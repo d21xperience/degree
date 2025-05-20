@@ -1,0 +1,274 @@
+{
+	"compiler": {
+		"version": "0.8.0+commit.c7dfd78e"
+	},
+	"language": "Solidity",
+	"output": {
+		"abi": [
+			{
+				"inputs": [],
+				"stateMutability": "nonpayable",
+				"type": "constructor"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "degreeHash",
+						"type": "bytes32"
+					}
+				],
+				"name": "DegreeDeleted",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "bytes32",
+						"name": "degreeHash",
+						"type": "bytes32"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "sekolah",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "issueDate",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "ipfsUrl",
+						"type": "string"
+					}
+				],
+				"name": "DegreeIssued",
+				"type": "event"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "",
+						"type": "bytes32"
+					}
+				],
+				"name": "degrees",
+				"outputs": [
+					{
+						"internalType": "bytes32",
+						"name": "degreeHash",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "string",
+						"name": "sekolah",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "issueDate",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "ipfsUrl",
+						"type": "string"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_degreeHash",
+						"type": "bytes32"
+					}
+				],
+				"name": "deleteDegree",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_degreeHash",
+						"type": "bytes32"
+					}
+				],
+				"name": "getDegree",
+				"outputs": [
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "",
+						"type": "string"
+					},
+					{
+						"internalType": "string[]",
+						"name": "",
+						"type": "string[]"
+					},
+					{
+						"internalType": "uint8[]",
+						"name": "",
+						"type": "uint8[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_degreeHash",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "string",
+						"name": "_sekolah",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_issueDate",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "_ipfsUrl",
+						"type": "string"
+					},
+					{
+						"internalType": "string[]",
+						"name": "_mataPelajaran",
+						"type": "string[]"
+					},
+					{
+						"internalType": "uint8[]",
+						"name": "_nilai",
+						"type": "uint8[]"
+					}
+				],
+				"name": "issueDegree",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "listDegrees",
+				"outputs": [
+					{
+						"internalType": "bytes32[]",
+						"name": "",
+						"type": "bytes32[]"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
+				"name": "owner",
+				"outputs": [
+					{
+						"internalType": "address",
+						"name": "",
+						"type": "address"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [
+					{
+						"internalType": "bytes32",
+						"name": "_degreeHash",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "string",
+						"name": "_sekolah",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "_issueDate",
+						"type": "uint256"
+					}
+				],
+				"name": "verifyDegree",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			}
+		],
+		"devdoc": {
+			"kind": "dev",
+			"methods": {},
+			"version": 1
+		},
+		"userdoc": {
+			"kind": "user",
+			"methods": {},
+			"version": 1
+		}
+	},
+	"settings": {
+		"compilationTarget": {
+			"Desktop/Smart Contract/sc_ijazah/backend/sc-service/smartcontract/contracts/ijazah_v2.sol": "VerifikasiIjazah"
+		},
+		"evmVersion": "istanbul",
+		"libraries": {},
+		"metadata": {
+			"bytecodeHash": "ipfs"
+		},
+		"optimizer": {
+			"enabled": false,
+			"runs": 200
+		},
+		"remappings": []
+	},
+	"sources": {
+		"Desktop/Smart Contract/sc_ijazah/backend/sc-service/smartcontract/contracts/ijazah_v2.sol": {
+			"keccak256": "0xd156dc3a3c4a3237a09efabfeec11879d6202824259e04b62238ec14987d88b5",
+			"license": "MIT",
+			"urls": [
+				"bzz-raw://3479c0464d78a959e8a6d4c6c7ab0db32b0c05373733992767c12efebcab8edd",
+				"dweb:/ipfs/QmUhaZufgJz3nUYiFL63tDbEXKmL2RcGAY6snEbc4QXeMQ"
+			]
+		}
+	},
+	"version": 1
+}
