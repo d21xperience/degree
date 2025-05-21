@@ -66,7 +66,12 @@ func (s *TahunAjaranService) GetTahunAjaran(ctx context.Context, req *pb.GetTahu
 		tahunAjaranModels, err = s.repo.FindAll(ctx, schemaName, 100, 0)
 		if err != nil {
 			log.Printf("[ERROR] Gagal menemukan tahun ajaran di schema '%s': %v", schemaName, err)
-			return nil, fmt.Errorf("gagal menemukan tahun ajaran di schema '%s': %w", schemaName, err)
+			// return nil, fmt.Errorf("gagal menemukan tahun ajaran di schema '%s': %w", schemaName, err)
+			return &pb.GetTahunAjaranResponse{
+				Status:      false,
+				Message:     fmt.Sprintf("gagal menemukan tahun ajaran di schema '%s': %v", schemaName, err),
+				TahunAjaran: nil,
+			}, nil
 		}
 
 		// Konversi hasil ke response protobuf
@@ -82,6 +87,8 @@ func (s *TahunAjaranService) GetTahunAjaran(ctx context.Context, req *pb.GetTahu
 
 		// Return response
 		return &pb.GetTahunAjaranResponse{
+			Status:      true,
+			Message:     "Berhasil mengambil data tahun ajaran",
 			TahunAjaran: tahunAjaranList,
 		}, nil
 	}

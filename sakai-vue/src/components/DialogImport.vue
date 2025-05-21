@@ -8,18 +8,19 @@ import { computed, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 const store = useStore();
 
-const { schemaname, listTahunAjaran } = useSekolahService();
+const { schemaname, listTahunAjaran, fetchTahunAjaran } = useSekolahService();
 // ============toast============
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 import DialogLoading from './DialogLoading.vue';
 const toast = useToast();
 onMounted(async () => {
-     
+    await fetchTahunAjaran();
+    console.log(schemaname.value);
 });
 const isLoading = ref(false);
 
-const baseUrl = 'http://localhost:8183/api/v1/ss'; // Disimpan di child
+const baseUrl = `${import.meta.env.VITE_API_SEKOLAH_BASE_URL}/ss`; //'http://localhost:8183/api/v1/ss'; // Disimpan di child
 const templateUrl = computed(() => {
     return `${baseUrl}/download/template?template_type=${props.templateType}&schemaname=${schemaname}&semesterId=${selectedTahunAjaran.value?.tahunAjaranId}`;
 });
@@ -61,8 +62,8 @@ const saveData = async () => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_type', props.templateType);
-    formData.append('schemaname', schemaname);
-
+    formData.append('schemaname', JSON.stringify(schemaname.value));
+    // console.log(schemaname.value);
     // Debugging
     console.log('Upload URL:', uploadUrl);
     for (let pair of formData.entries()) {
@@ -183,7 +184,7 @@ const downloadTemplate = async () => {
         <div>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700"> Tahun Pelajaran <span class="text-red-500">*</span> </label>
-                <Select v-model="selectedTahunAjaran" :options="listTahunAjaran" optionLabel="nama" placeholder="Pilih Tahun Pelajaran" class="w-full mr-2" :invalid="submitted && !selectedTahunAjaran" />
+                <Select v-model="selectedTahunAjaran" :options="listTahunAjaran.value" optionLabel="nama" placeholder="Pilih Tahun Pelajaran" class="w-full mr-2" :invalid="submitted && !selectedTahunAjaran" />
                 <small v-if="submitted && !selectedTahunAjaran" class="text-red-500">Pilih tahun ajaran.</small>
             </div>
 

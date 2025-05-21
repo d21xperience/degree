@@ -23,8 +23,6 @@ const handleSubmit = async () => {
     } catch (error) {
         // console.log(error);
         alert(error?.message);
-        
-        
     } finally {
         // setTimeout(() => (loading.value[index] = false), 1000);
         loading.value = false;
@@ -60,6 +58,10 @@ const handleSubmit = async () => {
                         <!-- <Button label="Sign In" class="w-full" as="router-link" to="/"></Button> -->
                         <Button label="Sign In" class="w-full" @click="handleSubmit" :loading="loading"></Button>
                     </div>
+                    <!-- <div class="mt-6 flex justify-between">
+                        <div><router-link to="/" class="text-blue-600 hover:underline">Kembali</router-link></div>
+                        <div>Belum punya akun?<router-link to="/auth/register" class="text-blue-600 hover:underline">Daftar</router-link></div>
+                    </div> -->
                 </div>
             </div>
         </div>

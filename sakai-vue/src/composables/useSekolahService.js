@@ -8,7 +8,8 @@ export function useSekolahService() {
     const siswaAktifList = ref([]);
     const kelasList = ref([]);
     const sekolah = computed(() => store.getters['sekolahService/getSekolah']);
-    const listTahunAjaran = store.getters['sekolahService/getTahunAjaran'];
+    const listTahunAjaran = computed(() => rawlistTahunAjaran || []);
+    const rawlistTahunAjaran = ref();
     const listSemester = store.getters['sekolahService/getSemester'];
 
     const schemaname = computed(() => store.getters['sekolahService/getTabeltenant']?.schemaname);
@@ -235,6 +236,23 @@ export function useSekolahService() {
         } catch (error) {}
     };
 
+    const fetchTahunAjaran = async () => {
+        try {
+            rawlistTahunAjaran.value = store.getters['sekolahService/getTahunAjaran'];
+            // console.log(rawlistTahunAjaran.value);
+            if (!rawlistTahunAjaran || rawlistTahunAjaran.value.length == 0) {
+                const results = await store.dispatch('sekolahService/fetchTahunAjaran');
+                // console.log(results);
+                if (results.status) {
+                    rawlistTahunAjaran.value = results.tahunAjaran;
+                    toast.add({ severity: 'success', summary: 'Successful', detail: `${results.message}`, life: 3000 });
+                }
+            }
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengambil tahun ajaran: ${error}`, life: 3000 });
+        }
+    };
+
     const fetchNilaiSiswa = async (pesertaDidikId = null) => {
         const payload = {
             // page: 1,
@@ -366,7 +384,7 @@ export function useSekolahService() {
                 schemaname: schemaname.value,
                 peserta_didik_id: pesertaDidikId
             };
-            console.log(payload)
+            console.log(payload);
             const response = await store.dispatch('sekolahService/deleteDns', payload);
             if (response.status) {
                 toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
@@ -465,6 +483,7 @@ export function useSekolahService() {
         searchDns,
         createInfoIjazah,
         sekolah,
-        deleteDns
+        deleteDns,
+        fetchTahunAjaran
     };
 }

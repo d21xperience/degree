@@ -5,7 +5,8 @@ const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
         Authorization: 'Bearer your_token'
-    }
+    },
+    timeout: 10000
 });
 
 const state = {

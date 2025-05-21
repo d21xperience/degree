@@ -71,7 +71,7 @@ func BacaDataExcel(param *ParamTemplate) ([][]string, error) {
 	// 	return nil, err
 	// }
 	param.semesterId = ret.Category
-	param.schemaname = ret.Keywords
+	// param.schemaname = ret.Keywords
 	rows, err := f.GetRows(f.GetSheetName(0))
 	if err != nil {
 		return nil, fmt.Errorf("gagal mengambil data dari sheet: %w", err)
@@ -236,7 +236,7 @@ func GenerateTemplate(param ParamTemplate, db *gorm.DB) error {
 
 		"kelas": {"Nama Kelas", "Nama Wali Kelas", "Tingkat", "Kurikulum ID"},
 
-		"guru": {"Nama", "Gelar Belakang","NUPTK", "JK", "Tempat Lahir", "Tanggal Lahir", "NIP", "Status Kepegawaian", "Jenis PTK", "Agama", "Alamat Jalan", "RT", "RW", "Nama Dusun", "Desa/Kelurahan", "Kecamatan", "Kode Pos", "Telepon", "HP", "Email", "Tugas Tambahan", "SK CPNS", "Tanggal CPNS", "SK Pengangkatan", "TMT Pengangkatan", "Lembaga Pengangkatan", "Pangkat Golongan", "Sumber Gaji", "Nama Ibu Kandung", "Status Perkawinan", "Nama Suami/Istri", "NIP Suami/Istri", "Pekerjaan Suami/Istri", "TMT PNS", "Sudah Lisensi Kepala Sekolah", "Pernah Diklat Kepengawasan", "Keahlian Braille", "Keahlian Bahasa Isyarat", "NPWP", "Nama Wajib Pajak", "Kewarganegaraan", "Bank", "Nomor Rekening Bank", "Rekening Atas Nama", "NIK", "No KK", "Karpeg", "Karis/Karsu", "Lintang", "Bujur", "NUKS"},
+		"guru": {"nama", "jenis_kelamin", "tempat_lahir", "tanggal_lahir", "agama", "gelar_depan", "gelar_belakang", "nik", "no_kk", "nuptk", "niy", "nip", "alamat_jalan", "rt", "rw", "desa_kelurahan", "kec", "kab_kota", "propinsi", "kode_pos", "no_telepon_rumah", "no_hp", "email"},
 	}
 	headers, exists := templates[param.templateType]
 	if !exists {

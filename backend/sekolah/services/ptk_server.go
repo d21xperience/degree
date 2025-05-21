@@ -50,17 +50,11 @@ func (s *PTKServiceServer) CreatePTK(ctx context.Context, req *pb.CreatePTKReque
 		return &models.TabelPTK{
 			PtkID:             utils.StringToUUID(item.PtkId),
 			Nama:              item.Nama,
-			NIP:               &item.Nip,
 			JenisPtkID:        item.JenisPtkId,
-			JenisKelamin:      item.JenisKelamin,
-			TempatLahir:       item.TempatLahir,
+			JenisKelamin:      &item.JenisKelamin,
+			TempatLahir:       &item.TempatLahir,
 			TanggalLahir:      utils.TimeToPointer(item.TanggalLahir),
-			NUPTK:             &item.Nuptk,
-			AlamatJalan:       item.AlamatJalan,
 			StatusKeaktifanID: item.StatusKeaktifanId,
-			GelarDepan:        &item.GelarBelakang,
-			GelarBelakang:     &item.GelarBelakang,
-			NIP_NIY:           &item.NipNiy,
 		}
 	})
 	conflicts, err := s.repo.SaveManyWithConflictCheck(ctx, schemaName, PTKModel, "PtkID", "ptk_id", 100, nil)
@@ -110,18 +104,11 @@ func (s *PTKServiceServer) GetPTK(ctx context.Context, req *pb.GetPTKRequest) (*
 		return &pb.PTK{
 			PtkId:             item.PtkID.String(),
 			Nama:              item.Nama,
-			Nuptk:             utils.SafeString(item.NUPTK),
-			JenisKelamin:      item.JenisKelamin,
-			TempatLahir:       item.TempatLahir,
-			AlamatJalan:       item.AlamatJalan,
-			Nip:               utils.SafeString(item.NIP),
+			JenisKelamin:      utils.SafeString(item.JenisKelamin),
+			TempatLahir:       utils.SafeString(item.TempatLahir),
 			JenisPtkId:        item.JenisPtkID,
 			TanggalLahir:      item.TanggalLahir.Format("2006-01-02"),
 			StatusKeaktifanId: item.StatusKeaktifanID,
-			GelarDepan:        utils.SafeString(item.GelarBelakang),
-			GelarBelakang:     utils.SafeString(item.GelarBelakang),
-			NipNiy:            utils.SafeString(item.NIP_NIY),
-			
 		}
 	})
 
@@ -147,17 +134,11 @@ func (s *PTKServiceServer) UpdatePTK(ctx context.Context, req *pb.UpdatePTKReque
 		return &models.TabelPTK{
 			PtkID:             utils.StringToUUID(item.PtkId),
 			Nama:              item.Nama,
-			NIP:               &item.Nip,
 			JenisPtkID:        item.JenisPtkId,
-			JenisKelamin:      item.JenisKelamin,
-			TempatLahir:       item.TanggalLahir,
+			JenisKelamin:      &item.JenisKelamin,
+			TempatLahir:       &item.TanggalLahir,
 			TanggalLahir:      utils.TimeToPointer(item.TanggalLahir),
-			NUPTK:             &item.Nuptk,
-			AlamatJalan:       item.AlamatJalan,
 			StatusKeaktifanID: item.StatusKeaktifanId,
-			GelarDepan:        &item.GelarBelakang,
-			GelarBelakang:     &item.GelarBelakang,
-			NIP_NIY:           &item.NipNiy,
 		}
 	})
 	for _, v := range PTKModels {

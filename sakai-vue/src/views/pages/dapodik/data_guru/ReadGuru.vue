@@ -87,7 +87,7 @@ const editGuru = async () => {
                                 <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="openNew" v-tooltip.bottom="'Tambah Guru Baru'" />
                                 <Button icon="pi pi-pencil" severity="warn" @click="editGuru" :disabled="!selectedGuru || !selectedGuru.length || selectedGuru.length > 1" class="mr-2" v-tooltip.bottom="'Edit Guru'" />
                                 <Button icon="pi pi-trash" severity="danger" class="mr-2 text-lg" @click="deleteGuruDialog = true" :disabled="!selectedGuru || !selectedGuru.length" v-tooltip.bottom="'Hapus Guru'" :loading="loading" />
-                                <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Import Guru'" v-show="initSelectedSemester.semester == 1"/>
+                                <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Upload Guru'" v-show="initSelectedSemester.semester == 1" />
                                 <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download Guru'" />
                             </template>
                             <template #end>
@@ -161,7 +161,7 @@ const editGuru = async () => {
 
         <!-- import data -->
         <!-- <DialogImport v-model:visible="dialogImport" @save="saveImport" @cancel="cancelImport" template-type="guru" :schema-name="schemaname" /> -->
-        <DialogImport v-model:visible="dialogImport" template-type="kelas" />
+        <DialogImport v-model:visible="dialogImport" template-type="guru" />
 
         <!-- end of import data -->
     </div>

@@ -7,19 +7,15 @@ import (
 )
 
 type TabelPTK struct {
-	PtkID             uuid.UUID  `gorm:"column:ptk_id;primaryKey"`   // UUID
-	Nama              string     `gorm:"column:nama"`                // String
-	NUPTK             *string    `gorm:"column:nuptk"`               // Nullable string
-	NIP               *string    `gorm:"column:nip"`                 // Nullable string
-	JenisPtkID        int32      `gorm:"column:jenis_ptk_id"`        // String
-	JenisKelamin      string     `gorm:"column:jenis_kelamin"`       // String
-	TempatLahir       string     `gorm:"column:tempat_lahir"`        // String
-	TanggalLahir      *time.Time `gorm:"column:tanggal_lahir"`       // String (format tanggal, bisa diubah ke time.Time jika perlu)
-	AlamatJalan       string     `gorm:"column:alamat_jalan"`        // String
+	PtkID             uuid.UUID  `gorm:"column:ptk_id;primaryKey"` // UUID
+	JenisPtkID        int32      `gorm:"column:jenis_ptk_id"`      // String
+	Nama              string     `gorm:"column:nama"`              // String
+	JenisKelamin      *string    `gorm:"column:jenis_kelamin"`     // String
+	Agama             *string    `gorm:"column:agama"`             // String
+	TempatLahir       *string    `gorm:"column:tempat_lahir"`      // String
+	TanggalLahir      *time.Time `gorm:"column:tanggal_lahir"`     // String (format tanggal, bisa diubah ke time.Time jika perlu)
+	IsDapodik         bool       `gorm:"column:is_dapodik"`
 	StatusKeaktifanID int32      `gorm:"column:status_keaktifan_id"` // String
-	GelarDepan        *string    `gorm:"column:gelar_depan"`         // Nullable string
-	GelarBelakang     *string    `gorm:"column:gelar_belakang"`      // Nullable string
-	NIP_NIY           *string    `gorm:"column:nip_niy"`
 }
 
 type PTKTerdaftar struct {
@@ -27,6 +23,7 @@ type PTKTerdaftar struct {
 	PtkID          uuid.UUID `gorm:"column:ptk_id"`
 	TahunAjaranId  string    `gorm:"column:tahun_ajaran_id"`
 	JenisKeluarId  *string   `gorm:"column:jenis_keluar_id"`
+	IsDapodik      bool      `gorm:"column:is_dapodik"`
 
 	// Relasi ke PTK
 	PTK TabelPTK `gorm:"foreignKey:PtkID;references:PtkID"`
@@ -45,18 +42,26 @@ func (TabelPTK) TableName() string {
 }
 
 type PtkPelengkap struct {
-	PtkPelengkapId uuid.UUID `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()" json:"ptk_pelengkap_id"`
-	PtkId          uuid.UUID `gorm:"type:uuid;not null" json:"ptk_id"`
-	GelarDepan    string `gorm:"type:varchar(20)" json:"gelar_depan,omitempty"`
-	GelarBelakang string `gorm:"type:varchar(20)" json:"gelar_belakang,omitempty"`
-	NipNiy        string `gorm:"type:varchar(18)" json:"nip_niy,omitempty"`
-	AlamatJalan   string `gorm:"type:varchar" json:"alamat_jalan,omitempty"`
-	RT            string `gorm:"type:varchar" json:"rt,omitempty"`
-	RW            string `gorm:"type:varchar" json:"rw,omitempty"`
-	Desa          string `gorm:"type:varchar" json:"desa,omitempty"`
-	Kec           string `gorm:"type:varchar" json:"kec,omitempty"`
-	Kab           string `gorm:"type:varchar" json:"kab,omitempty"`
-	Prov          string `gorm:"type:varchar" json:"prov,omitempty"`
+	PtkPelengkapId uuid.UUID `gorm:"column:ptk_pelengkap_id"`
+	PtkId          uuid.UUID `gorm:"column:ptk_id"`
+	GelarDepan     *string    `gorm:"column:gelar_depan"`
+	GelarBelakang  *string    `gorm:"column:gelar_belakang"`
+	NiK            *string    `gorm:"column:niK"`
+	NoKk           *string    `gorm:"column:no_kk"`
+	Nuptk          *string    `gorm:"column:nuptk"`
+	Niy            *string    `gorm:"column:niy"`
+	Nip            *string    `gorm:"column:nip"`
+	AlamatJalan    *string    `gorm:"column:alamat_jalan"`
+	Rt             *string    `gorm:"column:rt"`
+	Rw             *string    `gorm:"column:rw"`
+	DesaKelurahan  *string    `gorm:"column:desa"`
+	Kec            *string    `gorm:"column:kec"`
+	KabKota        *string    `gorm:"column:kab_kota"`
+	Propinsi       *string    `gorm:"column:propinsi"`
+	KodePos        *string    `gorm:"column:kode_pos"`
+	NoTeleponRumah *string    `gorm:"column:no_telepon_rumah"`
+	NoHp           *string    `gorm:"column:no_hp"`
+	Email          *string    `gorm:"column:email"`
 
 	// Relasi opsional ke tabel PTK
 	Ptk *TabelPTK `gorm:"foreignKey:PtkId;references:PtkID"`

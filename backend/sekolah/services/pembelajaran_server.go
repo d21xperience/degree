@@ -143,14 +143,11 @@ func (s *PembelajaranServiceServer) GetPembelajaran(ctx context.Context, req *pb
 				Ptk: &pb.PTK{
 					Nama:              item.PTKTerdaftar.PTK.Nama,
 					PtkId:             item.PTKTerdaftar.PtkID.String(),
-					Nip:               utils.SafeString(item.PTKTerdaftar.PTK.NIP),
 					JenisPtkId:        item.PTKTerdaftar.PTK.JenisPtkID,
-					JenisKelamin:      item.PTKTerdaftar.PTK.JenisKelamin,
-					TempatLahir:       item.PTKTerdaftar.PTK.TempatLahir,
+					JenisKelamin:      utils.SafeString(item.PTKTerdaftar.PTK.JenisKelamin),
+					TempatLahir:       utils.SafeString(item.PTKTerdaftar.PTK.TempatLahir),
 					StatusKeaktifanId: item.PTKTerdaftar.PTK.StatusKeaktifanID,
 					TanggalLahir:      item.PTKTerdaftar.PTK.TanggalLahir.Format("2006-01-02"),
-					Nuptk:             utils.SafeString(item.PTKTerdaftar.PTK.NUPTK),
-					AlamatJalan:       item.PTKTerdaftar.PTK.AlamatJalan,
 				},
 			},
 			// RombonganBelajar: &pb.Kelas{

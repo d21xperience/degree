@@ -155,7 +155,7 @@ const actions = {
             commit('SET_TABELTAHUNAJARAN', response.data.tahunAjaran);
             const selectedTahunAjaran = response.data.tahunAjaran.reduce((max, item) => (item.tahunAjaranId > max.tahunAjaranId ? item : max), response.data.tahunAjaran[0]);
             commit('SET_SELECTEDTAHUNAJARAN', selectedTahunAjaran);
-            return true; // Mengembalikan data sekolah
+            return response.data; // Mengembalikan data sekolah
         } catch (error) {
             throw error;
         }

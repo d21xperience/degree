@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_sekolah (
 	kode_aktivasi VARCHAR(30) NULL DEFAULT NULL,
 	bentuk_pendidikan_id SMALLINT NULL DEFAULT NULL,
 	jenjang_pendidikan_id NUMERIC(2,0) NULL DEFAULT NULL,
+	is_dapodik NUMERIC(1,0) NOT NULL DEFAULT 0,
 	PRIMARY KEY (sekolah_id),
 	CONSTRAINT FK_tabel_sekolah_ref_bentuk_pendidikan FOREIGN KEY (bentuk_pendidikan_id) REFERENCES ref.bentuk_pendidikan (bentuk_pendidikan_id) ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT FK_tabel_sekolah_ref_jenjang_pendidikan FOREIGN KEY (jenjang_pendidikan_id) REFERENCES ref.jenjang_pendidikan (jenjang_pendidikan_id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -48,6 +49,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_siswa (
 	nm_wali VARCHAR(100) NULL DEFAULT NULL,
 	pekerjaan_wali VARCHAR(30) NULL DEFAULT NULL,
 	nik VARCHAR(30) NULL DEFAULT NULL,
+	is_dapodik NUMERIC(1,0) NOT NULL DEFAULT 0,
 	PRIMARY KEY (peserta_didik_id)
 );
 
@@ -71,41 +73,55 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_siswa_pelengkap (
 );
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_ptk (
-	ptk_id UUID NOT NULL DEFAULT gen_random_uuid(),
-	jenis_ptk_id NUMERIC(2,0) NOT NULL,
+	ptk_id UUID NOT NULL,
+	jenis_ptk_id NUMERIC(2,0) NOT NULL DEFAULT 4,
 	nama VARCHAR(100) NOT NULL,
-	nip VARCHAR(18) NULL DEFAULT NULL,
-	nik CHAR(16) NOT NULL,
-	no_kk CHAR(16) NULL DEFAULT NULL,
-	agama VARCHAR(25) NULL DEFAULT NULL,
-	jenis_kelamin VARCHAR(1) NOT NULL,
-	tempat_lahir VARCHAR(32) NOT NULL,
-	tanggal_lahir DATE NOT NULL,
-	nuptk VARCHAR(16) NULL DEFAULT NULL,
-	alamat_jalan VARCHAR(200) NOT NULL,
-	rt NUMERIC(2,0) NULL DEFAULT NULL,
-	rw NUMERIC(2,0) NULL DEFAULT NULL,
-	desa_kelurahan VARCHAR(60) NOT NULL,
-	kab_kota VARCHAR(60) NULL DEFAULT NULL,
-	propinsi VARCHAR(60) NULL DEFAULT NULL,
-	kode_pos CHAR(5) NULL DEFAULT NULL,
-	no_telepon_rumah VARCHAR(20) NULL DEFAULT NULL,
-	no_hp VARCHAR(20) NULL DEFAULT NULL,
-	email VARCHAR(60) NULL DEFAULT NULL,
+	jenis_kelamin VARCHAR(1) NULL,
+	agama VARCHAR(25) NULL,
+	tempat_lahir VARCHAR(32) NULL,
+	tanggal_lahir DATE NULL,
+	is_dapodik NUMERIC(1,0) NOT NULL DEFAULT 0,
 	status_keaktifan_id NUMERIC(2,0) NOT NULL DEFAULT 1,  
     soft_delete NUMERIC(1,0) NOT NULL DEFAULT 0, 
 	PRIMARY KEY (ptk_id)
 );
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_ptk_terdaftar (
-	ptk_terdaftar_id UUID NOT NULL DEFAULT gen_random_uuid(),
+	ptk_terdaftar_id UUID NOT NULL,
 	ptk_id UUID NOT NULL,
-	tahun_ajaran_id VARCHAR(4) NULL DEFAULT NULL,
+	tahun_ajaran_id VARCHAR(4) NOT NULL,
 	jenis_keluar_id CHAR(1) NULL DEFAULT NULL,
-	soft_delete NUMERIC(1,0) NOT NULL DEFAULT 0,  
+	is_dapodik NUMERIC(1,0) NOT NULL DEFAULT 0,
+	soft_delete NUMERIC(1,0) NOT NULL DEFAULT 0,
 	PRIMARY KEY (ptk_terdaftar_id),
 	CONSTRAINT FK_tabel_ptk_terdaftar_tabel_ptk FOREIGN KEY (ptk_id) REFERENCES {{schema_name}}.tabel_ptk (ptk_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
+
+CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_ptk_pelengkap (
+	ptk_pelengkap_id UUID NOT NULL DEFAULT gen_random_uuid(),
+	ptk_id UUID NOT NULL,
+	gelar_depan VARCHAR(20) NULL DEFAULT NULL,
+	gelar_belakang VARCHAR(20) NULL DEFAULT NULL,
+	nik CHAR(16) NULL DEFAULT NULL,
+	no_kk CHAR(16) NULL DEFAULT NULL,
+	nuptk VARCHAR(16) NULL DEFAULT NULL,
+	niy VARCHAR(18) NULL DEFAULT NULL,
+	nip VARCHAR(18) NULL DEFAULT NULL,
+	alamat_jalan VARCHAR(200) NULL DEFAULT NULL,
+	rt NUMERIC(2,0) NULL DEFAULT NULL,
+	rw NUMERIC(2,0) NULL DEFAULT NULL,
+	desa_kelurahan VARCHAR(60) NULL DEFAULT NULL,
+	kec VARCHAR(60) NULL DEFAULT NULL,
+	kab_kota VARCHAR(60) NULL DEFAULT NULL,
+	propinsi VARCHAR(60) NULL DEFAULT NULL,
+	kode_pos CHAR(5) NULL DEFAULT NULL,
+	no_telepon_rumah VARCHAR(20) NULL DEFAULT NULL,
+	no_hp VARCHAR(20) NULL DEFAULT NULL,
+	email VARCHAR(60) NULL DEFAULT NULL,
+	PRIMARY KEY (ptk_pelengkap_id),
+	CONSTRAINT FK_tabel_ptk_pelengkap_tabel_ptk FOREIGN KEY (ptk_id) REFERENCES {{schema_name}}.tabel_ptk (ptk_id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_kelas (
 	rombongan_belajar_id UUID NOT NULL,
@@ -220,15 +236,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.ijazah (
    	CONSTRAINT FK_tabel_ijazah FOREIGN KEY (peserta_didik_id) REFERENCES {{schema_name}}.tabel_siswa (peserta_didik_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_ptk_pelengkap (
-	ptk_pelengkap_id UUID NOT NULL DEFAULT gen_random_uuid(),
-	ptk_id UUID NOT NULL,
-	gelar_depan VARCHAR(20) NULL DEFAULT NULL,
-	gelar_belakang VARCHAR(20) NULL DEFAULT NULL,
-	nip_niy VARCHAR(18) NULL DEFAULT NULL,
-	PRIMARY KEY (ptk_pelengkap_id),
-	CONSTRAINT FK_tabel_ptk_pelengkap_tabel_ptk FOREIGN KEY (ptk_id) REFERENCES {{schema_name}}.tabel_ptk (ptk_id) ON UPDATE CASCADE ON DELETE CASCADE
-);
+
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.data_nominasi_sementara (
     id UUID NOT NULL DEFAULT gen_random_uuid(),

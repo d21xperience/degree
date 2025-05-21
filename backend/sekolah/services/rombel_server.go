@@ -221,14 +221,11 @@ func (s *RombelServiceServer) GetKelas(ctx context.Context, req *pb.GetKelasRequ
 			Ptk: &pb.PTK{
 				PtkId:             kelas.PTK.PtkID.String(),
 				Nama:              kelas.PTK.Nama,
-				JenisKelamin:      kelas.PTK.JenisKelamin,
+				JenisKelamin:      utils.SafeString(kelas.PTK.JenisKelamin),
+				TempatLahir:       utils.SafeString(kelas.PTK.TempatLahir),
 				JenisPtkId:        kelas.PTK.JenisPtkID,
-				TempatLahir:       kelas.PTK.TempatLahir,
 				TanggalLahir:      kelas.PTK.TanggalLahir.Format("2006-01-02"),
-				AlamatJalan:       kelas.PTK.AlamatJalan,
 				StatusKeaktifanId: kelas.PTK.StatusKeaktifanID,
-				Nuptk:             utils.SafeString(kelas.PTK.NUPTK),
-				Nip:               utils.SafeString(kelas.PTK.NIP),
 			},
 			Jurusan: &pb.Jurusan{
 				JurusanId:           kelas.Jurusan.JurusanID,

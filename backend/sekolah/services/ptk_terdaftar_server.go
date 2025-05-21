@@ -55,13 +55,10 @@ func (s *PTKTerdaftarServiceServer) CreatePTKTerdaftar(ctx context.Context, req 
 			PTK: models.TabelPTK{
 				PtkID:             utils.StringToUUID(item.PtkId),
 				Nama:              item.Ptk.Nama,
-				NIP:               &item.Ptk.Nip,
 				JenisPtkID:        item.Ptk.JenisPtkId,
-				JenisKelamin:      item.Ptk.JenisKelamin,
-				TempatLahir:       item.Ptk.TempatLahir,
+				JenisKelamin:      &item.Ptk.JenisKelamin,
+				TempatLahir:       &item.Ptk.TempatLahir,
 				TanggalLahir:      utils.TimeToPointer(item.Ptk.TanggalLahir),
-				NUPTK:             &item.Ptk.Nuptk,
-				AlamatJalan:       item.Ptk.AlamatJalan,
 				StatusKeaktifanID: item.Ptk.StatusKeaktifanId,
 			},
 		}
@@ -186,14 +183,11 @@ func (s *PTKTerdaftarServiceServer) GetPTKTerdaftar(ctx context.Context, req *pb
 			Ptk: &pb.PTK{
 				PtkId:             ptk.PTK.PtkID.String(),
 				Nama:              ptk.PTK.Nama,
-				JenisKelamin:      ptk.PTK.JenisKelamin,
+				JenisKelamin:      utils.SafeString(ptk.PTK.JenisKelamin),
+				TempatLahir:       utils.SafeString(ptk.PTK.TempatLahir),
 				JenisPtkId:        ptk.PTK.JenisPtkID,
-				TempatLahir:       ptk.PTK.TempatLahir,
 				TanggalLahir:      ptk.PTK.TanggalLahir.Format("2006-01-02"),
-				AlamatJalan:       ptk.PTK.AlamatJalan,
 				StatusKeaktifanId: ptk.PTK.StatusKeaktifanID,
-				Nuptk:             utils.SafeString(ptk.PTK.NUPTK),
-				Nip:               utils.SafeString(ptk.PTK.NIP),
 			},
 		}
 	})
@@ -220,14 +214,9 @@ func (s *PTKTerdaftarServiceServer) UpdatePTKTerdaftar(ctx context.Context, req 
 	if len(PTKTerdaftar) == 1 {
 
 		PTKModel := &models.TabelPTK{
-			Nama:          PTKTerdaftar[0].Ptk.Nama,
-			NIP:           &PTKTerdaftar[0].Ptk.Nip,
-			JenisKelamin:  PTKTerdaftar[0].Ptk.JenisKelamin,
-			NUPTK:         &PTKTerdaftar[0].Ptk.Nuptk,
-			TempatLahir:   PTKTerdaftar[0].Ptk.TempatLahir,
-			GelarDepan:    &PTKTerdaftar[0].Ptk.GelarDepan,
-			GelarBelakang: &PTKTerdaftar[0].Ptk.GelarBelakang,
-			AlamatJalan:   PTKTerdaftar[0].Ptk.AlamatJalan,
+			Nama:         PTKTerdaftar[0].Ptk.Nama,
+			JenisKelamin: &PTKTerdaftar[0].Ptk.JenisKelamin,
+			TempatLahir:  &PTKTerdaftar[0].Ptk.TempatLahir,
 		}
 		err = s.repoPTK.Update(ctx, PTKModel, schemaName, "ptk_id", PTKTerdaftar[0].Ptk.PtkId)
 		if err != nil {
@@ -241,24 +230,24 @@ func (s *PTKTerdaftarServiceServer) UpdatePTKTerdaftar(ctx context.Context, req 
 
 		PTKPelengkap := &models.PtkPelengkap{
 			// PtkPelengkapId: uuid.New(),
-			PtkId: utils.StringToUUID(PTKTerdaftar[0].Ptk.PtkId),
-			RT:    PTKTerdaftar[0].PtkPelengkap.Rt,
-			RW:    PTKTerdaftar[0].PtkPelengkap.Rw,
-			Desa:  PTKTerdaftar[0].PtkPelengkap.Desa,
-			Kec:   PTKTerdaftar[0].PtkPelengkap.Kec,
-			Kab:   PTKTerdaftar[0].PtkPelengkap.Kab,
-			Prov:  PTKTerdaftar[0].PtkPelengkap.Prov,
+			PtkId:         utils.StringToUUID(PTKTerdaftar[0].Ptk.PtkId),
+			Rt:            &PTKTerdaftar[0].PtkPelengkap.Rt,
+			Rw:            &PTKTerdaftar[0].PtkPelengkap.Rw,
+			DesaKelurahan: &PTKTerdaftar[0].PtkPelengkap.Desa,
+			Kec:           &PTKTerdaftar[0].PtkPelengkap.Kec,
+			KabKota:       &PTKTerdaftar[0].PtkPelengkap.Kab,
+			Propinsi:      &PTKTerdaftar[0].PtkPelengkap.Prov,
 		}
 		// Cek apakah data sudah tersimpan di tabel_ptk_pelengkap?
 		cek, err := s.repoPTKPelengkap.FindOrCreateByID(ctx, PTKTerdaftar[0].Ptk.PtkId, schemaName, "ptk_id", func(id string) *models.PtkPelengkap {
 			return &models.PtkPelengkap{
-				PtkId: utils.StringToUUID(id),
-				RT:    PTKTerdaftar[0].PtkPelengkap.Rt,
-				RW:    PTKTerdaftar[0].PtkPelengkap.Rw,
-				Desa:  PTKTerdaftar[0].PtkPelengkap.Desa,
-				Kec:   PTKTerdaftar[0].PtkPelengkap.Kec,
-				Kab:   PTKTerdaftar[0].PtkPelengkap.Kab,
-				Prov:  PTKTerdaftar[0].PtkPelengkap.Prov,
+				PtkId:         utils.StringToUUID(id),
+				Rt:            &PTKTerdaftar[0].PtkPelengkap.Rt,
+				Rw:            &PTKTerdaftar[0].PtkPelengkap.Rw,
+				DesaKelurahan: &PTKTerdaftar[0].PtkPelengkap.Desa,
+				Kec:           &PTKTerdaftar[0].PtkPelengkap.Kec,
+				KabKota:       &PTKTerdaftar[0].PtkPelengkap.Kab,
+				Propinsi:      &PTKTerdaftar[0].PtkPelengkap.Prov,
 			}
 		})
 		if err != nil {
