@@ -1,5 +1,6 @@
 <script setup>
 import DialogSignOut from '@/components/DialogSignOut.vue';
+import MetamaskIcon from '@/components/MetamaskIcon.vue';
 import { useLayout } from '@/layout/composables/layout';
 import router from '@/router';
 import { useAuth } from '@/views/pages/auth/composables/auth';
@@ -45,6 +46,11 @@ const cek = () => {
                 <button type="button" class="layout-topbar-action" @click="toggleDarkMode">
                     <i :class="['pi', { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme }]"></i>
                 </button>
+                <Button class="!rounded-full !border-none layout-topbar-action !bg-transparent !w-6">
+                    <template #icon>
+                        <MetamaskIcon class="" />
+                    </template>
+                </Button>
                 <!-- <div class="relative">
                     <button
                         v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
@@ -108,3 +114,5 @@ const cek = () => {
         <DialogSignOut v-model:visible="isDialogSignOut" @confirm="onLogout" />
     </div>
 </template>
+
+<style scoped></style>

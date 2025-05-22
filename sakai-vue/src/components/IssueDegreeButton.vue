@@ -124,6 +124,7 @@ onMounted(async () => {
 
             // const contractAddress = '0x700b6A60ce7EaaEA56F065753d8dcB9653dbAD35'; // HARUS STRING BUKAN undefined/objek
             contract.value = new ethers.Contract(contractAddress, DegreeContractABI, signer);
+            
         } else {
             alert('Metamask tidak ditemukan. Harap instal terlebih dahulu.');
         }

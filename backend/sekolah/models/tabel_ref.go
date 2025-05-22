@@ -3,16 +3,16 @@ package models
 import "time"
 
 type BentukPendidikan struct {
-	BentukPendidikanID   uint16  `gorm:"primaryKey;column:bentuk_pendidikan_id"`
+	BentukPendidikanID   uint32  `gorm:"primaryKey;column:bentuk_pendidikan_id"`
 	Nama                 string  `gorm:"size:50;not null"`
-	JenjangPaud          uint8   `gorm:"not null"`
-	JenjangTk            uint8   `gorm:"not null"`
-	JenjangSd            uint8   `gorm:"not null"`
-	JenjangSmp           uint8   `gorm:"not null"`
-	JenjangSma           uint8   `gorm:"not null"`
-	JenjangTinggi        uint8   `gorm:"not null"`
+	JenjangPaud          uint32  `gorm:"not null"`
+	JenjangTk            uint32  `gorm:"not null"`
+	JenjangSd            uint32  `gorm:"not null"`
+	JenjangSmp           uint32  `gorm:"not null"`
+	JenjangSma           uint32  `gorm:"not null"`
+	JenjangTinggi        uint32  `gorm:"not null"`
 	DirektoratPembinaan  *string `gorm:"size:40;default:NULL"`
-	Aktif                uint8   `gorm:"not null"`
+	Aktif                uint32  `gorm:"not null"`
 	FormalitasPendidikan string  `gorm:"type:char(1);not null"`
 	// CreateDate          time.Time `gorm:"not null;default:'2020-04-16 09:40:03.422677'"`
 	// LastUpdate          time.Time `gorm:"not null;default:'2020-04-16 09:40:03.422677'"`

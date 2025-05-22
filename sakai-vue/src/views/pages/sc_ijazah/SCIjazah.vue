@@ -18,8 +18,8 @@
                         <!-- <Button icon="pi pi-plus" severity="success" class="mr-2" @click="visible = true"
                             v-tooltip.bottom="'Tambah data'" /> -->
                         <Button icon="pi pi-pencil" severity="warn" @click="visible = true" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 1" class="mr-2" v-tooltip.bottom="'Edit data'" />
-                        <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!selectedSiswa || !selectedSiswa.length" v-tooltip.bottom="'Delete data'"/>
-                        <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2"  v-tooltip.bottom="'Download data'"/>
+                        <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!selectedSiswa || !selectedSiswa.length" v-tooltip.bottom="'Delete data'" />
+                        <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2" v-tooltip.bottom="'Download data'" />
                         <!-- <Button label="Proses" icon="pi pi-send" severity="info" @click="exportCSV($event)" /> -->
                         <!-- <IssueDegreeButton
                             :degreeData="degreeData"
@@ -107,6 +107,7 @@
 
         <DialogImport :visible="dialogImport" />
     </div>
+    <IpfsInterface />
 </template>
 
 <script setup>
@@ -117,7 +118,6 @@ const store = useStore();
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 
-import IssueDegreeButton from '@/components/IssueDegreeButton.vue';
 import { useUtils } from '@/composables/useUtils';
 import { FilterMatchMode } from '@primevue/core/api';
 import Button from 'primevue/button';
@@ -174,6 +174,7 @@ const dataLulusan = ref();
 // const selectedJurusan = ref();
 import DialogIjazah from '@/components/DialogIjazah.vue';
 import DialogImport from '@/components/DialogImport.vue';
+import IpfsInterface from '@/components/IpfsInterface.vue';
 // Dummy data (bisa kamu ambil dari API atau input form)
 const degreeData = ref({
     nama: '',

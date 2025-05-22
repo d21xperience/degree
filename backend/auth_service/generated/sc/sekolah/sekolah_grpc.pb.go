@@ -3000,16 +3000,16 @@ var KenaikanService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	IjazahService_CreateIjazah_FullMethodName    = "/sekolah.IjazahService/CreateIjazah"
-	IjazahService_GetIjazah_FullMethodName       = "/sekolah.IjazahService/GetIjazah"
-	IjazahService_GetProsesIjazah_FullMethodName = "/sekolah.IjazahService/GetProsesIjazah"
-	IjazahService_UpdateIjazah_FullMethodName    = "/sekolah.IjazahService/UpdateIjazah"
-	IjazahService_DeleteIjazah_FullMethodName    = "/sekolah.IjazahService/DeleteIjazah"
-	IjazahService_UploadIjazah_FullMethodName    = "/sekolah.IjazahService/UploadIjazah"
-	IjazahService_CreateDns_FullMethodName       = "/sekolah.IjazahService/CreateDns"
-	IjazahService_UpdateDns_FullMethodName       = "/sekolah.IjazahService/UpdateDns"
-	IjazahService_GetDns_FullMethodName          = "/sekolah.IjazahService/GetDns"
-	IjazahService_DeleteDns_FullMethodName       = "/sekolah.IjazahService/DeleteDns"
+	IjazahService_CreateDns_FullMethodName        = "/sekolah.IjazahService/CreateDns"
+	IjazahService_UpdateDns_FullMethodName        = "/sekolah.IjazahService/UpdateDns"
+	IjazahService_GetDns_FullMethodName           = "/sekolah.IjazahService/GetDns"
+	IjazahService_DeleteDns_FullMethodName        = "/sekolah.IjazahService/DeleteDns"
+	IjazahService_SearchDns_FullMethodName        = "/sekolah.IjazahService/SearchDns"
+	IjazahService_FilterDns_FullMethodName        = "/sekolah.IjazahService/FilterDns"
+	IjazahService_CreateInfoIjazah_FullMethodName = "/sekolah.IjazahService/CreateInfoIjazah"
+	IjazahService_UpdateInfoIjazah_FullMethodName = "/sekolah.IjazahService/UpdateInfoIjazah"
+	IjazahService_GetInfoIjazah_FullMethodName    = "/sekolah.IjazahService/GetInfoIjazah"
+	IjazahService_DeleteInfoIjazah_FullMethodName = "/sekolah.IjazahService/DeleteInfoIjazah"
 )
 
 // IjazahServiceClient is the client API for IjazahService service.
@@ -3020,18 +3020,17 @@ const (
 // service untuk Ijazah
 // =========================================
 type IjazahServiceClient interface {
-	// CRUD IZAJAH
-	CreateIjazah(ctx context.Context, in *CreateIjazahRequest, opts ...grpc.CallOption) (*CreateIjazahResponse, error)
-	GetIjazah(ctx context.Context, in *GetIjazahRequest, opts ...grpc.CallOption) (*GetIjazahResponse, error)
-	GetProsesIjazah(ctx context.Context, in *GetProsesIjazahRequest, opts ...grpc.CallOption) (*GetProsesIjazahResponse, error)
-	UpdateIjazah(ctx context.Context, in *UpdateIjazahRequest, opts ...grpc.CallOption) (*UpdateIjazahResponse, error)
-	DeleteIjazah(ctx context.Context, in *DeleteIjazahRequest, opts ...grpc.CallOption) (*DeleteIjazahResponse, error)
-	// UPLOAD IJAZAH
-	UploadIjazah(ctx context.Context, in *UploadIjazahRequest, opts ...grpc.CallOption) (*UploadIjazahResponse, error)
 	CreateDns(ctx context.Context, in *CreateDnsRequest, opts ...grpc.CallOption) (*CreateDnsResponse, error)
 	UpdateDns(ctx context.Context, in *UpdateDnsRequest, opts ...grpc.CallOption) (*UpdateDnsResponse, error)
 	GetDns(ctx context.Context, in *GetDnsRequest, opts ...grpc.CallOption) (*GetDnsResponse, error)
 	DeleteDns(ctx context.Context, in *DeleteDnsRequest, opts ...grpc.CallOption) (*DeleteDnsResponse, error)
+	SearchDns(ctx context.Context, in *SearchDnsRequest, opts ...grpc.CallOption) (*SearchDnsResponse, error)
+	FilterDns(ctx context.Context, in *FilterDnsRequest, opts ...grpc.CallOption) (*FilterDnsResponse, error)
+	// SETINGS PENSISIAN IJAZAH
+	CreateInfoIjazah(ctx context.Context, in *CreateInfoIjazahRequest, opts ...grpc.CallOption) (*CreateInfoIjazahResponse, error)
+	UpdateInfoIjazah(ctx context.Context, in *UpdateInfoIjazahRequest, opts ...grpc.CallOption) (*UpdateInfoIjazahResponse, error)
+	GetInfoIjazah(ctx context.Context, in *GetInfoIjazahRequest, opts ...grpc.CallOption) (*GetInfoIjazahResponse, error)
+	DeleteInfoIjazah(ctx context.Context, in *DeleteInfoIjazahRequest, opts ...grpc.CallOption) (*DeleteInfoIjazahResponse, error)
 }
 
 type ijazahServiceClient struct {
@@ -3040,66 +3039,6 @@ type ijazahServiceClient struct {
 
 func NewIjazahServiceClient(cc grpc.ClientConnInterface) IjazahServiceClient {
 	return &ijazahServiceClient{cc}
-}
-
-func (c *ijazahServiceClient) CreateIjazah(ctx context.Context, in *CreateIjazahRequest, opts ...grpc.CallOption) (*CreateIjazahResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateIjazahResponse)
-	err := c.cc.Invoke(ctx, IjazahService_CreateIjazah_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *ijazahServiceClient) GetIjazah(ctx context.Context, in *GetIjazahRequest, opts ...grpc.CallOption) (*GetIjazahResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetIjazahResponse)
-	err := c.cc.Invoke(ctx, IjazahService_GetIjazah_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *ijazahServiceClient) GetProsesIjazah(ctx context.Context, in *GetProsesIjazahRequest, opts ...grpc.CallOption) (*GetProsesIjazahResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetProsesIjazahResponse)
-	err := c.cc.Invoke(ctx, IjazahService_GetProsesIjazah_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *ijazahServiceClient) UpdateIjazah(ctx context.Context, in *UpdateIjazahRequest, opts ...grpc.CallOption) (*UpdateIjazahResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateIjazahResponse)
-	err := c.cc.Invoke(ctx, IjazahService_UpdateIjazah_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *ijazahServiceClient) DeleteIjazah(ctx context.Context, in *DeleteIjazahRequest, opts ...grpc.CallOption) (*DeleteIjazahResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteIjazahResponse)
-	err := c.cc.Invoke(ctx, IjazahService_DeleteIjazah_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *ijazahServiceClient) UploadIjazah(ctx context.Context, in *UploadIjazahRequest, opts ...grpc.CallOption) (*UploadIjazahResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UploadIjazahResponse)
-	err := c.cc.Invoke(ctx, IjazahService_UploadIjazah_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *ijazahServiceClient) CreateDns(ctx context.Context, in *CreateDnsRequest, opts ...grpc.CallOption) (*CreateDnsResponse, error) {
@@ -3142,6 +3081,66 @@ func (c *ijazahServiceClient) DeleteDns(ctx context.Context, in *DeleteDnsReques
 	return out, nil
 }
 
+func (c *ijazahServiceClient) SearchDns(ctx context.Context, in *SearchDnsRequest, opts ...grpc.CallOption) (*SearchDnsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchDnsResponse)
+	err := c.cc.Invoke(ctx, IjazahService_SearchDns_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ijazahServiceClient) FilterDns(ctx context.Context, in *FilterDnsRequest, opts ...grpc.CallOption) (*FilterDnsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FilterDnsResponse)
+	err := c.cc.Invoke(ctx, IjazahService_FilterDns_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ijazahServiceClient) CreateInfoIjazah(ctx context.Context, in *CreateInfoIjazahRequest, opts ...grpc.CallOption) (*CreateInfoIjazahResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateInfoIjazahResponse)
+	err := c.cc.Invoke(ctx, IjazahService_CreateInfoIjazah_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ijazahServiceClient) UpdateInfoIjazah(ctx context.Context, in *UpdateInfoIjazahRequest, opts ...grpc.CallOption) (*UpdateInfoIjazahResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateInfoIjazahResponse)
+	err := c.cc.Invoke(ctx, IjazahService_UpdateInfoIjazah_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ijazahServiceClient) GetInfoIjazah(ctx context.Context, in *GetInfoIjazahRequest, opts ...grpc.CallOption) (*GetInfoIjazahResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetInfoIjazahResponse)
+	err := c.cc.Invoke(ctx, IjazahService_GetInfoIjazah_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *ijazahServiceClient) DeleteInfoIjazah(ctx context.Context, in *DeleteInfoIjazahRequest, opts ...grpc.CallOption) (*DeleteInfoIjazahResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteInfoIjazahResponse)
+	err := c.cc.Invoke(ctx, IjazahService_DeleteInfoIjazah_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // IjazahServiceServer is the server API for IjazahService service.
 // All implementations must embed UnimplementedIjazahServiceServer
 // for forward compatibility.
@@ -3150,18 +3149,17 @@ func (c *ijazahServiceClient) DeleteDns(ctx context.Context, in *DeleteDnsReques
 // service untuk Ijazah
 // =========================================
 type IjazahServiceServer interface {
-	// CRUD IZAJAH
-	CreateIjazah(context.Context, *CreateIjazahRequest) (*CreateIjazahResponse, error)
-	GetIjazah(context.Context, *GetIjazahRequest) (*GetIjazahResponse, error)
-	GetProsesIjazah(context.Context, *GetProsesIjazahRequest) (*GetProsesIjazahResponse, error)
-	UpdateIjazah(context.Context, *UpdateIjazahRequest) (*UpdateIjazahResponse, error)
-	DeleteIjazah(context.Context, *DeleteIjazahRequest) (*DeleteIjazahResponse, error)
-	// UPLOAD IJAZAH
-	UploadIjazah(context.Context, *UploadIjazahRequest) (*UploadIjazahResponse, error)
 	CreateDns(context.Context, *CreateDnsRequest) (*CreateDnsResponse, error)
 	UpdateDns(context.Context, *UpdateDnsRequest) (*UpdateDnsResponse, error)
 	GetDns(context.Context, *GetDnsRequest) (*GetDnsResponse, error)
 	DeleteDns(context.Context, *DeleteDnsRequest) (*DeleteDnsResponse, error)
+	SearchDns(context.Context, *SearchDnsRequest) (*SearchDnsResponse, error)
+	FilterDns(context.Context, *FilterDnsRequest) (*FilterDnsResponse, error)
+	// SETINGS PENSISIAN IJAZAH
+	CreateInfoIjazah(context.Context, *CreateInfoIjazahRequest) (*CreateInfoIjazahResponse, error)
+	UpdateInfoIjazah(context.Context, *UpdateInfoIjazahRequest) (*UpdateInfoIjazahResponse, error)
+	GetInfoIjazah(context.Context, *GetInfoIjazahRequest) (*GetInfoIjazahResponse, error)
+	DeleteInfoIjazah(context.Context, *DeleteInfoIjazahRequest) (*DeleteInfoIjazahResponse, error)
 	mustEmbedUnimplementedIjazahServiceServer()
 }
 
@@ -3172,24 +3170,6 @@ type IjazahServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedIjazahServiceServer struct{}
 
-func (UnimplementedIjazahServiceServer) CreateIjazah(context.Context, *CreateIjazahRequest) (*CreateIjazahResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateIjazah not implemented")
-}
-func (UnimplementedIjazahServiceServer) GetIjazah(context.Context, *GetIjazahRequest) (*GetIjazahResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetIjazah not implemented")
-}
-func (UnimplementedIjazahServiceServer) GetProsesIjazah(context.Context, *GetProsesIjazahRequest) (*GetProsesIjazahResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetProsesIjazah not implemented")
-}
-func (UnimplementedIjazahServiceServer) UpdateIjazah(context.Context, *UpdateIjazahRequest) (*UpdateIjazahResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateIjazah not implemented")
-}
-func (UnimplementedIjazahServiceServer) DeleteIjazah(context.Context, *DeleteIjazahRequest) (*DeleteIjazahResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteIjazah not implemented")
-}
-func (UnimplementedIjazahServiceServer) UploadIjazah(context.Context, *UploadIjazahRequest) (*UploadIjazahResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UploadIjazah not implemented")
-}
 func (UnimplementedIjazahServiceServer) CreateDns(context.Context, *CreateDnsRequest) (*CreateDnsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateDns not implemented")
 }
@@ -3201,6 +3181,24 @@ func (UnimplementedIjazahServiceServer) GetDns(context.Context, *GetDnsRequest) 
 }
 func (UnimplementedIjazahServiceServer) DeleteDns(context.Context, *DeleteDnsRequest) (*DeleteDnsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteDns not implemented")
+}
+func (UnimplementedIjazahServiceServer) SearchDns(context.Context, *SearchDnsRequest) (*SearchDnsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchDns not implemented")
+}
+func (UnimplementedIjazahServiceServer) FilterDns(context.Context, *FilterDnsRequest) (*FilterDnsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FilterDns not implemented")
+}
+func (UnimplementedIjazahServiceServer) CreateInfoIjazah(context.Context, *CreateInfoIjazahRequest) (*CreateInfoIjazahResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateInfoIjazah not implemented")
+}
+func (UnimplementedIjazahServiceServer) UpdateInfoIjazah(context.Context, *UpdateInfoIjazahRequest) (*UpdateInfoIjazahResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateInfoIjazah not implemented")
+}
+func (UnimplementedIjazahServiceServer) GetInfoIjazah(context.Context, *GetInfoIjazahRequest) (*GetInfoIjazahResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetInfoIjazah not implemented")
+}
+func (UnimplementedIjazahServiceServer) DeleteInfoIjazah(context.Context, *DeleteInfoIjazahRequest) (*DeleteInfoIjazahResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteInfoIjazah not implemented")
 }
 func (UnimplementedIjazahServiceServer) mustEmbedUnimplementedIjazahServiceServer() {}
 func (UnimplementedIjazahServiceServer) testEmbeddedByValue()                       {}
@@ -3221,114 +3219,6 @@ func RegisterIjazahServiceServer(s grpc.ServiceRegistrar, srv IjazahServiceServe
 		t.testEmbeddedByValue()
 	}
 	s.RegisterService(&IjazahService_ServiceDesc, srv)
-}
-
-func _IjazahService_CreateIjazah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateIjazahRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(IjazahServiceServer).CreateIjazah(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: IjazahService_CreateIjazah_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IjazahServiceServer).CreateIjazah(ctx, req.(*CreateIjazahRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _IjazahService_GetIjazah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetIjazahRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(IjazahServiceServer).GetIjazah(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: IjazahService_GetIjazah_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IjazahServiceServer).GetIjazah(ctx, req.(*GetIjazahRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _IjazahService_GetProsesIjazah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetProsesIjazahRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(IjazahServiceServer).GetProsesIjazah(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: IjazahService_GetProsesIjazah_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IjazahServiceServer).GetProsesIjazah(ctx, req.(*GetProsesIjazahRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _IjazahService_UpdateIjazah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateIjazahRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(IjazahServiceServer).UpdateIjazah(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: IjazahService_UpdateIjazah_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IjazahServiceServer).UpdateIjazah(ctx, req.(*UpdateIjazahRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _IjazahService_DeleteIjazah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteIjazahRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(IjazahServiceServer).DeleteIjazah(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: IjazahService_DeleteIjazah_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IjazahServiceServer).DeleteIjazah(ctx, req.(*DeleteIjazahRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _IjazahService_UploadIjazah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UploadIjazahRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(IjazahServiceServer).UploadIjazah(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: IjazahService_UploadIjazah_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(IjazahServiceServer).UploadIjazah(ctx, req.(*UploadIjazahRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _IjazahService_CreateDns_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -3403,6 +3293,114 @@ func _IjazahService_DeleteDns_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _IjazahService_SearchDns_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchDnsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IjazahServiceServer).SearchDns(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IjazahService_SearchDns_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IjazahServiceServer).SearchDns(ctx, req.(*SearchDnsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IjazahService_FilterDns_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FilterDnsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IjazahServiceServer).FilterDns(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IjazahService_FilterDns_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IjazahServiceServer).FilterDns(ctx, req.(*FilterDnsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IjazahService_CreateInfoIjazah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateInfoIjazahRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IjazahServiceServer).CreateInfoIjazah(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IjazahService_CreateInfoIjazah_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IjazahServiceServer).CreateInfoIjazah(ctx, req.(*CreateInfoIjazahRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IjazahService_UpdateInfoIjazah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateInfoIjazahRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IjazahServiceServer).UpdateInfoIjazah(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IjazahService_UpdateInfoIjazah_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IjazahServiceServer).UpdateInfoIjazah(ctx, req.(*UpdateInfoIjazahRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IjazahService_GetInfoIjazah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetInfoIjazahRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IjazahServiceServer).GetInfoIjazah(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IjazahService_GetInfoIjazah_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IjazahServiceServer).GetInfoIjazah(ctx, req.(*GetInfoIjazahRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _IjazahService_DeleteInfoIjazah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteInfoIjazahRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(IjazahServiceServer).DeleteInfoIjazah(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: IjazahService_DeleteInfoIjazah_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(IjazahServiceServer).DeleteInfoIjazah(ctx, req.(*DeleteInfoIjazahRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // IjazahService_ServiceDesc is the grpc.ServiceDesc for IjazahService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -3410,30 +3408,6 @@ var IjazahService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "sekolah.IjazahService",
 	HandlerType: (*IjazahServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "CreateIjazah",
-			Handler:    _IjazahService_CreateIjazah_Handler,
-		},
-		{
-			MethodName: "GetIjazah",
-			Handler:    _IjazahService_GetIjazah_Handler,
-		},
-		{
-			MethodName: "GetProsesIjazah",
-			Handler:    _IjazahService_GetProsesIjazah_Handler,
-		},
-		{
-			MethodName: "UpdateIjazah",
-			Handler:    _IjazahService_UpdateIjazah_Handler,
-		},
-		{
-			MethodName: "DeleteIjazah",
-			Handler:    _IjazahService_DeleteIjazah_Handler,
-		},
-		{
-			MethodName: "UploadIjazah",
-			Handler:    _IjazahService_UploadIjazah_Handler,
-		},
 		{
 			MethodName: "CreateDns",
 			Handler:    _IjazahService_CreateDns_Handler,
@@ -3449,6 +3423,30 @@ var IjazahService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteDns",
 			Handler:    _IjazahService_DeleteDns_Handler,
+		},
+		{
+			MethodName: "SearchDns",
+			Handler:    _IjazahService_SearchDns_Handler,
+		},
+		{
+			MethodName: "FilterDns",
+			Handler:    _IjazahService_FilterDns_Handler,
+		},
+		{
+			MethodName: "CreateInfoIjazah",
+			Handler:    _IjazahService_CreateInfoIjazah_Handler,
+		},
+		{
+			MethodName: "UpdateInfoIjazah",
+			Handler:    _IjazahService_UpdateInfoIjazah_Handler,
+		},
+		{
+			MethodName: "GetInfoIjazah",
+			Handler:    _IjazahService_GetInfoIjazah_Handler,
+		},
+		{
+			MethodName: "DeleteInfoIjazah",
+			Handler:    _IjazahService_DeleteInfoIjazah_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -3836,10 +3834,7 @@ var DownloadService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	DashboardService_GetCountSiswa_FullMethodName = "/sekolah.DashboardService/GetCountSiswa"
-	DashboardService_GetCountGuru_FullMethodName  = "/sekolah.DashboardService/GetCountGuru"
-	DashboardService_GetCountKelas_FullMethodName = "/sekolah.DashboardService/GetCountKelas"
-	DashboardService_GetInfoKelas_FullMethodName  = "/sekolah.DashboardService/GetInfoKelas"
+	DashboardService_GetDashboard_FullMethodName = "/sekolah.DashboardService/GetDashboard"
 )
 
 // DashboardServiceClient is the client API for DashboardService service.
@@ -3850,10 +3845,7 @@ const (
 // =============DASHBOARD SERVICE============
 // =========================================
 type DashboardServiceClient interface {
-	GetCountSiswa(ctx context.Context, in *GetCountSiswaRequest, opts ...grpc.CallOption) (*GetCountSiswaResponse, error)
-	GetCountGuru(ctx context.Context, in *GetCountGuruRequest, opts ...grpc.CallOption) (*GetCountGuruResponse, error)
-	GetCountKelas(ctx context.Context, in *GetCountKelasRequest, opts ...grpc.CallOption) (*GetCountKelasResponse, error)
-	GetInfoKelas(ctx context.Context, in *GetInfoKelasRequest, opts ...grpc.CallOption) (*GetInfoKelasResponse, error)
+	GetDashboard(ctx context.Context, in *GetDashboardRequest, opts ...grpc.CallOption) (*GetDashboardResponse, error)
 }
 
 type dashboardServiceClient struct {
@@ -3864,40 +3856,10 @@ func NewDashboardServiceClient(cc grpc.ClientConnInterface) DashboardServiceClie
 	return &dashboardServiceClient{cc}
 }
 
-func (c *dashboardServiceClient) GetCountSiswa(ctx context.Context, in *GetCountSiswaRequest, opts ...grpc.CallOption) (*GetCountSiswaResponse, error) {
+func (c *dashboardServiceClient) GetDashboard(ctx context.Context, in *GetDashboardRequest, opts ...grpc.CallOption) (*GetDashboardResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetCountSiswaResponse)
-	err := c.cc.Invoke(ctx, DashboardService_GetCountSiswa_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dashboardServiceClient) GetCountGuru(ctx context.Context, in *GetCountGuruRequest, opts ...grpc.CallOption) (*GetCountGuruResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetCountGuruResponse)
-	err := c.cc.Invoke(ctx, DashboardService_GetCountGuru_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dashboardServiceClient) GetCountKelas(ctx context.Context, in *GetCountKelasRequest, opts ...grpc.CallOption) (*GetCountKelasResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetCountKelasResponse)
-	err := c.cc.Invoke(ctx, DashboardService_GetCountKelas_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *dashboardServiceClient) GetInfoKelas(ctx context.Context, in *GetInfoKelasRequest, opts ...grpc.CallOption) (*GetInfoKelasResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetInfoKelasResponse)
-	err := c.cc.Invoke(ctx, DashboardService_GetInfoKelas_FullMethodName, in, out, cOpts...)
+	out := new(GetDashboardResponse)
+	err := c.cc.Invoke(ctx, DashboardService_GetDashboard_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -3912,10 +3874,7 @@ func (c *dashboardServiceClient) GetInfoKelas(ctx context.Context, in *GetInfoKe
 // =============DASHBOARD SERVICE============
 // =========================================
 type DashboardServiceServer interface {
-	GetCountSiswa(context.Context, *GetCountSiswaRequest) (*GetCountSiswaResponse, error)
-	GetCountGuru(context.Context, *GetCountGuruRequest) (*GetCountGuruResponse, error)
-	GetCountKelas(context.Context, *GetCountKelasRequest) (*GetCountKelasResponse, error)
-	GetInfoKelas(context.Context, *GetInfoKelasRequest) (*GetInfoKelasResponse, error)
+	GetDashboard(context.Context, *GetDashboardRequest) (*GetDashboardResponse, error)
 	mustEmbedUnimplementedDashboardServiceServer()
 }
 
@@ -3926,17 +3885,8 @@ type DashboardServiceServer interface {
 // pointer dereference when methods are called.
 type UnimplementedDashboardServiceServer struct{}
 
-func (UnimplementedDashboardServiceServer) GetCountSiswa(context.Context, *GetCountSiswaRequest) (*GetCountSiswaResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCountSiswa not implemented")
-}
-func (UnimplementedDashboardServiceServer) GetCountGuru(context.Context, *GetCountGuruRequest) (*GetCountGuruResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCountGuru not implemented")
-}
-func (UnimplementedDashboardServiceServer) GetCountKelas(context.Context, *GetCountKelasRequest) (*GetCountKelasResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetCountKelas not implemented")
-}
-func (UnimplementedDashboardServiceServer) GetInfoKelas(context.Context, *GetInfoKelasRequest) (*GetInfoKelasResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetInfoKelas not implemented")
+func (UnimplementedDashboardServiceServer) GetDashboard(context.Context, *GetDashboardRequest) (*GetDashboardResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetDashboard not implemented")
 }
 func (UnimplementedDashboardServiceServer) mustEmbedUnimplementedDashboardServiceServer() {}
 func (UnimplementedDashboardServiceServer) testEmbeddedByValue()                          {}
@@ -3959,74 +3909,20 @@ func RegisterDashboardServiceServer(s grpc.ServiceRegistrar, srv DashboardServic
 	s.RegisterService(&DashboardService_ServiceDesc, srv)
 }
 
-func _DashboardService_GetCountSiswa_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetCountSiswaRequest)
+func _DashboardService_GetDashboard_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetDashboardRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(DashboardServiceServer).GetCountSiswa(ctx, in)
+		return srv.(DashboardServiceServer).GetDashboard(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: DashboardService_GetCountSiswa_FullMethodName,
+		FullMethod: DashboardService_GetDashboard_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DashboardServiceServer).GetCountSiswa(ctx, req.(*GetCountSiswaRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _DashboardService_GetCountGuru_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetCountGuruRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DashboardServiceServer).GetCountGuru(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: DashboardService_GetCountGuru_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DashboardServiceServer).GetCountGuru(ctx, req.(*GetCountGuruRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _DashboardService_GetCountKelas_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetCountKelasRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DashboardServiceServer).GetCountKelas(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: DashboardService_GetCountKelas_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DashboardServiceServer).GetCountKelas(ctx, req.(*GetCountKelasRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _DashboardService_GetInfoKelas_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetInfoKelasRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(DashboardServiceServer).GetInfoKelas(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: DashboardService_GetInfoKelas_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(DashboardServiceServer).GetInfoKelas(ctx, req.(*GetInfoKelasRequest))
+		return srv.(DashboardServiceServer).GetDashboard(ctx, req.(*GetDashboardRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -4039,20 +3935,8 @@ var DashboardService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*DashboardServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetCountSiswa",
-			Handler:    _DashboardService_GetCountSiswa_Handler,
-		},
-		{
-			MethodName: "GetCountGuru",
-			Handler:    _DashboardService_GetCountGuru_Handler,
-		},
-		{
-			MethodName: "GetCountKelas",
-			Handler:    _DashboardService_GetCountKelas_Handler,
-		},
-		{
-			MethodName: "GetInfoKelas",
-			Handler:    _DashboardService_GetInfoKelas_Handler,
+			MethodName: "GetDashboard",
+			Handler:    _DashboardService_GetDashboard_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

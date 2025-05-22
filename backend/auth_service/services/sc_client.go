@@ -50,7 +50,7 @@ func NewSCServiceClient() (*SCServiceClient, error) {
 	return &SCServiceClient{client: client, clientBC: clientBC}, nil
 }
 
-func (s *SCServiceClient) RegistrasiSekolahTenant(sekolah *models.SekolahTenant, userId int32) error {
+func (s *SCServiceClient) RegistrasiSekolahTenant(sekolah *models.SekolahTenant, userId uint32) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_sekolah (
 	bentuk_pendidikan_id SMALLINT NULL DEFAULT NULL,
 	jenjang_pendidikan_id NUMERIC(2,0) NULL DEFAULT NULL,
 	is_dapodik NUMERIC(1,0) NOT NULL DEFAULT 0,
+	sekolah_id_dapo UUID NULL DEFAULT NULL,
 	PRIMARY KEY (sekolah_id),
 	CONSTRAINT FK_tabel_sekolah_ref_bentuk_pendidikan FOREIGN KEY (bentuk_pendidikan_id) REFERENCES ref.bentuk_pendidikan (bentuk_pendidikan_id) ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT FK_tabel_sekolah_ref_jenjang_pendidikan FOREIGN KEY (jenjang_pendidikan_id) REFERENCES ref.jenjang_pendidikan (jenjang_pendidikan_id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -50,6 +51,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_siswa (
 	pekerjaan_wali VARCHAR(30) NULL DEFAULT NULL,
 	nik VARCHAR(30) NULL DEFAULT NULL,
 	is_dapodik NUMERIC(1,0) NOT NULL DEFAULT 0,
+	peserta_didik_id_dapo UUID NULL DEFAULT NULL,
 	PRIMARY KEY (peserta_didik_id)
 );
 
@@ -81,6 +83,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_ptk (
 	tempat_lahir VARCHAR(32) NULL,
 	tanggal_lahir DATE NULL,
 	is_dapodik NUMERIC(1,0) NOT NULL DEFAULT 0,
+	ptk_id_dapodik UUID NULL DEFAULT NULL,
 	status_keaktifan_id NUMERIC(2,0) NOT NULL DEFAULT 1,  
     soft_delete NUMERIC(1,0) NOT NULL DEFAULT 0, 
 	PRIMARY KEY (ptk_id)
@@ -92,6 +95,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_ptk_terdaftar (
 	tahun_ajaran_id VARCHAR(4) NOT NULL,
 	jenis_keluar_id CHAR(1) NULL DEFAULT NULL,
 	is_dapodik NUMERIC(1,0) NOT NULL DEFAULT 0,
+	ptk_terdaftar_id_dapo UUID NULL DEFAULT NULL,
 	soft_delete NUMERIC(1,0) NOT NULL DEFAULT 0,
 	PRIMARY KEY (ptk_terdaftar_id),
 	CONSTRAINT FK_tabel_ptk_terdaftar_tabel_ptk FOREIGN KEY (ptk_id) REFERENCES {{schema_name}}.tabel_ptk (ptk_id) ON UPDATE CASCADE ON DELETE CASCADE
@@ -166,6 +170,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_pembelajaran (
 	nama_mata_pelajaran VARCHAR(50) NULL DEFAULT NULL,
 	induk_pembelajaran UUID NULL DEFAULT NULL,
 	is_dapo NUMERIC(1,0) NULL DEFAULT '1',
+	ptk_terdaftar_id_dapo UUID NULL DEFAULT NULL,
 	PRIMARY KEY (pembelajaran_id),
 	CONSTRAINT FK_tabel_pembelajaran_ref_mata_pelajaran FOREIGN KEY (mata_pelajaran_id) REFERENCES ref.mata_pelajaran (mata_pelajaran_id) ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT FK_tabel_pembelajaran_ref_semester FOREIGN KEY (semester_id) REFERENCES ref.semester (semester_id) ON UPDATE CASCADE ON DELETE CASCADE,

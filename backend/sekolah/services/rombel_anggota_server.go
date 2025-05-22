@@ -12,6 +12,8 @@ import (
 	"sekolah/utils"
 
 	"gorm.io/gorm"
+	// Untuk marshal protobuf ke JSON
+	// Pastikan redis client sudah diinisialisasi
 )
 
 type RombelAnggotaService struct {
@@ -240,14 +242,6 @@ func (s *RombelAnggotaService) SearchAnggotaKelas(ctx context.Context, req *pb.S
 	conditions := map[string]any{
 		"tabel_anggotakelas.semester_id": semesterId,
 	}
-	// customConditions := []struct {
-	// 	Query string
-	// 	Args  []interface{}
-	// }{
-	// 	{"age > ?", []interface{}{25}},
-	// 	// {"created_at BETWEEN ? AND ?", []interface{}{startDate, endDate}},
-	// }
-	// orderBy := []string{"tabel_kelas.nm_kelas ASC"} // Hindari duplikasi
 	if pesertaDidikId != "" {
 		// mod, err := s.repo.FindByID(ctx, pesertaDidikId, schemaName, "peserta_didik_id")
 		conditions["tabel_anggotakelas.peserta_didik_id"] = pesertaDidikId
@@ -584,3 +578,84 @@ func (s *RombelAnggotaService) FilterAnggotaKelas(ctx context.Context, req *pb.F
 		AnggotaKelas: results,
 	}, nil
 }
+
+// ===========================================
+// MENGGUNAKAN REDIS
+// ===========================================
+// func (s *RombelAnggotaService) GetAnggotaKelasRedis(ctx context.Context, req *pb.GetAnggotaKelasRequest) (*pb.GetAnggotaKelasResponse, error) {
+//     log.Printf("call rombel_anggota_server: data request: %+v\n", req)
+
+//     requiredFields := []string{"Schemaname", "SemesterId"}
+//     if err := utils.ValidateFields(req, requiredFields); err != nil {
+//         return nil, err
+//     }
+
+//     schemaName := req.GetSchemaname()
+//     semesterId := req.GetSemesterId()
+//     anggotaRombelId := req.GetAnggotaRombelId()
+
+//     // 🔑 Buat key Redis berdasarkan parameter
+//     key := fmt.Sprintf("anggota_kelas:%s:%s:%s", schemaName, semesterId, anggotaRombelId)
+
+//     // 📦 Cek di Redis cache terlebih dahulu
+//     cachedData, err := s.redisClient.Get(ctx, key).Bytes()
+//     if err == nil {
+//         var cachedResp pb.GetAnggotaKelasResponse
+//         if err := protojson.Unmarshal(cachedData, &cachedResp); err == nil {
+//             return &cachedResp, nil
+//         }
+//     }
+
+//     // ❌ Tidak ada di cache, lakukan query ke DB
+//     conditions := map[string]interface{}{
+//         "tabel_anggotakelas.semester_id": semesterId,
+//         "jenis_rombel":                   1,
+//     }
+//     if anggotaRombelId != "" {
+//         conditions["tabel_anggotakelas.anggota_rombel_id"] = anggotaRombelId
+//     }
+
+//     joins := []string{
+//         "JOIN tabel_siswa ON tabel_siswa.peserta_didik_id = tabel_anggotakelas.peserta_didik_id",
+//         "JOIN tabel_kelas ON tabel_kelas.rombongan_belajar_id = tabel_anggotakelas.rombongan_belajar_id",
+//         "JOIN tabel_ptk ON tabel_ptk.ptk_id = tabel_kelas.ptk_id",
+//     }
+//     preloads := []string{"PesertaDidik", "RombonganBelajar", "RombonganBelajar.PTK", "NilaiAkhir", "NilaiAkhir.MataPelajaran"}
+//     orderBy := []string{"tabel_kelas.nm_kelas ASC", "tabel_siswa.nm_siswa ASC"}
+
+//     anggotaRombelModel, err := s.repo.FindWithPreloadAndJoins(ctx, schemaName, joins, preloads, conditions, nil, orderBy, false)
+//     if err != nil {
+//         return nil, err
+//     }
+
+//     // 🔄 Konversi model ke protobuf
+//     banyakAnggotaKelasList := utils.ConvertModelsToPB(anggotaRombelModel, func(anggota models.RombelAnggota) *pb.AnggotaKelas1 {
+//         return &pb.AnggotaKelas1{
+//             RombonganBelajarId:  anggota.RombonganBelajarId.String(),
+//             NmKelas:             anggota.RombonganBelajar.NmKelas,
+//             AnggotaRombelId:     anggota.AnggotaRombelId.String(),
+//             TingkatPendidikanId: anggota.RombonganBelajar.TingkatPendidikanId,
+//             WaliKelas:           anggota.RombonganBelajar.PTK.Nama,
+//             PesertaDidikId:      anggota.PesertaDidikId.String(),
+//             NmSiswa:             anggota.PesertaDidik.NmSiswa,
+//             Nis:                 anggota.PesertaDidik.Nis,
+//             Nisn:                anggota.PesertaDidik.Nisn,
+//             Nik:                 utils.SafeString(anggota.PesertaDidik.Nik),
+//             TempatLahir:         anggota.PesertaDidik.TempatLahir,
+//             TanggalLahir:        anggota.PesertaDidik.TanggalLahir.Format("2006-01-02"),
+//             JenisKelamin:        anggota.PesertaDidik.JenisKelamin,
+//             NmIbu:               anggota.PesertaDidik.NmIbu,
+//             Agama:               anggota.PesertaDidik.Agama,
+//         }
+//     })
+
+//     response := &pb.GetAnggotaKelasResponse{
+//         AnggotaKelas: banyakAnggotaKelasList,
+//     }
+
+//     // 💾 Simpan ke Redis dalam format JSON protobuf
+//     dataToCache, _ := protojson.Marshal(response)
+//     s.redisClient.Set(ctx, key, dataToCache, 5*time.Minute) // TTL 5 menit
+
+//     return response, nil
+// }

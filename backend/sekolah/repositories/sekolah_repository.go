@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
@@ -16,6 +17,7 @@ type SekolahRepository interface {
 	FindByID(ctx context.Context, sekolahID string, schemaName string) (*models.Sekolah, error)
 	Update(ctx context.Context, sekolah *models.Sekolah, schemaName string) error
 	Delete(ctx context.Context, sekolahID string, schemaName string) error
+	GetKategoriSekolah(ctx context.Context, namaSekolah string) (*models.BentukPendidikan, error)
 }
 
 type sekolahRepositoryImpl struct {
@@ -120,4 +122,24 @@ func (r *sekolahRepositoryImpl) Delete(ctx context.Context, sekolahID string, sc
 
 		return nil // Commit transaksi jika tidak ada error
 	})
+}
+func (r *sekolahRepositoryImpl) GetKategoriSekolah(ctx context.Context, namaSekolah string) (*models.BentukPendidikan, error) {
+	var kategori models.BentukPendidikan
+
+	err := r.db.WithContext(ctx).
+		Model(&models.BentukPendidikan{}).
+		Where("? ILIKE '%' || nama || '%'", namaSekolah).
+		Where("aktif = ?", true).
+		Order("LENGTH(nama) DESC").
+		Limit(1).
+		Take(&kategori).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		// Kembalikan kategori default "Lainnya" dengan pointer struct
+		return &models.BentukPendidikan{Nama: "Lainnya"}, nil
+	} else if err != nil {
+		return nil, err
+	}
+
+	return &kategori, nil
 }

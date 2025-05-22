@@ -203,6 +203,10 @@ func (s *AuthServiceServer) Register(ctx context.Context, req *pb.RegisterReques
 			log.Printf("Gagal enqueue task: %v", err)
 			return nil, fmt.Errorf("gagal enqueue initSekolahService: %w", err)
 		}
+		if err := s.rQueue.EnqueueInitSCTask(*sekolahModel, userModel.ID); err != nil {
+			log.Printf("Gagal enqueue task: %v", err)
+			return nil, fmt.Errorf("gagal enqueue initSCService: %w", err)
+		}
 
 	} else if userModel.Role == "siswa" {
 		// Registrasi siswa
@@ -394,25 +398,4 @@ func (s *AuthServiceServer) GetSekolah(ctx context.Context, req *pb.GetSekolahRe
 			Npsn:          sekolah.NPSN,
 		},
 	}, nil
-}
-
-//	func registerAdmin(authService AuthService, userModel UserModel) error {
-//		if err := authService.RegisterAdmin(userModel); err != nil {
-//			log.Printf("Error registrasi admin: %v", err)
-//			return fmt.Errorf("gagal registrasi admin: %w", err)
-//		}
-//		return nil
-//	}
-
-func initSCService(sekolahModel *models.SekolahTenant, userID int) error {
-	scClient, err := NewSCServiceClient()
-	if err != nil {
-		return err
-	}
-
-	if err := scClient.RegistrasiSekolahTenant(sekolahModel, int32(userID)); err != nil {
-		return err
-	}
-
-	return nil
 }

@@ -133,8 +133,11 @@ func (s *SekolahService) CreateSekolah(ctx context.Context, req *pb.CreateSekola
 	// } else {
 	// 	fmt.Println("UUID ke String:", strValue)
 	// }
+	// bentukPendidikan, err := s.sekolahService.GetKategoriSekolah(ctx, sekolah.Nama)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-	sekolah.BentukPendidikanId = 4
 	sekolah.StatusKepemilikanId = 4
 	sekolah.JenjangPendidikanId = 98
 	sekolahModel := &models.Sekolah{
@@ -207,10 +210,10 @@ func (s *SekolahService) GetSekolah(ctx context.Context, req *pb.GetSekolahReque
 			NmKepsek:            utils.SafeString(sekolah.NamaKepsek),
 			NipKepsek:           utils.SafeString(sekolah.NIPKepsek),
 			NiyKepsek:           utils.SafeString(sekolah.NIPKepsek),
-			StatusKepemilikanId: utils.SafeInt32(sekolah.StatusKepemilikanID),
+			StatusKepemilikanId: utils.SafeUint32(sekolah.StatusKepemilikanID),
 			KodeAktivasi:        utils.SafeString(sekolah.KodeAktivasi),
-			JenjangPendidikanId: utils.SafeInt32(sekolah.JenjangPendidikanID),
-			BentukPendidikanId:  utils.SafeInt32(sekolah.BentukPendidikanID),
+			JenjangPendidikanId: utils.SafeUint32(sekolah.JenjangPendidikanID),
+			BentukPendidikanId:  utils.SafeUint32(sekolah.BentukPendidikanID),
 		},
 	}, nil
 }
