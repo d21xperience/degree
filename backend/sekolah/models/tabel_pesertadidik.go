@@ -7,32 +7,34 @@ import (
 )
 
 type PesertaDidik struct {
-	PesertaDidikId  string     `gorm:"column:peserta_didik_id;primaryKey"` // STRING
-	Nis             string     `gorm:"column:nis"`                         // String
-	Nisn            string     `gorm:"column:nisn"`                        // String
-	NmSiswa         string     `gorm:"column:nm_siswa"`                    // String
-	TempatLahir     string     `gorm:"column:tempat_lahir"`                // String
-	TanggalLahir    *time.Time `gorm:"column:tanggal_lahir"`               // String (format tanggal, bisa diubah ke time.Time jika perlu)
-	JenisKelamin    string     `gorm:"column:jenis_kelamin"`               // String
-	Agama           string     `gorm:"column:agama"`                       // String
-	AlamatSiswa     *string    `gorm:"column:alamat_siswa"`                // Nullable string
-	TeleponSiswa    string     `gorm:"column:telepon_siswa"`               // String
-	DiterimaTanggal *time.Time `gorm:"column:diterima_tanggal"`            // String (format tanggal, bisa diubah ke time.Time jika perlu)
-	NmAyah          string     `gorm:"column:nm_ayah"`                     // String
-	NmIbu           string     `gorm:"column:nm_ibu"`                      // String
-	PekerjaanAyah   string     `gorm:"column:pekerjaan_ayah"`              // String
-	PekerjaanIbu    string     `gorm:"column:pekerjaan_ibu"`               // String
-	NmWali          *string    `gorm:"column:nm_wali"`                     // Nullable string
-	PekerjaanWali   *string    `gorm:"column:pekerjaan_wali"`              // Nullable string
-	Nik             *string    `gorm:"column:nik"`
+	PesertaDidikId     uuid.UUID  `gorm:"column:peserta_didik_id;primaryKey"` // STRING
+	Nis                *string    `gorm:"column:nis"`                         // String
+	Nisn               *string    `gorm:"column:nisn"`                        // String
+	NmSiswa            string     `gorm:"column:nm_siswa"`                    // String
+	TempatLahir        *string    `gorm:"column:tempat_lahir"`                // String
+	TanggalLahir       *time.Time `gorm:"column:tanggal_lahir"`               // String (format tanggal, bisa diubah ke time.Time jika perlu)
+	JenisKelamin       *string    `gorm:"column:jenis_kelamin"`               // String
+	Agama              *string    `gorm:"column:agama"`                       // String
+	AlamatSiswa        *string    `gorm:"column:alamat_siswa"`                // Nullable string
+	TeleponSiswa       *string    `gorm:"column:telepon_siswa"`               // String
+	DiterimaTanggal    *time.Time `gorm:"column:diterima_tanggal"`            // String (format tanggal, bisa diubah ke time.Time jika perlu)
+	NmAyah             *string    `gorm:"column:nm_ayah"`                     // String
+	NmIbu              *string    `gorm:"column:nm_ibu"`                      // String
+	PekerjaanAyah      *string    `gorm:"column:pekerjaan_ayah"`              // String
+	PekerjaanIbu       *string    `gorm:"column:pekerjaan_ibu"`               // String
+	NmWali             *string    `gorm:"column:nm_wali"`                     // Nullable string
+	PekerjaanWali      *string    `gorm:"column:pekerjaan_wali"`              // Nullable string
+	Nik                *string    `gorm:"column:nik"`
+	IsDapo             bool       `gorm:"column:is_dapo"`
+	PesertaDidikIdDapo uuid.UUID  `gorm:"column:peserta_didik_id_dapo"`
 }
 
 type PesertaDidikPelengkap struct {
-	PelengkapSiswaId string       `gorm:"column:pelengkap_siswa_id;primaryKey"` // UUID
-	PesertaDidikId   *string      `gorm:"column:peserta_didik_id"`              // UUID
+	PelengkapSiswaId uuid.UUID    `gorm:"column:pelengkap_siswa_id;primaryKey"` // UUID
+	PesertaDidikId   uuid.UUID    `gorm:"column:peserta_didik_id"`              // UUID
 	StatusDalamKel   *string      `gorm:"column:status_dalam_kel"`              // Nullable string
 	AnakKe           *string      `gorm:"column:anak_ke"`                       // Integer
-	SekolahAsal      string       `gorm:"column:sekolah_asal"`                  // Non-nullable string
+	SekolahAsal      *string      `gorm:"column:sekolah_asal"`                  // Non-nullable string
 	DiterimaKelas    *string      `gorm:"column:diterima_kelas"`                // Nullable string
 	AlamatOrtu       *string      `gorm:"column:alamat_ortu"`                   // Nullable string
 	TeleponOrtu      *string      `gorm:"column:telepon_ortu"`                  // Nullable string

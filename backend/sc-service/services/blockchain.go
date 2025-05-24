@@ -11,7 +11,7 @@ import (
 type BlockchainClient interface {
 	Connect() error
 	NetworkID(ctx context.Context) (*big.Int, error)
-	GenerateNewAccount(ctx context.Context, userId int32, password string) (map[string]interface{}, error)
+	GenerateNewAccount(ctx context.Context, userId uint32, password string) (map[string]interface{}, error)
 }
 
 // BlockchainClientFactory mendefinisikan factory function
@@ -19,9 +19,9 @@ type BlockchainClientFactory func(cfg *Config) (BlockchainClient, error)
 
 // Peta blockchain factories
 var blockchainFactories = map[string]BlockchainClientFactory{
-	"ethereum": NewEthereumClient,
-	// "quorum":   NewQuorumClient,
-	"hyperledger": NewHyperledgerFabricClient,
+	// "ethereum": NewEthereumClient,
+	// // "quorum":   NewQuorumClient,
+	// "hyperledger": NewHyperledgerFabricClient,
 }
 
 // CreateClientFactory memilih blockchain berdasarkan runtime config

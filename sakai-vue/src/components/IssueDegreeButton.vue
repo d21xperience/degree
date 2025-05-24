@@ -3,9 +3,11 @@
 </template>
 
 <script setup>
+import { useSCService } from '@/composables/useSCService';
 import DegreeContractABI from '@/VerifikasiIjazahABI.json';
 import { ethers, keccak256, toUtf8Bytes } from 'ethers';
 import { onMounted, ref } from 'vue';
+const { createMetamaskConnected } = useSCService();
 const contractAddress = '0xdc64a140aa3e981100a9beca4e685f962f0cf6c9';
 const props = defineProps({
     degreeData: Object, // { name, nisn, graduationYear, major }
@@ -124,7 +126,9 @@ onMounted(async () => {
 
             // const contractAddress = '0x700b6A60ce7EaaEA56F065753d8dcB9653dbAD35'; // HARUS STRING BUKAN undefined/objek
             contract.value = new ethers.Contract(contractAddress, DegreeContractABI, signer);
-            
+            if (contract.value) {
+                createMetamaskConnected(true);
+            }
         } else {
             alert('Metamask tidak ditemukan. Harap instal terlebih dahulu.');
         }

@@ -24,6 +24,11 @@ func (SekolahTenant) TableName() string {
 	return "sekolah_tenant"
 }
 
+type TaskPayload struct {
+	SekolahTenant SekolahTenant
+	UserId  uint32
+}
+
 // type SekolahRef struct {
 // 	ID              int    `gorm:"primaryKey"`
 // 	SekolahIDEnkrip string `gorm:"unique" json:"sekolah_id_enkrip"`

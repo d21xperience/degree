@@ -47,7 +47,7 @@ onMounted(async () => {
 // ==================================
 // =======composable=============
 const selectedGuru = ref();
-const { initSelectedSemester, guruTerdaftarList, fetchGuruTerdaftar, deleteGuruTerdaftar } = useSekolahService();
+const { initSelectedSemester, guruTerdaftarList, fetchGuruTerdaftar, deleteGuruTerdaftar, deleteBatchGuruTerdaftar } = useSekolahService();
 // ==================================
 
 watch(initSelectedSemester, (e, b) => {
@@ -58,22 +58,31 @@ watch(initSelectedSemester, (e, b) => {
 const dialogImport = ref(false);
 
 const deletGuru = () => {
-    guruTerdaftarList.value = guruTerdaftarList.value.filter((val) => val.ptkTerdaftarId !== selectedGuru.value[0].ptkTerdaftarId);
-    deleteGuruDialog.value = false;
-    console.log(selectedGuru.value[0]);
-    // update ke backend
-    deleteGuruTerdaftar(selectedGuru.value[0].ptkTerdaftarId);
-    selectedGuru.value = [];
-    toast.add({ severity: 'success', summary: 'Successful', detail: 'Guru dihapus', life: 3000 });
+    guruTerdaftarList.value = guruTerdaftarList.value.filter((val) => !selectedGuru.value.includes(val));
+    if (selectedGuru.value.length == 1) {
+        deleteGuruTerdaftar(selectedGuru.value[0].ptkTerdaftarId);
+    } else if (selectedGuru.value.length > 1) {
+        const ids = selectedGuru.value.map((item) => item.ptkTerdaftarId);
+        deleteBatchGuruTerdaftar(ids);
+    }
 };
 
 const editGuru = async () => {
     await nextTick();
+    loadingEdit.value = true
     router.push({
         name: 'editGuru',
         query: { ptkTerdaftarId: selectedGuru.value[0]?.ptkTerdaftarId.toString() }
     });
 };
+
+const afterUpload = async (e) => {
+    console.log('cek', e);
+    await fetchGuruTerdaftar();
+    if (!e) {
+    }
+};
+const loadingEdit = ref(false)
 </script>
 
 <template>
@@ -85,7 +94,7 @@ const editGuru = async () => {
                         <Toolbar>
                             <template #start>
                                 <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="openNew" v-tooltip.bottom="'Tambah Guru Baru'" />
-                                <Button icon="pi pi-pencil" severity="warn" @click="editGuru" :disabled="!selectedGuru || !selectedGuru.length || selectedGuru.length > 1" class="mr-2" v-tooltip.bottom="'Edit Guru'" />
+                                <Button icon="pi pi-pencil" severity="warn" @click="editGuru" :disabled="!selectedGuru || !selectedGuru.length || selectedGuru.length > 1" class="mr-2" v-tooltip.bottom="'Edit Guru'" :loading="loadingEdit"/>
                                 <Button icon="pi pi-trash" severity="danger" class="mr-2 text-lg" @click="deleteGuruDialog = true" :disabled="!selectedGuru || !selectedGuru.length" v-tooltip.bottom="'Hapus Guru'" :loading="loading" />
                                 <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Upload Guru'" v-show="initSelectedSemester.semester == 1" />
                                 <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download Guru'" />
@@ -161,7 +170,7 @@ const editGuru = async () => {
 
         <!-- import data -->
         <!-- <DialogImport v-model:visible="dialogImport" @save="saveImport" @cancel="cancelImport" template-type="guru" :schema-name="schemaname" /> -->
-        <DialogImport v-model:visible="dialogImport" template-type="guru" />
+        <DialogImport v-model:visible="dialogImport" template-type="guru" @save="afterUpload" />
 
         <!-- end of import data -->
     </div>

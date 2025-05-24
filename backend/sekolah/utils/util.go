@@ -139,6 +139,14 @@ func SafeUint32(ptr *uint32) uint32 {
 	return 0
 }
 
+// Mengembalikan nilai *time.Time jika tidak nil, jika nil maka mengembalikan time.Time{} (zero time)
+func SafeTime(ptr *time.Time) time.Time {
+	if ptr != nil {
+		return *ptr
+	}
+	return time.Time{}
+}
+
 // =======================
 // KONVERSI UINT
 // =======================
@@ -228,6 +236,23 @@ func StringToTime[T ~string](str T, layout string) (time.Time, error) {
 		return time.Time{}, err
 	}
 	return parsedTime, nil
+}
+
+func ParseTimeWithMultipleFormats(input string) (time.Time, error) {
+	// Daftar format tanggal yang umum di Excel
+	dateFormats := []string{
+		"m/d/yy", "d-mmm-yy", "d-mmm", "mmm-yy",
+		"h:mm AM/PM", "h:mm:ss AM/PM", "h:mm",
+		"h:mm:ss", "m/d/yy h:mm", "mm/dd/yyyy",
+		"dd/mm/yyyy", "dd-mm-yyyy", "yyyy-mm-dd", "mm-dd-yy",
+	}
+	for _, layout := range dateFormats {
+		t, err := time.Parse(layout, input)
+		if err == nil {
+			return t, nil
+		}
+	}
+	return time.Time{}, fmt.Errorf("tidak ada format yang cocok untuk nilai: %s", input)
 }
 
 // =======================

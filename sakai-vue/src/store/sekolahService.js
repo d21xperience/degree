@@ -11,15 +11,16 @@ const api = axios.create({
 
 const state = {
     // tabelKelas: JSON.parse(localStorage.getItem("tabelKelas")) || null,
-    tabelKelas: (() => {
-        try {
-            const data = localStorage.getItem('tabelKelas');
-            return data ? JSON.parse(data) : [];
-        } catch (e) {
-            console.error('Gagal parse tabelKelas dari localStorage', e);
-            return [];
-        }
-    })(),
+    // tabelKelas: (() => {
+    //     try {
+    //         const data = localStorage.getItem('tabelKelas');
+    //         return data ? JSON.parse(data) : [];
+    //     } catch (e) {
+    //         console.error('Gagal parse tabelKelas dari localStorage', e);
+    //         return [];
+    //     }
+    // })(),
+    tabelKelas: JSON.parse(localStorage.getItem('tabelKelas')) || null,
     tabelTenant: JSON.parse(localStorage.getItem('tabelTenant')) || null,
     tabelSemester: JSON.parse(localStorage.getItem('tabelSemester')) || null,
     tabelSekolah: JSON.parse(localStorage.getItem('tabelSekolah')) || null,
@@ -78,7 +79,7 @@ const mutations = {
         localStorage.setItem('selectedSemester', JSON.stringify(value));
     },
     SET_TABELKELAS(state, value) {
-        state.tabelMapel = value;
+        state.tabelKelas = value;
         localStorage.setItem('tabelKelas', JSON.stringify(value));
     },
     SET_TABELANGGOTAKELAS(state, value) {
@@ -247,6 +248,44 @@ const actions = {
             throw error;
         }
     },
+    async deleteBatchPTKTerdaftar({ commit }, payload) {
+        try {
+            const response = await api.delete('/ss/ptk-terdaftar/delete-batch', {
+                params: {
+                    schemaname: payload.schemaname,
+                    ptk_terdaftar_id: payload.ptk_terdaftar_id
+                }
+            });
+            // update tabelPtkTerdaftarId
+            if (response.status) {
+                console.log(state.tabelPTKTerdaftar);
+                const updatePTK = {
+                    tahun_ajaran_id: state.selectedSemester?.semesterId,
+                    ptkTerdaftar: state.tabelPTKTerdaftar.ptkTerdaftar.filter((item) => item.ptkTerdaftarId != payload.ptk_terdaftar_id)
+                };
+                console.log(updatePTK);
+                commit('SET_TABELPTKTERDAFTAR', updatePTK);
+            }
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async searchPTKTerdaftar({ commit }, payload) {
+        try {
+            // console.log('searchGuruTerdaftar', payload);
+            const response = await api.get('/ss/ptk-terdaftar/search', {
+                params: {
+                    schemaname: payload.schemaname,
+                    ptk_terdaftar_id: payload.ptk_terdaftar_id
+                }
+            });
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
 
     async saveGuru({ commit }, payload) {
         try {
@@ -310,15 +349,13 @@ const actions = {
     },
     async updateSekolah({ commit }, payload) {
         try {
-            console.log(payload);
+            // console.log(payload);
             const response = await api.post(`/ss/${payload.schemaname}/update`, payload);
-            // console.log(response.data);
-            // commit("SET_TABELSEMESTER", response.data.semester);
             return response.data; // Mengembalikan data sekolah
         } catch (error) {
-            commit('SET_ERROR', error.response?.data || 'Terjadi kesalahan');
-            console.error('Gagal membuat semester:', error);
-            return null;
+            // commit('SET_ERROR', error.response?.data || 'Terjadi kesalahan');
+            // console.error('Gagal membuat semester:', error);
+            throw error;
         }
     },
 
@@ -901,9 +938,10 @@ const actions = {
 };
 
 const getters = {
-    getKelas: (state) => (semesterId) => {
-        return state.tabelKelas.filter((kelas) => kelas.semesterId === semesterId);
-    },
+    getKelas: (state) => state.tabelKelas,
+    // getKelas: (state) => (semesterId) => {
+    //     return state.tabelKelas.filter((kelas) => kelas.semesterId === semesterId);
+    // },
     isLoading: (state) => state.loading,
     getError: (state) => state.error,
     getTabeltenant: (state) => state.tabelTenant,

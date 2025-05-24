@@ -149,8 +149,8 @@ const router = createRouter({
                     name: 'settings',
                     children: [
                         {
-                            path: 'ehthereum',
-                            component: () => import('@/views/pages/sc_ijazah/settings/Client_Ethereum.vue')
+                            path: 'blockchain',
+                            component: () => import('@/views/pages/sc_ijazah/settings/BlockchainSetting.vue')
                         },
                         {
                             path: 'ipfs',

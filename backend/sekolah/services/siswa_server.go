@@ -9,6 +9,8 @@ import (
 	"sekolah/models"
 	"sekolah/repositories"
 	"sekolah/utils"
+
+	"github.com/google/uuid"
 )
 
 type SiswaServiceServer struct {
@@ -40,24 +42,36 @@ func (s *SiswaServiceServer) CreateSiswa(ctx context.Context, req *pb.CreateSisw
 	schemaName := req.GetSchemaname()
 	siswa := req.Siswa
 
+	var pdId any
+	var isDapodik bool
+	pdId = siswa.PesertaDidikId
+	if pdId == "" {
+		pdId = uuid.New()
+		isDapodik = false
+	} else {
+		pdId = utils.StringToUUID(siswa.PesertaDidikId)
+		isDapodik = true
+	}
 	siswaModel := &models.PesertaDidik{
-		PesertaDidikId:  siswa.PesertaDidikId,
-		Nis:             siswa.Nis,
-		Nisn:            siswa.Nisn,
+		PesertaDidikId:  pdId.(uuid.UUID),
+		Nis:             &siswa.Nis,
+		Nisn:            &siswa.Nisn,
 		NmSiswa:         siswa.NmSiswa,
-		TempatLahir:     siswa.TempatLahir,
+		TempatLahir:     &siswa.TempatLahir,
 		TanggalLahir:    utils.TimeToPointer(siswa.TanggalLahir),
-		JenisKelamin:    siswa.JenisKelamin,
-		Agama:           siswa.Agama,
+		JenisKelamin:    &siswa.JenisKelamin,
+		Agama:           &siswa.Agama,
 		AlamatSiswa:     &siswa.AlamatSiswa,
-		TeleponSiswa:    siswa.TeleponSiswa,
+		TeleponSiswa:    &siswa.TeleponSiswa,
 		DiterimaTanggal: utils.TimeToPointer(siswa.DiterimaTanggal),
-		NmAyah:          siswa.NmAyah,
-		NmIbu:           siswa.NmIbu,
-		PekerjaanAyah:   siswa.PekerjaanAyah,
-		PekerjaanIbu:    siswa.PekerjaanIbu,
+		NmAyah:          &siswa.NmAyah,
+		NmIbu:           &siswa.NmIbu,
+		PekerjaanAyah:   &siswa.PekerjaanAyah,
+		PekerjaanIbu:    &siswa.PekerjaanIbu,
 		NmWali:          &siswa.NmWali,
 		PekerjaanWali:   &siswa.PekerjaanWali,
+		IsDapo:          isDapodik,
+		
 	}
 
 	err = s.repo.Save(ctx, siswaModel, schemaName)
@@ -97,25 +111,36 @@ func (s *SiswaServiceServer) CreateBanyakSiswa(ctx context.Context, req *pb.Crea
 		// 		return nil
 		// 	}
 		// }
+		var pdId any
+		var isDapodik bool
+		pdId = item.PesertaDidikId
+		if pdId == "" {
+			pdId = uuid.New()
+			isDapodik = false
+		} else {
+			pdId = utils.StringToUUID(item.PesertaDidikId)
+			isDapodik = true
+		}
 		return &models.PesertaDidik{
-			PesertaDidikId: item.PesertaDidikId,
-			Nis:            item.Nis,
-			Nisn:           item.Nisn,
+			PesertaDidikId: pdId.(uuid.UUID),
+			Nis:            &item.Nis,
+			Nisn:           &item.Nisn,
 			NmSiswa:        item.NmSiswa,
-			TempatLahir:    item.TempatLahir,
+			TempatLahir:    &item.TempatLahir,
 			TanggalLahir:   &tglLahir,
-			JenisKelamin:   item.JenisKelamin,
-			Agama:          item.Agama,
+			JenisKelamin:   &item.JenisKelamin,
+			Agama:          &item.Agama,
 			AlamatSiswa:    &item.AlamatSiswa,
-			TeleponSiswa:   item.TeleponSiswa,
+			TeleponSiswa:   &item.TeleponSiswa,
 			// DiterimaTanggal: &tglDiterima,
-			NmAyah:        item.NmAyah,
-			NmIbu:         item.NmIbu,
-			PekerjaanAyah: item.PekerjaanAyah,
-			PekerjaanIbu:  item.PekerjaanIbu,
+			NmAyah:        &item.NmAyah,
+			NmIbu:         &item.NmIbu,
+			PekerjaanAyah: &item.PekerjaanAyah,
+			PekerjaanIbu:  &item.PekerjaanIbu,
 			NmWali:        &item.NmWali,
 			PekerjaanWali: &item.PekerjaanWali,
 			Nik:           &item.Nik,
+			IsDapo:        isDapodik,
 		}
 	})
 	err = s.repo.SaveMany(ctx, schemaName, siswaModels, 1000)
@@ -167,11 +192,11 @@ func (s *SiswaServiceServer) GetSiswa(ctx context.Context, req *pb.GetSiswaReque
 	fmt.Printf("Total Data: %d\n", totalCount)
 	banyakSiswaList := utils.ConvertModelsToPB(banyakSiswa, func(siswa models.PesertaDidikPelengkap) *pb.SiswaPelengkap {
 		return &pb.SiswaPelengkap{
-			PesertaDidikId:   utils.SafeString(siswa.PesertaDidikId),
-			PelengkapSiswaId: siswa.PelengkapSiswaId,
+			PelengkapSiswaId: siswa.PelengkapSiswaId.String(),
+			PesertaDidikId:   siswa.PesertaDidikId.String(),
 			StatusDalamKel:   utils.SafeString(siswa.StatusDalamKel),
 			AnakKe:           utils.SafeString(siswa.AnakKe),
-			SekolahAsal:      siswa.SekolahAsal,
+			SekolahAsal:      utils.SafeString(siswa.SekolahAsal),
 			DiterimaKelas:    utils.SafeString(siswa.DiterimaKelas),
 			AlamatOrtu:       utils.SafeString(siswa.AlamatOrtu),
 			TeleponOrtu:      utils.SafeString(siswa.TeleponOrtu),
@@ -179,19 +204,19 @@ func (s *SiswaServiceServer) GetSiswa(ctx context.Context, req *pb.GetSiswaReque
 			TeleponWali:      utils.SafeString(siswa.TeleponWali),
 			FotoSiswa:        utils.SafeString(siswa.FotoSiswa),
 			Siswa: &pb.Siswa{
-				Nis:           siswa.PesertaDidik.Nis,
-				Nisn:          siswa.PesertaDidik.Nisn,
+				Nis:           utils.SafeString(siswa.PesertaDidik.Nis),
+				Nisn:          utils.SafeString(siswa.PesertaDidik.Nisn),
 				NmSiswa:       siswa.PesertaDidik.NmSiswa,
-				TempatLahir:   siswa.PesertaDidik.TempatLahir,
-				TanggalLahir:  siswa.PesertaDidik.TanggalLahir.Format("2006-01-02"),
-				JenisKelamin:  siswa.PesertaDidik.JenisKelamin,
-				Agama:         siswa.PesertaDidik.Agama,
+				TempatLahir:   utils.SafeString(siswa.PesertaDidik.TempatLahir),
+				TanggalLahir:  utils.SafeTime(siswa.PesertaDidik.TanggalLahir).Format("2006-01-02"),
+				JenisKelamin:  utils.SafeString(siswa.PesertaDidik.JenisKelamin),
+				Agama:         utils.SafeString(siswa.PesertaDidik.Agama),
 				AlamatSiswa:   utils.SafeString(siswa.PesertaDidik.AlamatSiswa),
-				TeleponSiswa:  siswa.PesertaDidik.TeleponSiswa,
-				NmAyah:        siswa.PesertaDidik.NmAyah,
-				NmIbu:         siswa.PesertaDidik.NmIbu,
-				PekerjaanAyah: siswa.PesertaDidik.PekerjaanAyah,
-				PekerjaanIbu:  siswa.PesertaDidik.PekerjaanIbu,
+				TeleponSiswa:  utils.SafeString(siswa.PesertaDidik.TeleponSiswa),
+				NmAyah:        utils.SafeString(siswa.PesertaDidik.NmAyah),
+				NmIbu:         utils.SafeString(siswa.PesertaDidik.NmIbu),
+				PekerjaanAyah: utils.SafeString(siswa.PesertaDidik.PekerjaanAyah),
+				PekerjaanIbu:  utils.SafeString(siswa.PesertaDidik.PekerjaanIbu),
 				NmWali:        utils.SafeString(siswa.PesertaDidik.NmWali),
 				PekerjaanWali: utils.SafeString(siswa.PesertaDidik.PekerjaanWali),
 				// DiterimaTanggal: utils.TimeToString(*siswa.PesertaDidik.DiterimaTanggal, "2006-01-02"),
@@ -229,23 +254,23 @@ func (s *SiswaServiceServer) SearchSiswa(ctx context.Context, req *pb.SearchSisw
 		return nil, fmt.Errorf("gagal menemukan siswa di schema '%s': %w", schemaName, err)
 	}
 	banyakSiswaList := &pb.Siswa{
-		Nis:             mod.Nis,
-		Nisn:            mod.Nisn,
-		NmSiswa:         mod.NmSiswa,
-		TempatLahir:     mod.TempatLahir,
-		TanggalLahir:    mod.TanggalLahir.Format("2006-01-02"),
-		JenisKelamin:    mod.JenisKelamin,
-		Agama:           mod.Agama,
-		AlamatSiswa:     utils.SafeString(mod.AlamatSiswa),
-		TeleponSiswa:    mod.TeleponSiswa,
+		Nis:          utils.SafeString(mod.Nis),
+		Nisn:         utils.SafeString(mod.Nisn),
+		NmSiswa:      mod.NmSiswa,
+		TempatLahir:  utils.SafeString(mod.TempatLahir),
+		TanggalLahir: utils.SafeTime(mod.TanggalLahir).Format("2006-01-02"),
+		JenisKelamin: utils.SafeString(mod.JenisKelamin),
+		Agama:        utils.SafeString(mod.Agama),
+		AlamatSiswa:  utils.SafeString(mod.AlamatSiswa),
+		TeleponSiswa: utils.SafeString(mod.TeleponSiswa),
 		// DiterimaTanggal: utils.TimeToString(*mod.DiterimaTanggal, "2006-01-02"),
-		NmAyah:          mod.NmAyah,
-		NmIbu:           mod.NmIbu,
-		PekerjaanAyah:   mod.PekerjaanAyah,
-		PekerjaanIbu:    mod.PekerjaanIbu,
-		NmWali:          utils.SafeString(mod.NmWali),
-		PekerjaanWali:   utils.SafeString(mod.PekerjaanWali),
-		PesertaDidikId:  mod.PesertaDidikId,
+		NmAyah:         utils.SafeString(mod.NmAyah),
+		NmIbu:          utils.SafeString(mod.NmIbu),
+		PekerjaanAyah:  utils.SafeString(mod.PekerjaanAyah),
+		PekerjaanIbu:   utils.SafeString(mod.PekerjaanIbu),
+		NmWali:         utils.SafeString(mod.NmWali),
+		PekerjaanWali:  utils.SafeString(mod.PekerjaanWali),
+		PesertaDidikId: mod.PesertaDidikId.String(),
 	}
 	return &pb.SearchSiswaResponse{
 		Siswa: banyakSiswaList,

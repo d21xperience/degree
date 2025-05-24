@@ -79,7 +79,7 @@ type Account struct {
 	Address           string      `gorm:"uniqueIndex;not null"` // Alamat Ethereum unik
 	Username          string      `gorm:"uniqueIndex;not null"` // Nama pengguna opsional
 	Type              AccountType `gorm:"type:account_type;default:'IMPORTED'"`
-	UserID            int32       // data dari admin sekolah
+	UserID            uint32      // data dari admin sekolah
 	Password          string      `gorm:"size:100"` // digunakan untuk keystore file
 	KeystrokeFilename string      // digunakan untuk keystore file
 	NetworkID         uint32      `gorm:"not null;index"` // Relasi ke jaringan blockchain

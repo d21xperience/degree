@@ -2445,6 +2445,8 @@ const (
 	PTKTerdaftarService_GetPTKTerdaftar_FullMethodName          = "/sekolah.PTKTerdaftarService/GetPTKTerdaftar"
 	PTKTerdaftarService_UpdatePTKTerdaftar_FullMethodName       = "/sekolah.PTKTerdaftarService/UpdatePTKTerdaftar"
 	PTKTerdaftarService_DeletePTKTerdaftar_FullMethodName       = "/sekolah.PTKTerdaftarService/DeletePTKTerdaftar"
+	PTKTerdaftarService_DeletBatchPTKTerdaftar_FullMethodName   = "/sekolah.PTKTerdaftarService/DeletBatchPTKTerdaftar"
+	PTKTerdaftarService_SearchPTKTerdaftar_FullMethodName       = "/sekolah.PTKTerdaftarService/SearchPTKTerdaftar"
 )
 
 // PTKTerdaftarServiceClient is the client API for PTKTerdaftarService service.
@@ -2457,6 +2459,8 @@ type PTKTerdaftarServiceClient interface {
 	GetPTKTerdaftar(ctx context.Context, in *GetPTKTerdaftarRequest, opts ...grpc.CallOption) (*GetPTKTerdaftarResponse, error)
 	UpdatePTKTerdaftar(ctx context.Context, in *UpdatePTKTerdaftarRequest, opts ...grpc.CallOption) (*UpdatePTKTerdaftarResponse, error)
 	DeletePTKTerdaftar(ctx context.Context, in *DeletePTKTerdaftarRequest, opts ...grpc.CallOption) (*DeletePTKTerdaftarResponse, error)
+	DeletBatchPTKTerdaftar(ctx context.Context, in *DeleteBatchPTKTerdaftarRequest, opts ...grpc.CallOption) (*DeleteBatchPTKTerdaftarResponse, error)
+	SearchPTKTerdaftar(ctx context.Context, in *SearchPTKTerdaftarRequest, opts ...grpc.CallOption) (*SearchPTKTerdaftarResponse, error)
 }
 
 type pTKTerdaftarServiceClient struct {
@@ -2517,6 +2521,26 @@ func (c *pTKTerdaftarServiceClient) DeletePTKTerdaftar(ctx context.Context, in *
 	return out, nil
 }
 
+func (c *pTKTerdaftarServiceClient) DeletBatchPTKTerdaftar(ctx context.Context, in *DeleteBatchPTKTerdaftarRequest, opts ...grpc.CallOption) (*DeleteBatchPTKTerdaftarResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteBatchPTKTerdaftarResponse)
+	err := c.cc.Invoke(ctx, PTKTerdaftarService_DeletBatchPTKTerdaftar_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *pTKTerdaftarServiceClient) SearchPTKTerdaftar(ctx context.Context, in *SearchPTKTerdaftarRequest, opts ...grpc.CallOption) (*SearchPTKTerdaftarResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SearchPTKTerdaftarResponse)
+	err := c.cc.Invoke(ctx, PTKTerdaftarService_SearchPTKTerdaftar_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PTKTerdaftarServiceServer is the server API for PTKTerdaftarService service.
 // All implementations must embed UnimplementedPTKTerdaftarServiceServer
 // for forward compatibility.
@@ -2527,6 +2551,8 @@ type PTKTerdaftarServiceServer interface {
 	GetPTKTerdaftar(context.Context, *GetPTKTerdaftarRequest) (*GetPTKTerdaftarResponse, error)
 	UpdatePTKTerdaftar(context.Context, *UpdatePTKTerdaftarRequest) (*UpdatePTKTerdaftarResponse, error)
 	DeletePTKTerdaftar(context.Context, *DeletePTKTerdaftarRequest) (*DeletePTKTerdaftarResponse, error)
+	DeletBatchPTKTerdaftar(context.Context, *DeleteBatchPTKTerdaftarRequest) (*DeleteBatchPTKTerdaftarResponse, error)
+	SearchPTKTerdaftar(context.Context, *SearchPTKTerdaftarRequest) (*SearchPTKTerdaftarResponse, error)
 	mustEmbedUnimplementedPTKTerdaftarServiceServer()
 }
 
@@ -2551,6 +2577,12 @@ func (UnimplementedPTKTerdaftarServiceServer) UpdatePTKTerdaftar(context.Context
 }
 func (UnimplementedPTKTerdaftarServiceServer) DeletePTKTerdaftar(context.Context, *DeletePTKTerdaftarRequest) (*DeletePTKTerdaftarResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeletePTKTerdaftar not implemented")
+}
+func (UnimplementedPTKTerdaftarServiceServer) DeletBatchPTKTerdaftar(context.Context, *DeleteBatchPTKTerdaftarRequest) (*DeleteBatchPTKTerdaftarResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeletBatchPTKTerdaftar not implemented")
+}
+func (UnimplementedPTKTerdaftarServiceServer) SearchPTKTerdaftar(context.Context, *SearchPTKTerdaftarRequest) (*SearchPTKTerdaftarResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchPTKTerdaftar not implemented")
 }
 func (UnimplementedPTKTerdaftarServiceServer) mustEmbedUnimplementedPTKTerdaftarServiceServer() {}
 func (UnimplementedPTKTerdaftarServiceServer) testEmbeddedByValue()                             {}
@@ -2663,6 +2695,42 @@ func _PTKTerdaftarService_DeletePTKTerdaftar_Handler(srv interface{}, ctx contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PTKTerdaftarService_DeletBatchPTKTerdaftar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteBatchPTKTerdaftarRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PTKTerdaftarServiceServer).DeletBatchPTKTerdaftar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PTKTerdaftarService_DeletBatchPTKTerdaftar_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PTKTerdaftarServiceServer).DeletBatchPTKTerdaftar(ctx, req.(*DeleteBatchPTKTerdaftarRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PTKTerdaftarService_SearchPTKTerdaftar_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchPTKTerdaftarRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PTKTerdaftarServiceServer).SearchPTKTerdaftar(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PTKTerdaftarService_SearchPTKTerdaftar_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PTKTerdaftarServiceServer).SearchPTKTerdaftar(ctx, req.(*SearchPTKTerdaftarRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PTKTerdaftarService_ServiceDesc is the grpc.ServiceDesc for PTKTerdaftarService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -2689,6 +2757,14 @@ var PTKTerdaftarService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeletePTKTerdaftar",
 			Handler:    _PTKTerdaftarService_DeletePTKTerdaftar_Handler,
+		},
+		{
+			MethodName: "DeletBatchPTKTerdaftar",
+			Handler:    _PTKTerdaftarService_DeletBatchPTKTerdaftar_Handler,
+		},
+		{
+			MethodName: "SearchPTKTerdaftar",
+			Handler:    _PTKTerdaftarService_SearchPTKTerdaftar_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

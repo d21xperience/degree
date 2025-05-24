@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 type SekolahTenant struct {
 	gorm.Model
 	NamaSekolah     string
-	UserId          int32
+	UserId          uint32
 	SekolahTenantId uint32
 	SchemaName      string `gorm:"unique;not null"`
 }

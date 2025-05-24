@@ -2017,6 +2017,70 @@ func local_request_PTKTerdaftarService_DeletePTKTerdaftar_0(ctx context.Context,
 	return msg, metadata, err
 }
 
+var filter_PTKTerdaftarService_DeletBatchPTKTerdaftar_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+
+func request_PTKTerdaftarService_DeletBatchPTKTerdaftar_0(ctx context.Context, marshaler runtime.Marshaler, client PTKTerdaftarServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq DeleteBatchPTKTerdaftarRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_PTKTerdaftarService_DeletBatchPTKTerdaftar_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.DeletBatchPTKTerdaftar(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_PTKTerdaftarService_DeletBatchPTKTerdaftar_0(ctx context.Context, marshaler runtime.Marshaler, server PTKTerdaftarServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq DeleteBatchPTKTerdaftarRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_PTKTerdaftarService_DeletBatchPTKTerdaftar_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.DeletBatchPTKTerdaftar(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+var filter_PTKTerdaftarService_SearchPTKTerdaftar_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+
+func request_PTKTerdaftarService_SearchPTKTerdaftar_0(ctx context.Context, marshaler runtime.Marshaler, client PTKTerdaftarServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq SearchPTKTerdaftarRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_PTKTerdaftarService_SearchPTKTerdaftar_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.SearchPTKTerdaftar(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_PTKTerdaftarService_SearchPTKTerdaftar_0(ctx context.Context, marshaler runtime.Marshaler, server PTKTerdaftarServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq SearchPTKTerdaftarRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_PTKTerdaftarService_SearchPTKTerdaftar_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.SearchPTKTerdaftar(ctx, &protoReq)
+	return msg, metadata, err
+}
+
 func request_KenaikanService_CreateKenaikan_0(ctx context.Context, marshaler runtime.Marshaler, client KenaikanServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq CreateKenaikanRequest
@@ -4116,6 +4180,46 @@ func RegisterPTKTerdaftarServiceHandlerServer(ctx context.Context, mux *runtime.
 			return
 		}
 		forward_PTKTerdaftarService_DeletePTKTerdaftar_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodDelete, pattern_PTKTerdaftarService_DeletBatchPTKTerdaftar_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.PTKTerdaftarService/DeletBatchPTKTerdaftar", runtime.WithHTTPPathPattern("/api/v1/ss/ptk-terdaftar/delete-batch"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_PTKTerdaftarService_DeletBatchPTKTerdaftar_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_PTKTerdaftarService_DeletBatchPTKTerdaftar_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodGet, pattern_PTKTerdaftarService_SearchPTKTerdaftar_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.PTKTerdaftarService/SearchPTKTerdaftar", runtime.WithHTTPPathPattern("/api/v1/ss/ptk-terdaftar/search"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_PTKTerdaftarService_SearchPTKTerdaftar_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_PTKTerdaftarService_SearchPTKTerdaftar_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 
 	return nil
@@ -6311,6 +6415,40 @@ func RegisterPTKTerdaftarServiceHandlerClient(ctx context.Context, mux *runtime.
 		}
 		forward_PTKTerdaftarService_DeletePTKTerdaftar_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodDelete, pattern_PTKTerdaftarService_DeletBatchPTKTerdaftar_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.PTKTerdaftarService/DeletBatchPTKTerdaftar", runtime.WithHTTPPathPattern("/api/v1/ss/ptk-terdaftar/delete-batch"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_PTKTerdaftarService_DeletBatchPTKTerdaftar_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_PTKTerdaftarService_DeletBatchPTKTerdaftar_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodGet, pattern_PTKTerdaftarService_SearchPTKTerdaftar_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.PTKTerdaftarService/SearchPTKTerdaftar", runtime.WithHTTPPathPattern("/api/v1/ss/ptk-terdaftar/search"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_PTKTerdaftarService_SearchPTKTerdaftar_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_PTKTerdaftarService_SearchPTKTerdaftar_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	return nil
 }
 
@@ -6320,6 +6458,8 @@ var (
 	pattern_PTKTerdaftarService_GetPTKTerdaftar_0          = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "ss", "ptk-terdaftar"}, ""))
 	pattern_PTKTerdaftarService_UpdatePTKTerdaftar_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ss", "ptk-terdaftar", "update"}, ""))
 	pattern_PTKTerdaftarService_DeletePTKTerdaftar_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ss", "ptk-terdaftar", "delete"}, ""))
+	pattern_PTKTerdaftarService_DeletBatchPTKTerdaftar_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ss", "ptk-terdaftar", "delete-batch"}, ""))
+	pattern_PTKTerdaftarService_SearchPTKTerdaftar_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ss", "ptk-terdaftar", "search"}, ""))
 )
 
 var (
@@ -6328,6 +6468,8 @@ var (
 	forward_PTKTerdaftarService_GetPTKTerdaftar_0          = runtime.ForwardResponseMessage
 	forward_PTKTerdaftarService_UpdatePTKTerdaftar_0       = runtime.ForwardResponseMessage
 	forward_PTKTerdaftarService_DeletePTKTerdaftar_0       = runtime.ForwardResponseMessage
+	forward_PTKTerdaftarService_DeletBatchPTKTerdaftar_0   = runtime.ForwardResponseMessage
+	forward_PTKTerdaftarService_SearchPTKTerdaftar_0       = runtime.ForwardResponseMessage
 )
 
 // RegisterKenaikanServiceHandlerFromEndpoint is same as RegisterKenaikanServiceHandler but

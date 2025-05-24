@@ -12,6 +12,7 @@ func main() {
 
 	// Inisialisasi database
 	config.InitDatabase(cfg)
+
 	// config.DB.AutoMigrate(&models.Sekolah{}, &models.User{}, &models.UserProfile{})
 
 	// Start redis server
@@ -19,6 +20,7 @@ func main() {
 
 	// Jalankan worker di background
 	go worker.StartSekolahInitWorker(config.RDB)
+	go worker.StartSCInitWorker(config.RDB)
 
 	// Start GRPC Server
 	server.StartGRPCServer()

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sekolah/models"
 	"sekolah/repositories"
+	"sekolah/utils"
 
 	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
@@ -67,9 +68,6 @@ func BacaDataExcel(param *ParamTemplate) ([][]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	// if !strings.EqualFold(ret.Keywords, param.schemaname) || !strings.EqualFold(ret.ContentStatus, param.templateType) {
-	// 	return nil, err
-	// }
 	param.semesterId = ret.Category
 	// param.schemaname = ret.Keywords
 	rows, err := f.GetRows(f.GetSheetName(0))
@@ -84,6 +82,92 @@ func BacaDataExcel(param *ParamTemplate) ([][]string, error) {
 	return rows[1:], nil
 
 }
+
+// func BacaDataExcel(param *ParamTemplate) ([][]string, error) {
+// 	f, err := excelize.OpenFile(param.filePath)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("gagal membaca file Excel: %w", err)
+// 	}
+// 	defer f.Close()
+
+// 	ret, err := f.GetDocProps()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	param.semesterId = ret.Category
+
+// 	sheetName := f.GetSheetName(0)
+
+// 	rows, err := f.GetRows(sheetName, excelize.Options{RawCellValue: true})
+// 	if err != nil {
+// 		return nil, fmt.Errorf("gagal mengambil data dari sheet: %w", err)
+// 	}
+
+// 	if len(rows) < 2 {
+// 		return nil, fmt.Errorf("file Excel kosong atau tidak memiliki data yang valid")
+// 	}
+
+// 	var result [][]string
+
+// 	for i, row := range rows {
+// 		if i == 0 {
+// 			// Skip header
+// 			result = append(result, row)
+// 			continue
+// 		}
+
+// 		var newRow []string
+// 		for j, cell := range row {
+// 			cellRef := fmt.Sprintf("%s%d", ToAlpha(j+1), i+1)
+// 			rawVal, err := f.GetCellValue(sheetName, cellRef)
+// 			if err != nil {
+// 				newRow = append(newRow, cell)
+// 				continue
+// 			}
+
+// 			// Coba konversi nilai ke float64, untuk deteksi serial date
+// 			dateFloat, ok := isExcelDate(rawVal)
+// 			if ok {
+// 				t, parseErr := excelize.ExcelDateToTime(dateFloat, false)
+// 				if parseErr == nil {
+// 					rawVal = t.Format("02/01/2006") // Format DD/MM/YYYY
+// 				}
+// 			}
+
+// 			newRow = append(newRow, rawVal)
+// 		}
+
+// 		result = append(result, newRow)
+// 	}
+
+// 	return result[1:], nil
+// }
+
+// // Helper function untuk cek apakah string bisa jadi angka dan merepresentasikan Excel Date
+// func isExcelDate(val string) (float64, bool) {
+// 	var f float64
+// 	_, err := fmt.Sscan(val, &f)
+// 	if err != nil {
+// 		return 0, false
+// 	}
+// 	// Excel dates biasanya antara 1 sampai ~2958465
+// 	if f > 0 && f < 2958465 {
+// 		return f, true
+// 	}
+// 	return f, false
+// }
+
+// // Fungsi bantu untuk ubah nomor kolom ke huruf (A, B, ..., Z, AA, dll.)
+// func ToAlpha(colNumber int) string {
+// 	var col string
+// 	for colNumber > 0 {
+// 		colNumber--
+// 		letter := 'A' + rune(colNumber%26)
+// 		col = string(letter) + col
+// 		colNumber /= 26
+// 	}
+// 	return col
+// }
 
 // Fungsi generik untuk membaca file Excel dan memproses data berdasarkan jenis
 func UploadDataSekolah[T any](param ParamTemplate) ([]T, error) {
@@ -149,20 +233,40 @@ func parseSiswa(rows [][]string) []models.PesertaDidik {
 		if len(row) < 3 {
 			continue
 		}
+		tglLahir, err := utils.StringToTime(row[4], "2006-01-02")
+		if err != nil {
+			return nil
+		}
+		tglDiterima, err := utils.StringToTime(row[4], "2006-01-02")
+		if err != nil {
+			return nil
+		}
 		siswa := models.PesertaDidik{
-			PesertaDidikId: row[0],
-			Nis:            row[1],
-			Nisn:           row[2],
-			NmSiswa:        row[3],
-			TempatLahir:    row[4],
-			// TanggalLahir:    row[5],
-			JenisKelamin: row[6],
-			Agama:        row[7],
-			AlamatSiswa:  &row[8],
-			TeleponSiswa: row[9],
-			// DiterimaTanggal: row[10],
-			// Umur:   parseInt(row[1]), // Fungsi parseInt bisa digunakan untuk mengubah string ke int
-			// Alamat: row[2],
+			Nis:             &row[0],
+			Nisn:            &row[1],
+			NmSiswa:         row[2],
+			TempatLahir:     &row[3],
+			TanggalLahir:    utils.TimeToPointer(tglLahir.Format("2006-01-02")),
+			JenisKelamin:    &row[5],
+			Agama:           &row[6],
+			AlamatSiswa:     &row[7],
+			TeleponSiswa:    &row[8],
+			DiterimaTanggal: utils.TimeToPointer(tglDiterima.Format("2006-01-02")),
+			NmAyah:          &row[10],
+			NmIbu:           &row[11],
+			PekerjaanAyah:   &row[12],
+			PekerjaanIbu:    &row[13],
+			NmWali:          &row[14],
+			PekerjaanWali:   &row[15],
+			Nik:             &row[16],
+			// status_dalam_kel: &row[17],
+			// Anak_ke:          &row[18],
+			// sekolah_asal:     &row[19],
+			// diterima_kelas:   &row[20],
+			// alamat_ortu:      &row[21],
+			// telepon_ortu:     &row[22],
+			// alamat_wali:      &row[23],
+			// telepon_wali:     &row[24],
 		}
 		siswaList = append(siswaList, siswa)
 	}
@@ -229,7 +333,7 @@ func GenerateTemplate(param ParamTemplate, db *gorm.DB) error {
 	// Tentukan header berdasarkan jenis template
 	var headers []string
 	templates := map[string][]string{
-		"siswa": {"Nama", "NIPD", "JK", "NISN", "Tempat Lahir", "Tanggal Lahir", "NIK", "Agama", "Alamat", "RT", "RW", "Dusun", "Kelurahan", "Kecamatan", "Kode Pos", "Jenis Tinggal", "Alat Transportasi", "Telepon", "HP", "E-Mail", "SKHUN", "Penerima KPS", "No. KPS", "Nama Ayah", "Tahun Lahir Ayah", "Jenjang Pendidikan Ayah", "Pekerjaan Ayah", "Penghasilan Ayah", "NIK Ayah", "Nama Ibu", "Tahun Lahir Ibu", "Jenjang Pendidikan Ibu", "Pekerjaan Ibu", "Penghasilan Ibu", "NIK Ibu", "Nama Wali", "Tahun Lahir Wali", "Jenjang Pendidikan Wali", "Pekerjaan Wali", "Penghasilan Wali", "NIK Wali", "Rombel Saat Ini", "No Peserta Ujian Nasional", "No Seri Ijazah", "Penerima KIP", "Nomor KIP", "Nama di KIP", "Nomor KKS", "No Registrasi Akta Lahir", "Bank", "Nomor Rekening Bank", "Rekening Atas Nama", "Layak PIP (usulan dari sekolah)", "Alasan Layak PIP", "Kebutuhan Khusus", "Sekolah Asal", "Anak ke-berapa", "Lintang", "Bujur", "No KK", "Berat Badan", "Tinggi Badan", "Lingkar Kepala", "Jml. Saudara Kandung", "Jarak Rumah ke Sekolah (KM)"},
+		"siswa": {"NIS", "NISN", "Nama", "Tempat Lahir", "Tanggal Lahir", "JK", "Agama", "Alamat", "Telepon Siswa", "Diterima Tanggal", "Nama Ayah", "Nama Ibu", "Pekerjaan Ayah", "Pekerjaan Ibu", "Nama Wali", "Pekerjaan Wali", "NIK Siswa", "status_dalam_kel", "anak_ke", "sekolah_asal", "diterima_kelas", "alamat_ortu", "telepon_ortu", "alamat_wali", "telepon_wali"},
 
 		"nilai_akhir": {"peserta_didik_id(uuid)", "nm_siswa", "mata_pelajaran_id"},
 		"ijazah":      {"peserta_didik_id(uuid)", "nm_siswa", "nis", "nomor_ijazah", "tahun_lulus"},

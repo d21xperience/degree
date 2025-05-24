@@ -123,7 +123,7 @@ const kelasList = ref();
 const isLoading = ref(false);
 const tingkatPendidikanOptions = ref();
 onMounted(async () => {
-    console.log(selectedSemester.value)
+    // console.log(selectedSemester.value)
     await fetchK();
     tingkatPendidikanOptions.value = await fetchTingkat();
 });
@@ -159,16 +159,16 @@ watch(selectedSemester, async (newVal) => {
     await fetchK();
 });
 const fetchK = async () => {
-    try {
-        const res = store.getters['sekolahService/getKelas'](selectedSemester.value?.semesterId);
-        if (!res || res.length === 0) {
-            kelasList.value = await fetchKelas();
-        } else {
-            kelasList.value = res;
-        }
-    } catch (error) {
-        console.log(error);
-    }
+    // try {
+    //     const res = store.getters['sekolahService/getKelas'](selectedSemester.value?.semesterId);
+    //     if (!res || res.length === 0) {
+    kelasList.value = await fetchKelas();
+    //     } else {
+    //         kelasList.value = res;
+    //     }
+    // } catch (error) {
+    //     console.log(error);
+    // }
 };
 
 const toast = useToast();

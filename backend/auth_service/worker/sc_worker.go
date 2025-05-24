@@ -21,7 +21,7 @@ func StartSCInitWorker(rdb *redis.Client) {
 			continue
 		}
 
-		var model *models.SekolahTenant
+		var model *models.TaskPayload
 		if err := json.Unmarshal([]byte(val[1]), &model); err != nil {
 			log.Printf("Gagal parsing task: %v", err)
 			continue
@@ -35,13 +35,12 @@ func StartSCInitWorker(rdb *redis.Client) {
 	}
 }
 
-func initSCService(sekolahModel *models.SekolahTenant, userID uint32) error {
+func initSCService(taskPayload *models.TaskPayload) error {
 	scClient, err := services.NewSCServiceClient()
 	if err != nil {
 		return err
 	}
-
-	if err := scClient.RegistrasiSekolahTenant(sekolahModel, userID); err != nil {
+	if err := scClient.RegistrasiSekolahTenant(&taskPayload.SekolahTenant, taskPayload.UserId); err != nil {
 		return err
 	}
 

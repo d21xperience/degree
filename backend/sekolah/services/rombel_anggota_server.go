@@ -11,6 +11,7 @@ import (
 	"sekolah/repositories"
 	"sekolah/utils"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	// Untuk marshal protobuf ke JSON
 	// Pastikan redis client sudah diinisialisasi
@@ -94,29 +95,45 @@ func (s *RombelAnggotaService) CreateBanyakAnggotaKelas(ctx context.Context, req
 		if err != nil {
 			return nil
 		}
+		diterimaTgl, err := utils.StringToTime(anggota.PesertaDidik.DiterimaTanggal, "2006-01-02")
+		if err != nil {
+			return nil
+		}
+		var pdId any
+		var isDapodik bool
+		pdId = anggota.PesertaDidikId
+		if pdId == "" {
+			pdId = uuid.New()
+			isDapodik = false
+		} else {
+			pdId = utils.StringToUUID(anggota.PesertaDidikId)
+			isDapodik = true
+		}
 		return &models.RombelAnggota{
-			RombonganBelajarId: utils.StringToUUID(anggota.RombonganBelajarId),
+			RombonganBelajarId: utils.UUIDToPointer(utils.StringToUUID(anggota.RombonganBelajarId)),
 			AnggotaRombelId:    utils.StringToUUID(anggota.AnggotaRombelId),
 			PesertaDidikId:     utils.StringToUUID(anggota.PesertaDidikId),
 			SemesterId:         anggota.SemesterId,
 			PesertaDidik: models.PesertaDidik{
-				PesertaDidikId: anggota.PesertaDidik.PesertaDidikId,
-				Nis:            anggota.PesertaDidik.Nis,
-				Nisn:           anggota.PesertaDidik.Nisn,
-				NmSiswa:        anggota.PesertaDidik.NmSiswa,
-				TempatLahir:    anggota.PesertaDidik.TempatLahir,
-				TanggalLahir:   &tglLahir,
-				JenisKelamin:   anggota.PesertaDidik.JenisKelamin,
-				Agama:          anggota.PesertaDidik.Agama,
-				AlamatSiswa:    &anggota.PesertaDidik.AlamatSiswa,
-				TeleponSiswa:   anggota.PesertaDidik.TeleponSiswa,
-				// DiterimaTanggal: &tglDiterima,
-				NmAyah:        anggota.PesertaDidik.NmAyah,
-				NmIbu:         anggota.PesertaDidik.NmIbu,
-				PekerjaanAyah: anggota.PesertaDidik.PekerjaanAyah,
-				PekerjaanIbu:  anggota.PesertaDidik.PekerjaanIbu,
-				NmWali:        &anggota.PesertaDidik.NmWali,
-				PekerjaanWali: &anggota.PesertaDidik.PekerjaanWali,
+				PesertaDidikId:  pdId.(uuid.UUID),
+				Nis:             &anggota.PesertaDidik.Nis,
+				Nisn:            &anggota.PesertaDidik.Nisn,
+				NmSiswa:         anggota.PesertaDidik.NmSiswa,
+				TempatLahir:     &anggota.PesertaDidik.TempatLahir,
+				TanggalLahir:    &tglLahir,
+				JenisKelamin:    &anggota.PesertaDidik.JenisKelamin,
+				Agama:           &anggota.PesertaDidik.Agama,
+				AlamatSiswa:     &anggota.PesertaDidik.AlamatSiswa,
+				TeleponSiswa:    &anggota.PesertaDidik.TeleponSiswa,
+				DiterimaTanggal: &diterimaTgl,
+				NmAyah:          &anggota.PesertaDidik.NmAyah,
+				NmIbu:           &anggota.PesertaDidik.NmIbu,
+				PekerjaanAyah:   &anggota.PesertaDidik.PekerjaanAyah,
+				PekerjaanIbu:    &anggota.PesertaDidik.PekerjaanIbu,
+				NmWali:          &anggota.PesertaDidik.NmWali,
+				PekerjaanWali:   &anggota.PesertaDidik.PekerjaanWali,
+				IsDapo:          isDapodik,
+				Nik:             &anggota.PesertaDidik.Nik,
 			},
 		}
 	})
@@ -196,14 +213,14 @@ func (s *RombelAnggotaService) GetAnggotaKelas(ctx context.Context, req *pb.GetA
 			WaliKelas:           anggota.RombonganBelajar.PTK.Nama,
 			PesertaDidikId:      anggota.PesertaDidikId.String(),
 			NmSiswa:             anggota.PesertaDidik.NmSiswa,
-			Nis:                 anggota.PesertaDidik.Nis,
-			Nisn:                anggota.PesertaDidik.Nisn,
+			Nis:                 utils.SafeString(anggota.PesertaDidik.Nis),
+			Nisn:                utils.SafeString(anggota.PesertaDidik.Nisn),
 			Nik:                 utils.SafeString(anggota.PesertaDidik.Nik),
-			TempatLahir:         anggota.PesertaDidik.TempatLahir,
 			TanggalLahir:        anggota.PesertaDidik.TanggalLahir.Format("2006-01-02"),
-			JenisKelamin:        anggota.PesertaDidik.JenisKelamin,
-			NmIbu:               anggota.PesertaDidik.NmIbu,
-			Agama:               anggota.PesertaDidik.Agama,
+			TempatLahir:         utils.SafeString(anggota.PesertaDidik.TempatLahir),
+			JenisKelamin:        utils.SafeString(anggota.PesertaDidik.JenisKelamin),
+			NmIbu:               utils.SafeString(anggota.PesertaDidik.NmIbu),
+			Agama:               utils.SafeString(anggota.PesertaDidik.Agama),
 			// PtkId:              anggota.RombonganBelajar.PtkID.String(),
 		}
 	})
@@ -566,9 +583,9 @@ func (s *RombelAnggotaService) FilterAnggotaKelas(ctx context.Context, req *pb.F
 			NmKelas:            item.RombonganBelajar.NmKelas,
 			RombonganBelajarId: item.RombonganBelajarId.String(),
 			PesertaDidik: &pb.Siswa{
-				Nis:          item.PesertaDidik.Nis,
-				Nisn:         item.PesertaDidik.Nisn,
-				TempatLahir:  item.PesertaDidik.TempatLahir,
+				Nis:          utils.SafeString(item.PesertaDidik.Nis),
+				Nisn:         utils.SafeString(item.PesertaDidik.Nisn),
+				TempatLahir:  utils.SafeString(item.PesertaDidik.TempatLahir),
 				TanggalLahir: item.PesertaDidik.TanggalLahir.Format("2006-01-02"),
 			},
 		}

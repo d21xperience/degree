@@ -316,6 +316,7 @@ func (s *UploadServiceServer) processUploadSiswa(
 	param ParamTemplate,
 	uploadFunc func(*ParamTemplate) ([][]string, error),
 ) error {
+	var err error
 	// Ambil data dari file
 	data, err := uploadFunc(&param)
 	if err != nil {
@@ -330,38 +331,36 @@ func (s *UploadServiceServer) processUploadSiswa(
 
 		// Buat UUID untuk entitas terkait
 		pesertaDidikId := uuid.New()
-		pelengkapSiswaId := uuid.New()
-		anggotaRombelId := uuid.New()
-
-		// Parse tanggal lahir jika tersedia
-		var tanggalLahir *time.Time
-		tanggalLahirStr := row[4] // tanggal_lahir di index 4
-		if tanggalLahirStr != "" {
-			parsedDate, err := time.Parse("2006-01-02", tanggalLahirStr)
-			if err == nil {
-				tanggalLahir = &parsedDate
-			}
+		var tglLahir, tglDiterima time.Time
+		tglLahir, err = utils. ParseTimeWithMultipleFormats(row[4])
+		if err != nil {
+			return nil
+		}
+		tglDiterima, err := utils.ParseTimeWithMultipleFormats(row[4])
+		if err != nil {
+			return nil
 		}
 
 		// Simpan ke tabel peserta didik (siswa)
-		err := s.repoSiswa.Save(ctx, &models.PesertaDidik{
-			PesertaDidikId:  pesertaDidikId.String(),
-			NmSiswa:         row[2],       // nm_siswa
-			Nis:             row[0],       // nis
-			Nisn:            row[1],       // nisn
-			JenisKelamin:    row[5],       // jenis_kelamin
-			TempatLahir:     row[3],       // tempat_lahir
-			TanggalLahir:    tanggalLahir, // tanggal_lahir
-			Agama:           row[6],       // agama
-			AlamatSiswa:     &row[7],      // alamat_siswa
-			TeleponSiswa:    row[8],       // telepon_siswa
-			DiterimaTanggal: nil,          // tidak ada di contoh data
-			NmAyah:          row[10],      // nm_ayah
-			NmIbu:           row[11],      // nm_ibu
-			PekerjaanAyah:   row[12],      // pekerjaan_ayah
-			PekerjaanIbu:    row[13],      // pekerjaan_ibu
-			NmWali:          &row[14],     // nm_wali
-			PekerjaanWali:   &row[15],     // pekerjaan_wali
+		err = s.repoSiswa.Save(ctx, &models.PesertaDidik{
+			PesertaDidikId:  pesertaDidikId,
+			Nis:             &row[0],
+			Nisn:            &row[1],
+			NmSiswa:         row[2],
+			TempatLahir:     &row[3],
+			TanggalLahir:    utils.TimeToPointer(tglLahir.Format("2006-01-02")),
+			JenisKelamin:    &row[5],
+			Agama:           &row[6],
+			AlamatSiswa:     &row[7],
+			TeleponSiswa:    &row[8],
+			DiterimaTanggal: utils.TimeToPointer(tglDiterima.Format("2006-01-02")),
+			NmAyah:          &row[10],
+			NmIbu:           &row[11],
+			PekerjaanAyah:   &row[12],
+			PekerjaanIbu:    &row[13],
+			NmWali:          &row[14],
+			PekerjaanWali:   &row[15],
+			Nik:             &row[16],
 		}, param.schemaname)
 
 		if err != nil {
@@ -370,10 +369,15 @@ func (s *UploadServiceServer) processUploadSiswa(
 
 		// Simpan ke tabel pelengkap siswa (opsional)
 		err = s.repoSiswaPelengkap.Save(ctx, &models.PesertaDidikPelengkap{
-			PelengkapSiswaId: pelengkapSiswaId.String(),
-			PesertaDidikId:   func(s string) *string { return &s }(pesertaDidikId.String()),
-			SekolahAsal:      "",
-			AnakKe:           nil,
+			PesertaDidikId: pesertaDidikId,
+			StatusDalamKel: &row[17],
+			AnakKe:         &row[18],
+			SekolahAsal:    &row[19],
+			DiterimaKelas:  &row[20],
+			AlamatOrtu:     &row[21],
+			TeleponOrtu:    &row[22],
+			AlamatWali:     &row[23],
+			TeleponWali:    &row[24],
 		}, param.schemaname)
 
 		if err != nil {
@@ -381,19 +385,13 @@ func (s *UploadServiceServer) processUploadSiswa(
 		}
 
 		// Jika kelas tersedia, simpan ke rombel anggota
-		namaKelas := row[15] // Misalkan pekerjaan_wali digunakan untuk kelas? Cek lagi formatmu
-		if namaKelas != "" {
-			err = s.repoKelasAnggota.Save(ctx, &models.RombelAnggota{
-				AnggotaRombelId: utils.StringToUUID(anggotaRombelId.String()),
-				PesertaDidikId:  utils.StringToUUID(pesertaDidikId.String()),
-				RombonganBelajar: models.RombonganBelajar{
-					NmKelas: namaKelas,
-				},
-			}, param.schemaname)
+		err = s.repoKelasAnggota.Save(ctx, &models.RombelAnggota{
+			PesertaDidikId: pesertaDidikId,
+			SemesterId:     param.semesterId,
+		}, param.schemaname)
 
-			if err != nil {
-				return fmt.Errorf("gagal menyimpan anggota rombel: %v", err)
-			}
+		if err != nil {
+			return fmt.Errorf("gagal menyimpan anggota rombel: %v", err)
 		}
 	}
 
@@ -417,7 +415,7 @@ func (s *UploadServiceServer) processUploadGuru(
 		ptkTerdaftarId := uuid.New()
 
 		var tanggalLahir time.Time
-		tanggalLahirStr := data[i][4]
+		tanggalLahirStr := data[i][3]
 		if tanggalLahirStr != "" {
 			tanggalLahir, err = time.Parse("2006-01-02", tanggalLahirStr)
 			if err == nil {
@@ -426,11 +424,12 @@ func (s *UploadServiceServer) processUploadGuru(
 		}
 		err := s.repoGuru.Save(ctx, &models.TabelPTK{
 			PtkID:        ptkId,
-			Nama:         data[i][1],
-			JenisKelamin: &data[i][2],
-			TempatLahir:  &data[i][3],
+			Nama:         data[i][0],
+			JenisKelamin: &data[i][1],
+			TempatLahir:  &data[i][2],
 			TanggalLahir: &tanggalLahir,
-			Agama:        &data[i][5],
+			Agama:        &data[i][4],
+			JenisPtkID:   4,
 		}, param.schemaname)
 		if err != nil {
 			return err
@@ -439,15 +438,32 @@ func (s *UploadServiceServer) processUploadGuru(
 			PtkTerdaftarId: ptkTerdaftarId,
 			PtkID:          ptkId,
 			TahunAjaranId:  param.semesterId[:4],
-			// FotoSiswa: ,
 		}, param.schemaname)
 
 		if err != nil {
 			return err
 		}
 		err = s.repoGuruPelengkap.Save(ctx, &models.PtkPelengkap{
-			PtkId:      ptkId,
-			GelarDepan: &data[i][6],
+			PtkPelengkapId: uuid.New(),
+			PtkId:          ptkId,
+			GelarDepan:     &data[i][5],
+			GelarBelakang:  &data[i][6],
+			Nik:            &data[i][7],
+			NoKk:           &data[i][8],
+			Nuptk:          &data[i][9],
+			Niy:            &data[i][10],
+			Nip:            &data[i][11],
+			AlamatJalan:    &data[i][12],
+			Rt:             &data[i][13],
+			Rw:             &data[i][14],
+			DesaKelurahan:  &data[i][15],
+			Kec:            &data[i][16],
+			KabKota:        &data[i][17],
+			Propinsi:       &data[i][18],
+			KodePos:        &data[i][19],
+			NoTeleponRumah: &data[i][20],
+			NoHp:           &data[i][21],
+			Email:          &data[i][22],
 			// GelarBelakang: ,
 		}, param.schemaname)
 		if err != nil {

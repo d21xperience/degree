@@ -8,6 +8,7 @@ const { fetchDashboard } = useSekolahService();
 // Ambil data dashboard
 const dashboard = ref();
 onMounted(async () => {
+    
     dashboard.value = await fetchDashboard();
 });
 </script>

@@ -138,8 +138,12 @@ func (s *SekolahService) CreateSekolah(ctx context.Context, req *pb.CreateSekola
 	// 	return nil, err
 	// }
 
-	sekolah.StatusKepemilikanId = 4
-	sekolah.JenjangPendidikanId = 98
+	// sekolah.StatusKepemilikanId = 4
+	// sekolah.BentukPendidikanId = 39
+	// sekolah.JenjangPendidikanId = 98
+	bentukPendidikan := 39
+	jenjangPendidikan := 6
+	statusKepemilikan := 4
 	sekolahModel := &models.Sekolah{
 		SekolahID: uuid.New(),
 		Nama:      sekolah.Nama,
@@ -154,15 +158,15 @@ func (s *SekolahService) CreateSekolah(ctx context.Context, req *pb.CreateSekola
 		Propinsi:  &sekolah.Propinsi,
 		Website:   &sekolah.Website,
 
-		Email:               &sekolah.Email,
-		NamaKepsek:          &sekolah.NmKepsek,
-		NIPKepsek:           &sekolah.NipKepsek,
-		NIYKepsek:           &sekolah.NipKepsek,
-		StatusKepemilikanID: &sekolah.StatusKepemilikanId,
-		KodeAktivasi:        &sekolah.KodeAktivasi,
+		Email:        &sekolah.Email,
+		NamaKepsek:   &sekolah.NmKepsek,
+		NIPKepsek:    &sekolah.NipKepsek,
+		NIYKepsek:    &sekolah.NipKepsek,
+		KodeAktivasi: &sekolah.KodeAktivasi,
 
-		JenjangPendidikanID: &sekolah.JenjangPendidikanId,
-		BentukPendidikanID:  &sekolah.BentukPendidikanId,
+		StatusKepemilikanID: utils.Uint32ToPointer(uint32(statusKepemilikan)),
+		JenjangPendidikanID: utils.Uint32ToPointer(uint32(jenjangPendidikan)),
+		BentukPendidikanID:  utils.Uint32ToPointer(uint32(bentukPendidikan)),
 	}
 
 	sekolahTerdaftar := s.sekolahService.Save(ctx, sekolahModel, Schemaname)

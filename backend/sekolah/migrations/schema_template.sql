@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_sekolah (
 	kode_aktivasi VARCHAR(30) NULL DEFAULT NULL,
 	bentuk_pendidikan_id SMALLINT NULL DEFAULT NULL,
 	jenjang_pendidikan_id NUMERIC(2,0) NULL DEFAULT NULL,
-	is_dapodik NUMERIC(1,0) NOT NULL DEFAULT 0,
+	is_dapodik BOOLEAN NULL DEFAULT FALSE,
 	sekolah_id_dapo UUID NULL DEFAULT NULL,
 	PRIMARY KEY (sekolah_id),
 	CONSTRAINT FK_tabel_sekolah_ref_bentuk_pendidikan FOREIGN KEY (bentuk_pendidikan_id) REFERENCES ref.bentuk_pendidikan (bentuk_pendidikan_id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_siswa (
 	nm_wali VARCHAR(100) NULL DEFAULT NULL,
 	pekerjaan_wali VARCHAR(30) NULL DEFAULT NULL,
 	nik VARCHAR(30) NULL DEFAULT NULL,
-	is_dapodik NUMERIC(1,0) NOT NULL DEFAULT 0,
+	is_dapodik BOOLEAN NULL DEFAULT FALSE,
 	peserta_didik_id_dapo UUID NULL DEFAULT NULL,
 	PRIMARY KEY (peserta_didik_id)
 );
@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_siswa (
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_siswa_pelengkap (
 	pelengkap_siswa_id UUID NOT NULL DEFAULT gen_random_uuid(),
-	peserta_didik_id UUID NULL DEFAULT NULL,
+	peserta_didik_id UUID NOT NULL,
 	status_dalam_kel VARCHAR(30) NULL DEFAULT NULL,
 	anak_ke NUMERIC(3,0) NULL DEFAULT NULL,
 	sekolah_asal VARCHAR(100) NULL DEFAULT NULL,
@@ -75,14 +75,14 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_siswa_pelengkap (
 );
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_ptk (
-	ptk_id UUID NOT NULL,
+	ptk_id UUID NOT NULL,	
 	jenis_ptk_id NUMERIC(2,0) NOT NULL DEFAULT 4,
 	nama VARCHAR(100) NOT NULL,
 	jenis_kelamin VARCHAR(1) NULL,
 	agama VARCHAR(25) NULL,
-	tempat_lahir VARCHAR(32) NULL,
+	tempat_lahir VARCHAR(60) NULL,
 	tanggal_lahir DATE NULL,
-	is_dapodik NUMERIC(1,0) NOT NULL DEFAULT 0,
+	is_dapodik BOOLEAN NULL DEFAULT FALSE,
 	ptk_id_dapodik UUID NULL DEFAULT NULL,
 	status_keaktifan_id NUMERIC(2,0) NOT NULL DEFAULT 1,  
     soft_delete NUMERIC(1,0) NOT NULL DEFAULT 0, 
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_ptk_terdaftar (
 	ptk_id UUID NOT NULL,
 	tahun_ajaran_id VARCHAR(4) NOT NULL,
 	jenis_keluar_id CHAR(1) NULL DEFAULT NULL,
-	is_dapodik NUMERIC(1,0) NOT NULL DEFAULT 0,
+	is_dapodik BOOLEAN NULL DEFAULT FALSE,
 	ptk_terdaftar_id_dapo UUID NULL DEFAULT NULL,
 	soft_delete NUMERIC(1,0) NOT NULL DEFAULT 0,
 	PRIMARY KEY (ptk_terdaftar_id),
@@ -151,9 +151,9 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_kelas (
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_anggotakelas (
 	anggota_rombel_id UUID NOT NULL DEFAULT gen_random_uuid(),
 	peserta_didik_id UUID NOT NULL,
-	rombongan_belajar_id UUID NOT NULL,
+	rombongan_belajar_id UUID NULL DEFAULT NULL,
 	semester_id CHAR(5) NOT NULL,
-	status_keaktifan INTEGER NOT NULL DEFAULT 0,
+	-- status_keaktifan INTEGER NOT NULL DEFAULT 0,
 	PRIMARY KEY (anggota_rombel_id),
 	CONSTRAINT FK_tabel_anggotakelas_tabel_anggotakelas FOREIGN KEY (rombongan_belajar_id) REFERENCES {{schema_name}}.tabel_kelas (rombongan_belajar_id) ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT FK_tabel_anggotakelas_tabel_siswa FOREIGN KEY (peserta_didik_id) REFERENCES {{schema_name}}.tabel_siswa (peserta_didik_id) ON UPDATE CASCADE ON DELETE CASCADE,

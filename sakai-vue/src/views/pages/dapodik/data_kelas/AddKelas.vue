@@ -185,7 +185,7 @@ const batal = async () => {
 };
 
 onMounted(async () => {
-    console.log(sekolah.value);
+    // console.log(sekolah.value);
     await fetchTingkat();
     await fetchKurikulum();
     await fetchJurusan();
@@ -284,7 +284,8 @@ const submitForm = ref(false);
                             class="w-full"
                             fluid
                             dropdown
-                            :invalid="submitted && !selectedJurusan" :disabled="!selectedKurikulum"
+                            :invalid="submitted && !selectedJurusan"
+                            :disabled="!selectedKurikulum"
                         />
                         <small v-if="submitted && !selectedJurusan" class="text-red-500">Jurusan harus diisi.</small>
                     </div>

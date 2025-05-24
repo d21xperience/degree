@@ -14,9 +14,7 @@ const isValidUsername = (input) => {
 
 export function useAuth() {
     const store = useStore();
-
     const currentUser = computed(() => store.getters['authService/getUserProfile']);
-
     const onLogin = async ({ values }) => {
         const { username, password } = values;
         // cek apakah username merupakan username atau email

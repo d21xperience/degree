@@ -10,7 +10,8 @@ const api = axios.create({
 
 const state = {
     BCPlatformSelected: JSON.parse(localStorage.getItem('BCPlatformSelected')) || null,
-    BCAccountActivate: null
+    BCAccountActivate: null,
+    MetamasConnected: JSON.parse(localStorage.getItem('METAMASK_CONNECTED')) || null
 };
 
 const mutations = {
@@ -27,6 +28,10 @@ const mutations = {
     },
     setBCAccountActivate(state, value) {
         state.BCAccountActivate = value;
+    },
+    SET_METAMASKCONNECTED(state, value) {
+        state.MetamasConnected = value;
+        localStorage.setItem('METAMASK_CONNECTED', JSON.stringify(value));
     }
 };
 
@@ -224,6 +229,16 @@ const actions = {
     async updateBCAccountActivate({ commit }, value) {
         commit('setBCAccountActivate', value);
     }
+    // ==================================
+    // METAMASK
+    // ==================================
+    // async createMetamaskConnected ({commit}, value){
+    //     try {
+
+    //     } catch (error) {
+    //         throw error
+    //     }
+    // }
 };
 
 // ==========================================
@@ -232,7 +247,8 @@ const getters = {
     getBCNETWORK: (state) => state.BCNETWORK,
     getBCPlatformSelected: (state) => state.BCPlatformSelected,
     getBCAccount: (state) => state.BCACCOUNT,
-    getBCAccountActivate: (state) => state.BCAccountActivate
+    getBCAccountActivate: (state) => state.BCAccountActivate,
+    getMetamaskConnected: (state) => state.MetamasConnected
 };
 
 export default {

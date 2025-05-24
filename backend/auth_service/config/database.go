@@ -34,4 +34,8 @@ func InitRedisClient(cfg Config) {
 	RDB = redis.NewClient(&redis.Options{
 		Addr: addr,
 	})
+	if RDB == nil {
+		log.Fatal("Gagal menghubungkan ke Redis")
+
+	}
 }

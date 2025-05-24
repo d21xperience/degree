@@ -66,6 +66,8 @@ const mutations = {
         localStorage.removeItem('tabelTahunAjaran');
         localStorage.removeItem('selectedTahunAjaran');
         localStorage.removeItem('tabelDashboard');
+        localStorage.removeItem('METAMASK_CONNECTED');
+        localStorage.removeItem('tabelDns');
     },
     SET_SEKOLAH(state, sekolah) {
         state.sekolah = sekolah;

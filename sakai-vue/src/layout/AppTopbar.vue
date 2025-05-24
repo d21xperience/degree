@@ -1,16 +1,19 @@
 <script setup>
 import DialogSignOut from '@/components/DialogSignOut.vue';
 import MetamaskIcon from '@/components/MetamaskIcon.vue';
+import { useSCService } from '@/composables/useSCService';
 import { useLayout } from '@/layout/composables/layout';
 import router from '@/router';
 import { useAuth } from '@/views/pages/auth/composables/auth';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
 const isDialogSignOut = ref(false);
 const { onLogout, currentUser } = useAuth();
 const cek = () => {
     router.push({ name: 'userProfile' });
 };
+const { getMetamaskConnected } = useSCService();
+const isMetamask = computed(() => getMetamaskConnected());
 </script>
 
 <template>
@@ -46,7 +49,8 @@ const cek = () => {
                 <button type="button" class="layout-topbar-action" @click="toggleDarkMode">
                     <i :class="['pi', { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme }]"></i>
                 </button>
-                <Button class="!rounded-full !border-none layout-topbar-action !bg-transparent !w-6">
+
+                <Button class="!rounded-full !border-none layout-topbar-action !bg-transparent !w-6" v-show="isMetamask">
                     <template #icon>
                         <MetamaskIcon class="" />
                     </template>

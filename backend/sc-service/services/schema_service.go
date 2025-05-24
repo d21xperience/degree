@@ -19,7 +19,7 @@ type SchemaService interface {
 }
 type TenantSekolah struct {
 	SekolahTenantId uint32
-	UserId          int32
+	UserId          uint32
 	Password        string
 	NamaSekolah     string
 	SekolahIdEnkrip string

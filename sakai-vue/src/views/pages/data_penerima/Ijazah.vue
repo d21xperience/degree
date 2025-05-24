@@ -96,7 +96,7 @@ const { formatterDateID } = useUtils();
 const visible = ref(false);
 const tingkatPendidikanOptions = ref();
 const selectedSiswa = ref();
-const siswa = ref();
+const siswa = ref([]);
 const bentukPendidikan = ref('smk');
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },

@@ -32,9 +32,8 @@ type RombonganBelajar struct {
 type RombelAnggota struct {
 	AnggotaRombelId    uuid.UUID        `gorm:"column:anggota_rombel_id"` // UUID
 	PesertaDidikId     uuid.UUID        `gorm:"column:peserta_didik_id"`  // UUID
-	RombonganBelajarId uuid.UUID        `gorm:"column:rombongan_belajar_id"`
+	RombonganBelajarId *uuid.UUID       `gorm:"column:rombongan_belajar_id"`
 	SemesterId         string           `gorm:"column:semester_id"`
-	StatusKeaktifan    uint32           `gorm:"column:status_keaktifan"`
 	PesertaDidik       PesertaDidik     `gorm:"foreignKey:PesertaDidikId;references:PesertaDidikId"`
 	RombonganBelajar   RombonganBelajar `gorm:"foreignKey:RombonganBelajarId;references:RombonganBelajarId"`
 	NilaiAkhir         []NilaiAkhir     `gorm:"foreignKey:AnggotaRombelId;references:AnggotaRombelId"`

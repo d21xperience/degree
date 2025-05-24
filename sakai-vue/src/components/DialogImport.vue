@@ -16,7 +16,7 @@ import DialogLoading from './DialogLoading.vue';
 const toast = useToast();
 onMounted(async () => {
     await fetchTahunAjaran();
-    console.log(schemaname.value);
+    // console.log(schemaname.value);
 });
 const isLoading = ref(false);
 

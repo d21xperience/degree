@@ -127,11 +127,11 @@ func (s *KenaikanServiceServer) GetKenaikan(ctx context.Context, req *pb.GetKena
 				NmSiswa: item.AnggotaRombel.PesertaDidik.NmSiswa,
 				NmKelas: item.AnggotaRombel.RombonganBelajar.NmKelas,
 				PesertaDidik: &pb.Siswa{
-					TempatLahir:  item.AnggotaRombel.PesertaDidik.TempatLahir,
 					TanggalLahir: item.AnggotaRombel.PesertaDidik.TanggalLahir.Format("2016-02-01"),
-					Nis:          item.AnggotaRombel.PesertaDidik.Nis,
-					Nisn:         item.AnggotaRombel.PesertaDidik.Nisn,
-					JenisKelamin: item.AnggotaRombel.PesertaDidik.JenisKelamin,
+					TempatLahir:  utils.SafeString(item.AnggotaRombel.PesertaDidik.TempatLahir),
+					Nis:          utils.SafeString(item.AnggotaRombel.PesertaDidik.Nis),
+					Nisn:         utils.SafeString(item.AnggotaRombel.PesertaDidik.Nisn),
+					JenisKelamin: utils.SafeString(item.AnggotaRombel.PesertaDidik.JenisKelamin),
 				},
 				Nilai: utils.ConvertModelsToPB(item.AnggotaRombel.NilaiAkhir, func(nilai models.NilaiAkhir) *pb.NilaiAkhir {
 					return &pb.NilaiAkhir{

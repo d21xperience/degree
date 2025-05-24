@@ -189,6 +189,26 @@ func (s *PTKTerdaftarServiceServer) GetPTKTerdaftar(ctx context.Context, req *pb
 				TanggalLahir:      ptk.PTK.TanggalLahir.Format("2006-01-02"),
 				StatusKeaktifanId: ptk.PTK.StatusKeaktifanID,
 			},
+			PtkPelengkap: &pb.PtkPelengkap{
+				GelarDepan:     utils.SafeString(ptk.PTKPelengkap.GelarDepan),
+				GelarBelakang:  utils.SafeString(ptk.PTKPelengkap.GelarBelakang),
+				Nik:            utils.SafeString(ptk.PTKPelengkap.Nik),
+				No_KK:          utils.SafeString(ptk.PTKPelengkap.Nik),
+				Nuptk:          utils.SafeString(ptk.PTKPelengkap.Nuptk),
+				Niy:            utils.SafeString(ptk.PTKPelengkap.Niy),
+				Nip:            utils.SafeString(ptk.PTKPelengkap.Nip),
+				AlamatJalan:    utils.SafeString(ptk.PTKPelengkap.AlamatJalan),
+				Rt:             utils.SafeString(ptk.PTKPelengkap.Rt),
+				Rw:             utils.SafeString(ptk.PTKPelengkap.Rw),
+				DesaKelurahan:  utils.SafeString(ptk.PTKPelengkap.DesaKelurahan),
+				Kec:            utils.SafeString(ptk.PTKPelengkap.Kec),
+				KabKota:        utils.SafeString(ptk.PTKPelengkap.KabKota),
+				Propinsi:       utils.SafeString(ptk.PTKPelengkap.Propinsi),
+				KodePos:        utils.SafeString(ptk.PTKPelengkap.KodePos),
+				NoTeleponRumah: utils.SafeString(ptk.PTKPelengkap.NoTeleponRumah),
+				NoHp:           utils.SafeString(ptk.PTKPelengkap.NoHp),
+				Email:          utils.SafeString(ptk.PTKPelengkap.Email),
+			},
 		}
 	})
 
@@ -233,10 +253,10 @@ func (s *PTKTerdaftarServiceServer) UpdatePTKTerdaftar(ctx context.Context, req 
 			PtkId:         utils.StringToUUID(PTKTerdaftar[0].Ptk.PtkId),
 			Rt:            &PTKTerdaftar[0].PtkPelengkap.Rt,
 			Rw:            &PTKTerdaftar[0].PtkPelengkap.Rw,
-			DesaKelurahan: &PTKTerdaftar[0].PtkPelengkap.Desa,
+			DesaKelurahan: &PTKTerdaftar[0].PtkPelengkap.DesaKelurahan,
 			Kec:           &PTKTerdaftar[0].PtkPelengkap.Kec,
-			KabKota:       &PTKTerdaftar[0].PtkPelengkap.Kab,
-			Propinsi:      &PTKTerdaftar[0].PtkPelengkap.Prov,
+			KabKota:       &PTKTerdaftar[0].PtkPelengkap.KabKota,
+			Propinsi:      &PTKTerdaftar[0].PtkPelengkap.Propinsi,
 		}
 		// Cek apakah data sudah tersimpan di tabel_ptk_pelengkap?
 		cek, err := s.repoPTKPelengkap.FindOrCreateByID(ctx, PTKTerdaftar[0].Ptk.PtkId, schemaName, "ptk_id", func(id string) *models.PtkPelengkap {
@@ -244,10 +264,10 @@ func (s *PTKTerdaftarServiceServer) UpdatePTKTerdaftar(ctx context.Context, req 
 				PtkId:         utils.StringToUUID(id),
 				Rt:            &PTKTerdaftar[0].PtkPelengkap.Rt,
 				Rw:            &PTKTerdaftar[0].PtkPelengkap.Rw,
-				DesaKelurahan: &PTKTerdaftar[0].PtkPelengkap.Desa,
+				DesaKelurahan: &PTKTerdaftar[0].PtkPelengkap.DesaKelurahan,
 				Kec:           &PTKTerdaftar[0].PtkPelengkap.Kec,
-				KabKota:       &PTKTerdaftar[0].PtkPelengkap.Kab,
-				Propinsi:      &PTKTerdaftar[0].PtkPelengkap.Prov,
+				KabKota:       &PTKTerdaftar[0].PtkPelengkap.KabKota,
+				Propinsi:      &PTKTerdaftar[0].PtkPelengkap.Propinsi,
 			}
 		})
 		if err != nil {
@@ -294,5 +314,101 @@ func (s *PTKTerdaftarServiceServer) DeletePTKTerdaftar(ctx context.Context, req 
 	return &pb.DeletePTKTerdaftarResponse{
 		Message: "PTKTerdaftar berhasil dihapus",
 		Status:  true,
+	}, nil
+}
+func (s *PTKTerdaftarServiceServer) DeletBatchPTKTerdaftar(ctx context.Context, req *pb.DeleteBatchPTKTerdaftarRequest) (*pb.DeleteBatchPTKTerdaftarResponse, error) {
+	// Daftar field yang wajib diisi
+	requiredFields := []string{"Schemaname", "PtkTerdaftarId"}
+	// Validasi request
+	err := utils.ValidateFields(req, requiredFields)
+	if err != nil {
+		return nil, err
+	}
+	schemaName := req.GetSchemaname()
+	PTKTerdaftarID := req.GetPtkTerdaftarId()
+	err = s.repo.DeleteBatch(ctx, PTKTerdaftarID, schemaName, "ptk_terdaftar_id")
+	if err != nil {
+		log.Printf("Gagal menghapus PTKTerdaftar: %s", err)
+		return &pb.DeleteBatchPTKTerdaftarResponse{Message: "Gagal menghapus", Status: false}, fmt.Errorf("gagal menghapus PTKTerdaftar: %w", err)
+	}
+
+	return &pb.DeleteBatchPTKTerdaftarResponse{
+		Message: "PTKTerdaftar berhasil dihapus",
+		Status:  true,
+	}, nil
+}
+
+func (s *PTKTerdaftarServiceServer) SearchPTKTerdaftar(ctx context.Context, req *pb.SearchPTKTerdaftarRequest) (*pb.SearchPTKTerdaftarResponse, error) {
+	// Daftar field yang wajib diisi
+	requiredFields := []string{"Schemaname", "PtkTerdaftarId"}
+	// Validasi request
+	err := utils.ValidateFields(req, requiredFields)
+	if err != nil {
+		return nil, err
+	}
+	schemaName := req.GetSchemaname()
+	if schemaName == "\"\"" {
+		return nil, fmt.Errorf("schema name is required")
+	}
+
+	// Cek apakah harus mengambil semua data atau data spesifik berdasarkan SemesterId
+	// joins := []string{
+	// 	"JOIN tabel_ptk ON tabel_ptk.ptk_id = tabel_ptk_terdaftar.ptk_id",
+	// }
+	preloads := []string{"PTK", "PTKPelengkap"}
+
+	conditions := map[string]any{
+		"tabel_ptk_terdaftar.ptk_terdaftar_id": req.GetPtkTerdaftarId(),
+	}
+	PTKTerdaftarModel, err := s.repo.FindWithRelations(ctx, schemaName, nil, preloads, conditions, nil, nil, nil)
+	if err != nil {
+		return &pb.SearchPTKTerdaftarResponse{
+			PtkTerdaftar: nil,
+			Message:      fmt.Sprintf("Gagal mendapatkan %s", err),
+			Status:       false,
+		}, nil
+	}
+	// Konversi ke protobuf
+	ptkTerdaftarPB := utils.ConvertModelsToPB(PTKTerdaftarModel, func(ptk models.PTKTerdaftar) *pb.PTKTerdaftar {
+		return &pb.PTKTerdaftar{
+			PtkTerdaftarId: ptk.PtkTerdaftarId.String(),
+			TahunAjaranId:  ptk.TahunAjaranId,
+			Ptk: &pb.PTK{
+				PtkId:             ptk.PTK.PtkID.String(),
+				Nama:              ptk.PTK.Nama,
+				Agama:             utils.SafeString(ptk.PTK.Agama),
+				JenisKelamin:      utils.SafeString(ptk.PTK.JenisKelamin),
+				TempatLahir:       utils.SafeString(ptk.PTK.TempatLahir),
+				JenisPtkId:        ptk.PTK.JenisPtkID,
+				TanggalLahir:      ptk.PTK.TanggalLahir.Format("2006-01-02"),
+				StatusKeaktifanId: ptk.PTK.StatusKeaktifanID,
+			},
+			PtkPelengkap: &pb.PtkPelengkap{
+				GelarDepan:     utils.SafeString(ptk.PTKPelengkap.GelarDepan),
+				GelarBelakang:  utils.SafeString(ptk.PTKPelengkap.GelarBelakang),
+				Nik:            utils.SafeString(ptk.PTKPelengkap.Nik),
+				No_KK:          utils.SafeString(ptk.PTKPelengkap.Nik),
+				Nuptk:          utils.SafeString(ptk.PTKPelengkap.Nuptk),
+				Niy:            utils.SafeString(ptk.PTKPelengkap.Niy),
+				Nip:            utils.SafeString(ptk.PTKPelengkap.Nip),
+				AlamatJalan:    utils.SafeString(ptk.PTKPelengkap.AlamatJalan),
+				Rt:             utils.SafeString(ptk.PTKPelengkap.Rt),
+				Rw:             utils.SafeString(ptk.PTKPelengkap.Rw),
+				DesaKelurahan:  utils.SafeString(ptk.PTKPelengkap.DesaKelurahan),
+				Kec:            utils.SafeString(ptk.PTKPelengkap.Kec),
+				KabKota:        utils.SafeString(ptk.PTKPelengkap.KabKota),
+				Propinsi:       utils.SafeString(ptk.PTKPelengkap.Propinsi),
+				KodePos:        utils.SafeString(ptk.PTKPelengkap.KodePos),
+				NoTeleponRumah: utils.SafeString(ptk.PTKPelengkap.NoTeleponRumah),
+				NoHp:           utils.SafeString(ptk.PTKPelengkap.NoHp),
+				Email:          utils.SafeString(ptk.PTKPelengkap.Email),
+			},
+		}
+	})
+
+	return &pb.SearchPTKTerdaftarResponse{
+		PtkTerdaftar: ptkTerdaftarPB[0],
+		Status:       true,
+		Message:      "Behasil mendapatkan data ptk terdaftar",
 	}, nil
 }

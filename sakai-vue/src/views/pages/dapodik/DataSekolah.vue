@@ -208,12 +208,12 @@ const updateData = async () => {
             schemaname: store.getters['sekolahService/getTabeltenant']?.schemaname,
             sekolah: sekolah.value
         };
-        console.log('Mengirim payload:', payload.value);
-
         const resp = await store.dispatch('sekolahService/updateSekolah', payload);
         toast.add({ severity: 'info', summary: 'Info', detail: resp?.message, life: 3000 });
         // console.log(resp)
     } else {
+        toast.add({ severity: 'warn', summary: 'Info', detail: resp?.message, life: 3000 });
+
         console.log('Tidak ada perubahan, tidak perlu update.');
     }
     isEdit.value = false;

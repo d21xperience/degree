@@ -88,12 +88,17 @@ const handleSubmit = async () => {
     // if (valid) {
     try {
         dataReg.sekolah = formatValues(dataReg.sekolah);
-        const resp = await store.dispatch('authService/registerAdmin', dataReg);
-        console.log(resp);
+        const response = await store.dispatch('authService/registerAdmin', dataReg);
+        console.log(response);
         // Jika sukses, arahkan ke beranda
-        if (resp.ok) {
-            const result = resp?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
-            router.push({ name: 'dashboard', params: { sekolah: result } });
+        if (response.ok) {
+            // const result = resp?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
+            // router.push({ name: 'dashboard', params: { sekolah: result } });
+            await store.dispatch('sekolahService/fetchTahunAjaran');
+            await store.dispatch('sekolahService/fetchSemester');
+            const result = response?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
+            await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
+            await router.push({ name: 'dashboard', params: { sekolah: result } });
         }
         // success.value = 'Admin registered successfully!';
     } catch (error) {
@@ -196,10 +201,6 @@ const errorInfo = ref();
         {{ errorInfo }}
     </Dialog>
 
-
-
-
-    
     <!-- Dialog end -->
 </template>
 

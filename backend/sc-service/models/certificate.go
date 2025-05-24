@@ -74,7 +74,7 @@ type DegreeData struct {
 	// UrlBCExplorerQuorum string `gorm:"column:url_bc_explorerQuorum"`
 	// UrlBCExplorerFabric string `gorm:"column:url_bc_explorerFabric"`
 	SekolahId     uuid.UUID
-	TahunAjaranId int32
+	TahunAjaranId uint32
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 }
