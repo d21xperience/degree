@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -213,7 +214,7 @@ func (s *UploadServiceServer) DownloadDataSekolah(ctx context.Context, req *pb.D
 	}
 	// Buat file template jika belum ada
 	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
-		err := GenerateTemplate(param, config.DB)
+		err := GenerateTemplateV2(param, config.DB)
 		if err != nil {
 			return nil, fmt.Errorf("gagal membuat template %s: %w", templateType, err)
 		}
@@ -241,7 +242,7 @@ func (h *UploadServiceServer) DownloadTemplateHTTP(w http.ResponseWriter, r *htt
 	}
 	// Lokasi direktori template
 	var param = ParamTemplate{
-		schemaname:   r.FormValue("Schemaname"),
+		schemaname:   r.FormValue("schemaname"),
 		semesterId:   r.FormValue("semesterId"),
 		templateType: templateType,
 	}
@@ -249,7 +250,7 @@ func (h *UploadServiceServer) DownloadTemplateHTTP(w http.ResponseWriter, r *htt
 	param.filePath = templatePath
 	// Buat file template jika belum ada
 	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
-		err := GenerateTemplate(param, config.DB)
+		err := GenerateTemplateV2(param, config.DB)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Gagal membuat template: %v", err), http.StatusInternalServerError)
 			return
@@ -322,45 +323,51 @@ func (s *UploadServiceServer) processUploadSiswa(
 	if err != nil {
 		return fmt.Errorf("gagal memproses file: %v", err)
 	}
-
+	// log.Printf("pembacaan di luar loop %s", data[0][4])
 	for i, row := range data {
-		// Skip header atau baris kosong (misalnya baris pertama sebagai judul)
-		if i == 0 || len(row) < 16 {
-			continue
+		pesertaDidikId := uuid.New()
+
+		if err != nil {
+			return err
 		}
 
-		// Buat UUID untuk entitas terkait
-		pesertaDidikId := uuid.New()
-		var tglLahir, tglDiterima time.Time
-		tglLahir, err = utils. ParseTimeWithMultipleFormats(row[4])
-		if err != nil {
-			return nil
+		var tglLahir, tglDiterima *time.Time
+		if len(row[4]) != 0 {
+			cek, err := utils.StringToTime(data[i][7], "01-02-06")
+			if err != nil {
+				log.Printf("gagal parsing tanggal lahir %s", row[4])
+			}
+			tglLahir = utils.TimeToPointer(cek.Format("2006-01-02"))
 		}
-		tglDiterima, err := utils.ParseTimeWithMultipleFormats(row[4])
-		if err != nil {
-			return nil
+		if len(row[9]) != 0 {
+			cek, err := utils.StringToTime(data[i][11], "01-02-06")
+			if err != nil {
+				log.Print("gagal parsing tanggal lahir")
+				return nil
+			}
+			tglDiterima = utils.TimeToPointer(cek.Format("2006-01-02"))
 		}
 
 		// Simpan ke tabel peserta didik (siswa)
 		err = s.repoSiswa.Save(ctx, &models.PesertaDidik{
 			PesertaDidikId:  pesertaDidikId,
-			Nis:             &row[0],
-			Nisn:            &row[1],
-			NmSiswa:         row[2],
-			TempatLahir:     &row[3],
-			TanggalLahir:    utils.TimeToPointer(tglLahir.Format("2006-01-02")),
-			JenisKelamin:    &row[5],
-			Agama:           &row[6],
-			AlamatSiswa:     &row[7],
-			TeleponSiswa:    &row[8],
-			DiterimaTanggal: utils.TimeToPointer(tglDiterima.Format("2006-01-02")),
-			NmAyah:          &row[10],
-			NmIbu:           &row[11],
-			PekerjaanAyah:   &row[12],
-			PekerjaanIbu:    &row[13],
-			NmWali:          &row[14],
-			PekerjaanWali:   &row[15],
-			Nik:             &row[16],
+			Nis:             safeGet(row, 2),
+			Nisn:            safeGet(row, 3),
+			NmSiswa:         row[4],
+			JenisKelamin:    safeGet(row, 5),
+			TempatLahir:     safeGet(row, 6),
+			TanggalLahir:    tglLahir,
+			Agama:           safeGet(row, 8),
+			AlamatSiswa:     safeGet(row, 9),
+			TeleponSiswa:    safeGet(row, 10),
+			DiterimaTanggal: tglDiterima,
+			NmAyah:          safeGet(row, 12),
+			NmIbu:           safeGet(row, 13),
+			PekerjaanAyah:   safeGet(row, 14),
+			PekerjaanIbu:    safeGet(row, 15),
+			NmWali:          safeGet(row, 16),
+			PekerjaanWali:   safeGet(row, 17),
+			Nik:             safeGet(row, 18),
 		}, param.schemaname)
 
 		if err != nil {
@@ -369,15 +376,16 @@ func (s *UploadServiceServer) processUploadSiswa(
 
 		// Simpan ke tabel pelengkap siswa (opsional)
 		err = s.repoSiswaPelengkap.Save(ctx, &models.PesertaDidikPelengkap{
-			PesertaDidikId: pesertaDidikId,
-			StatusDalamKel: &row[17],
-			AnakKe:         &row[18],
-			SekolahAsal:    &row[19],
-			DiterimaKelas:  &row[20],
-			AlamatOrtu:     &row[21],
-			TeleponOrtu:    &row[22],
-			AlamatWali:     &row[23],
-			TeleponWali:    &row[24],
+			PelengkapSiswaId: uuid.New(),
+			PesertaDidikId:   pesertaDidikId,
+			StatusDalamKel:   safeGet(row, 19),
+			AnakKe:           safeGet(row, 20),
+			SekolahAsal:      safeGet(row, 21),
+			DiterimaKelas:    safeGet(row, 22),
+			AlamatOrtu:       safeGet(row, 23),
+			TeleponOrtu:      safeGet(row, 24),
+			AlamatWali:       safeGet(row, 25),
+			TeleponWali:      safeGet(row, 26),
 		}, param.schemaname)
 
 		if err != nil {
@@ -385,13 +393,32 @@ func (s *UploadServiceServer) processUploadSiswa(
 		}
 
 		// Jika kelas tersedia, simpan ke rombel anggota
-		err = s.repoKelasAnggota.Save(ctx, &models.RombelAnggota{
-			PesertaDidikId: pesertaDidikId,
-			SemesterId:     param.semesterId,
-		}, param.schemaname)
+		for j := 1; j <= 2; j++ {
+			rombonganBelajarId := uuid.New()
 
-		if err != nil {
-			return fmt.Errorf("gagal menyimpan anggota rombel: %v", err)
+			// Tabel Kelas
+			err = s.repoKelas.Save(ctx, &models.RombonganBelajar{
+				RombonganBelajarId:  rombonganBelajarId,
+				TingkatPendidikanId: int32(utils.ParseInt(row[0])),
+				NmKelas:             row[1],
+				SemesterId:          fmt.Sprintf("%s%d", param.semesterId, j),
+				
+			}, param.schemaname)
+			if err != nil {
+				return err
+			}
+
+			err = s.repoKelasAnggota.Save(ctx, &models.RombelAnggota{
+				AnggotaRombelId:    uuid.New(),
+				PesertaDidikId:     pesertaDidikId,
+				SemesterId:         fmt.Sprintf("%s%d", param.semesterId, j),
+				RombonganBelajarId: utils.UUIDToPointer(rombonganBelajarId),
+			}, param.schemaname)
+
+			if err != nil {
+				return fmt.Errorf("gagal menyimpan anggota rombel: %v", err)
+			}
+
 		}
 	}
 
@@ -469,6 +496,14 @@ func (s *UploadServiceServer) processUploadGuru(
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+// fungsi helper untuk mengecekan panjang slice len(row) sebelum akses indeks tertentu.
+func safeGet(row []string, idx int) *string {
+	if idx < len(row) && len(row[idx]) > 0 {
+		return &row[idx]
 	}
 	return nil
 }

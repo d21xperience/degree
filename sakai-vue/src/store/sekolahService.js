@@ -29,6 +29,7 @@ const state = {
     tabelPTKTerdaftar: JSON.parse(localStorage.getItem('tabelPTKTerdaftar')) || null,
     tabelTingkatPendidikan: JSON.parse(localStorage.getItem('tabelTingkatPendidikan')) || null,
     tabelKurikulum: JSON.parse(localStorage.getItem('tabelKurikulum')) || null,
+    tabelJurusan: JSON.parse(localStorage.getItem('tabelJurusan')) || null,
     selectedSemester: JSON.parse(localStorage.getItem('selectedSemester')) || null,
     tabelAnggotaKelas: JSON.parse(localStorage.getItem('tabelAnggotaKelas')) || [],
     tabelMapel: JSON.parse(localStorage.getItem('tabelMapel')) || null,
@@ -73,6 +74,10 @@ const mutations = {
     SET_TABELKURIKULUM(state, value) {
         state.tabelKurikulum = value;
         localStorage.setItem('tabelKurikulum', JSON.stringify(value));
+    },
+    SET_TABELJURUSAN(state, value) {
+        state.tabelJurusan = value;
+        localStorage.setItem('tabelJurusan', JSON.stringify(value));
     },
     SET_SELECTEDSEMESTER(state, value) {
         state.selectedSemester = value;
@@ -638,11 +643,12 @@ const actions = {
                     param: payload.param
                 }
             });
-            return response.data.jurusan;
+            if (response.status) {
+                commit('SET_TABELJURUSAN', response.data.jurusan);
+                return response.data.jurusan;
+            }
         } catch (error) {
-            // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
-            console.error('Gagal membuat kurikulum:', error);
-            return null;
+            throw error;
         }
     },
     async fetchMapel({ commit }, payload) {
@@ -949,6 +955,7 @@ const getters = {
     getSelectedSemester: (state) => state.selectedSemester,
     getSekolah: (state) => state.tabelSekolah,
     getKurikulum: (state) => state.tabelKurikulum,
+    getJurusan: (state) => state.tabelJurusan,
     getGuru: (state) => state.tabelGuru,
     getPTKTerdaftar: (state) => state.tabelPTKTerdaftar,
     getTingkatPendidikan: (state) => state.tabelTingkatPendidikan,

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sekolah/models"
 	"sekolah/repositories"
+	"sekolah/template"
 	"sekolah/utils"
 
 	"github.com/xuri/excelize/v2"
@@ -16,6 +17,7 @@ type ParamTemplate struct {
 	schemaname   string
 	filePath     string
 	semesterId   string
+	
 }
 
 // // RequestRequirement digunakan untuk menyimpan dependensi service dan protobuf
@@ -34,27 +36,27 @@ type ParamTemplate struct {
 // 	return result, nil
 // }
 
-func ConvertModelsToPB[T any, U any](models []*T, converter func(*T) *U) []*U {
-	var pbList []*U
-	for _, model := range models {
-		pbList = append(pbList, converter(model))
-	}
-	return pbList
-}
-func ConvertPBToModels[T any, U any](pbs []*T, converter func(*T) *U) []*U {
-	var modelList []*U
-	for _, model := range pbs {
-		modelList = append(modelList, converter(model))
-	}
-	return modelList
-}
+// func ConvertModelsToPB[T any, U any](models []*T, converter func(*T) *U) []*U {
+// 	var pbList []*U
+// 	for _, model := range models {
+// 		pbList = append(pbList, converter(model))
+// 	}
+// 	return pbList
+// }
+// func ConvertPBToModels[T any, U any](pbs []*T, converter func(*T) *U) []*U {
+// 	var modelList []*U
+// 	for _, model := range pbs {
+// 		modelList = append(modelList, converter(model))
+// 	}
+// 	return modelList
+// }
 
-func ConvertModelToPB[T any, U any](model *T, converter func(*T) *U) *U {
-	if model == nil {
-		return nil
-	}
-	return converter(model)
-}
+// func ConvertModelToPB[T any, U any](model *T, converter func(*T) *U) *U {
+// 	if model == nil {
+// 		return nil
+// 	}
+// 	return converter(model)
+// }
 
 // Fungsi untuk membaca file Excel dan memproses data berdasarkan jenis
 func BacaDataExcel(param *ParamTemplate) ([][]string, error) {
@@ -80,6 +82,7 @@ func BacaDataExcel(param *ParamTemplate) ([][]string, error) {
 	}
 	// Kembalikan data mulai dari baris kedua (tanpa header)
 	return rows[1:], nil
+	// return rows, nil
 
 }
 
@@ -359,31 +362,87 @@ func GenerateTemplate(param ParamTemplate, db *gorm.DB) error {
 	if err != nil {
 		return fmt.Errorf("gagal membuat properties %s: %w", param.templateType, err)
 	}
-
-	// Jika templatetype adalah siswa
-	// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	// defer cancel()
-	// switch param.templateType {
-
-	// case "nilai_akhir":
-	// 	// err := templateNilaiAkhir(ctx, db, f, param, sheetName)
-	// 	// if err != nil {
-	// 	// 	return err
-	// 	// }
-	// 	// Tambahkan mata pelajaran
-	// case "ijazah":
-	// 	// err := templateIjazah(ctx, db, f, param, sheetName)
-	// 	// if err != nil {
-	// 	// 	return err
-	// 	// }
-	// 	// default:
-	// 	// 	return fmt.Errorf("template type %s tidak ditemukan", param.templateType)
-	// }
-
 	// Simpan ke file
 	err = f.SaveAs(param.filePath)
 	if err != nil {
 		return fmt.Errorf("gagal membuat template %s: %w", param.templateType, err)
+	}
+
+	return nil
+}
+func GenerateTemplateV2(param ParamTemplate, db *gorm.DB) error {
+	f := excelize.NewFile()
+	sheetName := "Template"
+	f.SetSheetName("Sheet1", sheetName)
+
+	columns, exists := template.GetTemplateColumns(param.templateType)
+	if !exists {
+		return fmt.Errorf("template type %s tidak ditemukan", param.templateType)
+	}
+	headerStyle, _ := f.NewStyle(&excelize.Style{
+		Fill: excelize.Fill{
+			Type:    "pattern",
+			Color:   []string{"#4F81BD"},
+			Pattern: 1,
+		},
+		Font: &excelize.Font{
+			Bold:  true,
+			Color: "#FFFFFF",
+		},
+		Alignment: &excelize.Alignment{
+			Horizontal: "center",
+			Vertical:   "center",
+			WrapText:   true,
+		},
+	})
+	err1 := f.SetRowHeight(sheetName, 1, 50)
+	if err1 != nil {
+		return err1
+	}
+	// Buat kolom header dan contoh input
+	for i, col := range columns {
+		colLetter, _ := excelize.ColumnNumberToName(i + 1)
+		cellHeader := fmt.Sprintf("%s1", colLetter)
+		cellExample := fmt.Sprintf("%s2", colLetter)
+
+		// Header
+		f.SetCellValue(sheetName, cellHeader, col.Name)
+		f.SetCellStyle(sheetName, cellHeader, cellHeader, headerStyle)
+
+		// Contoh isi baris kedua
+		f.SetCellValue(sheetName, cellExample, col.Example)
+
+		// Validasi (jika ada)
+		if col.Validation != nil {
+			f.AddDataValidation(sheetName, col.Validation)
+		}
+
+		// Format tanggal (jika ada)
+		if col.FormatStyle != nil {
+			styleID, _ := f.NewStyle(col.FormatStyle)
+			f.SetCellStyle(sheetName, cellExample, fmt.Sprintf("%s100", colLetter), styleID)
+		}
+		if col.ColumnWidth != 0 {
+			f.SetColWidth(sheetName, colLetter, colLetter, col.ColumnWidth)
+		}
+	}
+
+	// Freeze baris header
+	f.SetPanes(sheetName, &excelize.Panes{Freeze: true, Split: true, XSplit: 0, YSplit: 1})
+
+	// Set properties dokumen
+	err := f.SetDocProps(&excelize.DocProperties{
+		ContentStatus: param.templateType,
+		Category:      param.semesterId,
+		Keywords:      param.schemaname,
+	})
+	if err != nil {
+		return fmt.Errorf("gagal membuat properties %s: %w", param.templateType, err)
+	}
+
+	// Simpan ke file
+	if err := f.SaveAs(param.filePath); err != nil {
+		return fmt.Errorf("gagal menyimpan template %s: %w", param.templateType, err)
 	}
 
 	return nil

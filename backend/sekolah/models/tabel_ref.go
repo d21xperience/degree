@@ -108,7 +108,7 @@ func (Jurusan) TableName() string {
 }
 
 type Kurikulum struct {
-	KurikulumID         uint16    `gorm:"column:kurikulum_id;primaryKey"`
+	KurikulumID         uint32    `gorm:"column:kurikulum_id;primaryKey"`
 	NamaKurikulum       string    `gorm:"column:nama_kurikulum;size:120;not null"`
 	MulaiBerlaku        time.Time `gorm:"column:mulai_berlaku;not null"`
 	SistemSKS           uint8     `gorm:"column:sistem_sks;not null;default:0"`

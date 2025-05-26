@@ -4,16 +4,16 @@ import "github.com/google/uuid"
 
 type RombonganBelajar struct {
 	RombonganBelajarId  uuid.UUID  `gorm:"column:rombongan_belajar_id;primaryKey"`
-	SekolahId           uuid.UUID  `gorm:"column:sekolah_id"`
+	SekolahId           *uuid.UUID `gorm:"column:sekolah_id"`
 	SemesterId          string     `gorm:"column:semester_id"`
-	JurusanId           string     `gorm:"column:jurusan_id"`
-	PtkID               uuid.UUID  `gorm:"column:ptk_id"`
+	JurusanId           *string    `gorm:"column:jurusan_id"`
+	PtkID               *uuid.UUID `gorm:"column:ptk_id"`
 	NmKelas             string     `gorm:"column:nm_kelas"`
 	TingkatPendidikanId int32      `gorm:"column:tingkat_pendidikan_id"`
-	JenisRombel         int32      `gorm:"column:jenis_rombel"`
-	NamaJurusanSp       string     `gorm:"column:nama_jurusan_sp"`
+	JenisRombel         *int32     `gorm:"column:jenis_rombel"`
+	NamaJurusanSp       *string    `gorm:"column:nama_jurusan_sp"`
 	JurusanSpId         *uuid.UUID `gorm:"column:jurusan_sp_id"` // Nullable field
-	KurikulumId         int32      `gorm:"column:kurikulum_id"`
+	KurikulumId         *int32     `gorm:"column:kurikulum_id"`
 
 	PTK TabelPTK `gorm:"foreignKey:PtkID;references:PtkID"`
 	// ERROR: relation "jurusan" does not exist (SQLSTATE 42P01)

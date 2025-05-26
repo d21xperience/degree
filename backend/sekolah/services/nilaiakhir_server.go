@@ -41,7 +41,7 @@ func (s *NilaiAkhirServiceServer) CreateNilaiAkhir(ctx context.Context, req *pb.
 	schemaName := req.GetSchemaname()
 	nilaiAkhirReq := req.GetNilaiAkhir()
 
-	nilaiAkhir := ConvertPBToModels(nilaiAkhirReq, func(nilai *pb.NilaiAkhir) *models.NilaiAkhir {
+	nilaiAkhir := utils.ConvertPBToModels(nilaiAkhirReq, func(nilai *pb.NilaiAkhir) *models.NilaiAkhir {
 		anggotaRombelID, err := uuid.Parse(nilai.AnggotaRombelId)
 		if err != nil {
 			log.Printf("Invalid UUID for AnggotaRombelID: %v", err)

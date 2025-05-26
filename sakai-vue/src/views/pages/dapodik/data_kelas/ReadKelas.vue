@@ -7,7 +7,7 @@
                         <Button icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" v-tooltip.bottom="'Tambah data'" />
                         <Button icon="pi pi-pencil" severity="warn" @click="editKelas(selectedKelas)" :disabled="!selectedKelas || !selectedKelas.length || selectedKelas.length > 1" class="mr-2" v-tooltip.bottom="'Edit data'" />
                         <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!selectedKelas || !selectedKelas.length" v-tooltip.bottom="'Hapus data'" />
-                        <!-- <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2" v-tooltip.bottom="'Upload'" /> -->
+                        <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2" v-tooltip.bottom="'Upload'" />
                         <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2" v-tooltip.bottom="'Download'" />
 
                         <div v-show="selectedSemester.semester == 2">
@@ -72,7 +72,7 @@
         </div>
 
         <DialogImport v-model:visible="dialogImport" template-type="kelas" />
-        <DialogConfirmDelete v-model:visible="deleteKelasDialog" message="Apakah kelas tersebut akan dihapus?" @confirm="deletedKelas" @closeDialog="closeDialog" />
+        <DialogConfirmDelete v-model:visible="deleteKelasDialog" message="Apakah kelas tersebut akan dihapus?" @confirm="deletedKelas" @closeDialog="closeDialog"/>
         <Dialog v-model:visible="showAnggotaKelas" style="width: 450px; height: max-content" header="Anggota Kelas" close-icon="pi pi-times" maximizable>
             <AnggotaKelas :rombongan-belajar-id="rombonganBelajarId" />
         </Dialog>

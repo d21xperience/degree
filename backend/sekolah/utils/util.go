@@ -237,7 +237,9 @@ func StringToTime[T ~string](str T, layout string) (time.Time, error) {
 	}
 	return parsedTime, nil
 }
-
+func StringToPointer(s string) *string {
+	return &s
+}
 func ParseTimeWithMultipleFormats(input string) (time.Time, error) {
 	// Daftar format tanggal yang umum di Excel
 	dateFormats := []string{

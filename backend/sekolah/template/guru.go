@@ -1,0 +1,57 @@
+package template
+
+import (
+	"sekolah/utils"
+
+	"github.com/xuri/excelize/v2"
+)
+
+func GetGuruColumns() []TemplateColumn {
+	return []TemplateColumn{
+		{Name: "Nama", Example: "Rina Sari"},
+		{Name: "Jenis Kelamin", Example: "P", Validation: &excelize.DataValidation{
+			Type:             "list",
+			Formula1:         `"L,P"`,
+			ShowDropDown:     true,
+			ShowErrorMessage: true,
+			ErrorTitle:       utils.StringToPointer("Input JK Salah!"),
+			Error:            utils.StringToPointer("Isi hanya L atau P"),
+			Sqref:            "B2:B1048576", // Kolom JK,
+			PromptTitle:      utils.StringToPointer("Input Jk"),
+			ShowInputMessage: true,
+			Prompt:           utils.StringToPointer("Isi L atau P"),
+		}},
+		{Name: "Tempat Lahir", Example: "Surabaya"},
+		{Name: "Tanggal Lahir", Example: "01/01/1980", FormatStyle: &excelize.Style{NumFmt: 14}},
+		{Name: "Agama", Example: "Islam", Validation: &excelize.DataValidation{
+			Type:             "list",
+			Formula1:         `"Islam,Kristen,Katolik,Hindu,Buddha,Khonghucu"`,
+			ShowDropDown:     true,
+			ShowErrorMessage: true,
+			ErrorTitle:       utils.StringToPointer("Input Agama Salah!"),
+			Error:            utils.StringToPointer("Pilih agama dari daftar"),
+			Sqref:            "E2:E1048576",
+			PromptTitle:      utils.StringToPointer("Input Agama"),
+			ShowInputMessage: true,
+			Prompt:           utils.StringToPointer("Tulis agama: Islam,Kristen,Katolik,Hindu,Buddha,Khonghucu"),
+		}},
+		{Name: "Gelar Depan", Example: "Dr."},
+		{Name: "Gelar Belakang", Example: "M.Pd"},
+		{Name: "NIK", Example: "3576010101010001"},
+		{Name: "No. KK", Example: "3576011234567890"},
+		{Name: "NUPTK", Example: "123456789012"},
+		{Name: "NIY", Example: "NIY00123"},
+		{Name: "NIP", Example: "198001012005012001"},
+		{Name: "Alamat Jalan", Example: "Jl. Melati 9"},
+		{Name: "RT", Example: "02"},
+		{Name: "RW", Example: "03"},
+		{Name: "Desa/Kelurahan", Example: "Cempaka Putih"},
+		{Name: "Kecamatan", Example: "Grogol"},
+		{Name: "Kab/kota", Example: "Jakarta Barat"},
+		{Name: "Propinsi", Example: "DKI Jakarta"},
+		{Name: "Kode Pos", Example: "11440"},
+		{Name: "No Telepon Rumah", Example: "021123456"},
+		{Name: "No Hp", Example: "081212345678"},
+		{Name: "Email", Example: "guru@example.com"},
+	}
+}

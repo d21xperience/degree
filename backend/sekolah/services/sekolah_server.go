@@ -19,9 +19,10 @@ import (
 type SekolahService struct {
 	pb.UnimplementedSekolahServiceServer
 	// RedisClient    *redis.Client // Tambahkan Redis sebagai field
-	sekolahService    repositories.SekolahRepository
-	schemaService     SchemaService
-	repoSekolahTenant repositories.GenericRepository[models.SekolahTenant]
+	sekolahService      repositories.SekolahRepository
+	schemaService       SchemaService
+	repoSekolahTenant   repositories.GenericRepository[models.SekolahTenant]
+	repoKategoriSekolah repositories.GenericRepository[models.KategoriSekolah]
 }
 
 func NewSekolahService() *SekolahService {
@@ -29,10 +30,12 @@ func NewSekolahService() *SekolahService {
 	schemaRepo := repositories.NewSchemaRepository(config.DB)
 	SekolahTenant := repositories.NewsekolahTenantRepository(config.DB)
 	schemaService := NewSchemaService(schemaRepo, *SekolahTenant)
+	repoKategoriSekolah := repositories.NewKategoriSekolahRepository(config.DB)
 	return &SekolahService{
-		sekolahService:    sekolahRepo,
-		schemaService:     schemaService,
-		repoSekolahTenant: *SekolahTenant,
+		sekolahService:      sekolahRepo,
+		schemaService:       schemaService,
+		repoSekolahTenant:   *SekolahTenant,
+		repoKategoriSekolah: *repoKategoriSekolah,
 	}
 }
 
@@ -262,5 +265,72 @@ func (s *SekolahService) UpdateSekolah(ctx context.Context, req *pb.UpdateSekola
 	return &pb.UpdateSekolahResponse{
 		Message: "Sekolah berhasil diupdate",
 		Status:  true,
+	}, nil
+}
+
+func (s *SekolahService) CreateKategoriSekolah(ctx context.Context, req *pb.CreateKategoriSekolahRequest) (*pb.CreateKategoriSekolahResponse, error) {
+	var err error
+	log.Printf("Received Sekolah data request: %+v\n", req)
+	requiredFields := []string{"Schemaname", "KategoriSekolah"}
+	// Validasi request
+	err = utils.ValidateFields(req, requiredFields)
+	if err != nil {
+		return nil, err
+	}
+	Schemaname := req.GetSchemaname()
+	pbKategoriSekolah := req.KategoriSekolah
+	kategoriSekolahModel := &models.KategoriSekolah{
+		NamaKurikulum: &pbKategoriSekolah.NamaKurikulum,
+		NamaJurusan:   &pbKategoriSekolah.NamaJurusan,
+		TahunAjaranId: pbKategoriSekolah.TahunAjaranId,
+	}
+	err = s.repoKategoriSekolah.Save(ctx, kategoriSekolahModel, Schemaname)
+	if err != nil {
+		return &pb.CreateKategoriSekolahResponse{
+			Message: "Gagal menambahkan kategori sekolah",
+			Status:  false,
+		}, nil
+	}
+	return &pb.CreateKategoriSekolahResponse{
+		Message: "Berhasil menambahkan kategori sekolah",
+		Status:  true,
+	}, nil
+}
+
+func (s *SekolahService) GetKategoriSekolah(ctx context.Context, req *pb.GetKategoriSekolahRequest) (*pb.GetKategoriSekolahResponse, error) {
+	var err error
+	log.Printf("Received Sekolah data request: %+v\n", req)
+	requiredFields := []string{"Schemaname", "TahunAjaranId"}
+	// Validasi request
+	err = utils.ValidateFields(req, requiredFields)
+	if err != nil {
+		return nil, err
+	}
+	Schemaname := req.GetSchemaname()
+	tahunAjaranId := req.GetTahunAjaranId()
+	exactConditions := map[string]interface{}{
+		"tabel_kategori_sekolah.tahun_ajaran_id": tahunAjaranId,
+	}
+	modelKategoriSekolah, err := s.repoKategoriSekolah.FindWithRelations(ctx, Schemaname, nil, nil, exactConditions, nil, nil, nil)
+	if err != nil {
+		return &pb.GetKategoriSekolahResponse{
+			Message:         "Gagal mendapatkan kategori sekolah",
+			Status:          false,
+			KategoriSekolah: nil,
+		}, nil
+	}
+
+	pbKategoriSekolah := utils.ConvertModelsToPB(modelKategoriSekolah, func(item models.KategoriSekolah) *pb.KategoriSekolah {
+		return &pb.KategoriSekolah{
+			KategoriSekolahId: uint32(item.KategorisekolahId),
+			NamaKurikulum:     utils.SafeString(item.NamaKurikulum),
+			NamaJurusan:       utils.SafeString(item.NamaJurusan),
+			TahunAjaranId:     item.TahunAjaranId,
+		}
+	})
+	return &pb.GetKategoriSekolahResponse{
+		Message:         "Berhasil mendapatkan kategori sekolah",
+		Status:          true,
+		KategoriSekolah: pbKategoriSekolah,
 	}, nil
 }

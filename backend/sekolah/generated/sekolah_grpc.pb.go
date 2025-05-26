@@ -501,12 +501,16 @@ var SemesterService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	SekolahService_GetSchoolInfo_FullMethodName     = "/sekolah.SekolahService/GetSchoolInfo"
-	SekolahService_RegistrasiSekolah_FullMethodName = "/sekolah.SekolahService/RegistrasiSekolah"
-	SekolahService_GetSekolahTenant_FullMethodName  = "/sekolah.SekolahService/GetSekolahTenant"
-	SekolahService_CreateSekolah_FullMethodName     = "/sekolah.SekolahService/CreateSekolah"
-	SekolahService_GetSekolah_FullMethodName        = "/sekolah.SekolahService/GetSekolah"
-	SekolahService_UpdateSekolah_FullMethodName     = "/sekolah.SekolahService/UpdateSekolah"
+	SekolahService_GetSchoolInfo_FullMethodName         = "/sekolah.SekolahService/GetSchoolInfo"
+	SekolahService_RegistrasiSekolah_FullMethodName     = "/sekolah.SekolahService/RegistrasiSekolah"
+	SekolahService_GetSekolahTenant_FullMethodName      = "/sekolah.SekolahService/GetSekolahTenant"
+	SekolahService_CreateSekolah_FullMethodName         = "/sekolah.SekolahService/CreateSekolah"
+	SekolahService_GetSekolah_FullMethodName            = "/sekolah.SekolahService/GetSekolah"
+	SekolahService_UpdateSekolah_FullMethodName         = "/sekolah.SekolahService/UpdateSekolah"
+	SekolahService_CreateKategoriSekolah_FullMethodName = "/sekolah.SekolahService/CreateKategoriSekolah"
+	SekolahService_GetKategoriSekolah_FullMethodName    = "/sekolah.SekolahService/GetKategoriSekolah"
+	SekolahService_UpdateKategoriSekolah_FullMethodName = "/sekolah.SekolahService/UpdateKategoriSekolah"
+	SekolahService_DeleteKategoriSekolah_FullMethodName = "/sekolah.SekolahService/DeleteKategoriSekolah"
 )
 
 // SekolahServiceClient is the client API for SekolahService service.
@@ -520,6 +524,13 @@ type SekolahServiceClient interface {
 	CreateSekolah(ctx context.Context, in *CreateSekolahRequest, opts ...grpc.CallOption) (*CreateSekolahResponse, error)
 	GetSekolah(ctx context.Context, in *GetSekolahRequest, opts ...grpc.CallOption) (*GetSekolahResponse, error)
 	UpdateSekolah(ctx context.Context, in *UpdateSekolahRequest, opts ...grpc.CallOption) (*UpdateSekolahResponse, error)
+	// ====================================
+	// KATEGORI SEKOLAH
+	// ====================================
+	CreateKategoriSekolah(ctx context.Context, in *CreateKategoriSekolahRequest, opts ...grpc.CallOption) (*CreateKategoriSekolahResponse, error)
+	GetKategoriSekolah(ctx context.Context, in *GetKategoriSekolahRequest, opts ...grpc.CallOption) (*GetKategoriSekolahResponse, error)
+	UpdateKategoriSekolah(ctx context.Context, in *UpdateKategoriSekolahRequest, opts ...grpc.CallOption) (*UpdateKategoriSekolahResponse, error)
+	DeleteKategoriSekolah(ctx context.Context, in *DeleteKategoriSekolahRequest, opts ...grpc.CallOption) (*DeleteKategoriSekolahResponse, error)
 }
 
 type sekolahServiceClient struct {
@@ -590,6 +601,46 @@ func (c *sekolahServiceClient) UpdateSekolah(ctx context.Context, in *UpdateSeko
 	return out, nil
 }
 
+func (c *sekolahServiceClient) CreateKategoriSekolah(ctx context.Context, in *CreateKategoriSekolahRequest, opts ...grpc.CallOption) (*CreateKategoriSekolahResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateKategoriSekolahResponse)
+	err := c.cc.Invoke(ctx, SekolahService_CreateKategoriSekolah_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sekolahServiceClient) GetKategoriSekolah(ctx context.Context, in *GetKategoriSekolahRequest, opts ...grpc.CallOption) (*GetKategoriSekolahResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetKategoriSekolahResponse)
+	err := c.cc.Invoke(ctx, SekolahService_GetKategoriSekolah_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sekolahServiceClient) UpdateKategoriSekolah(ctx context.Context, in *UpdateKategoriSekolahRequest, opts ...grpc.CallOption) (*UpdateKategoriSekolahResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateKategoriSekolahResponse)
+	err := c.cc.Invoke(ctx, SekolahService_UpdateKategoriSekolah_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sekolahServiceClient) DeleteKategoriSekolah(ctx context.Context, in *DeleteKategoriSekolahRequest, opts ...grpc.CallOption) (*DeleteKategoriSekolahResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteKategoriSekolahResponse)
+	err := c.cc.Invoke(ctx, SekolahService_DeleteKategoriSekolah_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SekolahServiceServer is the server API for SekolahService service.
 // All implementations must embed UnimplementedSekolahServiceServer
 // for forward compatibility.
@@ -601,6 +652,13 @@ type SekolahServiceServer interface {
 	CreateSekolah(context.Context, *CreateSekolahRequest) (*CreateSekolahResponse, error)
 	GetSekolah(context.Context, *GetSekolahRequest) (*GetSekolahResponse, error)
 	UpdateSekolah(context.Context, *UpdateSekolahRequest) (*UpdateSekolahResponse, error)
+	// ====================================
+	// KATEGORI SEKOLAH
+	// ====================================
+	CreateKategoriSekolah(context.Context, *CreateKategoriSekolahRequest) (*CreateKategoriSekolahResponse, error)
+	GetKategoriSekolah(context.Context, *GetKategoriSekolahRequest) (*GetKategoriSekolahResponse, error)
+	UpdateKategoriSekolah(context.Context, *UpdateKategoriSekolahRequest) (*UpdateKategoriSekolahResponse, error)
+	DeleteKategoriSekolah(context.Context, *DeleteKategoriSekolahRequest) (*DeleteKategoriSekolahResponse, error)
 	mustEmbedUnimplementedSekolahServiceServer()
 }
 
@@ -628,6 +686,18 @@ func (UnimplementedSekolahServiceServer) GetSekolah(context.Context, *GetSekolah
 }
 func (UnimplementedSekolahServiceServer) UpdateSekolah(context.Context, *UpdateSekolahRequest) (*UpdateSekolahResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateSekolah not implemented")
+}
+func (UnimplementedSekolahServiceServer) CreateKategoriSekolah(context.Context, *CreateKategoriSekolahRequest) (*CreateKategoriSekolahResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateKategoriSekolah not implemented")
+}
+func (UnimplementedSekolahServiceServer) GetKategoriSekolah(context.Context, *GetKategoriSekolahRequest) (*GetKategoriSekolahResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetKategoriSekolah not implemented")
+}
+func (UnimplementedSekolahServiceServer) UpdateKategoriSekolah(context.Context, *UpdateKategoriSekolahRequest) (*UpdateKategoriSekolahResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateKategoriSekolah not implemented")
+}
+func (UnimplementedSekolahServiceServer) DeleteKategoriSekolah(context.Context, *DeleteKategoriSekolahRequest) (*DeleteKategoriSekolahResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteKategoriSekolah not implemented")
 }
 func (UnimplementedSekolahServiceServer) mustEmbedUnimplementedSekolahServiceServer() {}
 func (UnimplementedSekolahServiceServer) testEmbeddedByValue()                        {}
@@ -758,6 +828,78 @@ func _SekolahService_UpdateSekolah_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SekolahService_CreateKategoriSekolah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateKategoriSekolahRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SekolahServiceServer).CreateKategoriSekolah(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SekolahService_CreateKategoriSekolah_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SekolahServiceServer).CreateKategoriSekolah(ctx, req.(*CreateKategoriSekolahRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SekolahService_GetKategoriSekolah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetKategoriSekolahRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SekolahServiceServer).GetKategoriSekolah(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SekolahService_GetKategoriSekolah_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SekolahServiceServer).GetKategoriSekolah(ctx, req.(*GetKategoriSekolahRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SekolahService_UpdateKategoriSekolah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateKategoriSekolahRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SekolahServiceServer).UpdateKategoriSekolah(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SekolahService_UpdateKategoriSekolah_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SekolahServiceServer).UpdateKategoriSekolah(ctx, req.(*UpdateKategoriSekolahRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SekolahService_DeleteKategoriSekolah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteKategoriSekolahRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SekolahServiceServer).DeleteKategoriSekolah(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SekolahService_DeleteKategoriSekolah_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SekolahServiceServer).DeleteKategoriSekolah(ctx, req.(*DeleteKategoriSekolahRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SekolahService_ServiceDesc is the grpc.ServiceDesc for SekolahService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -788,6 +930,22 @@ var SekolahService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "UpdateSekolah",
 			Handler:    _SekolahService_UpdateSekolah_Handler,
+		},
+		{
+			MethodName: "CreateKategoriSekolah",
+			Handler:    _SekolahService_CreateKategoriSekolah_Handler,
+		},
+		{
+			MethodName: "GetKategoriSekolah",
+			Handler:    _SekolahService_GetKategoriSekolah_Handler,
+		},
+		{
+			MethodName: "UpdateKategoriSekolah",
+			Handler:    _SekolahService_UpdateKategoriSekolah_Handler,
+		},
+		{
+			MethodName: "DeleteKategoriSekolah",
+			Handler:    _SekolahService_DeleteKategoriSekolah_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

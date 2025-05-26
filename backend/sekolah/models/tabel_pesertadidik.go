@@ -25,7 +25,7 @@ type PesertaDidik struct {
 	NmWali             *string    `gorm:"column:nm_wali"`                     // Nullable string
 	PekerjaanWali      *string    `gorm:"column:pekerjaan_wali"`              // Nullable string
 	Nik                *string    `gorm:"column:nik"`
-	IsDapo             bool       `gorm:"column:is_dapo"`
+	IsDapodik          bool       `gorm:"column:is_dapodik"`
 	PesertaDidikIdDapo uuid.UUID  `gorm:"column:peserta_didik_id_dapo"`
 }
 

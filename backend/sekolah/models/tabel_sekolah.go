@@ -46,3 +46,14 @@ type SchemaLog struct {
 // func (SekolahTenant) TableName() string {
 // 	return "sekolah_tenant"
 // }
+
+type KategoriSekolah struct {
+	KategorisekolahId int32   `gorm:"column:kategori_sekolah_id"`
+	NamaKurikulum     *string `gorm:"column:nama_kurikulum"`
+	NamaJurusan       *string `gorm:"column:nama_jurusan"`
+	TahunAjaranId     string  `gorm:"column:tahun_ajaran_id"`
+}
+
+func (KategoriSekolah) TableName() string {
+	return "tabel_kategori_sekolah"
+}

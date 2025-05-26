@@ -16,13 +16,13 @@ import DialogLoading from './DialogLoading.vue';
 const toast = useToast();
 onMounted(async () => {
     await fetchTahunAjaran();
-    // console.log(schemaname.value);
+    // console.log(schemaname.value)
 });
 const isLoading = ref(false);
 
 const baseUrl = `${import.meta.env.VITE_API_SEKOLAH_BASE_URL}/ss`; //'http://localhost:8183/api/v1/ss'; // Disimpan di child
 const templateUrl = computed(() => {
-    return `${baseUrl}/download/template?template_type=${props.templateType}&schemaname=${schemaname}&semesterId=${selectedTahunAjaran.value?.tahunAjaranId}`;
+    return `${baseUrl}/download/template?template_type=${props.templateType}&schemaname=${schemaname.value}&semesterId=${selectedTahunAjaran.value?.tahunAjaranId}`;
 });
 const selectedTahunAjaran = ref();
 // ========================
@@ -183,12 +183,6 @@ const downloadTemplate = async () => {
     <Dialog v-model:visible="isVisible" :style="{ width: '450px' }" header="Tambah Data" :modal="true">
         <div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700"> Tahun Pelajaran <span class="text-red-500">*</span> </label>
-                <Select v-model="selectedTahunAjaran" :options="listTahunAjaran.value" optionLabel="nama" placeholder="Pilih Tahun Pelajaran" class="w-full mr-2" :invalid="submitted && !selectedTahunAjaran" />
-                <small v-if="submitted && !selectedTahunAjaran" class="text-red-500">Pilih tahun ajaran.</small>
-            </div>
-
-            <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700"> Unggah File Excel (Pastikan sesuai dengan Template yang disediakan) </label>
                 <!-- <div class="mt-2 flex flex-col gap-6 items-center justify-center">
                     <FileUpload ref="uploadedFiles" mode="basic" name="file" accept=".xlsx" :maxFileSize="2000000"
@@ -197,16 +191,23 @@ const downloadTemplate = async () => {
                 <div class="mt-2 flex flex-col gap-6 items-center justify-center">
                     <FileUpload ref="uploadedFiles" mode="basic" name="file" accept=".xlsx" :maxFileSize="2000000" :customUpload="true" severity="secondary" />
                 </div>
-                <p class="mt-2 text-sm text-gray-500">
+            </div>
+            <div class="mb-4 flex justify-between">
+                <div class="mt-2 text-sm text-gray-500">
                     Unduh Template Import data
                     <a href="#" @click.prevent="downloadTemplate" class="text-indigo-600 hover:text-indigo-500">Disini</a>
-                </p>
+                </div>
+                <div class="">
+                    <!-- <label class="block text-sm font-medium text-gray-700">Tahun Pelajaran <span class="text-red-500">*</span> </label> -->
+                    <Select v-model="selectedTahunAjaran" :options="listTahunAjaran.value" optionLabel="nama" placeholder="Pilih Tahun Pelajaran" class="text-sm" :invalid="submitted && !selectedTahunAjaran" fluid/>
+                    <small v-if="submitted && !selectedTahunAjaran" class="text-red-500">Pilih tahun ajaran.</small>
+                </div>
             </div>
         </div>
 
         <template #footer>
-            <Button label="Batal" icon="pi pi-times" text @click="closeDialog" />
-            <Button label="Simpan" icon="pi pi-check" text @click="saveData" />
+            <Button label="Batal" icon="pi pi-times"  text @click="closeDialog" />
+            <Button label="Upload" icon="pi pi-upload" severity="warn" text @click="saveData" />
         </template>
     </Dialog>
 

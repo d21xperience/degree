@@ -56,15 +56,15 @@ func (s *RombelServiceServer) CreateKelas(ctx context.Context, req *pb.CreateKel
 	kelasModel := utils.ConvertPBToModels(kelas, func(item *pb.Kelas) *models.RombonganBelajar {
 		return &models.RombonganBelajar{
 			RombonganBelajarId:  utils.StringToUUID(item.RombonganBelajarId),
-			SekolahId:           utils.StringToUUID(item.SekolahId),
+			SekolahId:           utils.UUIDToPointer(utils.StringToUUID(item.SekolahId)),
 			SemesterId:          item.SemesterId,
-			JurusanId:           item.JurusanId,
-			PtkID:               utils.StringToUUID(item.PtkId),
+			JurusanId:           &item.JurusanId,
+			PtkID:               utils.UUIDToPointer(utils.StringToUUID(item.PtkId)),
 			NmKelas:             item.NmKelas,
 			TingkatPendidikanId: item.TingkatPendidikanId,
-			JenisRombel:         item.JenisRombel,
-			NamaJurusanSp:       item.NamaJurusanSp,
-			KurikulumId:         item.KurikulumId,
+			JenisRombel:         &item.JenisRombel,
+			NamaJurusanSp:       &item.NamaJurusanSp,
+			KurikulumId:         &item.KurikulumId,
 		}
 	})
 	// simpan kelas ke database
@@ -184,13 +184,13 @@ func (s *RombelServiceServer) GetKelas(ctx context.Context, req *pb.GetKelasRequ
 			RombonganBelajarId:  kelas.RombonganBelajarId.String(),
 			SekolahId:           kelas.SekolahId.String(),
 			SemesterId:          kelas.SemesterId,
-			JurusanId:           kelas.JurusanId,
+			JurusanId:           utils.SafeString(kelas.JurusanId),
 			PtkId:               kelas.PtkID.String(),
 			NmKelas:             kelas.NmKelas,
 			TingkatPendidikanId: kelas.TingkatPendidikanId,
-			JenisRombel:         kelas.JenisRombel,
-			NamaJurusanSp:       kelas.NamaJurusanSp,
-			KurikulumId:         kelas.KurikulumId,
+			JenisRombel:         utils.SafeInt32(kelas.JenisRombel),
+			NamaJurusanSp:       utils.SafeString(kelas.NamaJurusanSp),
+			KurikulumId:         utils.SafeInt32(kelas.KurikulumId),
 			AnggotaKelas: utils.ConvertPBToModels(utils.SliceToPointer(kelas.AnggotaKelas), func(item *models.RombelAnggota) *pb.AnggotaKelas {
 				return &pb.AnggotaKelas{
 					AnggotaRombelId:    item.AnggotaRombelId.String(),
@@ -304,15 +304,15 @@ func (s *RombelServiceServer) UpdateKelas(ctx context.Context, req *pb.UpdateKel
 	KelasModel := &models.RombonganBelajar{
 		RombonganBelajarId:  rombelId,
 		NmKelas:             Kelas.NmKelas,
-		SekolahId:           sekolahId,
+		SekolahId:           &sekolahId,
 		SemesterId:          Kelas.SemesterId,
-		JurusanId:           Kelas.JurusanId,
+		JurusanId:           &Kelas.JurusanId,
 		TingkatPendidikanId: Kelas.TingkatPendidikanId,
-		PtkID:               ptkId,
-		JenisRombel:         Kelas.JenisRombel,
-		NamaJurusanSp:       Kelas.NamaJurusanSp,
+		PtkID:               &ptkId,
+		JenisRombel:         &Kelas.JenisRombel,
+		NamaJurusanSp:       &Kelas.NamaJurusanSp,
 		JurusanSpId:         &uuid.Nil,
-		KurikulumId:         Kelas.KurikulumId,
+		KurikulumId:         &Kelas.KurikulumId,
 		// RombonganBelajarId:  kelas.RombonganBelajarId,
 	}
 	err = s.repo.Update(ctx, KelasModel, schemaName, "rombongan_belajar_id", Kelas.RombonganBelajarId)
@@ -438,15 +438,15 @@ func (s *RombelServiceServer) ImportDapodikRombel(ctx context.Context, req *pb.I
 
 		return &models.RombonganBelajar{
 			RombonganBelajarId:  utils.StringToUUID(item.RombonganBelajarId),
-			SekolahId:           utils.StringToUUID(item.SekolahId),
+			SekolahId:           utils.UUIDToPointer(utils.StringToUUID(item.SekolahId)),
 			SemesterId:          item.SemesterId,
-			JurusanId:           item.JurusanId,
-			PtkID:               utils.StringToUUID(item.PtkId),
+			JurusanId:           &item.JurusanId,
+			PtkID:               utils.UUIDToPointer(utils.StringToUUID(item.PtkId)),
 			NmKelas:             item.NmKelas,
 			TingkatPendidikanId: item.TingkatPendidikanId,
-			JenisRombel:         item.JenisRombel,
-			NamaJurusanSp:       item.NamaJurusanSp,
-			KurikulumId:         item.KurikulumId,
+			JenisRombel:         &item.JenisRombel,
+			NamaJurusanSp:       &item.NamaJurusanSp,
+			KurikulumId:         &item.KurikulumId,
 			JurusanSpId:         utils.PointerToUUID(*item.JurusanSpId),
 		}
 	})

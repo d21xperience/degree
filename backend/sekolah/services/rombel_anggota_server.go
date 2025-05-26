@@ -90,7 +90,7 @@ func (s *RombelAnggotaService) CreateBanyakAnggotaKelas(ctx context.Context, req
 	schemaName := req.GetSchemaname()
 	anggotaKelas := req.AnggotaKelas
 
-	anggotaRombel := ConvertPBToModels(anggotaKelas, func(anggota *pb.AnggotaKelas) *models.RombelAnggota {
+	anggotaRombel := utils.ConvertPBToModels(anggotaKelas, func(anggota *pb.AnggotaKelas) *models.RombelAnggota {
 		tglLahir, err := utils.StringToTime(anggota.PesertaDidik.TanggalLahir, "2006-01-02")
 		if err != nil {
 			return nil
@@ -132,7 +132,7 @@ func (s *RombelAnggotaService) CreateBanyakAnggotaKelas(ctx context.Context, req
 				PekerjaanIbu:    &anggota.PesertaDidik.PekerjaanIbu,
 				NmWali:          &anggota.PesertaDidik.NmWali,
 				PekerjaanWali:   &anggota.PesertaDidik.PekerjaanWali,
-				IsDapo:          isDapodik,
+				IsDapodik:       isDapodik,
 				Nik:             &anggota.PesertaDidik.Nik,
 			},
 		}

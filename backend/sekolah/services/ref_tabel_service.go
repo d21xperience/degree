@@ -177,7 +177,11 @@ func (s *ReferensiServiceServer) GetJurusan(ctx context.Context, req *pb.GetJuru
 	}
 	mod, err := s.repoJurusan.FindAllByConditions(ctx, "ref", conditions, 100, 0, nil)
 	if err != nil {
-		return nil, err
+		return &pb.GetJurusanResponse{
+			Status:  false,
+			Message: "Gagal mengambil data jurusan",
+			Jurusan: nil,
+		}, nil
 	}
 	res := utils.ConvertModelsToPB(mod, func(re *models.Jurusan) *pb.Jurusan {
 		return &pb.Jurusan{
@@ -194,6 +198,8 @@ func (s *ReferensiServiceServer) GetJurusan(ctx context.Context, req *pb.GetJuru
 		}
 	})
 	return &pb.GetJurusanResponse{
+		Status:  true,
+		Message: "Berhasil mengambil jurusan",
 		Jurusan: res,
 	}, nil
 }

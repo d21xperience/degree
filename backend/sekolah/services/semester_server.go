@@ -76,7 +76,7 @@ func (s *SemesterServiceServer) GetSemester(ctx context.Context, req *pb.GetSeme
 			return nil, fmt.Errorf("gagal menemukan tahun ajaran di schema '%s': %w", "ref", err)
 		}
 		// Konversi hasil ke response protobuf
-		SemesterList := ConvertModelsToPB(SemesterModels, func(model *models.Semester) *pb.Semester {
+		SemesterList := utils.ConvertModelsToPB(SemesterModels, func(model *models.Semester) *pb.Semester {
 			return &pb.Semester{
 				SemesterId:     model.SemesterID,
 				TahunAjaranId:  model.TahunAjaranID,
@@ -103,7 +103,7 @@ func (s *SemesterServiceServer) GetSemester(ctx context.Context, req *pb.GetSeme
 
 	return &pb.GetSemesterResponse{
 		Semester: []*pb.Semester{
-			ConvertModelToPB(SemesterModel, func(model *models.Semester) *pb.Semester {
+			utils.ConvertModelToPB(SemesterModel, func(model *models.Semester) *pb.Semester {
 				return &pb.Semester{
 					SemesterId:     model.SemesterID,
 					TahunAjaranId:  model.TahunAjaranID,

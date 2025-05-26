@@ -70,8 +70,7 @@ func (s *SiswaServiceServer) CreateSiswa(ctx context.Context, req *pb.CreateSisw
 		PekerjaanIbu:    &siswa.PekerjaanIbu,
 		NmWali:          &siswa.NmWali,
 		PekerjaanWali:   &siswa.PekerjaanWali,
-		IsDapo:          isDapodik,
-		
+		IsDapodik:       isDapodik,
 	}
 
 	err = s.repo.Save(ctx, siswaModel, schemaName)
@@ -98,7 +97,7 @@ func (s *SiswaServiceServer) CreateBanyakSiswa(ctx context.Context, req *pb.Crea
 	schemaName := req.GetSchemaname()
 	siswa := req.Siswa
 
-	siswaModels := ConvertPBToModels(siswa, func(item *pb.Siswa) *models.PesertaDidik {
+	siswaModels := utils.ConvertPBToModels(siswa, func(item *pb.Siswa) *models.PesertaDidik {
 		tglLahir, err := utils.StringToTime(item.TanggalLahir, "2006-01-02")
 		if err != nil {
 			return nil
@@ -140,7 +139,7 @@ func (s *SiswaServiceServer) CreateBanyakSiswa(ctx context.Context, req *pb.Crea
 			NmWali:        &item.NmWali,
 			PekerjaanWali: &item.PekerjaanWali,
 			Nik:           &item.Nik,
-			IsDapo:        isDapodik,
+			IsDapodik:     isDapodik,
 		}
 	})
 	err = s.repo.SaveMany(ctx, schemaName, siswaModels, 1000)
