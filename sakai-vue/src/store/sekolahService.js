@@ -344,12 +344,12 @@ const actions = {
     async fetchSekolah({ commit }, payload) {
         try {
             const response = await api.get(`/ss/${payload.schemaname}/sekolah`);
-            commit('SET_TABELSEKOLAH', response.data.sekolah);
-            return response.data.sekolah; // Mengembalikan data sekolah
+            commit('SET_TABELSEKOLAH', response.data);
+            return response.data; // Mengembalikan data sekolah
         } catch (error) {
-            commit('SET_ERROR', error.response?.data || 'Terjadi kesalahan');
-            console.error('Gagal membuat semester:', error);
-            return null;
+            // commit('SET_ERROR', error.response?.data || 'Terjadi kesalahan');
+            // console.error('Gagal membuat semester:', error);
+            throw error;
         }
     },
     async updateSekolah({ commit }, payload) {
@@ -760,6 +760,49 @@ const actions = {
             });
             if (response) {
                 commit('SET_DASHBOARD', response.data);
+                return response.data;
+            }
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async fetchKategoriSekolah({ commit }, payload) {
+        try {
+            const response = await api.get(`/ss/${payload.schemaname}/kategori-sekolah`, {
+                params: {
+                    tahun_ajaran_id: payload.tahun_ajaran_id
+                }
+            });
+            if (response) {
+                // commit('SET_DASHBOARD', response.data);
+                return response.data;
+            }
+        } catch (error) {
+            throw error;
+        }
+    },
+    async createKategoriSekolah({ commit }, payload) {
+        try {
+            const response = await api.post(`/ss/${payload.schemaname}/kategori-sekolah/create`, payload);
+            if (response) {
+                // commit('SET_DASHBOARD', response.data);
+                return response.data;
+            }
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    },
+    async deleteKategoriSekolah({ commit }, payload) {
+        try {
+            const response = await api.delete(`/ss/${payload.schemaname}/kategori-sekolah/delete`, {
+                params: {
+                    kategori_sekolah_id: payload.kategori_sekolah_id
+                }
+            });
+            if (response) {
+                // commit('SET_DASHBOARD', response.data);
                 return response.data;
             }
         } catch (error) {

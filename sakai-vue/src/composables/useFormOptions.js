@@ -1,9 +1,11 @@
 // composables/useFormOptions.js
 
+import { debounce } from 'lodash-es';
 import { useToast } from 'primevue';
 import { ref } from 'vue';
 import { useStore } from 'vuex';
 import { useSekolahService } from './useSekolahService';
+
 export function useFormOptions() {
     const { sekolah } = useSekolahService();
     const store = useStore();
@@ -88,17 +90,29 @@ export function useFormOptions() {
         }
     };
 
-    const kurikulumSearch = (searchTerm) => {
+    // const kurikulumSearch = (searchTerm) => {
+    //     kurikulumLoading.value = true;
+    //     setTimeout(async () => {
+    //         if (!searchTerm.query.trim().length) {
+    //             kurikulumOptions.value = await kurikulumList;
+    //         } else {
+    //             kurikulumOptions.value = await kurikulumList.filter((item) => item.namaKurikulum.toLowerCase().includes(searchTerm.query.toLowerCase()));
+    //         }
+    //         kurikulumLoading.value = false;
+    //     }, 250);
+    // };
+
+    const kurikulumSearch = debounce(async (searchTerm) => {
         kurikulumLoading.value = true;
-        setTimeout(async () => {
-            if (!searchTerm.query.trim().length) {
-                kurikulumOptions.value = await kurikulumList;
-            } else {
-                kurikulumOptions.value = await kurikulumList.filter((item) => item.namaKurikulum.toLowerCase().includes(searchTerm.query.toLowerCase()));
-            }
-            kurikulumLoading.value = false;
-        }, 250);
-    };
+
+        if (!searchTerm.query.trim().length) {
+            kurikulumOptions.value = await kurikulumList;
+        } else {
+            kurikulumOptions.value = await kurikulumList.filter((item) => item.namaKurikulum.toLowerCase().includes(searchTerm.query.toLowerCase()));
+        }
+
+        kurikulumLoading.value = false;
+    }, 250);
 
     const fetchJurusan = async () => {
         try {
@@ -135,17 +149,28 @@ export function useFormOptions() {
         }
     };
 
-    const jurusanSearch = (searchTerm) => {
+    // const jurusanSearch = (searchTerm) => {
+    //     jurusanLoading.value = true;
+    //     setTimeout(async () => {
+    //         if (!searchTerm.query.trim().length) {
+    //             jurusanOptions.value = await jurusanList;
+    //         } else {
+    //             jurusanOptions.value = await jurusanList.filter((item) => item.namaJurusan.toLowerCase().includes(searchTerm.query.toLowerCase()));
+    //         }
+    //         jurusanLoading.value = false;
+    //     }, 250);
+    // };
+    const jurusanSearch = debounce(async (searchTerm) => {
         jurusanLoading.value = true;
-        setTimeout(async () => {
-            if (!searchTerm.query.trim().length) {
-                jurusanOptions.value = await jurusanList;
-            } else {
-                jurusanOptions.value = await jurusanList.filter((item) => item.namaJurusan.toLowerCase().includes(searchTerm.query.toLowerCase()));
-            }
-            jurusanLoading.value = false;
-        }, 250);
-    };
+
+        if (!searchTerm.query.trim().length) {
+            jurusanOptions.value = await jurusanList;
+        } else {
+            jurusanOptions.value = await jurusanList.filter((item) => item.namaJurusan.toLowerCase().includes(searchTerm.query.toLowerCase()));
+        }
+
+        jurusanLoading.value = false;
+    }, 250);
 
     return {
         selectedJenisKelamin,

@@ -27,6 +27,9 @@ type Sekolah struct {
 	KodeAktivasi        *string   `gorm:"type:varchar(30);default:null" json:"kode_aktivasi,omitempty"`
 	BentukPendidikanID  *uint32   `gorm:"column:bentuk_pendidikan_id;type:smallint;default:null" json:"bentuk_pendidikan_id,omitempty"`
 	JenjangPendidikanID *uint32   `gorm:"column:jenjang_pendidikan_id;type:numeric(2,0);default:null" json:"jenjang_pendidikan_id,omitempty"`
+
+	BentukPendidikan  BentukPendidikan  `gorm:"foreignKey:BentukPendidikanID;references:BentukPendidikanID"`
+	JenjangPendidikan JenjangPendidikan `gorm:"foreignKey:JenjangPendidikanID;references:JenjangPendidikanID"`
 }
 
 type SekolahTenant struct {
@@ -48,12 +51,15 @@ type SchemaLog struct {
 // }
 
 type KategoriSekolah struct {
-	KategorisekolahId int32   `gorm:"column:kategori_sekolah_id"`
+	KategorisekolahId int32   `gorm:"column:kategori_sekolah_id;primaryKey;autoIncrement"`
 	NamaKurikulum     *string `gorm:"column:nama_kurikulum"`
 	NamaJurusan       *string `gorm:"column:nama_jurusan"`
 	TahunAjaranId     string  `gorm:"column:tahun_ajaran_id"`
 }
 
+func (Sekolah) TableName() string {
+	return "tabel_sekolah"
+}
 func (KategoriSekolah) TableName() string {
 	return "tabel_kategori_sekolah"
 }

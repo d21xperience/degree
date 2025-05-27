@@ -509,7 +509,6 @@ const (
 	SekolahService_UpdateSekolah_FullMethodName         = "/sekolah.SekolahService/UpdateSekolah"
 	SekolahService_CreateKategoriSekolah_FullMethodName = "/sekolah.SekolahService/CreateKategoriSekolah"
 	SekolahService_GetKategoriSekolah_FullMethodName    = "/sekolah.SekolahService/GetKategoriSekolah"
-	SekolahService_UpdateKategoriSekolah_FullMethodName = "/sekolah.SekolahService/UpdateKategoriSekolah"
 	SekolahService_DeleteKategoriSekolah_FullMethodName = "/sekolah.SekolahService/DeleteKategoriSekolah"
 )
 
@@ -529,7 +528,12 @@ type SekolahServiceClient interface {
 	// ====================================
 	CreateKategoriSekolah(ctx context.Context, in *CreateKategoriSekolahRequest, opts ...grpc.CallOption) (*CreateKategoriSekolahResponse, error)
 	GetKategoriSekolah(ctx context.Context, in *GetKategoriSekolahRequest, opts ...grpc.CallOption) (*GetKategoriSekolahResponse, error)
-	UpdateKategoriSekolah(ctx context.Context, in *UpdateKategoriSekolahRequest, opts ...grpc.CallOption) (*UpdateKategoriSekolahResponse, error)
+	//	rpc UpdateKategoriSekolah (UpdateKategoriSekolahRequest) returns (UpdateKategoriSekolahResponse) {
+	//	  option (google.api.http) = {
+	//	    post: "/api/v1/ss/{schemaname}/kategori-sekolah/update"
+	//	    body:"*"
+	//	  };
+	//	}
 	DeleteKategoriSekolah(ctx context.Context, in *DeleteKategoriSekolahRequest, opts ...grpc.CallOption) (*DeleteKategoriSekolahResponse, error)
 }
 
@@ -621,16 +625,6 @@ func (c *sekolahServiceClient) GetKategoriSekolah(ctx context.Context, in *GetKa
 	return out, nil
 }
 
-func (c *sekolahServiceClient) UpdateKategoriSekolah(ctx context.Context, in *UpdateKategoriSekolahRequest, opts ...grpc.CallOption) (*UpdateKategoriSekolahResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateKategoriSekolahResponse)
-	err := c.cc.Invoke(ctx, SekolahService_UpdateKategoriSekolah_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *sekolahServiceClient) DeleteKategoriSekolah(ctx context.Context, in *DeleteKategoriSekolahRequest, opts ...grpc.CallOption) (*DeleteKategoriSekolahResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(DeleteKategoriSekolahResponse)
@@ -657,7 +651,12 @@ type SekolahServiceServer interface {
 	// ====================================
 	CreateKategoriSekolah(context.Context, *CreateKategoriSekolahRequest) (*CreateKategoriSekolahResponse, error)
 	GetKategoriSekolah(context.Context, *GetKategoriSekolahRequest) (*GetKategoriSekolahResponse, error)
-	UpdateKategoriSekolah(context.Context, *UpdateKategoriSekolahRequest) (*UpdateKategoriSekolahResponse, error)
+	//	rpc UpdateKategoriSekolah (UpdateKategoriSekolahRequest) returns (UpdateKategoriSekolahResponse) {
+	//	  option (google.api.http) = {
+	//	    post: "/api/v1/ss/{schemaname}/kategori-sekolah/update"
+	//	    body:"*"
+	//	  };
+	//	}
 	DeleteKategoriSekolah(context.Context, *DeleteKategoriSekolahRequest) (*DeleteKategoriSekolahResponse, error)
 	mustEmbedUnimplementedSekolahServiceServer()
 }
@@ -692,9 +691,6 @@ func (UnimplementedSekolahServiceServer) CreateKategoriSekolah(context.Context, 
 }
 func (UnimplementedSekolahServiceServer) GetKategoriSekolah(context.Context, *GetKategoriSekolahRequest) (*GetKategoriSekolahResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetKategoriSekolah not implemented")
-}
-func (UnimplementedSekolahServiceServer) UpdateKategoriSekolah(context.Context, *UpdateKategoriSekolahRequest) (*UpdateKategoriSekolahResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateKategoriSekolah not implemented")
 }
 func (UnimplementedSekolahServiceServer) DeleteKategoriSekolah(context.Context, *DeleteKategoriSekolahRequest) (*DeleteKategoriSekolahResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteKategoriSekolah not implemented")
@@ -864,24 +860,6 @@ func _SekolahService_GetKategoriSekolah_Handler(srv interface{}, ctx context.Con
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SekolahService_UpdateKategoriSekolah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateKategoriSekolahRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SekolahServiceServer).UpdateKategoriSekolah(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: SekolahService_UpdateKategoriSekolah_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SekolahServiceServer).UpdateKategoriSekolah(ctx, req.(*UpdateKategoriSekolahRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _SekolahService_DeleteKategoriSekolah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DeleteKategoriSekolahRequest)
 	if err := dec(in); err != nil {
@@ -938,10 +916,6 @@ var SekolahService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetKategoriSekolah",
 			Handler:    _SekolahService_GetKategoriSekolah_Handler,
-		},
-		{
-			MethodName: "UpdateKategoriSekolah",
-			Handler:    _SekolahService_UpdateKategoriSekolah_Handler,
 		},
 		{
 			MethodName: "DeleteKategoriSekolah",

@@ -189,9 +189,10 @@ func (s *SekolahService) GetSekolah(ctx context.Context, req *pb.GetSekolahReque
 	//  Ambil schema dari request
 	Schemaname := req.GetSchemaname()
 	// sekolahID := req.GetSekolahId()
-
+	preloads := []string{"BentukPendidikan", "JenjangPendidikan"}
 	//  Cari sekolah berdasarkan ID dan schema
-	sekolah, err := s.sekolahService.Find(ctx, Schemaname)
+	// sekolah, err := s.sekolahService.Find(ctx, Schemaname)
+	sekolah, err := s.sekolahService.FindWithRelations(ctx, Schemaname, nil, preloads, nil, nil, nil, nil)
 	if err != nil {
 		log.Printf("Gagal menemukan sekolah: %v", err)
 		return nil, fmt.Errorf("gagal menemukan sekolah: %w", err)
@@ -200,28 +201,30 @@ func (s *SekolahService) GetSekolah(ctx context.Context, req *pb.GetSekolahReque
 	//  Return response dalam format protobuf
 	return &pb.GetSekolahResponse{
 		Sekolah: &pb.SekolahDapo{
-			SekolahId:           sekolah.SekolahID.String(),
-			Nama:                sekolah.Nama,
-			Nss:                 sekolah.NSS,
-			Npsn:                sekolah.NPSN,
-			Alamat:              utils.SafeString(sekolah.Alamat),
-			KdPos:               utils.SafeString(sekolah.KodePos),
-			Telepon:             utils.SafeString(sekolah.Telepon),
-			Fax:                 utils.SafeString(sekolah.Fax),
-			Kelurahan:           utils.SafeString(sekolah.Kelurahan),
-			Kecamatan:           utils.SafeString(sekolah.Kecamatan),
-			KabKota:             utils.SafeString(sekolah.KabKota),
-			Propinsi:            utils.SafeString(sekolah.Propinsi),
-			Website:             utils.SafeString(sekolah.Website),
-			Email:               utils.SafeString(sekolah.Email),
-			NmKepsek:            utils.SafeString(sekolah.NamaKepsek),
-			NipKepsek:           utils.SafeString(sekolah.NIPKepsek),
-			NiyKepsek:           utils.SafeString(sekolah.NIPKepsek),
-			StatusKepemilikanId: utils.SafeUint32(sekolah.StatusKepemilikanID),
-			KodeAktivasi:        utils.SafeString(sekolah.KodeAktivasi),
-			JenjangPendidikanId: utils.SafeUint32(sekolah.JenjangPendidikanID),
-			BentukPendidikanId:  utils.SafeUint32(sekolah.BentukPendidikanID),
+			SekolahId:           sekolah[0].SekolahID.String(),
+			Nama:                sekolah[0].Nama,
+			Nss:                 sekolah[0].NSS,
+			Npsn:                sekolah[0].NPSN,
+			Alamat:              utils.SafeString(sekolah[0].Alamat),
+			KdPos:               utils.SafeString(sekolah[0].KodePos),
+			Telepon:             utils.SafeString(sekolah[0].Telepon),
+			Fax:                 utils.SafeString(sekolah[0].Fax),
+			Kelurahan:           utils.SafeString(sekolah[0].Kelurahan),
+			Kecamatan:           utils.SafeString(sekolah[0].Kecamatan),
+			KabKota:             utils.SafeString(sekolah[0].KabKota),
+			Propinsi:            utils.SafeString(sekolah[0].Propinsi),
+			Website:             utils.SafeString(sekolah[0].Website),
+			Email:               utils.SafeString(sekolah[0].Email),
+			NmKepsek:            utils.SafeString(sekolah[0].NamaKepsek),
+			NipKepsek:           utils.SafeString(sekolah[0].NIPKepsek),
+			NiyKepsek:           utils.SafeString(sekolah[0].NIPKepsek),
+			StatusKepemilikanId: utils.SafeUint32(sekolah[0].StatusKepemilikanID),
+			KodeAktivasi:        utils.SafeString(sekolah[0].KodeAktivasi),
+			JenjangPendidikanId: utils.SafeUint32(sekolah[0].JenjangPendidikanID),
+			BentukPendidikanId:  utils.SafeUint32(sekolah[0].BentukPendidikanID),
 		},
+		BentukPendidikanStr:  sekolah[0].BentukPendidikan.Nama,
+		JenjangPendidikanStr: sekolah[0].JenjangPendidikan.Nama,
 	}, nil
 }
 
@@ -333,4 +336,30 @@ func (s *SekolahService) GetKategoriSekolah(ctx context.Context, req *pb.GetKate
 		Status:          true,
 		KategoriSekolah: pbKategoriSekolah,
 	}, nil
+}
+
+func (s *SekolahService) DeleteKategoriSekolah(ctx context.Context, req *pb.DeleteKategoriSekolahRequest) (*pb.DeleteKategoriSekolahResponse, error) {
+	var err error
+	// Debugging: Cek nilai request yang diterima
+	// log.Printf("Received Sekolah data request: %+v\n", req)
+	requiredFields := []string{"Schemaname", "KategoriSekolahId"}
+	// Validasi request
+	err = utils.ValidateFields(req, requiredFields)
+	if err != nil {
+		return nil, err
+	}
+	Schemaname := req.GetSchemaname()
+	kategoriSekolahId := strconv.Itoa(int(req.GetKategoriSekolahId()))
+	err = s.repoKategoriSekolah.Delete(ctx, kategoriSekolahId, Schemaname, "kategori_sekolah_id")
+	if err != nil {
+		return &pb.DeleteKategoriSekolahResponse{
+			Message: fmt.Sprintf("Gagal menyimpan data kategori sekolah: %s", err),
+			Status:  false,
+		}, nil
+	}
+	return &pb.DeleteKategoriSekolahResponse{
+		Message: "Kategori sekolah berhasil dihapus!",
+		Status:  true,
+	}, nil
+
 }

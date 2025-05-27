@@ -545,48 +545,6 @@ func local_request_SekolahService_GetKategoriSekolah_0(ctx context.Context, mars
 	return msg, metadata, err
 }
 
-func request_SekolahService_UpdateKategoriSekolah_0(ctx context.Context, marshaler runtime.Marshaler, client SekolahServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq UpdateKategoriSekolahRequest
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	val, ok := pathParams["schemaname"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "schemaname")
-	}
-	protoReq.Schemaname, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "schemaname", err)
-	}
-	msg, err := client.UpdateKategoriSekolah(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_SekolahService_UpdateKategoriSekolah_0(ctx context.Context, marshaler runtime.Marshaler, server SekolahServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq UpdateKategoriSekolahRequest
-		metadata runtime.ServerMetadata
-		err      error
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	val, ok := pathParams["schemaname"]
-	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "schemaname")
-	}
-	protoReq.Schemaname, err = runtime.String(val)
-	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "schemaname", err)
-	}
-	msg, err := server.UpdateKategoriSekolah(ctx, &protoReq)
-	return msg, metadata, err
-}
-
 var filter_SekolahService_DeleteKategoriSekolah_0 = &utilities.DoubleArray{Encoding: map[string]int{"schemaname": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 
 func request_SekolahService_DeleteKategoriSekolah_0(ctx context.Context, marshaler runtime.Marshaler, client SekolahServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
@@ -3595,26 +3553,6 @@ func RegisterSekolahServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		}
 		forward_SekolahService_GetKategoriSekolah_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_SekolahService_UpdateKategoriSekolah_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.SekolahService/UpdateKategoriSekolah", runtime.WithHTTPPathPattern("/api/v1/ss/{schemaname}/kategori-sekolah/update"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_SekolahService_UpdateKategoriSekolah_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_SekolahService_UpdateKategoriSekolah_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
 	mux.Handle(http.MethodDelete, pattern_SekolahService_DeleteKategoriSekolah_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -5695,23 +5633,6 @@ func RegisterSekolahServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		}
 		forward_SekolahService_GetKategoriSekolah_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_SekolahService_UpdateKategoriSekolah_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.SekolahService/UpdateKategoriSekolah", runtime.WithHTTPPathPattern("/api/v1/ss/{schemaname}/kategori-sekolah/update"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_SekolahService_UpdateKategoriSekolah_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_SekolahService_UpdateKategoriSekolah_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
 	mux.Handle(http.MethodDelete, pattern_SekolahService_DeleteKategoriSekolah_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -5740,7 +5661,6 @@ var (
 	pattern_SekolahService_UpdateSekolah_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "ss", "schemaname", "update"}, ""))
 	pattern_SekolahService_CreateKategoriSekolah_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "v1", "ss", "schemaname", "kategori-sekolah", "create"}, ""))
 	pattern_SekolahService_GetKategoriSekolah_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "ss", "schemaname", "kategori-sekolah"}, ""))
-	pattern_SekolahService_UpdateKategoriSekolah_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "v1", "ss", "schemaname", "kategori-sekolah", "update"}, ""))
 	pattern_SekolahService_DeleteKategoriSekolah_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "v1", "ss", "schemaname", "kategori-sekolah", "delete"}, ""))
 )
 
@@ -5752,7 +5672,6 @@ var (
 	forward_SekolahService_UpdateSekolah_0         = runtime.ForwardResponseMessage
 	forward_SekolahService_CreateKategoriSekolah_0 = runtime.ForwardResponseMessage
 	forward_SekolahService_GetKategoriSekolah_0    = runtime.ForwardResponseMessage
-	forward_SekolahService_UpdateKategoriSekolah_0 = runtime.ForwardResponseMessage
 	forward_SekolahService_DeleteKategoriSekolah_0 = runtime.ForwardResponseMessage
 )
 

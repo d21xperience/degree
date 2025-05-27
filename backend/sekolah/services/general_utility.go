@@ -17,46 +17,7 @@ type ParamTemplate struct {
 	schemaname   string
 	filePath     string
 	semesterId   string
-	
 }
-
-// // RequestRequirement digunakan untuk menyimpan dependensi service dan protobuf
-// type RequestRequirement[S any, P any] struct {
-// 	service  S // Service untuk mengakses data
-// 	protoBuf P // Protobuf atau struct untuk representasi data
-// }
-
-// func (r *RequestRequirement[S, P]) GetModelByID(ctx context.Context, id string, fetcher func(S, string) (*P, error)) (*P, error) {
-// 	// Gunakan fetcher untuk mengambil data berdasarkan ID
-// 	result, err := fetcher(r.service, id)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to get model by ID: %w", err)
-// 	}
-
-// 	return result, nil
-// }
-
-// func ConvertModelsToPB[T any, U any](models []*T, converter func(*T) *U) []*U {
-// 	var pbList []*U
-// 	for _, model := range models {
-// 		pbList = append(pbList, converter(model))
-// 	}
-// 	return pbList
-// }
-// func ConvertPBToModels[T any, U any](pbs []*T, converter func(*T) *U) []*U {
-// 	var modelList []*U
-// 	for _, model := range pbs {
-// 		modelList = append(modelList, converter(model))
-// 	}
-// 	return modelList
-// }
-
-// func ConvertModelToPB[T any, U any](model *T, converter func(*T) *U) *U {
-// 	if model == nil {
-// 		return nil
-// 	}
-// 	return converter(model)
-// }
 
 // Fungsi untuk membaca file Excel dan memproses data berdasarkan jenis
 func BacaDataExcel(param *ParamTemplate) ([][]string, error) {
@@ -85,92 +46,6 @@ func BacaDataExcel(param *ParamTemplate) ([][]string, error) {
 	// return rows, nil
 
 }
-
-// func BacaDataExcel(param *ParamTemplate) ([][]string, error) {
-// 	f, err := excelize.OpenFile(param.filePath)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("gagal membaca file Excel: %w", err)
-// 	}
-// 	defer f.Close()
-
-// 	ret, err := f.GetDocProps()
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	param.semesterId = ret.Category
-
-// 	sheetName := f.GetSheetName(0)
-
-// 	rows, err := f.GetRows(sheetName, excelize.Options{RawCellValue: true})
-// 	if err != nil {
-// 		return nil, fmt.Errorf("gagal mengambil data dari sheet: %w", err)
-// 	}
-
-// 	if len(rows) < 2 {
-// 		return nil, fmt.Errorf("file Excel kosong atau tidak memiliki data yang valid")
-// 	}
-
-// 	var result [][]string
-
-// 	for i, row := range rows {
-// 		if i == 0 {
-// 			// Skip header
-// 			result = append(result, row)
-// 			continue
-// 		}
-
-// 		var newRow []string
-// 		for j, cell := range row {
-// 			cellRef := fmt.Sprintf("%s%d", ToAlpha(j+1), i+1)
-// 			rawVal, err := f.GetCellValue(sheetName, cellRef)
-// 			if err != nil {
-// 				newRow = append(newRow, cell)
-// 				continue
-// 			}
-
-// 			// Coba konversi nilai ke float64, untuk deteksi serial date
-// 			dateFloat, ok := isExcelDate(rawVal)
-// 			if ok {
-// 				t, parseErr := excelize.ExcelDateToTime(dateFloat, false)
-// 				if parseErr == nil {
-// 					rawVal = t.Format("02/01/2006") // Format DD/MM/YYYY
-// 				}
-// 			}
-
-// 			newRow = append(newRow, rawVal)
-// 		}
-
-// 		result = append(result, newRow)
-// 	}
-
-// 	return result[1:], nil
-// }
-
-// // Helper function untuk cek apakah string bisa jadi angka dan merepresentasikan Excel Date
-// func isExcelDate(val string) (float64, bool) {
-// 	var f float64
-// 	_, err := fmt.Sscan(val, &f)
-// 	if err != nil {
-// 		return 0, false
-// 	}
-// 	// Excel dates biasanya antara 1 sampai ~2958465
-// 	if f > 0 && f < 2958465 {
-// 		return f, true
-// 	}
-// 	return f, false
-// }
-
-// // Fungsi bantu untuk ubah nomor kolom ke huruf (A, B, ..., Z, AA, dll.)
-// func ToAlpha(colNumber int) string {
-// 	var col string
-// 	for colNumber > 0 {
-// 		colNumber--
-// 		letter := 'A' + rune(colNumber%26)
-// 		col = string(letter) + col
-// 		colNumber /= 26
-// 	}
-// 	return col
-// }
 
 // Fungsi generik untuk membaca file Excel dan memproses data berdasarkan jenis
 func UploadDataSekolah[T any](param ParamTemplate) ([]T, error) {
@@ -375,7 +250,11 @@ func GenerateTemplateV2(param ParamTemplate, db *gorm.DB) error {
 	sheetName := "Template"
 	f.SetSheetName("Sheet1", sheetName)
 
-	columns, exists := template.GetTemplateColumns(param.templateType)
+	columns, exists := template.GetTemplateColumns(&template.DataTemplate{
+		TemplateType:  param.templateType,
+		Schemaname:    param.schemaname,
+		TahunAjaranId: param.semesterId,
+	}, db)
 	if !exists {
 		return fmt.Errorf("template type %s tidak ditemukan", param.templateType)
 	}

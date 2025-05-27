@@ -18,6 +18,19 @@ type SekolahRepository interface {
 	Update(ctx context.Context, sekolah *models.Sekolah, schemaName string) error
 	Delete(ctx context.Context, sekolahID string, schemaName string) error
 	GetKategoriSekolah(ctx context.Context, namaSekolah string) (*models.BentukPendidikan, error)
+	FindWithRelations(
+		ctx context.Context,
+		schemaName string,
+		joins []string,
+		preloads []string,
+		exactConditions map[string]interface{},
+		customConditions []struct {
+			Query string
+			Args  []interface{}
+		},
+		groupByColumns []string,
+		orderBy []string,
+	) ([]models.Sekolah, error)
 }
 
 type sekolahRepositoryImpl struct {
@@ -142,4 +155,65 @@ func (r *sekolahRepositoryImpl) GetKategoriSekolah(ctx context.Context, namaSeko
 	}
 
 	return &kategori, nil
+}
+
+func (r *sekolahRepositoryImpl) FindWithRelations(
+	ctx context.Context,
+	schemaName string,
+	joins []string,
+	preloads []string,
+	exactConditions map[string]interface{},
+	customConditions []struct {
+		Query string
+		Args  []interface{}
+	},
+	groupByColumns []string,
+	orderBy []string,
+) ([]models.Sekolah, error) {
+	var results []models.Sekolah
+	tx := r.db.WithContext(ctx)
+
+	// Set schema ke schemaName
+	if err := tx.Exec(fmt.Sprintf("SET search_path TO %s", schemaName)).Error; err != nil {
+		return nil, fmt.Errorf("failed to set schema: %w", err)
+	}
+
+	// Hapus tx.Distinct() → tidak digunakan
+
+	// Join relasi jika ada
+	for _, join := range joins {
+		tx = tx.Joins(join)
+	}
+
+	// Preload relasi jika ada
+	for _, preload := range preloads {
+		tx = tx.Preload(preload)
+	}
+
+	// GROUP BY jika ada
+	if len(groupByColumns) > 0 {
+		tx = tx.Group(strings.Join(groupByColumns, ", "))
+	}
+
+	// ORDER BY jika ada
+	if len(orderBy) > 0 {
+		tx = tx.Order(strings.Join(orderBy, ", "))
+	}
+
+	// Kondisi exact
+	if len(exactConditions) > 0 {
+		tx = tx.Where(exactConditions)
+	}
+
+	// Kondisi custom
+	for _, cond := range customConditions {
+		tx = tx.Where(cond.Query, cond.Args...)
+	}
+
+	// Eksekusi query
+	if err := tx.Find(&results).Error; err != nil {
+		return nil, err
+	}
+
+	return results, nil
 }
