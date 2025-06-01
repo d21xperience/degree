@@ -11,7 +11,6 @@ const loading = ref(false);
 // Fungsi handler submit form
 const handleSubmit = async () => {
     loading.value = true;
-
     try {
         // Kirim data form ke onLogin
         await onLogin({
@@ -21,7 +20,6 @@ const handleSubmit = async () => {
             }
         });
     } catch (error) {
-        // console.log(error);
         alert(error?.message);
     } finally {
         // setTimeout(() => (loading.value[index] = false), 1000);

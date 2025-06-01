@@ -14,17 +14,18 @@ type TabelPTK struct {
 	TempatLahir       *string    `gorm:"column:tempat_lahir"`      // String
 	TanggalLahir      *time.Time `gorm:"column:tanggal_lahir"`     // String (format tanggal, bisa diubah ke time.Time jika perlu)
 	IsDapodik         bool       `gorm:"column:is_dapodik"`
+	PtkIdDapodik      *uuid.UUID `gorm:"column:ptk_id_dapodik"`
 	StatusKeaktifanID int32      `gorm:"column:status_keaktifan_id"` // String
 	JenisPtkID        int32      `gorm:"column:jenis_ptk_id"`        // String
 }
 
 type PTKTerdaftar struct {
-	PtkTerdaftarId uuid.UUID `gorm:"column:ptk_terdaftar_id;primaryKey"`
-	PtkID          uuid.UUID `gorm:"column:ptk_id"`
-	TahunAjaranId  string    `gorm:"column:tahun_ajaran_id"`
-	JenisKeluarId  *string   `gorm:"column:jenis_keluar_id"`
-	IsDapodik      bool      `gorm:"column:is_dapodik"`
-
+	PtkTerdaftarId        uuid.UUID  `gorm:"column:ptk_terdaftar_id;primaryKey"`
+	PtkID                 uuid.UUID  `gorm:"column:ptk_id"`
+	TahunAjaranId         string     `gorm:"column:tahun_ajaran_id"`
+	JenisKeluarId         *string    `gorm:"column:jenis_keluar_id"`
+	IsDapodik             bool       `gorm:"column:is_dapodik"`
+	PtkTerdaftarIdDapodik *uuid.UUID `gorm:"column:ptk_terdaftar_id_dapodik"`
 	// Relasi ke PTK
 	PTK TabelPTK `gorm:"foreignKey:PtkID;references:PtkID"`
 	// Pembelajaran []Pembelajaran `gorm:"foreignKey:PtkTerdaftarId;references:PtkTerdaftarId"`

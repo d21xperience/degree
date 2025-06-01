@@ -1,7 +1,7 @@
+import { useSekolahService } from '@/composables/useSekolahService';
 import router from '@/router';
 import { computed } from 'vue';
 import { useStore } from 'vuex';
-
 const isEmail = (input) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(input);
@@ -13,6 +13,7 @@ const isValidUsername = (input) => {
 };
 
 export function useAuth() {
+    const { fetchSekolah } = useSekolahService();
     const store = useStore();
     const currentUser = computed(() => store.getters['authService/getUserProfile']);
     const onLogin = async ({ values }) => {
@@ -26,26 +27,35 @@ export function useAuth() {
             alert('Username atau email tidak valid.');
             return;
         }
+        let cek = {};
         try {
             const response = await store.dispatch('authService/login', {
                 [loginIdentifier]: username,
                 password
             });
-            if (response) {
+            if (response.status) {
+                await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
+                await fetchSekolah();
+
                 // Ambil tahun ajaran
                 await store.dispatch('sekolahService/fetchTahunAjaran');
                 await store.dispatch('sekolahService/fetchSemester');
-                const result = response?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
-                await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
-                await router.push({ name: 'dashboard', params: { sekolah: result } });
+
+                const namaSekolah = response?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
+
+                await router.push({ name: 'dashboard', params: { sekolah: namaSekolah } });
             }
         } catch (error) {
-            throw error;
+            console.error('Login gagal:', error);
+            alert('Login gagal. Silakan periksa kembali informasi Anda.');
+            store.dispatch('authService/logout');
+            return; // pastikan keluar supaya finally tidak berjalan seolah login sukses
         }
     };
 
     const onLogout = async () => {
         await store.dispatch('authService/logout');
+        await store.dispatch('sekolahService/resetState');
         router.push({ name: 'landing' });
     };
     return {

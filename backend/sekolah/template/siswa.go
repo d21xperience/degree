@@ -9,7 +9,7 @@ import (
 func GetSiswaColumns() []TemplateColumn {
 	return []TemplateColumn{
 		{Name: "Tingkat Pendidikan", Example: "10", ColumnWidth: 11},
-		{Name: "Nama Kelas", Example: "X TKJ A", ColumnWidth: 11},
+		{Name: "Nama Kelas", Example: "X TKJ A (lihat tabel pengisian)", ColumnWidth: 11},
 		{Name: "NIS", Example: "123456"},
 		{Name: "NISN", Example: "99887766"},
 		{Name: "Nama", Example: "Ahmad"},
@@ -24,6 +24,7 @@ func GetSiswaColumns() []TemplateColumn {
 			PromptTitle:      utils.StringToPointer("Input Jk"),
 			ShowInputMessage: true,
 			Prompt:           utils.StringToPointer("Isi L atau P"),
+			
 		}},
 		{Name: "Tempat Lahir", Example: "Jakarta"},
 		{Name: "Tanggal Lahir", Example: "09/12/2016", FormatStyle: &excelize.Style{
@@ -37,7 +38,7 @@ func GetSiswaColumns() []TemplateColumn {
 			ShowErrorMessage: true,
 			ErrorTitle:       utils.StringToPointer("Input Agama Salah!"),
 			Error:            utils.StringToPointer("Pilih agama dari daftar"),
-			Sqref:            "G2:G1048576",
+			Sqref:            "I2:I1048576",
 			PromptTitle:      utils.StringToPointer("Input Agama"),
 			ShowInputMessage: true,
 			Prompt:           utils.StringToPointer("Tulis agama: Islam,Kristen,Katolik,Hindu,Buddha,Khonghucu"),

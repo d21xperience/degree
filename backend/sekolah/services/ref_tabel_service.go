@@ -183,18 +183,18 @@ func (s *ReferensiServiceServer) GetJurusan(ctx context.Context, req *pb.GetJuru
 			Jurusan: nil,
 		}, nil
 	}
-	res := utils.ConvertModelsToPB(mod, func(re *models.Jurusan) *pb.Jurusan {
+	res := utils.ConvertModelsToPB(mod, func(item *models.Jurusan) *pb.Jurusan {
 		return &pb.Jurusan{
-			JurusanId:           re.JurusanID,
-			NamaJurusan:         re.NamaJurusan,
-			UntukSma:            uint32(re.UntukSMA),
-			UntukSmk:            uint32(re.UntukSMK),
-			UntukPt:             uint32(re.UntukPT),
-			UntukSlb:            uint32(re.UntukSLB),
-			UntukSmklb:          uint32(re.UntukSMKLB),
-			JenjangPendidikanId: utils.PointerToUint32(utils.Uint16ToUint32Pointer(re.JenjangPendidikanID)),
-			JurusanInduk:        utils.SafeString(re.JurusanInduk),
-			LevelBidangId:       re.LevelBidangID,
+			JurusanId:           item.JurusanID,
+			NamaJurusan:         item.NamaJurusan,
+			UntukSma:            uint32(item.UntukSMA),
+			UntukSmk:            uint32(item.UntukSMK),
+			UntukPt:             uint32(item.UntukPT),
+			UntukSlb:            uint32(item.UntukSLB),
+			UntukSmklb:          uint32(item.UntukSMKLB),
+			JenjangPendidikanId: utils.PointerToUint32(utils.Uint16ToUint32Pointer(item.JenjangPendidikanID)),
+			JurusanInduk:        utils.SafeString(item.JurusanInduk),
+			LevelBidangId:       item.LevelBidangID,
 		}
 	})
 	return &pb.GetJurusanResponse{

@@ -193,3 +193,35 @@ func (s *PTKServiceServer) DeletePTK(ctx context.Context, req *pb.DeletePTKReque
 // 	}
 // 	return res
 // }
+
+func (s *PTKServiceServer) SearchPTKByName(ctx context.Context, req *pb.SearchPTKByNameRequest) (*pb.SearchPTKByNameResponse, error) {
+	log.Printf("ptk_server/SearchPTKByName=>Received Sekolah data request: %+v\n", req)
+	// Daftar field yang wajib diisi
+	requiredFields := []string{"Schemaname", "Nama"}
+	// Validasi request
+	err := utils.ValidateFields(req, requiredFields)
+	if err != nil {
+		return nil, err
+	}
+	schemaName := req.GetSchemaname()
+	namaPtk := req.GetNama()
+	ptks, _, err := s.repo.SearchByColumnNamePreloadAndJoins(ctx, schemaName, nil, nil, nil, nil, 100, 0, "nama", namaPtk)
+	if err != nil {
+		return nil, err
+	}
+	ptkList := utils.ConvertModelsToPB(ptks, func(item models.TabelPTK) *pb.PTK {
+		return &pb.PTK{
+			PtkId:             item.PtkID.String(),
+			Nama:              item.Nama,
+			JenisKelamin:      utils.SafeString(item.JenisKelamin),
+			TempatLahir:       utils.SafeString(item.TempatLahir),
+			JenisPtkId:        item.JenisPtkID,
+			TanggalLahir:      item.TanggalLahir.Format("2006-01-02"),
+			StatusKeaktifanId: item.StatusKeaktifanID,
+		}
+	})
+
+	return &pb.SearchPTKByNameResponse{
+		PTK: ptkList,
+	}, nil
+}

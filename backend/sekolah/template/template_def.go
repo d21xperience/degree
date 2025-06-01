@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"sekolah/repositories"
-	"strings"
 	"time"
 
 	"github.com/xuri/excelize/v2"
@@ -29,14 +28,13 @@ type DataTemplate struct {
 }
 
 // Mengembalikan daftar kolom berdasarkan tipe template
-func GetTemplateColumns(param *DataTemplate, db *gorm.DB) ([]TemplateColumn, bool) {
+func GetTemplateColumns(param *DataTemplate) ([]TemplateColumn, bool) {
 	switch param.TemplateType {
 	case "siswa":
 		return GetSiswaColumns(), true
 	case "guru":
 		return GetGuruColumns(), true
 	case "kelas":
-		initKelas(param, db)
 		return GetKelasColumns(), true
 	// case "ijazah":
 	// 	return GetIjazahColumns(), true
@@ -47,34 +45,80 @@ func GetTemplateColumns(param *DataTemplate, db *gorm.DB) ([]TemplateColumn, boo
 	}
 }
 
-func initKelas(param *DataTemplate, db *gorm.DB) error {
-	// var err error
-	repoKategoriSekolah := repositories.NewKategoriSekolahRepository(db)
-	exactConditions := map[string]any{
-		"tabel_kategori_sekolah.tahun_ajaran_id": param.TahunAjaranId,
+// func initKelas(param *DataTemplate, db *gorm.DB) error {
+// 	// var err error
+// 	repoKategoriSekolah := repositories.NewKategoriSekolahRepository(db)
+// 	exactConditions := map[string]any{
+// 		"tabel_kategori_sekolah.tahun_ajaran_id": param.TahunAjaranId,
+// 	}
+// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
+// 	kategoriSekolah, err := repoKategoriSekolah.FindWithRelations(ctx, param.Schemaname, nil, nil, exactConditions, nil, nil, nil)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	// namaKurikulumList := []string{}
+// 	namaJurusanList := []string{}
+// 	for _, k := range kategoriSekolah {
+// 		// if k.NamaKurikulum != nil {
+// 		// 	namaKurikulumList = append(namaKurikulumList, *k.NamaKurikulum)
+// 		// }
+// 		// if k.NamaJurusan != nil {
+// 		// 	namaJurusanList = append(namaJurusanList, *k.NamaJurusan)
+// 		// }
+// 		namaJurusanList = append(namaJurusanList, fmt.Sprintf("%d untuk jurusan", k.KategorisekolahId), *k.NamaJurusan)
+// 	}
+
+// 	// KurikulumList = fmt.Sprintf("`\"%s\"`", strings.Join(namaKurikulumList, ","))
+// 	// fmt.Println(KurikulumList)
+// 	// JurusanList = fmt.Sprintf("`\"%s\"`", strings.Join(namaJurusanList, ";"))
+// 	JurusanList = strings.Join(namaJurusanList, ";")
+// 	// KurikulumList = `"` + strings.Join(namaKurikulumList, ",") + `"`
+// 	// JurusanList = `"` + strings.Join(namaJurusanList, ",") + `"`
+
+// 	return nil
+// }
+
+func GetPetunjukSheet(f *excelize.File, param *DataTemplate, db *gorm.DB) error {
+	switch param.TemplateType {
+	case "siswa":
+		return getKelas(f, param, db)
+	// case "guru":
+	// 	return GetGuruColumns()
+	// case "kelas":
+	// 	return GetKelasColumns()
+	// // case "ijazah":
+	// // 	return GetIjazahColumns()
+	// case "nilai_akhir":
+	// 	return GetNilaiAkhirColumns()
+	default:
+		return nil
 	}
+}
+
+func getKelas(f *excelize.File, param *DataTemplate, db *gorm.DB) error {
+	repoKelas := repositories.NewrombonganBelajarRepository(db)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	kategoriSekolah, err := repoKategoriSekolah.FindWithRelations(ctx, param.Schemaname, nil, nil, exactConditions, nil, nil, nil)
+	conditions := map[string]any{
+		"tabel_kelas.semester_id": fmt.Sprintf("%s1", param.TahunAjaranId),
+	}
+	kelasList, err := repoKelas.FindAllByConditions(ctx, param.Schemaname, conditions, 100, 0, nil)
 	if err != nil {
 		return err
-	}
-	namaKurikulumList := []string{}
-	namaJurusanList := []string{}
-	for _, k := range kategoriSekolah {
-		if k.NamaKurikulum != nil {
-			namaKurikulumList = append(namaKurikulumList, *k.NamaKurikulum)
-		}
-		if k.NamaJurusan != nil {
-			namaJurusanList = append(namaJurusanList, *k.NamaJurusan)
-		}
-	}
+	} 
+	infoSheet := "Petunjuk pengisian"
+	f.NewSheet(infoSheet)
 
-	KurikulumList = fmt.Sprintf("`\"%s\"`", strings.Join(namaKurikulumList, ","))
-	fmt.Println(KurikulumList)
-	JurusanList = fmt.Sprintf("`\"%s\"`", strings.Join(namaJurusanList, ","))
-	// KurikulumList = `"` + strings.Join(namaKurikulumList, ",") + `"`
-	// JurusanList = `"` + strings.Join(namaJurusanList, ",") + `"`
+	f.SetCellValue(infoSheet, "A1", "Nama Kelas")
+	f.SetCellValue(infoSheet, "B1", "Tingkat")
 
+	var cell string
+	for i, kelas := range kelasList {
+		cell = fmt.Sprintf("A%d", i+2) // Mulai dari A2
+		f.SetCellValue(infoSheet, cell, kelas.NmKelas)
+		cell = fmt.Sprintf("B%d", i+2) // Mulai dari A2
+		f.SetCellValue(infoSheet, cell, kelas.TingkatPendidikanId)
+	}
 	return nil
 }

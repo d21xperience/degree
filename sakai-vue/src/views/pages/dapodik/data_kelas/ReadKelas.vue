@@ -4,10 +4,10 @@
             <div class="mb-2">
                 <Toolbar>
                     <template #start>
-                        <Button icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" v-tooltip.bottom="'Tambah data'" />
-                        <Button icon="pi pi-pencil" severity="warn" @click="editKelas(selectedKelas)" :disabled="!selectedKelas || !selectedKelas.length || selectedKelas.length > 1" class="mr-2" v-tooltip.bottom="'Edit data'" />
+                        <!-- <Button icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" v-tooltip.bottom="'Tambah data'" v-show="selectedSemester.semester == 1" /> -->
+                        <Button icon="pi pi-pencil" severity="warn" @click="editKelas" :disabled="!selectedKelas || !selectedKelas.length || selectedKelas.length > 1" class="mr-2" v-tooltip.bottom="'Edit data'" />
                         <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!selectedKelas || !selectedKelas.length" v-tooltip.bottom="'Hapus data'" />
-                        <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2" v-tooltip.bottom="'Upload'" />
+                        <!-- <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2" v-tooltip.bottom="'Upload'" v-show="selectedSemester.semester == 1" /> -->
                         <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2" v-tooltip.bottom="'Download'" />
 
                         <div v-show="selectedSemester.semester == 2">
@@ -17,7 +17,17 @@
                     <template #end>
                         <div class="flex flex-wrap gap-2 items-center justify-between">
                             <div class="flex">
-                                <Select v-model="filters['tingkatPendidikanId'].value" :options="tingkatPendidikanOptions" optionLabel="nama" optionValue="kode" placeholder="Tingkat" class="w-full md:w-48" checkmark show-clear />
+                                <Select
+                                    v-model="filters['tingkatPendidikanId'].value"
+                                    :options="tingkatPendidikanOptions"
+                                    optionLabel="nama"
+                                    optionValue="kode"
+                                    placeholder="Tingkat"
+                                    class="w-full md:w-48"
+                                    checkmark
+                                    show-clear
+                                    v-show="kelasList.length > 0"
+                                />
                             </div>
                         </div>
                     </template>
@@ -72,7 +82,7 @@
         </div>
 
         <DialogImport v-model:visible="dialogImport" template-type="kelas" />
-        <DialogConfirmDelete v-model:visible="deleteKelasDialog" message="Apakah kelas tersebut akan dihapus?" @confirm="deletedKelas" @closeDialog="closeDialog"/>
+        <DialogConfirmDelete v-model:visible="deleteKelasDialog" message="Apakah kelas tersebut akan dihapus?" @confirm="deleteKelas" @closeDialog="closeDialog" />
         <Dialog v-model:visible="showAnggotaKelas" style="width: 450px; height: max-content" header="Anggota Kelas" close-icon="pi pi-times" maximizable>
             <AnggotaKelas :rombongan-belajar-id="rombonganBelajarId" />
         </Dialog>
@@ -117,19 +127,18 @@ import Skeleton from 'primevue/skeleton';
 // import DialogAnggotaKelas from '@/components/dapodik/AnggotaKelas.vue';
 import { useSekolahService } from '@/composables/useSekolahService';
 
-const { schemaname, fetchKelas, fetchTingkat, initSelectedSemester, createDns } = useSekolahService();
+const { schemaname, fetchKelas, fetchTingkat, sekolah, addDns } = useSekolahService();
 // ================================
-const kelasList = ref();
+const kelasList = ref([]);
 const isLoading = ref(false);
 const tingkatPendidikanOptions = ref();
 onMounted(async () => {
-    // console.log(selectedSemester.value)
     await fetchK();
-    tingkatPendidikanOptions.value = await fetchTingkat();
 });
 const openNew = async () => {
+    // console.log(sekolah.value)
     await nextTick();
-    router.push({ name: 'inputKelas' });
+    router.push({ name: 'inputKelas', params: { sekolah: sekolah.value?.uri } });
 };
 const closeDialog = () => {
     selectedKelas.value = null;
@@ -143,7 +152,7 @@ const exportCSV = () => {
     dt.value.exportCSV();
 };
 
-const deletedKelas = () => {
+const deleteKelas = () => {
     kelasList.value = kelasList.value.filter((val) => !selectedKelas.value.includes(val));
     // if (selectedKelas.value.length == 1) {
     //     deleteSiswaAktif(selectedKelas.value[0].anggotaRombelId);
@@ -153,22 +162,14 @@ const deletedKelas = () => {
     // }
 };
 const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
-
-watch(selectedSemester, async (newVal) => {
-    // console.log('selecteSemester', newVal);
+watch(selectedSemester, async () => {
     await fetchK();
 });
 const fetchK = async () => {
-    // try {
-    //     const res = store.getters['sekolahService/getKelas'](selectedSemester.value?.semesterId);
-    //     if (!res || res.length === 0) {
     kelasList.value = await fetchKelas();
-    //     } else {
-    //         kelasList.value = res;
-    //     }
-    // } catch (error) {
-    //     console.log(error);
-    // }
+    if (kelasList.value.length > 0) {
+        tingkatPendidikanOptions.value = await fetchTingkat();
+    }
 };
 
 const toast = useToast();
@@ -184,7 +185,8 @@ const submitted = ref(false);
 const editKelas = async () => {
     router.push({
         name: 'editKelas',
-        params: { kelasId: selectedKelas.value[0]?.rombonganBelajarId.toString() }
+        params: { sekolah: sekolah.value?.uri },
+        query: { kelasId: selectedKelas.value[0]?.rombonganBelajarId.toString() }
     });
 };
 
@@ -281,6 +283,6 @@ const sendToDns = async () => {
     }));
 
     isDialogKelulusan.value = false;
-    createDns(anggotaKelas);
+    addDns(anggotaKelas);
 };
 </script>

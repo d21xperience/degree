@@ -40,9 +40,6 @@ const mutations = {
         state.refreshToken = refreshToken;
     },
     clearAuthData(state) {
-        state.token = null;
-        state.refreshToken = null;
-        state.user = null;
         localStorage.removeItem('token'); // Hapus token saat logout
         localStorage.removeItem('userRole'); // Hapus userRole saat logout
         localStorage.removeItem('userProfile'); // Hapus userProfile saat logout
@@ -68,6 +65,14 @@ const mutations = {
         localStorage.removeItem('tabelDashboard');
         localStorage.removeItem('METAMASK_CONNECTED');
         localStorage.removeItem('tabelDns');
+        localStorage.removeItem('tabelJurusan');
+        localStorage.removeItem('tabelSekolah');
+        state.token = null;
+        state.userRole = null;
+        state.user = null;
+        state.userProfile = null;
+        state.sekolah = null;
+        state.refreshToken = null;
     },
     SET_SEKOLAH(state, sekolah) {
         state.sekolah = sekolah;
@@ -88,10 +93,12 @@ const actions = {
             const { ok } = response.data;
             if (ok) {
                 commit('setToken', response.data.token);
-                commit('setUser', response.data.user);
                 commit('setUserRole', response.data.user.role);
+                commit('setUser', response.data.user);
                 commit('SET_SEKOLAH', response.data.sekolahTenant);
                 const results = {
+                    status: true,
+                    userRole: response.data.user.role,
                     user: response.data.user,
                     sekolahTenant: response.data.sekolahTenant
                 };
@@ -104,6 +111,7 @@ const actions = {
             throw error.response.data;
         }
     },
+
     async logout({ commit }) {
         try {
             commit('clearAuthData');

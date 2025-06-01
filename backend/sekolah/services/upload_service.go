@@ -14,6 +14,7 @@ import (
 	"sekolah/models"
 	"sekolah/repositories"
 	"sekolah/utils"
+	"strconv"
 	"strings"
 	"time"
 
@@ -23,14 +24,16 @@ import (
 // UploadService menangani penyimpanan file yang diunggah
 type UploadServiceServer struct {
 	pb.UnimplementedUploadDataSekolahServiceServer
-	uploadDir          string
-	repoSiswa          repositories.GenericRepository[models.PesertaDidik]
-	repoSiswaPelengkap repositories.GenericRepository[models.PesertaDidikPelengkap]
-	repoKelas          repositories.GenericRepository[models.RombonganBelajar]
-	repoKelasAnggota   repositories.GenericRepository[models.RombelAnggota]
-	repoGuru           repositories.GenericRepository[models.TabelPTK]
-	repoGuruTerdaftar  repositories.GenericRepository[models.PTKTerdaftar]
-	repoGuruPelengkap  repositories.GenericRepository[models.PtkPelengkap]
+	uploadDir              string
+	repoSiswa              repositories.GenericRepository[models.PesertaDidik]
+	repoSiswaPelengkap     repositories.GenericRepository[models.PesertaDidikPelengkap]
+	repoKelas              repositories.GenericRepository[models.RombonganBelajar]
+	repoKelasAnggota       repositories.GenericRepository[models.RombelAnggota]
+	repoGuru               repositories.GenericRepository[models.TabelPTK]
+	repoGuruTerdaftar      repositories.GenericRepository[models.PTKTerdaftar]
+	repoGuruPelengkap      repositories.GenericRepository[models.PtkPelengkap]
+	repoKategoriSekolah    repositories.GenericRepository[models.KategoriSekolah]
+	repoKategoriSekolahLog repositories.GenericRepository[models.KategoriSekolahLog]
 	// uploadParameter    ParamTemplate
 }
 
@@ -42,18 +45,22 @@ func NewUploadServiceServer() *UploadServiceServer {
 	repoGuru := repositories.NewPTKRepository(config.DB)
 	repoGuruTerdaftar := repositories.NewPTKTerdaftarRepository(config.DB)
 	repoGuruPelengkap := repositories.NewPTKPelengkapRepository(config.DB)
+	repoKategoriSekolah := repositories.NewKategoriSekolahRepository(config.DB)
+	repoKategoriSekolahLog := repositories.NewKategoriSekolahLogRepository(config.DB)
 	// if repoSiswa == nil {
 	// 	log.Fatal("❌ ERROR: Gagal menginisialisasi repoSiswa") // Debugging
 	// }
 	return &UploadServiceServer{
-		uploadDir:          "uploads",
-		repoSiswa:          *repoSiswa,
-		repoSiswaPelengkap: *repoSiswaPelengkap,
-		repoKelas:          *repoKelas,
-		repoKelasAnggota:   *repoKelasAnggota,
-		repoGuru:           *repoGuru,
-		repoGuruTerdaftar:  *repoGuruTerdaftar,
-		repoGuruPelengkap:  *repoGuruPelengkap,
+		uploadDir:              "uploads",
+		repoSiswa:              *repoSiswa,
+		repoSiswaPelengkap:     *repoSiswaPelengkap,
+		repoKelas:              *repoKelas,
+		repoKelasAnggota:       *repoKelasAnggota,
+		repoGuru:               *repoGuru,
+		repoGuruTerdaftar:      *repoGuruTerdaftar,
+		repoGuruPelengkap:      *repoGuruPelengkap,
+		repoKategoriSekolah:    *repoKategoriSekolah,
+		repoKategoriSekolahLog: *repoKategoriSekolahLog,
 	}
 }
 
@@ -151,6 +158,12 @@ func (s *UploadServiceServer) UploadFileHTTP(w http.ResponseWriter, r *http.Requ
 				BacaDataExcel,
 			)
 		},
+		"kelas": func() error {
+			return s.processUploadKelas(
+				context.Background(), param,
+				BacaDataExcel,
+			)
+		},
 		// Tambahkan tipe lain di sini...
 	}
 
@@ -196,41 +209,42 @@ func (s *UploadServiceServer) UploadFileHTTP(w http.ResponseWriter, r *http.Requ
 }
 
 // GetTemplate menyediakan template Excel berdasarkan jenis data
-func (s *UploadServiceServer) DownloadDataSekolah(ctx context.Context, req *pb.DownloadDataSekolahRequest) (*pb.DownloadDataSekolahResponse, error) {
-	// Daftar field yang wajib diisi
-	requiredFields := []string{"TemplateType"}
-	// Validasi request
-	err := utils.ValidateFields(req, requiredFields)
-	if err != nil {
-		return nil, err
-	}
-	templateType := req.GetDownloadType()
-	templatePath := fmt.Sprintf("templates/template_%s.xlsx", templateType)
-	var param = ParamTemplate{
-		schemaname:   "",
-		filePath:     "",
-		semesterId:   "",
-		templateType: templateType,
-	}
-	// Buat file template jika belum ada
-	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
-		err := GenerateTemplateV2(param, config.DB)
-		if err != nil {
-			return nil, fmt.Errorf("gagal membuat template %s: %w", templateType, err)
-		}
-	}
+// func (s *UploadServiceServer) DownloadDataSekolah(ctx context.Context, req *pb.DownloadDataSekolahRequest) (*pb.DownloadDataSekolahResponse, error) {
+// 	// Daftar field yang wajib diisi
+// 	requiredFields := []string{"TemplateType"}
+// 	// Validasi request
+// 	err := utils.ValidateFields(req, requiredFields)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	templateType := req.GetDownloadType()
+// 	templatePath := fmt.Sprintf("templates/template_%s.xlsx", templateType)
+// 	var param = ParamTemplate{
+// 		schemaname:   "",
+// 		filePath:     "",
+// 		semesterId:   "",
+// 		templateType: templateType,
+// 	}
 
-	// Baca file template
-	data, err := os.ReadFile(templatePath)
-	if err != nil {
-		return nil, fmt.Errorf("gagal membaca template %s: %w", templateType, err)
-	}
+// 	// Buat file template jika belum ada
+// 	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
+// 		err := GenerateTemplateV2(param, config.DB)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("gagal membuat template %s: %w", templateType, err)
+// 		}
+// 	}
 
-	return &pb.DownloadDataSekolahResponse{
-		Filename: fmt.Sprintf("template_%s.xlsx", templateType),
-		File:     data,
-	}, nil
-}
+// 	// Baca file template
+// 	data, err := os.ReadFile(templatePath)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("gagal membaca template %s: %w", templateType, err)
+// 	}
+
+// 	return &pb.DownloadDataSekolahResponse{
+// 		Filename: fmt.Sprintf("template_%s.xlsx", templateType),
+// 		File:     data,
+// 	}, nil
+// }
 
 // HandleDownloadTemplate adalah handler untuk mengunduh file template .xlsx.
 func (h *UploadServiceServer) DownloadTemplateHTTP(w http.ResponseWriter, r *http.Request) {
@@ -248,6 +262,7 @@ func (h *UploadServiceServer) DownloadTemplateHTTP(w http.ResponseWriter, r *htt
 	}
 	templatePath := fmt.Sprintf("templates/template_%s_%s_%s.xlsx", templateType, param.schemaname, param.semesterId)
 	param.filePath = templatePath
+
 	// Buat file template jika belum ada
 	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
 		err := GenerateTemplateV2(param, config.DB)
@@ -255,7 +270,22 @@ func (h *UploadServiceServer) DownloadTemplateHTTP(w http.ResponseWriter, r *htt
 			http.Error(w, fmt.Sprintf("Gagal membuat template: %v", err), http.StatusInternalServerError)
 			return
 		}
+		// } else {
+		// Cek templateType dan bandingka di database
+		// cek, err := h.repoKategoriSekolahLog.FindByID(context.Background(), param.semesterId, param.schemaname, "tahun_ajaran_id")
+		// if err != nil {
+		// 	http.Error(w, fmt.Sprintf("Terjadi masalah pada saat mengambil data di database: %v", err), http.StatusInternalServerError)
+		// 	return
+		// }
+		// // Bandingkan waktu perubahan dengan waktu pada saat download
+		// if cek != nil {
+		// 	err := GenerateTemplateV2(param, config.DB)
+		// 	if err != nil {
+		// 		http.Error(w, fmt.Sprintf("Gagal membuat template: %v", err), http.StatusInternalServerError)
+		// 		return
+		// 	}
 	}
+	// }
 
 	// Buka file template
 	file, err := os.Open(templatePath)
@@ -402,7 +432,6 @@ func (s *UploadServiceServer) processUploadSiswa(
 				TingkatPendidikanId: int32(utils.ParseInt(row[0])),
 				NmKelas:             row[1],
 				SemesterId:          fmt.Sprintf("%s%d", param.semesterId, j),
-				
 			}, param.schemaname)
 			if err != nil {
 				return err
@@ -444,7 +473,7 @@ func (s *UploadServiceServer) processUploadGuru(
 		var tanggalLahir time.Time
 		tanggalLahirStr := data[i][3]
 		if tanggalLahirStr != "" {
-			tanggalLahir, err = time.Parse("2006-01-02", tanggalLahirStr)
+			tanggalLahir, err = time.Parse("01-02-06", tanggalLahirStr)
 			if err == nil {
 				// tanggalLahir = &tanggalLahir
 			}
@@ -496,6 +525,41 @@ func (s *UploadServiceServer) processUploadGuru(
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func (s *UploadServiceServer) processUploadKelas(
+	ctx context.Context,
+	param ParamTemplate,
+	uploadFunc func(*ParamTemplate) ([][]string, error),
+) error {
+	// Ambil data dari file
+	data, err := uploadFunc(&param)
+	if err != nil {
+		return fmt.Errorf("gagal memproses file: %v", err)
+	}
+
+	// Iterasi data dan simpan ke database
+	for _, row := range data {
+		tingkat, err1 := strconv.Atoi(row[1])
+		if err1 != nil {
+			return err
+		}
+		// Jika kelas tersedia, simpan ke rombel anggota
+		for j := 1; j <= 2; j++ {
+			err := s.repoKelas.Save(ctx, &models.RombonganBelajar{
+				RombonganBelajarId:  uuid.New(),
+				SemesterId:          fmt.Sprintf("%s%d", param.semesterId, j),
+				NmKelas:             row[0],
+				TingkatPendidikanId: int32(tingkat),
+				JenisRombel:         utils.Int32ToPointer(1),
+			}, param.schemaname)
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 	return nil
 }

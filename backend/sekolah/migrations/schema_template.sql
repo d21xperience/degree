@@ -25,15 +25,12 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_sekolah (
 	jenjang_pendidikan_id NUMERIC(2,0) NULL DEFAULT NULL,
 	is_dapodik BOOLEAN NULL DEFAULT FALSE,
 	sekolah_id_dapo UUID NULL DEFAULT NULL,
-	PRIMARY KEY (sekolah_id),
-	CONSTRAINT FK_tabel_sekolah_ref_bentuk_pendidikan FOREIGN KEY (bentuk_pendidikan_id) REFERENCES ref.bentuk_pendidikan (bentuk_pendidikan_id) ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT FK_tabel_sekolah_ref_jenjang_pendidikan FOREIGN KEY (jenjang_pendidikan_id) REFERENCES ref.jenjang_pendidikan (jenjang_pendidikan_id) ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT FK_tabel_sekolah_ref_status_kepemilikan FOREIGN KEY (status_kepemilikan_id) REFERENCES ref.status_kepemilikan (status_kepemilikan_id) ON UPDATE CASCADE ON DELETE CASCADE
+	PRIMARY KEY (sekolah_id)
 );
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_siswa (
 	peserta_didik_id UUID NOT NULL DEFAULT gen_random_uuid(),
-	nis VARCHAR(20) NOT NULL,
+	nis VARCHAR(20) NULL DEFAULT NULL,
 	nisn VARCHAR(13) NULL DEFAULT NULL,
 	nm_siswa VARCHAR(100) NOT NULL,
 	tempat_lahir VARCHAR(50) NULL DEFAULT NULL,
@@ -68,10 +65,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_siswa_pelengkap (
 	alamat_wali TEXT NULL DEFAULT NULL,
 	telepon_wali VARCHAR(20) NULL DEFAULT NULL,
 	foto_siswa VARCHAR(100) NULL DEFAULT NULL,
-	PRIMARY KEY (pelengkap_siswa_id),
-	CONSTRAINT FK_tabel_siswa_pelengkap_tabel_siswa FOREIGN KEY (peserta_didik_id)
-		REFERENCES {{schema_name}}.tabel_siswa (peserta_didik_id)
-		ON UPDATE CASCADE ON DELETE CASCADE
+	PRIMARY KEY (pelengkap_siswa_id)
 );
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_ptk (
@@ -95,10 +89,9 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_ptk_terdaftar (
 	tahun_ajaran_id VARCHAR(4) NOT NULL,
 	jenis_keluar_id CHAR(1) NULL DEFAULT NULL,
 	is_dapodik BOOLEAN NULL DEFAULT FALSE,
-	ptk_terdaftar_id_dapo UUID NULL DEFAULT NULL,
+	ptk_terdaftar_id_dapodik UUID NULL DEFAULT NULL,
 	soft_delete NUMERIC(1,0) NOT NULL DEFAULT 0,
-	PRIMARY KEY (ptk_terdaftar_id),
-	CONSTRAINT FK_tabel_ptk_terdaftar_tabel_ptk FOREIGN KEY (ptk_id) REFERENCES {{schema_name}}.tabel_ptk (ptk_id) ON UPDATE CASCADE ON DELETE CASCADE
+	PRIMARY KEY (ptk_terdaftar_id)
 );
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_ptk_pelengkap (
@@ -112,8 +105,8 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_ptk_pelengkap (
 	niy VARCHAR(18) NULL DEFAULT NULL,
 	nip VARCHAR(18) NULL DEFAULT NULL,
 	alamat_jalan VARCHAR(200) NULL DEFAULT NULL,
-	rt NUMERIC(2,0) NULL DEFAULT NULL,
-	rw NUMERIC(2,0) NULL DEFAULT NULL,
+	rt VARCHAR(3) NULL DEFAULT NULL,
+	rw VARCHAR(3) NULL DEFAULT NULL,
 	desa_kelurahan VARCHAR(60) NULL DEFAULT NULL,
 	kec VARCHAR(60) NULL DEFAULT NULL,
 	kab_kota VARCHAR(60) NULL DEFAULT NULL,
@@ -122,8 +115,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_ptk_pelengkap (
 	no_telepon_rumah VARCHAR(20) NULL DEFAULT NULL,
 	no_hp VARCHAR(20) NULL DEFAULT NULL,
 	email VARCHAR(60) NULL DEFAULT NULL,
-	PRIMARY KEY (ptk_pelengkap_id),
-	CONSTRAINT FK_tabel_ptk_pelengkap_tabel_ptk FOREIGN KEY (ptk_id) REFERENCES {{schema_name}}.tabel_ptk (ptk_id) ON UPDATE CASCADE ON DELETE CASCADE
+	PRIMARY KEY (ptk_pelengkap_id)
 );
 
 
@@ -139,13 +131,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_kelas (
 	nama_jurusan_sp VARCHAR(100) NULL DEFAULT NULL,
 	jurusan_sp_id UUID NULL DEFAULT NULL,
 	kurikulum_id SMALLINT NULL DEFAULT NULL,
-	PRIMARY KEY (rombongan_belajar_id),
-	-- CONSTRAINT FK_tabel_kelas_ref_jurusan FOREIGN KEY (jurusan_id) REFERENCES ref.jurusan (jurusan_id) ON UPDATE CASCADE ON DELETE SET NULL,
-	-- CONSTRAINT FK_tabel_kelas_ref_kurikulum FOREIGN KEY (kurikulum_id) REFERENCES ref.kurikulum (kurikulum_id) ON UPDATE CASCADE ON DELETE SET NULL,
-	-- CONSTRAINT FK_tabel_kelas_ref_semester FOREIGN KEY (semester_id) REFERENCES ref.semester (semester_id) ON UPDATE CASCADE ON DELETE CASCADE,
-	-- CONSTRAINT FK_tabel_kelas_ref_tingkat_pendidikan FOREIGN KEY (tingkat_pendidikan_id) REFERENCES ref.tingkat_pendidikan (tingkat_pendidikan_id) ON UPDATE CASCADE ON DELETE CASCADE,
-	-- CONSTRAINT FK_tabel_kelas_tabel_ptk FOREIGN KEY (ptk_id) REFERENCES {{schema_name}}.tabel_ptk (ptk_id) ON UPDATE CASCADE ON DELETE SET NULL
-
+	PRIMARY KEY (rombongan_belajar_id)
 );
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_anggotakelas (
@@ -154,10 +140,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_anggotakelas (
 	rombongan_belajar_id UUID NULL DEFAULT NULL,
 	semester_id CHAR(5) NOT NULL,
 	-- status_keaktifan INTEGER NOT NULL DEFAULT 0,
-	PRIMARY KEY (anggota_rombel_id),
-	-- CONSTRAINT FK_tabel_anggotakelas_tabel_anggotakelas FOREIGN KEY (rombongan_belajar_id) REFERENCES {{schema_name}}.tabel_kelas (rombongan_belajar_id) ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT FK_tabel_anggotakelas_tabel_siswa FOREIGN KEY (peserta_didik_id) REFERENCES {{schema_name}}.tabel_siswa (peserta_didik_id) ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT FK_tabel_anggotakelas_ref_semester FOREIGN KEY (semester_id) REFERENCES ref.semester (semester_id) ON UPDATE CASCADE ON DELETE SET NULL
+	PRIMARY KEY (anggota_rombel_id)
 );
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_pembelajaran (
@@ -171,11 +154,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_pembelajaran (
 	induk_pembelajaran UUID NULL DEFAULT NULL,
 	is_dapo NUMERIC(1,0) NULL DEFAULT '1',
 	ptk_terdaftar_id_dapo UUID NULL DEFAULT NULL,
-	PRIMARY KEY (pembelajaran_id),
-	CONSTRAINT FK_tabel_pembelajaran_ref_mata_pelajaran FOREIGN KEY (mata_pelajaran_id) REFERENCES ref.mata_pelajaran (mata_pelajaran_id) ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT FK_tabel_pembelajaran_ref_semester FOREIGN KEY (semester_id) REFERENCES ref.semester (semester_id) ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT FK_tabel_pembelajaran_tabel_kelas FOREIGN KEY (rombongan_belajar_id) REFERENCES {{schema_name}}.tabel_kelas (rombongan_belajar_id) ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT FK_tabel_pembelajaran_tabel_ptk_terdaftar FOREIGN KEY (ptk_terdaftar_id) REFERENCES {{schema_name}}.tabel_ptk_terdaftar (ptk_terdaftar_id) ON UPDATE CASCADE ON DELETE SET NULL
+	PRIMARY KEY (pembelajaran_id)
 );
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_nilaiakhir (
@@ -194,9 +173,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_nilaiakhir (
 	peserta_didik_id UUID NULL DEFAULT NULL,
 	id_minat VARCHAR(2) NULL DEFAULT NULL,
 	semester NUMERIC(1,0) NULL DEFAULT NULL,
-	PRIMARY KEY (id_nilai_akhir),
-	CONSTRAINT FK_tabel_nilaiakhir_tabel_anggotakelas FOREIGN KEY (anggota_rombel_id) REFERENCES {{schema_name}}.tabel_anggotakelas (anggota_rombel_id) ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT FK_tabel_nilaiakhir_tabel_siswa FOREIGN KEY (peserta_didik_id) REFERENCES {{schema_name}}.tabel_siswa (peserta_didik_id) ON UPDATE CASCADE ON DELETE CASCADE
+	PRIMARY KEY (id_nilai_akhir)
 );
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_kenaikan (
@@ -206,11 +183,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_kenaikan (
 	peserta_didik_id UUID NULL DEFAULT NULL,
 	kenaikan NUMERIC(3,0) NULL DEFAULT NULL,
 	tingkat NUMERIC(3,0) NULL DEFAULT NULL,
-	PRIMARY KEY (kd_kenaikan),
-	CONSTRAINT FK_tabel_kenaikan_ref_semester FOREIGN KEY (semester_id) REFERENCES ref.semester (semester_id) ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT FK_tabel_kenaikan_tabel_anggotakelas FOREIGN KEY (anggota_rombel_id) REFERENCES {{schema_name}}.tabel_anggotakelas (anggota_rombel_id) ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT FK_tabel_kenaikan_tabel_siswa FOREIGN KEY (peserta_didik_id) REFERENCES {{schema_name}}.tabel_siswa (peserta_didik_id) ON UPDATE CASCADE ON DELETE CASCADE
-
+	PRIMARY KEY (kd_kenaikan)
 );
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.ijazah (
@@ -237,8 +210,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.ijazah (
     tanggal_ijazah DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL,
-   	CONSTRAINT FK_tabel_ijazah FOREIGN KEY (peserta_didik_id) REFERENCES {{schema_name}}.tabel_siswa (peserta_didik_id) ON UPDATE CASCADE ON DELETE CASCADE
+    deleted_at TIMESTAMP NULL
 );
 
 
@@ -270,9 +242,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.data_nominasi_sementara (
 	is_complete BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL,
-   	CONSTRAINT FK_tabel_ijazah FOREIGN KEY (peserta_didik_id) REFERENCES {{schema_name}}.tabel_siswa (peserta_didik_id) ON UPDATE CASCADE ON DELETE CASCADE,
-   	CONSTRAINT FK_data_nominasi_sementara_tabel_kelas FOREIGN KEY (rombongan_belajar_id) REFERENCES {{schema_name}}.tabel_kelas (rombongan_belajar_id) ON UPDATE CASCADE ON DELETE CASCADE
+    deleted_at TIMESTAMP NULL
 );
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_informasi_ijazah (
@@ -282,13 +252,62 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_informasi_ijazah (
 	tgl_dikeluarkan_ijazah DATE NULL DEFAULT NULL,
 	ptk_id UUID NULL DEFAULT NULL,
 	kop_sekolah_url VARCHAR NULL DEFAULT NULL,
-	PRIMARY KEY (id),
-	CONSTRAINT FK_tabel_informasi_ijazah_tabel_ptk FOREIGN KEY (ptk_id) REFERENCES {{schema_name}}.tabel_ptk (ptk_id) ON UPDATE CASCADE ON DELETE SET NULL
+	PRIMARY KEY (id)
 );
 
 CREATE TABLE  IF NOT EXISTS {{schema_name}}.tabel_kategori_sekolah (
 	kategori_sekolah_id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	kurikulum_id SMALLINT NULL DEFAULT NULL,
+	jurusan_id VARCHAR(25) NULL DEFAULT NULL,
 	nama_kurikulum VARCHAR NULL DEFAULT NULL,
 	nama_jurusan VARCHAR NULL DEFAULT NULL,
 	tahun_ajaran_id NUMERIC(4,0) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS {{schema_name}}.kategori_sekolah_log (
+    log_id SERIAL PRIMARY KEY,
+    action_type TEXT,
+    kategori_sekolah_id INT,
+    nama_kurikulum TEXT,
+    nama_jurusan TEXT,
+    jurusan_id VARCHAR(25),
+    kurikulum_id SMALLINT,
+    tahun_ajaran_id NUMERIC(4,0),
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE OR REPLACE FUNCTION {{schema_name}}.log_kategori_sekolah_changes()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (TG_OP = 'INSERT') THEN
+        INSERT INTO {{schema_name}}.kategori_sekolah_log(action_type, kategori_sekolah_id, nama_kurikulum, nama_jurusan, jurusan_id, kurikulum_id, tahun_ajaran_id)
+        VALUES ('INSERT', NEW.kategori_sekolah_id, NEW.nama_kurikulum, NEW.nama_jurusan, NEW.jurusan_id, NEW.kurikulum_id, NEW.tahun_ajaran_id);
+        RETURN NEW;
+
+    ELSIF (TG_OP = 'UPDATE') THEN
+        INSERT INTO {{schema_name}}.kategori_sekolah_log(action_type, kategori_sekolah_id, nama_kurikulum, nama_jurusan, jurusan_id, kurikulum_id, tahun_ajaran_id)
+        VALUES ('UPDATE', NEW.kategori_sekolah_id, NEW.nama_kurikulum, NEW.nama_jurusan, NEW.jurusan_id, NEW.kurikulum_id, NEW.tahun_ajaran_id);
+        RETURN NEW;
+
+    ELSIF (TG_OP = 'DELETE') THEN
+        INSERT INTO {{schema_name}}.kategori_sekolah_log(action_type, kategori_sekolah_id, nama_kurikulum, nama_jurusan, jurusan_id, kurikulum_id, tahun_ajaran_id)
+        VALUES ('DELETE', OLD.kategori_sekolah_id, OLD.nama_kurikulum, OLD.nama_jurusan, OLD.jurusan_id, OLD.kurikulum_id, OLD.tahun_ajaran_id);
+        RETURN OLD;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_kategori_sekolah_log
+AFTER INSERT OR UPDATE OR DELETE ON {{schema_name}}.tabel_kategori_sekolah
+FOR EACH ROW
+EXECUTE FUNCTION {{schema_name}}.log_kategori_sekolah_changes();
+
+CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_kategori_kelas (
+	id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	kategori_sekolah_id INTEGER NOT NULL,
+	tingkat_id INTEGER NULL DEFAULT NULL,
+	jumlah INTEGER NULL DEFAULT NULL,
+	tahun_ajaran_id NUMERIC(4,0),
+	CONSTRAINT FK__tabel_kategori_sekolah FOREIGN KEY (kategori_sekolah_id) REFERENCES {{schema_name}}.tabel_kategori_sekolah (kategori_sekolah_id) ON UPDATE CASCADE ON DELETE CASCADE
 );

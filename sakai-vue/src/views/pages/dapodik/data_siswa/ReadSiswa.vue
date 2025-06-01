@@ -5,7 +5,7 @@
                 <div class="mb-2">
                     <Toolbar>
                         <template #start>
-                            <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="openNew" v-tooltip.bottom="'Tambah Guru Baru'" />
+                            <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="openNew" v-tooltip.bottom="'Tambah Siswa'" :loading="isOpenNew" />
                             <Button icon="pi pi-pencil" severity="warn" @click="openNew" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 2" class="mr-2" v-tooltip.bottom="'Edit siswa'" />
                             <Button icon="pi pi-trash" severity="danger" class="mr-2 text-lg" @click="deleteSiswaDialog = true" :disabled="!selectedSiswa || !selectedSiswa.length" v-tooltip.bottom="'Hapus siswa'" />
                             <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Upload siswa'" v-show="selectedSemester.semester == 1" />
@@ -70,6 +70,8 @@
 </template>
 
 <script setup>
+import { debounce } from 'lodash-es';
+
 import { useSekolahService } from '@/composables/useSekolahService';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
@@ -79,9 +81,12 @@ const store = useStore();
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 
-import Button from 'primevue/button';
-
+import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
+import DialogImport from '@/components/DialogImport.vue';
+import { useUtils } from '@/composables/useUtils';
+import router from '@/router';
 import { FilterMatchMode } from '@primevue/core/api';
+import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import InputText from 'primevue/inputtext';
@@ -92,7 +97,7 @@ onMounted(async () => {
     siswa.value = await fetchSiswaAktif();
     tingkatPendidikanOptions.value = await fetchTingkat();
 });
-
+const isEdit = ref(false);
 const dt = ref();
 const deleteSiswaDialog = ref(false);
 const filters = ref({
@@ -100,9 +105,10 @@ const filters = ref({
     tingkatPendidikanId: { value: null, matchMode: FilterMatchMode.EQUALS }
 });
 
-const openNew = () => {
+const isOpenNew = ref(false);
+const openNew = debounce(() => {
     router.push({ name: 'inputSiswa' });
-};
+}, 250);
 const closeDialog = () => {
     selectedSiswa.value = null;
 };
@@ -134,8 +140,6 @@ watch(selectedSemester, async (e, b) => {
     siswa.value = await fetchSiswaAktif();
 });
 // ========IMPORT DATA========
-import DialogImport from '@/components/DialogImport.vue';
-import router from '@/router';
 const dialogImport = ref(false);
 const saveImport = (e) => {
     // console.log("Data disimpan:", e);
@@ -147,8 +151,6 @@ const cancelImport = () => {
     dialogImport.value = false;
 };
 
-import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
-import { useUtils } from '@/composables/useUtils';
 const { formatterDateID } = useUtils();
 const tingkatPendidikanOptions = ref([]);
 </script>

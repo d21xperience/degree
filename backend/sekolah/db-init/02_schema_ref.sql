@@ -143,3 +143,45 @@ CREATE TABLE ref.gelar_akademik (
 	last_sync TIMESTAMP NOT NULL DEFAULT '1901-01-01 00:00:00',
 	PRIMARY KEY (gelar_akademik_id)
 );
+
+CREATE TABLE ref.jenis_ptk (
+	jenis_ptk_id NUMERIC(2,0) NOT NULL,
+	jenis_ptk VARCHAR(30) NOT NULL,
+	guru_kelas NUMERIC(1,0) NOT NULL,
+	guru_matpel NUMERIC(1,0) NOT NULL,
+	guru_bk NUMERIC(1,0) NOT NULL,
+	guru_inklusi NUMERIC(1,0) NOT NULL,
+	guru_pengganti NUMERIC(1,0) NOT NULL DEFAULT '0',
+	pengawas_satdik NUMERIC(1,0) NOT NULL,
+	pengawas_plb NUMERIC(1,0) NOT NULL,
+	pengawas_matpel NUMERIC(1,0) NOT NULL,
+	pengawas_bidang NUMERIC(1,0) NOT NULL,
+	tas NUMERIC(1,0) NOT NULL,
+	tendik_lainnya NUMERIC(1,0) NOT NULL DEFAULT '0',
+	formal NUMERIC(1,0) NOT NULL,
+	create_date TIMESTAMP NOT NULL DEFAULT '2019-09-10 14:29:56.403927',
+	last_update TIMESTAMP NOT NULL DEFAULT '2019-09-10 14:29:56.403927',
+	expired_date TIMESTAMP NULL DEFAULT NULL,
+	last_sync TIMESTAMP NOT NULL DEFAULT '1901-01-01 00:00:00',
+	PRIMARY KEY (jenis_ptk_id)
+);
+
+
+CREATE TABLE ref.mata_pelajaran_kurikulum (
+	kurikulum_id SMALLINT NOT NULL,
+	mata_pelajaran_id INTEGER NOT NULL,
+	tingkat_pendidikan_id NUMERIC(2,0) NOT NULL,
+	jumlah_jam NUMERIC(2,0) NOT NULL,
+	jumlah_jam_maksimum NUMERIC(2,0) NOT NULL,
+	status_di_kurikulum NUMERIC(2,0) NOT NULL,
+	wajib NUMERIC(1,0) NOT NULL,
+	sks NUMERIC(2,0) NOT NULL DEFAULT '0',
+	a_peminatan NUMERIC(1,0) NOT NULL,
+	area_kompetensi CHAR(1) NOT NULL DEFAULT '*',
+	gmp_id UUID NULL DEFAULT NULL,
+	create_date TIMESTAMP NOT NULL DEFAULT '2022-06-28 18:45:38.08',
+	last_update TIMESTAMP NOT NULL DEFAULT '2022-06-28 18:45:38.08',
+	expired_date TIMESTAMP NULL DEFAULT NULL,
+	last_sync TIMESTAMP NOT NULL DEFAULT '1901-01-01 00:00:00',
+	PRIMARY KEY (kurikulum_id, mata_pelajaran_id, tingkat_pendidikan_id)
+);

@@ -250,11 +250,13 @@ func GenerateTemplateV2(param ParamTemplate, db *gorm.DB) error {
 	sheetName := "Template"
 	f.SetSheetName("Sheet1", sheetName)
 
-	columns, exists := template.GetTemplateColumns(&template.DataTemplate{
+	dataTemplate := &template.DataTemplate{
 		TemplateType:  param.templateType,
 		Schemaname:    param.schemaname,
 		TahunAjaranId: param.semesterId,
-	}, db)
+	}
+	
+	columns, exists := template.GetTemplateColumns(dataTemplate)
 	if !exists {
 		return fmt.Errorf("template type %s tidak ditemukan", param.templateType)
 	}
@@ -309,6 +311,11 @@ func GenerateTemplateV2(param ParamTemplate, db *gorm.DB) error {
 	// Freeze baris header
 	f.SetPanes(sheetName, &excelize.Panes{Freeze: true, Split: true, XSplit: 0, YSplit: 1})
 
+	// Tambahkas sheet baru untuk petunjuk pengisian
+	err2 := template.GetPetunjukSheet(f, dataTemplate, db)
+	if err2 != nil {
+		return err2
+	}
 	// Set properties dokumen
 	err := f.SetDocProps(&excelize.DocProperties{
 		ContentStatus: param.templateType,

@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"reflect"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -29,6 +30,9 @@ func ConvertModelsToPB[T any, U any](models []T, convert func(T) U) []U {
 //		}
 //		return pbList
 //	}
+func Int32ToPointer(i int32) *int32 {
+	return &i
+}
 
 // konversi pb ke model
 // schemaName := req.GetSchemaName()
@@ -56,6 +60,42 @@ func ConvertModelToPB[T any, U any](model *T, converter func(*T) *U) *U {
 func ParseInt(value string) int {
 	i, _ := strconv.Atoi(value)
 	return i
+}
+func AngkaKeRomawi(angka int) string {
+	if angka <= 0 || angka >= 4000 {
+		return "Angka di luar jangkauan (1 - 3999)"
+	}
+
+	var builder strings.Builder
+
+	// Daftar angka romawi dari besar ke kecil
+	romawiMap := []struct {
+		angka  int
+		simbol string
+	}{
+		{1000, "M"},
+		{900, "CM"},
+		{500, "D"},
+		{400, "CD"},
+		{100, "C"},
+		{90, "XC"},
+		{50, "L"},
+		{40, "XL"},
+		{10, "X"},
+		{9, "IX"},
+		{5, "V"},
+		{4, "IV"},
+		{1, "I"},
+	}
+
+	for _, item := range romawiMap {
+		for angka >= item.angka {
+			builder.WriteString(item.simbol)
+			angka -= item.angka
+		}
+	}
+
+	return builder.String()
 }
 
 // =======================

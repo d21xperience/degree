@@ -17,34 +17,14 @@
                         <div>
                             <div v-if="!isEdit">{{ sekolah?.jenjangPendidikanStr }}</div>
                             <div v-else>
-                                <Select
-                                    v-model="sekolah.sekolah.jenjangPendidikanId"
-                                    filter
-                                    :options="jenjangPendidikanFiltered"
-                                    optionLabel="nama"
-                                    placeholder="Pilih jenjang pendidikan"
-                                    fluid
-                                    showClear
-                                    class="w-full md:w-56"
-                                    option-value="jenjangPendidikanId"
-                                />
+                                <Select v-model="selectedJenjangPendidikan" filter :options="jenjangPendidikanFiltered" optionLabel="nama" placeholder="Pilih jenjang pendidikan" fluid showClear class="w-full md:w-56" />
                             </div>
                         </div>
                         <div>Bentuk Pendidikan</div>
                         <div>
                             <div v-if="!isEdit">{{ sekolah?.bentukPendidikanStr }}</div>
                             <div v-else>
-                                <Select
-                                    v-model="sekolah.sekolah.bentukPendidikanId"
-                                    :options="bentukPendidikan"
-                                    filter
-                                    optionLabel="nama"
-                                    placeholder="Pilih bentuk pendidikan"
-                                    fluid
-                                    showClear
-                                    class="w-full md:w-56"
-                                    option-value="bentukPendidikanId"
-                                />
+                                <Select v-model="selectedBentukPendidikan" :options="bentukPendidikan" filter optionLabel="nama" placeholder="Pilih bentuk pendidikan" fluid showClear class="w-full md:w-56" />
                             </div>
                         </div>
                         <div>NSS</div>
@@ -62,7 +42,10 @@
                         <div>Jalan</div>
                         <div>{{ sekolah?.sekolah.alamat }}</div>
                         <div>Desa/Kelurahan</div>
-                        <div>{{ sekolah?.sekolah.kelurahan }}</div>
+                        <div>
+                            <div v-if="!isEdit">{{ sekolah?.sekolah.kelurahan }}</div>
+                            <InputText v-model="sekolah.sekolah.kelurahan" placeholder="Masukan nama Desa/Kelurahan" fluid v-else />
+                        </div>
                         <div>Kecamatan</div>
                         <div>{{ sekolah?.sekolah.kecamatan }}</div>
                         <div>Provinsi</div>
@@ -93,7 +76,7 @@
                         <div>
                             <div v-if="!isEdit">
                                 <a v-if="sekolah?.sekolah.website" :href="getWebsiteUrl(sekolah?.sekolah.website)" target="_blank" rel="noopener noreferrer" class="text-blue-700 underline">
-                                    {{ sekolah?.website }}
+                                    {{ sekolah?.sekolah.website }}
                                 </a>
                             </div>
                             <div v-else><InputText type="text" placeholder="Masukan alamat website" v-model="sekolah.sekolah.website" fluid /></div>
@@ -105,65 +88,95 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>Nama Kepsek</div>
                         <div>
-                            <div v-if="!isEdit">{{ sekolah?.nmKepsek }}</div>
+                            <div v-if="!isEdit">{{ sekolah.sekolah?.nmKepsek }}</div>
                             <div v-else><InputText v-model="sekolah.sekolah.nmKepsek" fluid name="nmKepsek" /></div>
                         </div>
                         <div>NIP Kepsek</div>
                         <div>
-                            <div v-if="!isEdit">{{ sekolah?.nipKepsek }}</div>
+                            <div v-if="!isEdit">{{ sekolah.sekolah?.nipKepsek }}</div>
                             <div v-else><InputText v-model="sekolah.sekolah.nipKepsek" fluid name="nipKepsek" /></div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="flex justify-end" v-show="isEdit">
-                <button class="bg-blue-800 text-white px-4 py-2 rounded flex items-center" @click="updateData"><i class="fas fa-edit mr-2"></i> Update Data</button>
+                <Button class="bg-blue-800 text-white px-4 py-2 rounded flex items-center" @click="updateData" label="Update Data" icon="pi pi-save" :loading="loadingUpdate" />
             </div>
 
             <div class="my-10">
                 <div class="flex justify-between">
-                    <h3 class="text-lg font-semibold mb-2">Kategori</h3>
+                    <div class="flex">
+                        <h3 class="text-lg font-semibold mb-2 mr-2">Kategori</h3>
+                        <Button v-show="isEditKategoriSekolah" icon="pi pi-plus" @click="openAddDialog" size="small" rounded v-tooltip.bottom="`Tambah kategori`" />
+                    </div>
                     <div>
-                        <Button v-show="isEditKategoriSekolah" icon="pi pi-plus" @click="isDialogAddKategoriSekolah = true" class="mr-2" />
-                        <Button icon="pi pi-pencil" @click="isEditKategoriSekolah = !isEditKategoriSekolah" severity="secondary" v-tooltip.bottom="'Edit kategori'"/>
+                        <Button icon="pi pi-pencil" @click="isEditKategoriSekolah = !isEditKategoriSekolah" severity="secondary" v-tooltip.bottom="'Edit kategori'" />
                     </div>
                 </div>
                 <div class="grid grid-cols-1 gap-4">
-                    <DataTable :value="kategoriSekolahList" dataKey="kategoriSekolahId">
-                        <Column header="No">
+                    <DataTable v-model:expandedRows="expandedRows" :value="kategoriSekolahList" @row-expand="onRowExpand" @row-collapse="onRowCollapse" dataKey="kategoriSekolahId" striped-rows>
+                        <template #header>
+                            <div class="flex flex-wrap justify-end gap-2">
+                                <Button text icon="pi pi-plus" label="Expand All" @click="expandAll" />
+                                <Button text icon="pi pi-minus" label="Collapse All" @click="collapseAll" />
+                            </div>
+                        </template>
+                        <Column expander style="width: 2rem" />
+                        <Column header="No" style="width: 2rem">
                             <template #body="slotProps">
                                 {{ slotProps.index + 1 }}
                             </template>
                         </Column>
-                        <Column header="Kurikulum" field="namaKurikulum"></Column>
+                        <Column header="Kurikulum" field="namaKurikulum" style="width: 20rem"></Column>
                         <Column header="Jurusan" field="namaJurusan" />
+                        <!-- <Column header="Total Kelas"></Column> -->
                         <Column header="Tahun Ajaran" field="tahunAjaranId" />
                         <Column header="Aksi" :hidden="!isEditKategoriSekolah">
                             <template #body="slotProps">
-                                <Button icon="pi pi-trash" class="mr-2 !text-sm" severity="danger" @click="deleteKategoriSekolahDialog(slotProps.data)" />
+                                <Button icon="pi pi-trash" class="mr-2 !text-sm" severity="danger" @click="deleteKategoriSekolahDialog(slotProps.data)" size="small" rounded />
+                                <Button icon="pi pi-pencil" class="mr-2 !text-sm" severity="warn" @click="openEditDialog(slotProps.data)" size="small" rounded />
                             </template>
                         </Column>
+
+                        <template #expansion="slotProps">
+                            <DataTable :value="slotProps.data.kategoriKelas">
+                                <Column></Column>
+                                <Column header="Kelas" field="tingkatId"> </Column>
+                                <Column header="Jml.Kelas" field="jumlah"></Column>
+                            </DataTable>
+                        </template>
                     </DataTable>
                 </div>
             </div>
             <div class="flex justify-end" v-show="isEditKategoriSekolah">
-                <Button class="px-4 py-2 rounded flex items-center" @click="isEditKategoriSekolah = false" label="Tutup" severity="help"/>
+                <Button class="px-4 py-2 rounded flex items-center" @click="isEditKategoriSekolah = false" label="Proses" severity="help" />
             </div>
         </div>
 
         <Toast />
-        <Dialog v-model:visible="isDialogAddKategoriSekolah" style="width: 450px" header="Tambah" :modal="true">
-            <div class="mb-4">
-                <label for="kurikulum">Kurikulum</label>
-                <kurikulum-component v-model="kurikulumTerpilih" />
+        <Dialog v-model:visible="isDialogAddKategoriSekolah" style="width: 550px" :header="title" :modal="true">
+            <div class="mb-4 md:grid md:space-x-2" :class="{ 'md:grid-cols-2': sekolah.sekolah?.jenjangPendidikanId == 6 }">
+                <div class="">
+                    <label for="kurikulum">Kurikulum</label>
+                    <kurikulum-component v-model="kurikulumTerpilih" fluid />
+                </div>
+                <div v-show="sekolah.sekolah?.jenjangPendidikanId == 6">
+                    <label for="">Jurusan</label>
+                    <jurusan-component v-model="jurusanTerpilih" />
+                </div>
             </div>
-            <div>
-                <label for="">Jurusan</label>
-                <jurusan-component v-model="jurusanTerpilih" />
+            <h6>Jumlah Kelas yg menggunakan kurikulum tersebut</h6>
+            <div class="my-2 grid md:grid-cols-4 md:space-x-1">
+                <div v-for="(tkt, index) in tingkat" :key="tkt.kode">
+                    {{ tkt.nama }} :
+
+                    <InputNumber placeholder="e.g. 1 (max: 10)" fluid v-model="getKategoriKelas(tkt.kode).jumlah" />
+                </div>
             </div>
             <div class="flex justify-end space-x-4 mt-10">
-                <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" @click="addKategoriSekolah">Tambah</button>
-                <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" @click="isDialogAddKategoriSekolah = false">Batal</button>
+                <Button @click="editKategoriSekolah" label="Update" severity="warn" class="w-20" v-if="isEditDataKategoriSekolah" />
+                <Button @click="addKategoriSekolah" label="Tambah" severity="warn" class="w-20" v-else />
+                <Button @click="cancelKategoriSekolah" severity="help" label="Batal" class="w-20" />
             </div>
         </Dialog>
 
@@ -179,37 +192,86 @@ const store = useStore();
 import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
 import JurusanComponent from '@/components/JurusanComponent.vue';
 import KurikulumComponent from '@/components/KurikulumComponent.vue';
+import { useFormOptions } from '@/composables/useFormOptions';
 import { useSekolahService } from '@/composables/useSekolahService';
-import Button from 'primevue/button';
-import Select from 'primevue/select';
-import Toast from 'primevue/toast';
-import { useToast } from 'primevue/usetoast';
+const { fetchSekolah, fetchKategoriSekolah, createKategoriSekolah, deleteKategoriSekolah, updateKategoriSekolah, initSelectedSemester, updateSekolah, fetchTingkat } = useSekolahService();
 
-const { fetchSekolah, fetchKategoriSekolah, createKategoriSekolah, deleteKategoriSekolah, initSelectedSemester } = useSekolahService();
-const toast = useToast();
+const { fetchJurusan, fetchKurikulum } = useFormOptions();
 
 const fetchRefTable = async () => {
     bentukPendidikan.value = await store.dispatch('sekolahService/fetchBentukPendidikan');
     jenjangPendidikan.value = await store.dispatch('sekolahService/fetchJenjangPendidikan');
 };
 
+// Evaluasi variabel di bawah ini:
 const jenjangPendidikanFiltered = computed(() => {
     return jenjangPendidikan.value.filter((item) => item.jenjangLembaga === 1);
 });
 
-const sekolah = ref();
-const initFirst = async () => {
-    sekolah.value = await fetchSekolah();
+const sekolah = ref({
+    sekolah: {}
+});
+const initKategoriSekolah = async () => {
     kategoriSekolahList.value = await fetchKategoriSekolah();
+
+    kategoriSekolahList.value.forEach((el) => {
+        if (el.kategoriKelas.length === 0) {
+            el.kategoriKelas = tingkat.value.map((tingkatItem) => ({
+                jumlah: 0,
+                kategoriSekolahId: el.kategoriSekolahId,
+                tahunAjaranId: el.tahunAjaranId,
+                tingkatId: tingkatItem.kode
+            }));
+        }
+
+        // Jika jumlah kategoriKelas kurang dari jumlah tingkat, tambahkan sisanya
+        if (el.kategoriKelas.length < tingkat.value.length) {
+            const existingTingkatIds = el.kategoriKelas.map((k) => k.tingkatId);
+            const missingTingkat = tingkat.value.filter((t) => !existingTingkatIds.includes(t.kode));
+
+            missingTingkat.forEach((t) => {
+                el.kategoriKelas.push({
+                    jumlah: 0,
+                    kategoriSekolahId: el.kategoriSekolahId,
+                    tahunAjaranId: el.tahunAjaranId,
+                    tingkatId: t.kode
+                });
+            });
+        }
+    });
 };
-onMounted(() => {
+const initFirst = async () => {
+    // fetchSemester;
+    sekolah.value = await fetchSekolah();
+    initKategoriSekolah();
+    // console.log(kategoriSekolahList.value);
+};
+const tingkat = ref();
+onMounted(async () => {
     initFirst();
+    tingkat.value = await fetchTingkat();
+
+    // console.log(tingkat.value);
     // const data = await fetchSekolah();
     // Object.assign(sekolah, data);
 });
-watch(initSelectedSemester, (newVal) => {
-    console.log('update semester');
+watch(initSelectedSemester, () => {
+    // console.log('update semester');
     initFirst();
+});
+const selectedBentukPendidikan = ref();
+const selectedJenjangPendidikan = ref();
+watch(selectedBentukPendidikan, (newVal) => {
+    if (newVal) {
+        sekolah.value.sekolah.bentukPendidikanId = newVal.bentukPendidikanId;
+        sekolah.value.bentukPendidikanStr = newVal.nama;
+    }
+});
+watch(selectedJenjangPendidikan, (newVal) => {
+    if (newVal) {
+        sekolah.value.sekolah.jenjangPendidikanId = newVal.jenjangPendidikanId;
+        sekolah.value.jenjangPendidikanStr = newVal.nama;
+    }
 });
 // Edit
 const isEdit = ref(false);
@@ -220,77 +282,41 @@ const editSekolah = () => {
 watch(isEdit, async (newVal) => {
     if (newVal) {
         await fetchRefTable();
+        selectedBentukPendidikan.value = bentukPendidikan.value.find((item) => item.nama === sekolah.value.bentukPendidikanStr);
+        selectedJenjangPendidikan.value = jenjangPendidikan.value.find((item) => item.nama === sekolah.value.jenjangPendidikanStr);
     }
 });
 
 const bentukPendidikan = ref([]);
 const jenjangPendidikan = ref([]);
 const tahunAjaranId = initSelectedSemester.value?.tahunAjaranId; // Misal nilai default, bisa juga pakai dropdown tahun ajaran
-
-const changedData = ref({});
-// watch(
-//     sekolah,
-//     (newVal) => {
-//         changedData.value = {}; // Reset perubahan
-//         for (const key in newVal) {
-//             if (newVal[key] !== dataSekolah.value[key]) {
-//                 changedData.value[key] = newVal[key]; // Simpan hanya data yang berubah
-//             }
-//         }
-//         // console.log("Perubahan terdeteksi:", changedData.value);
-//     },
-//     { deep: true } // Perlu `deep: true` untuk melacak perubahan dalam objek
-// );
-
-// watch(jenjangPendidikanSelected, (newVal) => (sekolah.value.jenjangPendidikanId = newVal.jenjangPendidikanId));
-// watch(bentukPendidikanSelected, (newVal) => (sekolah.value.bentukPendidikanId = newVal.bentukPendidikanId));
 const getWebsiteUrl = (url) => {
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
         return `https://${url}`; // Tambahkan https jika belum ada
     }
     return url;
 };
-
+const loadingUpdate = ref(false);
 const updateData = async () => {
-    if (Object.keys(changedData.value).length > 0) {
-        // Kirim `changedData.value` ke backend via API
-        const payload = {
-            schemaname: store.getters['sekolahService/getTabeltenant']?.schemaname,
-            sekolah: sekolah.value
-        };
-        const resp = await store.dispatch('sekolahService/updateSekolah', payload);
-        toast.add({ severity: 'info', summary: 'Info', detail: resp?.message, life: 3000 });
-        // console.log(resp)
-    } else {
-        toast.add({ severity: 'warn', summary: 'Info', detail: resp?.message, life: 3000 });
-
-        console.log('Tidak ada perubahan, tidak perlu update.');
-    }
+    loadingUpdate.value = true;
+    // console.log(sekolah.value);
+    const payload = {
+        schemaname: store.getters['sekolahService/getTabeltenant']?.schemaname,
+        sekolah: sekolah.value.sekolah,
+        bentukPendidikanStr: selectedBentukPendidikan.value.nama,
+        jenjangPendidikanStr: selectedJenjangPendidikan.value.nama
+    };
+    await updateSekolah(payload);
+    selectedBentukPendidikan.value = null;
+    loadingUpdate.value = false;
     isEdit.value = false;
 };
 const kurikulumTerpilih = ref(null);
 const jurusanTerpilih = ref(null);
-const kategoriSekolahList = ref([
-    // {
-    //     id: 1,
-    //     kurikulum: 'Kurikulum TKJ',
-    //     jurusan: 'Teknik Komputer dan Jaringan',
-    //     tahun_ajaran_id: '20231'
-    // },
-    // {
-    //     id: 2,
-    //     kurikulum: 'Kurikulum Akuntansi',
-    //     jurusan: 'Akuntansi Keuangan Lembaga',
-    //     tahun_ajaran_id: '20231'
-    // },
-    // {
-    //     id: 3,
-    //     kurikulum: 'Kurikulum Bisnis',
-    //     jurusan: 'Manajemen Perkantoran',
-    //     tahun_ajaran_id: '20231'
-    // }
-]);
-const selectedKategoriSekolah = ref();
+const kategoriSekolahList = ref([]);
+const selectedKategoriSekolah = ref({
+    kategoriKelas: []
+});
 
 const isDialogAddKategoriSekolah = ref(false);
 
@@ -304,6 +330,7 @@ watch(isDialogAddKategoriSekolah, (newVal) => {
 
 // ========================================
 // Add
+const title = ref('');
 const addKategoriSekolah = () => {
     if (!kurikulumTerpilih.value || !jurusanTerpilih.value) {
         alert('Kurikulum dan jurusan harus dipilih!');
@@ -316,6 +343,8 @@ const addKategoriSekolah = () => {
         id: newId,
         namaKurikulum: kurikulumTerpilih.value.namaKurikulum || kurikulumTerpilih.value,
         namaJurusan: jurusanTerpilih.value.namaJurusan || jurusanTerpilih.value,
+        jurusanId: jurusanTerpilih.value.jurusanId,
+        kurikulumId: kurikulumTerpilih.value.kurikulumId,
         tahunAjaranId: tahunAjaranId
     };
 
@@ -326,20 +355,52 @@ const addKategoriSekolah = () => {
     jurusanTerpilih.value = null;
     isDialogAddKategoriSekolah.value = false;
 };
+const editKategoriSekolah = () => {
+    if (!kurikulumTerpilih.value || !jurusanTerpilih.value) {
+        alert('Kurikulum dan jurusan harus dipilih!');
+        return;
+    }
 
-// ========================================
+    const kategoriBaru = {
+        kategoriSekolahId: selectedKategoriSekolah.value.kategoriSekolahId,
+        namaKurikulum: kurikulumTerpilih.value.namaKurikulum || kurikulumTerpilih.value,
+        namaJurusan: jurusanTerpilih.value.namaJurusan || jurusanTerpilih.value,
+        jurusanId: jurusanTerpilih.value.jurusanId,
+        kurikulumId: kurikulumTerpilih.value.kurikulumId,
+        tahunAjaranId: tahunAjaranId,
+        kategoriKelas: selectedKategoriSekolah.value.kategoriKelas.map((k) => {
+            return {
+                kategori_sekolah_id: k.kategoriSekolahId,
+                tingkat_id: k.tingkatId,
+                jumlah: k.jumlah,
+                tahun_ajaran_id: k.tahunAjaranId
+            };
+        })
+    };
+    // console.log(kategoriBaru);
+    // return;
 
-// const isDeleteKategoriSekolah = ref(false);
-// ========================================
-// Edit
-const isDialogEditKategoriSekolah = ref(false);
-// const editKategoriSekolah = (e) => {
-//     isDialogEditKategoriSekolah.value = true;
-//     selectedKategoriSekolah.value = e;
-// };
-// const confirmEditKategoriSekolah = () => {
-//     addKategoriSekolah.value = true;
-// };
+    // Cari index dari kategori yang diedit
+    const index = kategoriSekolahList.value.findIndex((k) => k.kategoriSekolahId === kategoriBaru.kategoriSekolahId);
+
+    if (index !== -1) {
+        // Ganti data lama dengan data baru
+        kategoriSekolahList.value.splice(index, 1, kategoriBaru);
+    } else {
+        console.warn('Kategori sekolah tidak ditemukan di list');
+        // Opsional: tambahkan jika ingin fallback ke push()
+        // kategoriSekolahList.value.push(kategoriBaru);
+    }
+
+    // Kirim ke server
+    updateKategoriSekolah(kategoriBaru);
+
+    // Reset input dan tutup dialog
+    kurikulumTerpilih.value = null;
+    jurusanTerpilih.value = null;
+    isEditDataKategoriSekolah.value = false;
+    isDialogAddKategoriSekolah.value = false;
+};
 
 // ========================================
 // Delete
@@ -355,6 +416,66 @@ const confirmDeleteKategoriSekolah = () => {
     deleteKategoriSekolah(selectedKategoriSekolah.value.kategoriSekolahId);
 };
 // ========================================
+const isEditDataKategoriSekolah = ref(false);
+const openAddDialog = () => {
+    title.value = 'Tambah Data';
+    isDialogAddKategoriSekolah.value = true;
+};
+const openEditDialog = async (e) => {
+    title.value = 'Edit Data';
+    isEditDataKategoriSekolah.value = true;
+    selectedKategoriSekolah.value = e;
+    let tes = await fetchKurikulum();
+    kurikulumTerpilih.value = tes.find((item) => item.namaKurikulum == selectedKategoriSekolah.value?.namaKurikulum);
+    tes = await fetchJurusan();
+    jurusanTerpilih.value = tes.find((item) => item.namaJurusan == selectedKategoriSekolah.value?.namaJurusan);
+    isDialogAddKategoriSekolah.value = true;
+};
+const cancelKategoriSekolah = () => {
+    selectedKategoriSekolah.value = null;
+    isDialogAddKategoriSekolah.value = false;
+    isEditDataKategoriSekolah.value = false;
+};
+
+const expandedRows = ref();
+const onRowExpand = (event) => {
+    // Ambil data mapel untuk kelas tertentu
+    //   console.log(event);
+};
+const onRowCollapse = (event) => {
+    //   console.log(event);
+};
+const expandAll = () => {
+    expandedRows.value = kategoriSekolahList.value.reduce((acc, p) => (acc[p.kategoriSekolahId] = true) && acc, {});
+};
+const collapseAll = () => {
+    expandedRows.value = null;
+};
+
+const getKategoriKelas = computed(() => {
+    return (kode) => {
+        const kelas = selectedKategoriSekolah.value.kategoriKelas.find((k) => k.tingkatId == kode);
+        return kelas || { jumlah: 0 };
+    };
+});
+
+// const initKategoriKelas = (tingkatList) => {
+//     const kelas = selectedKategoriSekolah.value.kategoriKelas;
+
+//     for (const tkt of tingkatList) {
+//         const existing = kelas.find((k) => k.tingkatId === parseInt(tkt.kode));
+//         if (!existing) {
+//             kelas.push({
+//                 jumlah: 0,
+//                 kategoriSekolahId: selectedKategoriSekolah.value.kategoriSekolahId || 0,
+//                 tahunAjaranId: selectedKategoriSekolah.value.tahunAjaranId || 0,
+//                 tingkatId: parseInt(tkt.kode)
+//             });
+//         }
+//     }
+
+//     return kelas;
+// };
 </script>
 
 <style scoped>

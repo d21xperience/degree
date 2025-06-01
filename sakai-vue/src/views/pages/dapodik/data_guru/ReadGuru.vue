@@ -12,18 +12,14 @@ import Button from 'primevue/button';
 
 import Dialog from 'primevue/dialog';
 
+import router from '@/router';
 import { FilterMatchMode } from '@primevue/core/api';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import InputText from 'primevue/inputtext';
 import Toolbar from 'primevue/toolbar';
-import { useToast } from 'primevue/usetoast';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
 const loading = ref(false);
 
-const toast = useToast();
 const dt = ref();
 
 const deleteGuruDialog = ref(false);
@@ -32,14 +28,17 @@ const filters = ref({
 });
 
 const openNew = async () => {
-    router.push({ name: 'inputGuru' });
+    loadingAdd.value = true;
+    router.push({ name: 'inputGuru', params: { sekolah: 'smkspasundanjatinangor' } }).catch((err) => {
+        console.error('Router error:', err);
+    });
+    loadingAdd.value = false;
 };
 
 const exportCSV = () => {
     dt.value.exportCSV();
 };
 
-// import EmptyData from '@/components/EmptyData.vue';
 onMounted(async () => {
     await fetchGuruTerdaftar();
 });
@@ -69,7 +68,7 @@ const deletGuru = () => {
 
 const editGuru = async () => {
     await nextTick();
-    loadingEdit.value = true
+    loadingEdit.value = true;
     router.push({
         name: 'editGuru',
         query: { ptkTerdaftarId: selectedGuru.value[0]?.ptkTerdaftarId.toString() }
@@ -82,7 +81,8 @@ const afterUpload = async (e) => {
     if (!e) {
     }
 };
-const loadingEdit = ref(false)
+const loadingEdit = ref(false);
+const loadingAdd = ref(false);
 </script>
 
 <template>
@@ -93,8 +93,8 @@ const loadingEdit = ref(false)
                     <div class="mb-2">
                         <Toolbar>
                             <template #start>
-                                <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="openNew" v-tooltip.bottom="'Tambah Guru Baru'" />
-                                <Button icon="pi pi-pencil" severity="warn" @click="editGuru" :disabled="!selectedGuru || !selectedGuru.length || selectedGuru.length > 1" class="mr-2" v-tooltip.bottom="'Edit Guru'" :loading="loadingEdit"/>
+                                <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="openNew" v-tooltip.bottom="'Tambah Guru Baru'" v-show="initSelectedSemester.semester == 1" :loading="loadingAdd" />
+                                <Button icon="pi pi-pencil" severity="warn" @click="editGuru" :disabled="!selectedGuru || !selectedGuru.length || selectedGuru.length > 1" class="mr-2" v-tooltip.bottom="'Edit Guru'" :loading="loadingEdit" />
                                 <Button icon="pi pi-trash" severity="danger" class="mr-2 text-lg" @click="deleteGuruDialog = true" :disabled="!selectedGuru || !selectedGuru.length" v-tooltip.bottom="'Hapus Guru'" :loading="loading" />
                                 <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Upload Guru'" v-show="initSelectedSemester.semester == 1" />
                                 <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download Guru'" />
@@ -140,10 +140,10 @@ const loadingEdit = ref(false)
                 >
                     <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
                     <Column field="ptk.nama" header="Nama" sortable> </Column>
-                    <Column field="ptk.gelarBelakang" header="Gelar belakang"> </Column>
+                    <Column field="ptkPelengkap.gelarBelakang" header="Gelar belakang"> </Column>
                     <Column field="ptk.jenisKelamin" header="JK"> </Column>
-                    <Column field="ptk.nip" header="NIP"> </Column>
-                    <Column field="ptk.nuptk" header="NUPTK"> </Column>
+                    <Column field="ptkPelengkap.nip" header="NIP"> </Column>
+                    <Column field="ptkPelengkap.nuptk" header="NUPTK"> </Column>
                     <Column field="ptk.tempatLahir" header="Tpt.Lahir"> </Column>
                     <Column field="ptk.tanggalLahir" header="Tgl.Lahir">
                         <template #body="slotProps">

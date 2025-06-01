@@ -19,10 +19,13 @@ import (
 type SekolahService struct {
 	pb.UnimplementedSekolahServiceServer
 	// RedisClient    *redis.Client // Tambahkan Redis sebagai field
-	sekolahService      repositories.SekolahRepository
-	schemaService       SchemaService
-	repoSekolahTenant   repositories.GenericRepository[models.SekolahTenant]
-	repoKategoriSekolah repositories.GenericRepository[models.KategoriSekolah]
+	sekolahService        repositories.SekolahRepository
+	schemaService         SchemaService
+	repoSekolahTenant     repositories.GenericRepository[models.SekolahTenant]
+	repoKategoriSekolah   repositories.GenericRepository[models.KategoriSekolah]
+	repoBentukPendidikan  repositories.GenericRepository[models.BentukPendidikan]
+	repoJenjangPendidikan repositories.GenericRepository[models.JenjangPendidikan]
+	repoKategoriKelas     repositories.GenericRepository[models.KategoriKelas]
 }
 
 func NewSekolahService() *SekolahService {
@@ -31,11 +34,18 @@ func NewSekolahService() *SekolahService {
 	SekolahTenant := repositories.NewsekolahTenantRepository(config.DB)
 	schemaService := NewSchemaService(schemaRepo, *SekolahTenant)
 	repoKategoriSekolah := repositories.NewKategoriSekolahRepository(config.DB)
+	repoBentukPendidikan := repositories.NewBentukPendidikanRepository(config.DB)
+	repoJenjangPendidikan := repositories.NewJenjangPendidikanRepository(config.DB)
+	repoKategoriKelas := repositories.NewKategoriKelasRepository(config.DB)
+
 	return &SekolahService{
-		sekolahService:      sekolahRepo,
-		schemaService:       schemaService,
-		repoSekolahTenant:   *SekolahTenant,
-		repoKategoriSekolah: *repoKategoriSekolah,
+		sekolahService:        sekolahRepo,
+		schemaService:         schemaService,
+		repoSekolahTenant:     *SekolahTenant,
+		repoKategoriSekolah:   *repoKategoriSekolah,
+		repoBentukPendidikan:  *repoBentukPendidikan,
+		repoJenjangPendidikan: *repoJenjangPendidikan,
+		repoKategoriKelas:     *repoKategoriKelas,
 	}
 }
 
@@ -127,25 +137,17 @@ func (s *SekolahService) CreateSekolah(ctx context.Context, req *pb.CreateSekola
 	}
 	Schemaname := req.GetSchemaname()
 	sekolah := req.GetSekolah()
-	// sekolahID, _ := uuid.Parse(sekolah.SekolahId)
-	// // Contoh: Konversi UUID ke string
-	// uuidObj := uuid.New() // Generate UUID baru
-	// strValue, err := utils.ConvertUUIDToStringViceVersa(uuidObj)
-	// if err != nil {
-	// 	fmt.Println("Error:", err)
-	// } else {
-	// 	fmt.Println("UUID ke String:", strValue)
-	// }
-	// bentukPendidikan, err := s.sekolahService.GetKategoriSekolah(ctx, sekolah.Nama)
-	// if err != nil {
-	// 	return nil, err
-	// }
+	bentukPendidikanModel, err := s.repoBentukPendidikan.FindWithStringMatch(ctx, "ref", sekolah.Nama, "nama")
+	if err != nil {
+		return nil, err
+	}
 
-	// sekolah.StatusKepemilikanId = 4
-	// sekolah.BentukPendidikanId = 39
-	// sekolah.JenjangPendidikanId = 98
-	bentukPendidikan := 39
-	jenjangPendidikan := 6
+	var bentukPendidikan uint32
+	cek := utils.ClassifyEducationForm(sekolah.Nama, *bentukPendidikanModel)
+	if cek == nil {
+		bentukPendidikan = 1
+	}
+	jenjangPendidikan := utils.ClassifyEducationGrade(*bentukPendidikanModel)
 	statusKepemilikan := 4
 	sekolahModel := &models.Sekolah{
 		SekolahID: uuid.New(),
@@ -286,6 +288,8 @@ func (s *SekolahService) CreateKategoriSekolah(ctx context.Context, req *pb.Crea
 		NamaKurikulum: &pbKategoriSekolah.NamaKurikulum,
 		NamaJurusan:   &pbKategoriSekolah.NamaJurusan,
 		TahunAjaranId: pbKategoriSekolah.TahunAjaranId,
+		JurusanId:     &pbKategoriSekolah.JurusanId,
+		KurikulumId:   &pbKategoriSekolah.KurikulumId,
 	}
 	err = s.repoKategoriSekolah.Save(ctx, kategoriSekolahModel, Schemaname)
 	if err != nil {
@@ -294,8 +298,23 @@ func (s *SekolahService) CreateKategoriSekolah(ctx context.Context, req *pb.Crea
 			Status:  false,
 		}, nil
 	}
+	kategoriKelasModel := utils.ConvertPBToModels(req.KategoriKelas, func(item *pb.KategoriKelas) *models.KategoriKelas {
+		return &models.KategoriKelas{
+			KategorisekolahId: kategoriSekolahModel.KategorisekolahId,
+			TingkatId:         &item.TingkatId,
+			Jumlah:            &item.Jumlah,
+			TahunAjaranId:     kategoriSekolahModel.TahunAjaranId,
+		}
+	})
+	err = s.repoKategoriKelas.SaveMany(ctx, Schemaname, kategoriKelasModel, 100)
+	if err != nil {
+		return &pb.CreateKategoriSekolahResponse{
+			Message: "Gagal menambahkan kategori kelas",
+			Status:  false,
+		}, nil
+	}
 	return &pb.CreateKategoriSekolahResponse{
-		Message: "Berhasil menambahkan kategori sekolah",
+		Message: "Berhasil menambahkan kategori sekolah & kelas",
 		Status:  true,
 	}, nil
 }
@@ -314,10 +333,11 @@ func (s *SekolahService) GetKategoriSekolah(ctx context.Context, req *pb.GetKate
 	exactConditions := map[string]interface{}{
 		"tabel_kategori_sekolah.tahun_ajaran_id": tahunAjaranId,
 	}
-	modelKategoriSekolah, err := s.repoKategoriSekolah.FindWithRelations(ctx, Schemaname, nil, nil, exactConditions, nil, nil, nil)
+	preloads := []string{"KategoriKelas"}
+	modelKategoriSekolah, err := s.repoKategoriSekolah.FindWithRelations(ctx, Schemaname, nil, preloads, exactConditions, nil, nil, nil)
 	if err != nil {
 		return &pb.GetKategoriSekolahResponse{
-			Message:         "Gagal mendapatkan kategori sekolah",
+			Message:         "Gagal mendapatkan kategori sekolah dan kelas",
 			Status:          false,
 			KategoriSekolah: nil,
 		}, nil
@@ -329,10 +349,20 @@ func (s *SekolahService) GetKategoriSekolah(ctx context.Context, req *pb.GetKate
 			NamaKurikulum:     utils.SafeString(item.NamaKurikulum),
 			NamaJurusan:       utils.SafeString(item.NamaJurusan),
 			TahunAjaranId:     item.TahunAjaranId,
+			KurikulumId:       utils.SafeInt32(item.KurikulumId),
+			JurusanId:         utils.SafeString(item.JurusanId),
+			KategoriKelas: utils.ConvertModelsToPB(item.KategoriKelas, func(item models.KategoriKelas) *pb.KategoriKelas {
+				return &pb.KategoriKelas{
+					KategoriSekolahId: item.KategorisekolahId,
+					TingkatId:         utils.SafeInt32(item.TingkatId),
+					Jumlah:            utils.SafeInt32(item.Jumlah),
+					TahunAjaranId:     item.TahunAjaranId,
+				}
+			}),
 		}
 	})
 	return &pb.GetKategoriSekolahResponse{
-		Message:         "Berhasil mendapatkan kategori sekolah",
+		Message:         "Berhasil mendapatkan kategori sekolah dan kelas",
 		Status:          true,
 		KategoriSekolah: pbKategoriSekolah,
 	}, nil
@@ -362,4 +392,52 @@ func (s *SekolahService) DeleteKategoriSekolah(ctx context.Context, req *pb.Dele
 		Status:  true,
 	}, nil
 
+}
+
+func (s *SekolahService) UpdateKategoriSekolah(ctx context.Context, req *pb.UpdateKategoriSekolahRequest) (*pb.UpdateKategoriSekolahResponse, error) {
+	var err error
+	log.Printf("Received Sekolah data request: %+v\n", req)
+	requiredFields := []string{"Schemaname", "KategoriSekolah"}
+	// Validasi request
+	err = utils.ValidateFields(req, requiredFields)
+	if err != nil {
+		return nil, err
+	}
+	Schemaname := req.GetSchemaname()
+	pbKategoriSekolah := req.KategoriSekolah
+	kategoriSekolahModel := &models.KategoriSekolah{
+		// KategorisekolahId: int32(pbKategoriSekolah.KategoriSekolahId),
+		NamaKurikulum: &pbKategoriSekolah.NamaKurikulum,
+		NamaJurusan:   &pbKategoriSekolah.NamaJurusan,
+		TahunAjaranId: pbKategoriSekolah.TahunAjaranId,
+		JurusanId:     &pbKategoriSekolah.JurusanId,
+		KurikulumId:   &pbKategoriSekolah.KurikulumId,
+	}
+	err = s.repoKategoriSekolah.Update(ctx, kategoriSekolahModel, Schemaname, "kategori_sekolah_id", fmt.Sprintf("%d", req.KategoriSekolah.KategoriSekolahId))
+	if err != nil {
+		return &pb.UpdateKategoriSekolahResponse{
+			Message: "Gagal update kategori sekolah",
+			Status:  false,
+		}, nil
+	}
+	kategoriKelasModel := utils.ConvertPBToModels(req.KategoriSekolah.KategoriKelas, func(item *pb.KategoriKelas) *models.KategoriKelas {
+		return &models.KategoriKelas{
+			KategorisekolahId: int32(pbKategoriSekolah.KategoriSekolahId),
+			TingkatId:         &item.TingkatId,
+			Jumlah:            &item.Jumlah,
+			TahunAjaranId:     kategoriSekolahModel.TahunAjaranId,
+		}
+	})
+	err = s.repoKategoriKelas.SaveMany(ctx, Schemaname, kategoriKelasModel, 100)
+	if err != nil {
+		return &pb.UpdateKategoriSekolahResponse{
+			Message: "Gagal menambahkan kategori kelas",
+			Status:  false,
+		}, nil
+	}
+
+	return &pb.UpdateKategoriSekolahResponse{
+		Message: "Berhasil update kategori sekolah",
+		Status:  true,
+	}, nil
 }

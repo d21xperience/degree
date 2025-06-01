@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"log"
@@ -35,6 +34,52 @@ func (r *schemaRepositoryImpl) ExecuteSQL(query string) error {
 
 // LoadSQLFile membaca isi file SQL lalu mengganti placeholder {{schema_name}}
 // File dibaca baris demi baris untuk mengurangi penggunaan memori.
+// func (r *schemaRepositoryImpl) LoadSQLFile(filePath, schemaName string) (string, error) {
+// 	// Validasi parameter
+// 	if filePath == "" {
+// 		return "", fmt.Errorf("file path is empty")
+// 	}
+// 	if schemaName == "" {
+// 		return "", fmt.Errorf("schema name is empty")
+// 	}
+
+// 	// Validasi schemaName untuk karakter yang aman
+// 	isValidSchemaName := regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString
+// 	if !isValidSchemaName(schemaName) {
+// 		return "", fmt.Errorf("invalid schema name: %s", schemaName)
+// 	}
+
+// 	// Buka file untuk dibaca
+// 	file, err := os.Open(filePath)
+// 	if err != nil {
+// 		return "", fmt.Errorf("failed to open file: %w", err)
+// 	}
+// 	defer file.Close()
+
+// 	// Buffer untuk menampung konten SQL
+// 	var builder strings.Builder
+// 	scanner := bufio.NewScanner(file)
+
+// 	// Iterasi setiap baris dalam file
+// 	for scanner.Scan() {
+// 		line := scanner.Text()
+
+// 		// Ganti placeholder {{schema_name}} dengan schemaName
+// 		line = strings.ReplaceAll(line, "{{schema_name}}", schemaName)
+
+// 		// Tambahkan baris ke buffer
+// 		builder.WriteString(line)
+// 		builder.WriteString("\n") // Tambahkan newline untuk setiap baris
+// 	}
+
+// 	// Periksa error pada scanner
+// 	if err := scanner.Err(); err != nil {
+// 		return "", fmt.Errorf("error reading file: %w", err)
+// 	}
+
+// 	return builder.String(), nil
+// }
+
 func (r *schemaRepositoryImpl) LoadSQLFile(filePath, schemaName string) (string, error) {
 	// Validasi parameter
 	if filePath == "" {
@@ -44,60 +89,147 @@ func (r *schemaRepositoryImpl) LoadSQLFile(filePath, schemaName string) (string,
 		return "", fmt.Errorf("schema name is empty")
 	}
 
-	// Validasi schemaName untuk karakter yang aman
+	// Validasi schemaName
 	isValidSchemaName := regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString
 	if !isValidSchemaName(schemaName) {
 		return "", fmt.Errorf("invalid schema name: %s", schemaName)
 	}
 
-	// Buka file untuk dibaca
-	file, err := os.Open(filePath)
+	// Baca seluruh file sebagai satu string
+	content, err := os.ReadFile(filePath)
 	if err != nil {
-		return "", fmt.Errorf("failed to open file: %w", err)
-	}
-	defer file.Close()
-
-	// Buffer untuk menampung konten SQL
-	var builder strings.Builder
-	scanner := bufio.NewScanner(file)
-
-	// Iterasi setiap baris dalam file
-	for scanner.Scan() {
-		line := scanner.Text()
-
-		// Ganti placeholder {{schema_name}} dengan schemaName
-		line = strings.ReplaceAll(line, "{{schema_name}}", schemaName)
-
-		// Tambahkan baris ke buffer
-		builder.WriteString(line)
-		builder.WriteString("\n") // Tambahkan newline untuk setiap baris
+		return "", fmt.Errorf("failed to read file: %w", err)
 	}
 
-	// Periksa error pada scanner
-	if err := scanner.Err(); err != nil {
-		return "", fmt.Errorf("error reading file: %w", err)
-	}
+	// Ganti placeholder schema
+	sql := strings.ReplaceAll(string(content), "{{schema_name}}", schemaName)
 
-	return builder.String(), nil
+	return sql, nil
 }
 
-func (r *schemaRepositoryImpl) InitializeDatabase(ctx context.Context, schemaFile, schemaName string) error {
-	var err error
-	log.Printf("Initializing database for schema: %s", schemaName)
+// func (r *schemaRepositoryImpl) InitializeDatabase(ctx context.Context, schemaFile, schemaName string) error {
+// 	var err error
+// 	log.Printf("Initializing database for schema: %s", schemaName)
 
-	// 1. Mulai transaksi
+// 	// 1. Mulai transaksi
+// 	tx := r.db.WithContext(ctx).Begin()
+// 	if tx.Error != nil {
+// 		log.Printf("❌ Failed to start transaction: %v", tx.Error)
+// 		return fmt.Errorf("failed to begin transaction: %w", tx.Error)
+// 	}
+// 	defer func() {
+// 		if r := recover(); r != nil {
+// 			log.Printf("🚨 Panic recovered in transaction: %v", r)
+// 			tx.Rollback()
+// 			err = fmt.Errorf("panic occurred: %v", r)
+// 		} else if err != nil {
+// 			log.Printf("❌ Rolling back transaction due to error: %v", err)
+// 			tx.Rollback()
+// 		} else {
+// 			log.Printf("✅ Committing transaction")
+// 			tx.Commit()
+// 		}
+// 	}()
+
+// 	// 2. Muat file SQL
+// 	log.Printf("🔐 Transaction started for schema: %s", schemaName)
+// 	sqlContent, err := r.LoadSQLFile(schemaFile, schemaName)
+// 	if err != nil {
+// 		log.Printf("❌ Error loading SQL file (%s): %v", schemaFile, err)
+// 		err = fmt.Errorf("failed to load SQL file: %w", err)
+// 		return err
+// 	}
+
+// 	if len(sqlContent) == 0 {
+// 		log.Printf("❌ SQL content is empty for schema: %s", schemaName)
+// 		err = fmt.Errorf("sql content is empty")
+// 		return err
+// 	}
+
+// 	fmt.Println("=== FINAL SQL ===\n", sqlContent) // Debug output
+// 	log.Printf("✅ SQL file loaded successfully")
+
+// 	// 3. Eksekusi SQL satu per satu
+// 	statements := strings.Split(sqlContent, ";")
+// 	for i, stmt := range statements {
+// 		stmt = strings.TrimSpace(stmt)
+// 		if stmt == "" {
+// 			continue
+// 		}
+// 		log.Printf("🌀 Executing statement #%d for schema %s", i+1, schemaName)
+
+// 		if execErr := tx.Exec(stmt).Error; execErr != nil {
+// 			log.Printf("❌ Error executing statement #%d: %v", i+1, execErr)
+// 			err = fmt.Errorf("error at statement #%d: %w", i+1, execErr)
+// 			return err
+// 		}
+// 	}
+// 	log.Printf("✅ All SQL statements executed successfully")
+
+// 	// 4. Simpan ke schema_logs
+// 	log.Printf("📝 Inserting schema log for: %s", schemaName)
+// 	if insertErr := tx.Exec("INSERT INTO public.schema_logs (schema_name, created_at) VALUES (?, NOW())", schemaName).Error; insertErr != nil {
+// 		log.Printf("❌ Error saving schema log for (%s): %v", schemaName, insertErr)
+// 		err = fmt.Errorf("failed to save schema log: %w", insertErr)
+// 		return err
+// 	}
+// 	log.Printf("✅ Schema log inserted successfully")
+
+// 	log.Printf("🎉 Schema %s successfully initialized", schemaName)
+// 	return nil
+// }
+
+func (r *schemaRepositoryImpl) InitializeDatabase(ctx context.Context, schemaFile, schemaName string) error {
+	log.Printf("🔧 Initializing database for schema: %s", schemaName)
+
+	// Validasi parameter di awal
+	if err := validateSchemaParams(schemaFile, schemaName); err != nil {
+		return err
+	}
+
+	// Baca dan siapkan SQL
+	sqlContent, err := r.LoadSQLFile(schemaFile, schemaName)
+	if err != nil {
+		return fmt.Errorf("failed to load SQL file: %w", err)
+	}
+	if len(strings.TrimSpace(sqlContent)) == 0 {
+		return fmt.Errorf("SQL content is empty")
+	}
+
+	log.Printf("📄 SQL content loaded and processed for schema: %s", schemaName)
+	fmt.Println("=== FINAL SQL ===\n", sqlContent) // Debug output
+
+	// Eksekusi dalam transaksi
+	return r.executeWithTransaction(ctx, sqlContent, schemaName)
+}
+
+func validateSchemaParams(filePath, schemaName string) error {
+	if filePath == "" {
+		return fmt.Errorf("file path is empty")
+	}
+	if schemaName == "" {
+		return fmt.Errorf("schema name is empty")
+	}
+	isValid := regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString
+	if !isValid(schemaName) {
+		return fmt.Errorf("invalid schema name: %s", schemaName)
+	}
+	return nil
+}
+func (r *schemaRepositoryImpl) executeWithTransaction(ctx context.Context, sqlContent, schemaName string) (err error) {
 	tx := r.db.WithContext(ctx).Begin()
 	if tx.Error != nil {
-		log.Printf("❌ Failed to start transaction: %v", tx.Error)
-		return fmt.Errorf("failed to begin transaction: %w", tx.Error)
+		log.Printf("❌ Failed to begin transaction: %v", tx.Error)
+		return tx.Error
 	}
+
 	defer func() {
 		if r := recover(); r != nil {
-			log.Printf("🚨 Panic recovered in transaction: %v", r)
+			log.Printf("🚨 Panic recovered: %v", r)
 			tx.Rollback()
 			err = fmt.Errorf("panic occurred: %v", r)
 		} else if err != nil {
-			log.Printf("❌ Rolling back transaction due to error: %v", err)
+			log.Printf("❌ Rolling back due to error: %v", err)
 			tx.Rollback()
 		} else {
 			log.Printf("✅ Committing transaction")
@@ -105,48 +237,20 @@ func (r *schemaRepositoryImpl) InitializeDatabase(ctx context.Context, schemaFil
 		}
 	}()
 
-	// 2. Muat file SQL
-	log.Printf("🔐 Transaction started for schema: %s", schemaName)
-	sqlContent, err := r.LoadSQLFile(schemaFile, schemaName)
-	if err != nil {
-		log.Printf("❌ Error loading SQL file (%s): %v", schemaFile, err)
-		err = fmt.Errorf("failed to load SQL file: %w", err)
+	// Jalankan seluruh SQL (tidak di-split!)
+	if execErr := tx.Exec(sqlContent).Error; execErr != nil {
+		err = fmt.Errorf("failed to execute SQL content: %w", execErr)
 		return err
 	}
+	log.Printf("✅ SQL executed successfully")
 
-	if len(sqlContent) == 0 {
-		log.Printf("❌ SQL content is empty for schema: %s", schemaName)
-		err = fmt.Errorf("sql content is empty")
-		return err
-	}
-	log.Printf("✅ SQL file loaded successfully")
-
-	// 3. Eksekusi SQL satu per satu
-	statements := strings.Split(sqlContent, ";")
-	for i, stmt := range statements {
-		stmt = strings.TrimSpace(stmt)
-		if stmt == "" {
-			continue
-		}
-		log.Printf("🌀 Executing statement #%d for schema %s", i+1, schemaName)
-		if execErr := tx.Exec(stmt).Error; execErr != nil {
-			log.Printf("❌ Error executing statement #%d: %v", i+1, execErr)
-			err = fmt.Errorf("error at statement #%d: %w", i+1, execErr)
-			return err
-		}
-	}
-	log.Printf("✅ All SQL statements executed successfully")
-
-	// 4. Simpan ke schema_logs
-	log.Printf("📝 Inserting schema log for: %s", schemaName)
+	// Simpan ke schema log
 	if insertErr := tx.Exec("INSERT INTO public.schema_logs (schema_name, created_at) VALUES (?, NOW())", schemaName).Error; insertErr != nil {
-		log.Printf("❌ Error saving schema log for (%s): %v", schemaName, insertErr)
 		err = fmt.Errorf("failed to save schema log: %w", insertErr)
 		return err
 	}
-	log.Printf("✅ Schema log inserted successfully")
+	log.Printf("📝 Schema log saved: %s", schemaName)
 
-	log.Printf("🎉 Schema %s successfully initialized", schemaName)
 	return nil
 }
 

@@ -3,7 +3,6 @@ import store from '@/store';
 import { createRouter, createWebHistory } from 'vue-router';
 const kondisi = true;
 const router = createRouter({
-    // history: createWebHistory(),
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
         {
@@ -69,6 +68,7 @@ const router = createRouter({
                         {
                             path: 'info-siswa',
                             name: 'infoSiswa',
+                            props: true,
                             meta: { title: 'Info Siswa', namaRoute: 'Siswa' },
                             component: () => import('@/views/pages/dapodik/data_siswa/ReadSiswa.vue')
                         },
@@ -117,8 +117,16 @@ const router = createRouter({
                         {
                             path: 'input-kelas',
                             name: 'inputKelas',
-                            meta: { title: 'Tambah Kelas', namaRoute: 'Kelas' },
+                            props: true,
+                            meta: { disableSelect: true, title: 'Tambah Kelas', namaRoute: 'Kelas' },
                             component: () => import('@/views/pages/dapodik/data_kelas/AddKelas.vue')
+                        },
+                        {
+                            path: 'input-siswa',
+                            name: 'inputSiswa',
+                            props: true,
+                            meta: { disableSelect: true, title: 'Tambah Siswa', namaRoute: 'Siswa' },
+                            component: () => import('@/views/pages/dapodik/data_siswa/AddSiswa.vue')
                         },
                         {
                             path: 'info-mapel',

@@ -8,7 +8,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 const store = useStore();
 
-const { schemaname, listTahunAjaran, fetchTahunAjaran } = useSekolahService();
+const { schemaname, listTahunAjaran, fetchTahunAjaran, initSelectedTahunAjaran } = useSekolahService();
 // ============toast============
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
@@ -16,6 +16,7 @@ import DialogLoading from './DialogLoading.vue';
 const toast = useToast();
 onMounted(async () => {
     await fetchTahunAjaran();
+    selectedTahunAjaran.value = initSelectedTahunAjaran.value 
     // console.log(schemaname.value)
 });
 const isLoading = ref(false);
@@ -199,14 +200,14 @@ const downloadTemplate = async () => {
                 </div>
                 <div class="">
                     <!-- <label class="block text-sm font-medium text-gray-700">Tahun Pelajaran <span class="text-red-500">*</span> </label> -->
-                    <Select v-model="selectedTahunAjaran" :options="listTahunAjaran.value" optionLabel="nama" placeholder="Pilih Tahun Pelajaran" class="text-sm" :invalid="submitted && !selectedTahunAjaran" fluid/>
+                    <Select v-model="selectedTahunAjaran" :options="listTahunAjaran.value" optionLabel="nama" placeholder="Pilih Tahun Pelajaran" class="text-sm" :invalid="submitted && !selectedTahunAjaran" fluid />
                     <small v-if="submitted && !selectedTahunAjaran" class="text-red-500">Pilih tahun ajaran.</small>
                 </div>
             </div>
         </div>
 
         <template #footer>
-            <Button label="Batal" icon="pi pi-times"  text @click="closeDialog" />
+            <Button label="Batal" icon="pi pi-times" text @click="closeDialog" />
             <Button label="Upload" icon="pi pi-upload" severity="warn" text @click="saveData" />
         </template>
     </Dialog>

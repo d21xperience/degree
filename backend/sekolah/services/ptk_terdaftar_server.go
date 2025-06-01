@@ -10,6 +10,7 @@ import (
 	"sekolah/repositories"
 	"sekolah/utils"
 
+	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -35,7 +36,7 @@ func NewPTKTerdaftarServiceServer() *PTKTerdaftarServiceServer {
 // **CreatePTKTerdaftar**
 func (s *PTKTerdaftarServiceServer) CreatePTKTerdaftar(ctx context.Context, req *pb.CreatePTKTerdaftarRequest) (*pb.CreatePTKTerdaftarResponse, error) {
 	// Debugging: Cek nilai request yang diterima
-	// log.Printf("Received Sekolah data request: %+v\n", req)
+	log.Printf("ptk_terdaftar_server/CreatePTKTerdaftar => Received Sekolah data request: %+v\n", req)
 	// Daftar field yang wajib diisi
 	requiredFields := []string{"Schemaname", "PTKTerdaftar"}
 	// Validasi request
@@ -45,13 +46,32 @@ func (s *PTKTerdaftarServiceServer) CreatePTKTerdaftar(ctx context.Context, req 
 	}
 	schemaName := req.GetSchemaname()
 	PTKTerdaftar := req.GetPtkTerdaftar()
+	if req.PtkTerdaftar[0].Ptk.Nama == "" || req.PtkTerdaftar[0].Ptk.Nama == "\"\"" {
+		return &pb.CreatePTKTerdaftarResponse{
+			Message: "Data yang diinputkan tidak boleh kosong!",
+			Status:  false,
+		}, nil
+	}
 
+	var ptkTerdaftarId uuid.UUID
+	var ptkId uuid.UUID
 	PTKTerdaftarModel := utils.ConvertPBToModels(PTKTerdaftar, func(item *pb.PTKTerdaftar) *models.PTKTerdaftar {
+		// cek apakah data dari dapodik atau bukan
+		if !item.Ptk.IsDapodik {
+			ptkTerdaftarId = uuid.New()
+			ptkId = uuid.New()
+		} else {
+			ptkTerdaftarId = utils.StringToUUID(item.PtkTerdaftarId)
+			ptkId = utils.StringToUUID(item.PtkId)
+		}
+
 		return &models.PTKTerdaftar{
-			PtkTerdaftarId: utils.StringToUUID(item.PtkTerdaftarId),
+			PtkTerdaftarId: ptkTerdaftarId,
 			TahunAjaranId:  item.TahunAjaranId,
-			PtkID:          utils.StringToUUID(item.PtkId),
+			PtkID:          ptkId,
 			JenisKeluarId:  &item.JenisKeluarId,
+			IsDapodik:      item.IsDapodik,
+			// PtkTerdaftarIdDapodik: ,
 			PTK: models.TabelPTK{
 				PtkID:             utils.StringToUUID(item.PtkId),
 				Nama:              item.Ptk.Nama,
@@ -60,6 +80,30 @@ func (s *PTKTerdaftarServiceServer) CreatePTKTerdaftar(ctx context.Context, req 
 				TempatLahir:       &item.Ptk.TempatLahir,
 				TanggalLahir:      utils.TimeToPointer(item.Ptk.TanggalLahir),
 				StatusKeaktifanID: item.Ptk.StatusKeaktifanId,
+				Agama:             &item.Ptk.Agama,
+				IsDapodik:         item.Ptk.IsDapodik,
+			},
+			PTKPelengkap: models.PtkPelengkap{
+				PtkPelengkapId: uuid.New(),
+				PtkId:          ptkId,
+				GelarDepan:     &item.PtkPelengkap.GelarDepan,
+				GelarBelakang:  &item.PtkPelengkap.GelarBelakang,
+				Nik:            &item.PtkPelengkap.Nik,
+				NoKk:           &item.PtkPelengkap.No_KK,
+				Nuptk:          &item.PtkPelengkap.Nuptk,
+				Niy:            &item.PtkPelengkap.Niy,
+				Nip:            &item.PtkPelengkap.Nip,
+				AlamatJalan:    &item.PtkPelengkap.AlamatJalan,
+				Rt:             &item.PtkPelengkap.Rt,
+				Rw:             &item.PtkPelengkap.Rw,
+				DesaKelurahan:  &item.PtkPelengkap.DesaKelurahan,
+				Kec:            &item.PtkPelengkap.Kec,
+				KabKota:        &item.PtkPelengkap.KabKota,
+				Propinsi:       &item.PtkPelengkap.Propinsi,
+				KodePos:        &item.PtkPelengkap.KodePos,
+				NoTeleponRumah: &item.PtkPelengkap.NoTeleponRumah,
+				NoHp:           &item.PtkPelengkap.NoHp,
+				Email:          &item.PtkPelengkap.Email,
 			},
 		}
 	})
@@ -153,7 +197,7 @@ func (s *PTKTerdaftarServiceServer) GetPTKTerdaftar(ctx context.Context, req *pb
 	joins := []string{
 		"JOIN tabel_ptk ON tabel_ptk.ptk_id = tabel_ptk_terdaftar.ptk_id",
 	}
-	preloads := []string{"PTK"}
+	preloads := []string{"PTK", "PTKPelengkap"}
 
 	conditions := map[string]interface{}{
 		"tabel_ptk_terdaftar.tahun_ajaran_id": req.GetTahunAjaranId(),
@@ -176,38 +220,38 @@ func (s *PTKTerdaftarServiceServer) GetPTKTerdaftar(ctx context.Context, req *pb
 		return nil, err
 	}
 	// Konversi ke protobuf
-	ptkTerdaftarPB := utils.ConvertModelsToPB(PTKTerdaftarModel, func(ptk models.PTKTerdaftar) *pb.PTKTerdaftar {
+	ptkTerdaftarPB := utils.ConvertModelsToPB(PTKTerdaftarModel, func(item models.PTKTerdaftar) *pb.PTKTerdaftar {
 		return &pb.PTKTerdaftar{
-			PtkTerdaftarId: ptk.PtkTerdaftarId.String(),
-			TahunAjaranId:  ptk.TahunAjaranId,
+			PtkTerdaftarId: item.PtkTerdaftarId.String(),
+			TahunAjaranId:  item.TahunAjaranId,
 			Ptk: &pb.PTK{
-				PtkId:             ptk.PTK.PtkID.String(),
-				Nama:              ptk.PTK.Nama,
-				JenisKelamin:      utils.SafeString(ptk.PTK.JenisKelamin),
-				TempatLahir:       utils.SafeString(ptk.PTK.TempatLahir),
-				JenisPtkId:        ptk.PTK.JenisPtkID,
-				TanggalLahir:      ptk.PTK.TanggalLahir.Format("2006-01-02"),
-				StatusKeaktifanId: ptk.PTK.StatusKeaktifanID,
+				PtkId:             item.PTK.PtkID.String(),
+				Nama:              item.PTK.Nama,
+				JenisKelamin:      utils.SafeString(item.PTK.JenisKelamin),
+				TempatLahir:       utils.SafeString(item.PTK.TempatLahir),
+				JenisPtkId:        item.PTK.JenisPtkID,
+				TanggalLahir:      item.PTK.TanggalLahir.Format("2006-01-02"),
+				StatusKeaktifanId: item.PTK.StatusKeaktifanID,
 			},
 			PtkPelengkap: &pb.PtkPelengkap{
-				GelarDepan:     utils.SafeString(ptk.PTKPelengkap.GelarDepan),
-				GelarBelakang:  utils.SafeString(ptk.PTKPelengkap.GelarBelakang),
-				Nik:            utils.SafeString(ptk.PTKPelengkap.Nik),
-				No_KK:          utils.SafeString(ptk.PTKPelengkap.Nik),
-				Nuptk:          utils.SafeString(ptk.PTKPelengkap.Nuptk),
-				Niy:            utils.SafeString(ptk.PTKPelengkap.Niy),
-				Nip:            utils.SafeString(ptk.PTKPelengkap.Nip),
-				AlamatJalan:    utils.SafeString(ptk.PTKPelengkap.AlamatJalan),
-				Rt:             utils.SafeString(ptk.PTKPelengkap.Rt),
-				Rw:             utils.SafeString(ptk.PTKPelengkap.Rw),
-				DesaKelurahan:  utils.SafeString(ptk.PTKPelengkap.DesaKelurahan),
-				Kec:            utils.SafeString(ptk.PTKPelengkap.Kec),
-				KabKota:        utils.SafeString(ptk.PTKPelengkap.KabKota),
-				Propinsi:       utils.SafeString(ptk.PTKPelengkap.Propinsi),
-				KodePos:        utils.SafeString(ptk.PTKPelengkap.KodePos),
-				NoTeleponRumah: utils.SafeString(ptk.PTKPelengkap.NoTeleponRumah),
-				NoHp:           utils.SafeString(ptk.PTKPelengkap.NoHp),
-				Email:          utils.SafeString(ptk.PTKPelengkap.Email),
+				GelarDepan:     utils.SafeString(item.PTKPelengkap.GelarDepan),
+				GelarBelakang:  utils.SafeString(item.PTKPelengkap.GelarBelakang),
+				Nik:            utils.SafeString(item.PTKPelengkap.Nik),
+				No_KK:          utils.SafeString(item.PTKPelengkap.Nik),
+				Nuptk:          utils.SafeString(item.PTKPelengkap.Nuptk),
+				Niy:            utils.SafeString(item.PTKPelengkap.Niy),
+				Nip:            utils.SafeString(item.PTKPelengkap.Nip),
+				AlamatJalan:    utils.SafeString(item.PTKPelengkap.AlamatJalan),
+				Rt:             utils.SafeString(item.PTKPelengkap.Rt),
+				Rw:             utils.SafeString(item.PTKPelengkap.Rw),
+				DesaKelurahan:  utils.SafeString(item.PTKPelengkap.DesaKelurahan),
+				Kec:            utils.SafeString(item.PTKPelengkap.Kec),
+				KabKota:        utils.SafeString(item.PTKPelengkap.KabKota),
+				Propinsi:       utils.SafeString(item.PTKPelengkap.Propinsi),
+				KodePos:        utils.SafeString(item.PTKPelengkap.KodePos),
+				NoTeleponRumah: utils.SafeString(item.PTKPelengkap.NoTeleponRumah),
+				NoHp:           utils.SafeString(item.PTKPelengkap.NoHp),
+				Email:          utils.SafeString(item.PTKPelengkap.Email),
 			},
 		}
 	})
@@ -237,6 +281,8 @@ func (s *PTKTerdaftarServiceServer) UpdatePTKTerdaftar(ctx context.Context, req 
 			Nama:         PTKTerdaftar[0].Ptk.Nama,
 			JenisKelamin: &PTKTerdaftar[0].Ptk.JenisKelamin,
 			TempatLahir:  &PTKTerdaftar[0].Ptk.TempatLahir,
+			Agama:        &PTKTerdaftar[0].Ptk.Agama,
+			TanggalLahir: utils.TimeToPointer(PTKTerdaftar[0].Ptk.TanggalLahir),
 		}
 		err = s.repoPTK.Update(ctx, PTKModel, schemaName, "ptk_id", PTKTerdaftar[0].Ptk.PtkId)
 		if err != nil {
@@ -250,13 +296,25 @@ func (s *PTKTerdaftarServiceServer) UpdatePTKTerdaftar(ctx context.Context, req 
 
 		PTKPelengkap := &models.PtkPelengkap{
 			// PtkPelengkapId: uuid.New(),
-			PtkId:         utils.StringToUUID(PTKTerdaftar[0].Ptk.PtkId),
-			Rt:            &PTKTerdaftar[0].PtkPelengkap.Rt,
-			Rw:            &PTKTerdaftar[0].PtkPelengkap.Rw,
-			DesaKelurahan: &PTKTerdaftar[0].PtkPelengkap.DesaKelurahan,
-			Kec:           &PTKTerdaftar[0].PtkPelengkap.Kec,
-			KabKota:       &PTKTerdaftar[0].PtkPelengkap.KabKota,
-			Propinsi:      &PTKTerdaftar[0].PtkPelengkap.Propinsi,
+			PtkId:          utils.StringToUUID(PTKTerdaftar[0].Ptk.PtkId),
+			Rt:             &PTKTerdaftar[0].PtkPelengkap.Rt,
+			Rw:             &PTKTerdaftar[0].PtkPelengkap.Rw,
+			DesaKelurahan:  &PTKTerdaftar[0].PtkPelengkap.DesaKelurahan,
+			Kec:            &PTKTerdaftar[0].PtkPelengkap.Kec,
+			KabKota:        &PTKTerdaftar[0].PtkPelengkap.KabKota,
+			Propinsi:       &PTKTerdaftar[0].PtkPelengkap.Propinsi,
+			GelarDepan:     &PTKTerdaftar[0].PtkPelengkap.GelarDepan,
+			GelarBelakang:  &PTKTerdaftar[0].PtkPelengkap.GelarBelakang,
+			Nik:            &PTKTerdaftar[0].PtkPelengkap.Nik,
+			NoKk:           &PTKTerdaftar[0].PtkPelengkap.No_KK,
+			Nuptk:          &PTKTerdaftar[0].PtkPelengkap.Nuptk,
+			Niy:            &PTKTerdaftar[0].PtkPelengkap.Niy,
+			Nip:            &PTKTerdaftar[0].PtkPelengkap.Nip,
+			AlamatJalan:    &PTKTerdaftar[0].PtkPelengkap.AlamatJalan,
+			KodePos:        &PTKTerdaftar[0].PtkPelengkap.KodePos,
+			NoTeleponRumah: &PTKTerdaftar[0].PtkPelengkap.NoTeleponRumah,
+			NoHp:           &PTKTerdaftar[0].PtkPelengkap.NoHp,
+			Email:          &PTKTerdaftar[0].PtkPelengkap.Email,
 		}
 		// Cek apakah data sudah tersimpan di tabel_ptk_pelengkap?
 		cek, err := s.repoPTKPelengkap.FindOrCreateByID(ctx, PTKTerdaftar[0].Ptk.PtkId, schemaName, "ptk_id", func(id string) *models.PtkPelengkap {

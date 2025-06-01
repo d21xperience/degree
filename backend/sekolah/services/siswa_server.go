@@ -31,7 +31,7 @@ func NewSiswaServiceServer() *SiswaServiceServer {
 // **CreateSiswa**
 func (s *SiswaServiceServer) CreateSiswa(ctx context.Context, req *pb.CreateSiswaRequest) (*pb.CreateSiswaResponse, error) {
 	// Debugging: Cek nilai request yang diterima
-	log.Printf("Received Sekolah data request: %+v\n", req)
+	log.Printf("siswa_server/CreateSiswa => Received Sekolah data request: %+v\n", req)
 	// Daftar field yang wajib diisi
 	requiredFields := []string{"Schemaname", "Siswa"}
 	// Validasi request

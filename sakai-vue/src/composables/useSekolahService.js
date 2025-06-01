@@ -9,7 +9,12 @@ export function useSekolahService() {
     const guruTerdaftarList = ref([]);
     const siswaAktifList = ref([]);
     const kelasList = ref([]);
-    const sekolah = computed(() => store.getters['sekolahService/getSekolah']);
+    const sekolah = computed(() => {
+        const tes = store.getters['sekolahService/getSekolah'];
+        const response = tes;
+        response.uri = response?.sekolah.nama.toLowerCase().replace(/\s+/g, '');
+        return response;
+    });
     const listTahunAjaran = computed(() => rawlistTahunAjaran || []);
     const rawlistTahunAjaran = ref();
     const listSemester = store.getters['sekolahService/getSemester'];
@@ -23,7 +28,6 @@ export function useSekolahService() {
     const fetchSekolah = async () => {
         try {
             let response = await store.getters['sekolahService/getSekolah'];
-            // console.log(response)
             if (!response) {
                 const sekolahID = await store.state.authService.user?.sekolahTenantId;
                 const tTenant = await store.dispatch('sekolahService/fetchTabeltenant', sekolahID);
@@ -36,15 +40,35 @@ export function useSekolahService() {
             console.log(error);
         }
     };
+    const updateSekolah = async (param) => {
+        try {
+            const payload = {
+                sekolah: param.sekolah,
+                bentukPendidikanStr: param.bentukPendidikanStr,
+                jenjangPendidikanStr: param.jenjangPendidikanStr
+            };
+            store.commit('sekolahService/SET_TABELSEKOLAH', payload);
+            // await fetchSekolah();
+
+            payload.schemaname = schemaname.value;
+            const response = await store.dispatch('sekolahService/updateSekolah', payload);
+            if (response.status) {
+                toast.add({ severity: 'info', summary: 'Info', detail: response?.message, life: 3000 });
+            }
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Info', detail: error, life: 3000 });
+        }
+    };
     const fetchGuruTerdaftar = async () => {
         try {
             const payload = {
                 tahunAjaranId: initSelectedSemester.value?.tahunAjaranId,
                 schemaname: schemaname.value
             };
-            console.log(payload);
             let res = await store.getters['sekolahService/getPTKTerdaftar'];
-            if (!res) {
+            // console.log('useSekolahService/fetchGuruTerdaftar', res);
+            if (!res || res.length == 0) {
+                // console.log(payload);
                 res = await store.dispatch('sekolahService/fetchPTKTerdaftar', payload);
             } else {
                 if (res.tahun_ajaran_id != initSelectedSemester.value?.tahunAjaranId) {
@@ -109,12 +133,31 @@ export function useSekolahService() {
                 schemaname: schemaname.value,
                 ptk_terdaftar: [ptkTerdaftar._rawValue]
             };
-            console.log(payload);
             const response = await store.dispatch('sekolahService/updatePTKTerdaftar', payload);
             if (!response.status) {
                 toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal update data guru: ${response.message}`, life: 3000 });
             }
-            toast.add({ severity: 'success', summary: 'Success', detail: `Berhasil update data guru: ${response.message}`, life: 3000 });
+            await store.dispatch('sekolahService/fetchPTKTerdaftar', { tahunAjaranId: initSelectedSemester.value?.tahunAjaranId, schemaname: schemaname.value });
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Berhasil update data guru', life: 3000 });
+            return response;
+        } catch (error) {
+            console.error('Gagal update data guru:', error);
+            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal update data guru: ${error}`, life: 3000 });
+        }
+    };
+    const addGuruTerdaftar = async (ptkTerdaftar) => {
+        try {
+            const payload = {
+                schemaname: schemaname.value,
+                ptk_terdaftar: [ptkTerdaftar._rawValue]
+            };
+            console.log(payload);
+            const response = await store.dispatch('sekolahService/addPTKTerdaftar', payload);
+            if (!response.status) {
+                toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal menambah data guru: ${response.message}`, life: 3000 });
+            }
+            await store.dispatch('sekolahService/fetchPTKTerdaftar', { tahunAjaranId: initSelectedSemester.value?.tahunAjaranId, schemaname: schemaname.value });
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Berhasil menambah data guru', life: 3000 });
 
             return response;
         } catch (error) {
@@ -142,7 +185,8 @@ export function useSekolahService() {
     const fetchKelas = async (kelasId = null, tingkatPendidikanId = null) => {
         try {
             let response = store.getters['sekolahService/getKelas'];
-            if (!response || response.length == 0) {
+
+            if (!response || response.length == 0 || initSelectedSemester.value?.semesterId != response?.semesterId) {
                 const payload = {
                     schemaname: schemaname.value,
                     semester_id: initSelectedSemester.value?.semesterId
@@ -153,16 +197,41 @@ export function useSekolahService() {
                 if (tingkatPendidikanId) {
                     payload.tingkat_pendidikan_id = tingkatPendidikanId;
                 }
-                response = await store.dispatch('sekolahService/fetchRombel', payload);
+                response = await store.dispatch('sekolahService/fetchKelas', payload);
+                if (response.status) {
+                    toast.add({ severity: 'success', summary: 'Success', detail: `${response.message}`, life: 3000 });
+                }
             }
 
             kelasList.value = response.kelas;
             // console.log(response);
             return response.kelas;
         } catch (error) {
-            console.error('Gagal mengambil data kelas:', error);
+            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengambil kelas: ${error}`, life: 3000 });
         }
     };
+    const addKelas = async (kelas, anggotaKelas = null) => {
+        try {
+            const payload = {
+                schemaname: schemaname.value,
+                kelas: [kelas._rawValue],
+                anggota_kelas: anggotaKelas
+            };
+            console.log(payload);
+            const response = await store.dispatch('sekolahService/createKelas', payload);
+            if (!response.status) {
+                toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal menambah data kelas: ${response.message}`, life: 3000 });
+            }
+            // await store.dispatch('sekolahService/fetchKelas', { tahunAjaranId: initSelectedSemester.value?.tahunAjaranId, schemaname: schemaname.value });
+            toast.add({ severity: 'success', summary: 'Success', detail: 'Berhasil menambah data kelas', life: 3000 });
+
+            return response;
+        } catch (error) {
+            console.error('Gagal update data kelas:', error);
+            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal update data kelas: ${error}`, life: 3000 });
+        }
+    };
+
     // const fetchAnggotaKelas = async (anggotaRombelId = null) => {
     //     try {
     //         const payload = {
@@ -208,7 +277,7 @@ export function useSekolahService() {
                 schemaname: schemaname.value,
                 anggota_rombel_id: anggotaRombelId
             };
-            const response = await store.dispatch('sekolahService/deleteAnggotaKelas', payload);
+            const response = await store.dispatch('sekolahService/createAnggotaKelas', payload);
             if (response.status) {
                 toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
             }
@@ -217,6 +286,20 @@ export function useSekolahService() {
         }
     };
     const deleteBatchSiswaAktif = async (anggotaRombelIds) => {
+        try {
+            const payload = {
+                schemaname: schemaname.value,
+                anggota_rombel_id: anggotaRombelIds
+            };
+            const response = await store.dispatch('sekolahService/deleteBatchAnggotaKelas', payload);
+            if (response.status) {
+                toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
+            }
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal menghapus banyak siswa: ${error}`, life: 3000 });
+        }
+    };
+    const addSiswaAktif = async (anggotaRombelIds) => {
         try {
             const payload = {
                 schemaname: schemaname.value,
@@ -292,19 +375,17 @@ export function useSekolahService() {
     const fetchTingkat = async () => {
         try {
             let response = await store.getters['sekolahService/getTingkatPendidikan'];
-            // console.log(response);
             if (!response) {
                 const payload = {
-                    jenjang_pendidikan_id: await store.getters['sekolahService/getSekolah']?.jenjangPendidikanId //sekolah.value?.jenjangPendidikanId
+                    jenjang_pendidikan_id: await store.getters['sekolahService/getSekolah']?.sekolah.jenjangPendidikanId //sekolah.value?.jenjangPendidikanId
                 };
+                console.log(payload);
                 response = await store.dispatch('sekolahService/fetchTingkatPendidikan', payload);
             }
             return response;
         } catch (error) {
             throw error;
         }
-
-        // console.log(response);
     };
 
     const fetchBanyakSiswaByTingkatId = async (tingkatPendidikanId) => {
@@ -338,7 +419,7 @@ export function useSekolahService() {
         }
     };
 
-    const createDns = async (dns) => {
+    const addDns = async (dns) => {
         try {
             const payload = {
                 schemaname: schemaname.value,
@@ -479,10 +560,39 @@ export function useSekolahService() {
                 kategori_sekolah: {
                     nama_kurikulum: kategoriSekolah.namaKurikulum,
                     nama_jurusan: kategoriSekolah.namaJurusan,
+                    kurikulum_id: kategoriSekolah.kurikulumId,
+                    jurusan_id: kategoriSekolah.jurusanId,
                     tahun_ajaran_id: `${kategoriSekolah.tahunAjaranId}`
                 }
             };
             const response = await store.dispatch('sekolahService/createKategoriSekolah', payload);
+            // console.log(response);
+            if (response.status) {
+                toast.add({ severity: 'success', summary: 'Success', detail: `${response.message}`, life: 3000 });
+            }
+            return response.kategoriSekolah;
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error}`, life: 3000 });
+        }
+    };
+    const updateKategoriSekolah = async (kategoriSekolah) => {
+        try {
+            const payload = {
+                schemaname: schemaname.value,
+                kategori_sekolah: {
+                    kategori_sekolah_id: kategoriSekolah.kategoriSekolahId,
+                    nama_kurikulum: kategoriSekolah.namaKurikulum,
+                    nama_jurusan: kategoriSekolah.namaJurusan,
+                    kurikulum_id: kategoriSekolah.kurikulumId,
+                    jurusan_id: kategoriSekolah.jurusanId,
+                    tahun_ajaran_id: `${kategoriSekolah.tahunAjaranId}`,
+                    kategori_kelas: kategoriSekolah.kategoriKelas
+                }
+            };
+
+            // console.log(payload)
+            // return
+            const response = await store.dispatch('sekolahService/updateKategoriSekolah', payload);
             // console.log(response);
             if (response.status) {
                 toast.add({ severity: 'success', summary: 'Success', detail: `${response.message}`, life: 3000 });
@@ -542,7 +652,7 @@ export function useSekolahService() {
         initSelectedTahunAjaran,
         fetchBanyakSiswaByTingkatId,
         fetchBanyakSiswaByRombelId,
-        createDns,
+        addDns,
         getDns,
         fetchSekolah,
         fetchDashboard,
@@ -554,6 +664,10 @@ export function useSekolahService() {
         deleteBatchGuruTerdaftar,
         fetchKategoriSekolah,
         deleteKategoriSekolah,
-        createKategoriSekolah
+        createKategoriSekolah,
+        updateKategoriSekolah,
+        addGuruTerdaftar,
+        addKelas,
+        updateSekolah
     };
 }

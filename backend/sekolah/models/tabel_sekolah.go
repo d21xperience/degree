@@ -54,7 +54,30 @@ type KategoriSekolah struct {
 	KategorisekolahId int32   `gorm:"column:kategori_sekolah_id;primaryKey;autoIncrement"`
 	NamaKurikulum     *string `gorm:"column:nama_kurikulum"`
 	NamaJurusan       *string `gorm:"column:nama_jurusan"`
-	TahunAjaranId     string  `gorm:"column:tahun_ajaran_id"`
+	TahunAjaranId     int32   `gorm:"column:tahun_ajaran_id"`
+	JurusanId         *string `gorm:"column:jurusan_id"`
+	KurikulumId       *int32  `gorm:"column:kurikulum_id"`
+
+	KategoriKelas []KategoriKelas `gorm:"foreignKey:KategorisekolahId;references:KategorisekolahId"`
+}
+
+type KategoriKelas struct {
+	Id                int32  `gorm:"column:id;primaryKey;autoIncrement"`
+	KategorisekolahId int32  `gorm:"column:kategori_sekolah_id"`
+	TingkatId         *int32 `gorm:"column:tingkat_id"`
+	Jumlah            *int32 `gorm:"jumlah"`
+	TahunAjaranId     int32  `gorm:"column:tahun_ajaran_id"`
+}
+
+type KategoriSekolahLog struct {
+	LogId             int32   `gorm:"column:log_id;primaryKey;autoIncrement"`
+	ActionType        *string `gorm:"column:action_type"`
+	KategorisekolahId int32   `gorm:"column:kategori_sekolah_id"`
+	NamaKurikulum     *string `gorm:"column:nama_kurikulum"`
+	NamaJurusan       *string `gorm:"column:nama_jurusan"`
+	JurusanId         *string `gorm:"column:jurusan_id"`
+	KurikulumId       *int32  `gorm:"column:kurikulum_id"`
+	TahunAjaranId     int32   `gorm:"column:tahun_ajaran_id"`
 }
 
 func (Sekolah) TableName() string {
@@ -62,4 +85,7 @@ func (Sekolah) TableName() string {
 }
 func (KategoriSekolah) TableName() string {
 	return "tabel_kategori_sekolah"
+}
+func (KategoriKelas) TableName() string {
+	return "tabel_kategori_kelas"
 }

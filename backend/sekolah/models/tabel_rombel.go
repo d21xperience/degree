@@ -16,10 +16,7 @@ type RombonganBelajar struct {
 	KurikulumId         *int32     `gorm:"column:kurikulum_id"`
 
 	PTK TabelPTK `gorm:"foreignKey:PtkID;references:PtkID"`
-	// ERROR: relation "jurusan" does not exist (SQLSTATE 42P01)
-	// Foreign Key ke Jurusan
 	Jurusan Jurusan `gorm:"foreignKey:JurusanId;references:JurusanID"`
-
 	// Foreign Key ke Kurikulum
 	Kurikulum Kurikulum `gorm:"foreignKey:KurikulumId;references:KurikulumID"`
 

@@ -6,20 +6,10 @@ const api = axios.create({
         'Content-Type': 'application/json',
         Authorization: 'Bearer your_token'
     },
-    timeout: 20000 // 20 detik
+    timeout: 10000 // 20 detik
 });
 
 const state = {
-    // tabelKelas: JSON.parse(localStorage.getItem("tabelKelas")) || null,
-    // tabelKelas: (() => {
-    //     try {
-    //         const data = localStorage.getItem('tabelKelas');
-    //         return data ? JSON.parse(data) : [];
-    //     } catch (e) {
-    //         console.error('Gagal parse tabelKelas dari localStorage', e);
-    //         return [];
-    //     }
-    // })(),
     tabelKelas: JSON.parse(localStorage.getItem('tabelKelas')) || null,
     tabelTenant: JSON.parse(localStorage.getItem('tabelTenant')) || null,
     tabelSemester: JSON.parse(localStorage.getItem('tabelSemester')) || null,
@@ -31,10 +21,9 @@ const state = {
     tabelKurikulum: JSON.parse(localStorage.getItem('tabelKurikulum')) || null,
     tabelJurusan: JSON.parse(localStorage.getItem('tabelJurusan')) || null,
     selectedSemester: JSON.parse(localStorage.getItem('selectedSemester')) || null,
-    tabelAnggotaKelas: JSON.parse(localStorage.getItem('tabelAnggotaKelas')) || [],
     tabelMapel: JSON.parse(localStorage.getItem('tabelMapel')) || null,
-
     tabelNilaiakhir: JSON.parse(localStorage.getItem('tabelNilaiakhir')) || null,
+    tabelAnggotaKelas: JSON.parse(localStorage.getItem('tabelAnggotaKelas')) || [],
     tabelTahunAjaran: JSON.parse(localStorage.getItem('tabelTahunAjaran')) || [],
     selectedTahunAjaran: JSON.parse(localStorage.getItem('selectedTahunAjaran')) || [],
     tabelGelarAkademik: JSON.parse(localStorage.getItem('gelarAkademik')) || [],
@@ -118,10 +107,38 @@ const mutations = {
     SET_TABELDNS(state, value) {
         state.tabelDns = value;
         localStorage.setItem('tabelDns', JSON.stringify(value));
+    },
+    resetState(state) {
+        state.tabelKelas = null;
+        state.tabelTenant = null;
+        state.tabelSemester = null;
+        state.tabelSekolah = null;
+        state.tabelSiswaAktif = null;
+        state.tabelGuru = null;
+        state.tabelPTKTerdaftar = null;
+        state.tabelTingkatPendidikan = null;
+        state.tabelKurikulum = null;
+        state.tabelJurusan = null;
+        state.selectedSemester = null;
+        state.tabelMapel = null;
+        state.tabelNilaiakhir = null;
+        state.tabelAnggotaKelas = [];
+        state.tabelTahunAjaran = [];
+        state.selectedTahunAjaran = [];
+        state.tabelGelarAkademik = [];
+        state.tabelDashboard = [];
+        state.tabelDns = [];
     }
 };
 
 const actions = {
+    async resetState({ commit }) {
+        try {
+            commit('resetState');
+        } finally {
+            commit('resetState');
+        }
+    },
     // ================================================
     // Semester
     // ================================================
@@ -161,7 +178,7 @@ const actions = {
             commit('SET_TABELTAHUNAJARAN', response.data.tahunAjaran);
             const selectedTahunAjaran = response.data.tahunAjaran.reduce((max, item) => (item.tahunAjaranId > max.tahunAjaranId ? item : max), response.data.tahunAjaran[0]);
             commit('SET_SELECTEDTAHUNAJARAN', selectedTahunAjaran);
-            return response.data; // Mengembalikan data sekolah
+            return response.data;
         } catch (error) {
             throw error;
         }
@@ -171,27 +188,6 @@ const actions = {
         commit('SET_SELECTEDTAHUNAJARAN', payload);
     },
     // ================================================
-
-    async fetchRombel({ commit }, payload) {
-        try {
-            // console.log(payload);
-            const response = await api.get(`/ss/${payload.schemaname}/kelas`, {
-                params: {
-                    semester_id: payload.semester_id,
-                    kelas_id: payload.kelas_id,
-                    tingkat_pendidikan_id: payload.tingkat_pendidikan_id
-                }
-            });
-            const data = {
-                semesterId: payload.semester_id,
-                kelas: response.data.kelas
-            };
-            commit('SET_TABELKELAS', data.kelas);
-            return data; // Mengembalikan data sekolah
-        } catch (error) {
-            throw error;
-        }
-    },
 
     // ================================================
     // Service Guru
@@ -206,11 +202,35 @@ const actions = {
             });
             // console.log(response.data);
             // commit("SET_TABELGURU", response.data.PTK);
-            return response.data.PTK; // Mengembalikan data sekolah
+            return response.data.PTK;
         } catch (error) {
             throw error;
         }
     },
+    async saveGuru({ commit }, payload) {
+        try {
+            const response = await api.post('/ss/ptk/create', payload);
+            return response.data.status;
+        } catch (error) {
+            console.log(error);
+        }
+    },
+
+    async searchPTKByName({ commit }, payload) {
+        try {
+            const response = await api.get('/ss/ptk/search', {
+                params: {
+                    schemaname: payload.schemaname,
+                    nama: payload.nama
+                }
+            });
+            // console.log(response.data)
+            return response.data.PTK;
+        } catch (error) {
+            throw error;
+        }
+    },
+
     async fetchPTKTerdaftar({ commit }, payload) {
         try {
             const response = await api.get('/ss/ptk-terdaftar', {
@@ -225,7 +245,7 @@ const actions = {
             };
             // console.log(response.data);
             commit('SET_TABELPTKTERDAFTAR', results);
-            return results; // Mengembalikan data sekolah
+            return results;
         } catch (error) {
             throw error;
         }
@@ -292,19 +312,11 @@ const actions = {
         }
     },
 
-    async saveGuru({ commit }, payload) {
-        try {
-            const response = await api.post('/ss/ptk/create', payload);
-            return response.data.status;
-        } catch (error) {
-            console.log(error);
-        }
-    },
-    async savePTKTerdaftar({ commit }, payload) {
+    async addPTKTerdaftar({ commit }, payload) {
         try {
             console.log(payload);
             const response = await api.post(`/ss/${payload.schemaname}/ptk-terdaftar/create`, payload);
-            return response.data.status;
+            return response.data;
         } catch (error) {
             throw error;
         }
@@ -334,7 +346,7 @@ const actions = {
             });
             // console.log(response.data.semester);
             // commit("SET_TABELSEMESTER", response.data.semester);
-            return response; // Mengembalikan data sekolah
+            return response;
         } catch (error) {
             commit('SET_ERROR', error.response?.data || 'Terjadi kesalahan');
             console.error('Gagal membuat semester:', error);
@@ -345,7 +357,7 @@ const actions = {
         try {
             const response = await api.get(`/ss/${payload.schemaname}/sekolah`);
             commit('SET_TABELSEKOLAH', response.data);
-            return response.data; // Mengembalikan data sekolah
+            return response.data;
         } catch (error) {
             // commit('SET_ERROR', error.response?.data || 'Terjadi kesalahan');
             // console.error('Gagal membuat semester:', error);
@@ -354,9 +366,10 @@ const actions = {
     },
     async updateSekolah({ commit }, payload) {
         try {
-            // console.log(payload);
-            const response = await api.post(`/ss/${payload.schemaname}/update`, payload);
-            return response.data; // Mengembalikan data sekolah
+            const response = await api.put(`/ss/${payload.schemaname}/update`, payload);
+            if (response.status) {
+                return response.data;
+            }
         } catch (error) {
             // commit('SET_ERROR', error.response?.data || 'Terjadi kesalahan');
             // console.error('Gagal membuat semester:', error);
@@ -371,7 +384,7 @@ const actions = {
         try {
             const response = await api.post(`/ss/${payload.schemaname}/siswa/create-banyak`, payload);
             console.log(response.data);
-            return response.data; // Mengembalikan data sekolah
+            return response.data;
         } catch (error) {
             return null;
         }
@@ -387,7 +400,7 @@ const actions = {
             });
             // console.log(response);
 
-            return response.data; // Mengembalikan data sekolah
+            return response.data;
         } catch (error) {
             // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
             throw error;
@@ -480,7 +493,7 @@ const actions = {
                     peserta_didik_id: payload.peserta_didik_id
                 }
             });
-            return response.data.anggotaKelas; // Mengembalikan data sekolah
+            return response.data.anggotaKelas;
         } catch (error) {
             if (error.code === 'ECONNABORTED') {
                 console.error('Permintaan terlalu lama, server lambat atau tidak merespons.');
@@ -550,6 +563,23 @@ const actions = {
         }
     },
 
+    async createAnggotaKelas({ commit }, payload) {
+        try {
+            const response = await api.post(`/ss/${payload.schemaname}/anggota-kelas/delete`, payload);
+
+            const updateAnggotaRombel = state.tabelSiswaAktif.peserta_didik.filter((item) => item.anggotaRombelId != payload.anggota_rombel_id);
+            const updateState = {
+                semester_id: state.selectedSemester.semesterId,
+                peserta_didik: updateAnggotaRombel
+            };
+            // console.log(updateState);
+            // commit('SET_TABELSISWAAKTIF', updateState);
+            return response.data; // Mengembalikan data
+        } catch (error) {
+            throw error;
+        }
+    },
+
     // =======================================
     // REFERENSI TABEL
     // =======================================
@@ -561,7 +591,7 @@ const actions = {
                 }
             });
             commit('SET_TABELTENANT', response.data);
-            return response.data; // Mengembalikan data sekolah
+            return response.data;
         } catch (error) {
             console.error('Gagal mengambil data tabel tenant:', error);
             throw error;
@@ -572,13 +602,11 @@ const actions = {
         const payload = {
             sekolah: sekolah.sekolahData
         };
-
-        // return;
         try {
             const response = await api.post('/sekolah/registrasi-sekolah', payload);
             console.log(response.data);
             commit('SET_TABELTENANT', response.data);
-            return response.data; // Mengembalikan data sekolah
+            return response.data;
         } catch (error) {
             // commit('SET_ERROR', error.response?.data || 'Terjadi kesalahan');
             console.error('Gagal membuat tabel tenant:', error);
@@ -680,14 +708,35 @@ const actions = {
     // KELAS
     // =======================================
 
+    async fetchKelas({ commit }, payload) {
+        try {
+            // console.log(payload);
+            const response = await api.get(`/ss/${payload.schemaname}/kelas`, {
+                params: {
+                    semester_id: payload.semester_id,
+                    kelas_id: payload.kelas_id,
+                    tingkat_pendidikan_id: payload.tingkat_pendidikan_id
+                }
+            });
+            const data = {
+                semesterId: payload.semester_id,
+                kelas: response.data.kelas
+            };
+            commit('SET_TABELKELAS', data);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
     async createKelas({ commit }, payload) {
         try {
             const response = await api.post(`/ss/${payload.schemaname}/tambah-kelas`, payload);
-            return response.data; // Mengembalikan data sekolah
+            console.log('sekolahService/createKelas', response);
+            return response.data;
         } catch (error) {
-            // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
             console.error('Gagal membuat kelas:', error);
-            return null;
+            throw error;
         }
     },
     async editKelas({ commit }, payload) {
@@ -696,7 +745,7 @@ const actions = {
             const response = await api.put(`/ss/${payload.schemaname}/kelas`, payload);
             // console.log(response.data);
             // commit("SET_TABELSEMESTER", response.data.semester);
-            return response.data; // Mengembalikan data sekolah
+            return response.data;
         } catch (error) {
             // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
             console.error('Gagal update kelas:', error);
@@ -785,8 +834,21 @@ const actions = {
     async createKategoriSekolah({ commit }, payload) {
         try {
             const response = await api.post(`/ss/${payload.schemaname}/kategori-sekolah/create`, payload);
-            if (response) {
+            if (response.status) {
                 // commit('SET_DASHBOARD', response.data);
+                return response.data;
+            }
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    },
+    async updateKategoriSekolah({ commit }, payload) {
+        try {
+            // console.log(payload)
+            // return
+            const response = await api.put(`/ss/${payload.schemaname}/kategori-sekolah/update`, payload);
+            if (response.status) {
                 return response.data;
             }
         } catch (error) {
@@ -822,7 +884,7 @@ const actions = {
     //         });
     //         // console.log(response.data);
     //         // commit("SET_TABELSEMESTER", response.data.semester);
-    //         return response.data; // Mengembalikan data sekolah
+    //         return response.data;
     //     } catch (error) {
     //         // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
     //         console.error('Gagal menghapus anggota kelas:', error);
@@ -837,7 +899,7 @@ const actions = {
         try {
             const response = await api.post(`ss/pembelajaran/create`, payload);
             console.log(response.data);
-            return response.data; // Mengembalikan data sekolah
+            return response.data;
         } catch (error) {
             commit('SET_ERROR', error.response?.data || 'Terjadi kesalahan');
             console.error('Gagal mendaftarkan siswa baru:', error);
@@ -851,7 +913,7 @@ const actions = {
     async createProsesIjazah({ commit }, payload) {
         try {
             const response = await api.post(`ss/ijazah/create`, payload);
-            return response.data; // Mengembalikan data sekolah
+            return response.data;
         } catch (error) {
             // console.error("Gagal mendaftarkan siswa baru:", error);
             throw error;
@@ -866,7 +928,7 @@ const actions = {
                     ijazah_id: payload.ijazah_id
                 }
             });
-            return response.data.anggotaKelas; // Mengembalikan data sekolah
+            return response.data.anggotaKelas;
         } catch (error) {
             throw error;
         }
@@ -983,6 +1045,10 @@ const actions = {
             console.error('Gagal nilai siswa:', error);
             return null;
         }
+    },
+
+    async updateSettingSekolah({}) {
+        commit('sekolahService/SET_TABELSEKOLAH', payload);
     }
 };
 

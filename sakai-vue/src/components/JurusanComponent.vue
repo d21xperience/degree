@@ -27,6 +27,7 @@ watch(
     () => props.modelValue,
     (newVal) => {
         internalValue.value = newVal;
+        // jurusanSearch({ query: newVal });
     }
 );
 

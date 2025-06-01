@@ -42,7 +42,7 @@ func NewRombelServiceServer() *RombelServiceServer {
 // **CreateKelas**
 func (s *RombelServiceServer) CreateKelas(ctx context.Context, req *pb.CreateKelasRequest) (*pb.CreateKelasResponse, error) {
 	// Debugging: Cek nilai request yang diterima
-	log.Printf("Received Sekolah data request: %+v\n", req)
+	log.Printf("rombel_server/CreateKelas => Received Sekolah data request: %+v\n", req)
 	// Daftar field yang wajib diisi
 	requiredFields := []string{"Schemaname", "Kelas"}
 	// Validasi request
@@ -52,25 +52,47 @@ func (s *RombelServiceServer) CreateKelas(ctx context.Context, req *pb.CreateKel
 	}
 	schemaName := req.GetSchemaname()
 	kelas := req.Kelas
-	// rombelId := uuid.New()
-	kelasModel := utils.ConvertPBToModels(kelas, func(item *pb.Kelas) *models.RombonganBelajar {
-		return &models.RombonganBelajar{
-			RombonganBelajarId:  utils.StringToUUID(item.RombonganBelajarId),
-			SekolahId:           utils.UUIDToPointer(utils.StringToUUID(item.SekolahId)),
-			SemesterId:          item.SemesterId,
-			JurusanId:           &item.JurusanId,
-			PtkID:               utils.UUIDToPointer(utils.StringToUUID(item.PtkId)),
-			NmKelas:             item.NmKelas,
-			TingkatPendidikanId: item.TingkatPendidikanId,
-			JenisRombel:         &item.JenisRombel,
-			NamaJurusanSp:       &item.NamaJurusanSp,
-			KurikulumId:         &item.KurikulumId,
+	// Cek apakah rombel_id ada
+	var thnMasuk int
+	var jmlTingkat int
+	var tingkatPendidikanAwal int
+	switch kelas[0].TingkatPendidikanId {
+	case 12:
+		jmlTingkat = 2
+		thnMasuk = utils.ParseInt(req.Kelas[0].SemesterId) - jmlTingkat
+		tingkatPendidikanAwal = int(req.Kelas[0].TingkatPendidikanId) - jmlTingkat
+	case 11:
+		jmlTingkat = 1
+		thnMasuk = utils.ParseInt(req.Kelas[0].SemesterId) - jmlTingkat
+	default:
+		jmlTingkat = 0
+		thnMasuk = utils.ParseInt(req.Kelas[0].SemesterId) - jmlTingkat
+	}
+
+	for i := thnMasuk; i <= utils.ParseInt(req.Kelas[0].SemesterId); i++ {
+		for j := 1; j <= 2; j++ {
+			kelasModel := utils.ConvertPBToModels(kelas, func(item *pb.Kelas) *models.RombonganBelajar {
+				return &models.RombonganBelajar{
+					RombonganBelajarId:  uuid.New(),
+					SekolahId:           utils.UUIDToPointer(utils.StringToUUID(item.SekolahId)),
+					SemesterId:          fmt.Sprintf("%d%d", i, j),
+					JurusanId:           &item.JurusanId,
+					PtkID:               utils.UUIDToPointer(utils.StringToUUID(item.PtkId)),
+					NmKelas:             fmt.Sprintf("%s %s", utils.AngkaKeRomawi(int(tingkatPendidikanAwal)), item.NmKelas),
+					TingkatPendidikanId: int32(tingkatPendidikanAwal),
+					JenisRombel:         &item.JenisRombel,
+					NamaJurusanSp:       &item.NamaJurusanSp,
+					KurikulumId:         &item.KurikulumId,
+				}
+			})
+			// simpan kelas ke database
+			res := s.repo.SaveMany(ctx, schemaName, kelasModel, 100)
+			if res != nil {
+				return nil, err
+			}
+			log.Print(i)
 		}
-	})
-	// simpan kelas ke database
-	res := s.repo.SaveMany(ctx, schemaName, kelasModel, 100)
-	if res != nil {
-		return nil, err
+		tingkatPendidikanAwal++
 	}
 
 	return &pb.CreateKelasResponse{
@@ -78,55 +100,6 @@ func (s *RombelServiceServer) CreateKelas(ctx context.Context, req *pb.CreateKel
 		Status:  true,
 	}, nil
 }
-
-// func (s *RombelServiceServer) CreateBanyakKelas(ctx context.Context, req *pb.CreateBanyakKelasRequest) (*pb.CreateBanyakKelasResponse, error) {
-// 	// Debugging: Cek nilai request yang diterima
-// 	log.Printf("Received Sekolah data request: %+v\n", req)
-// 	// Daftar field yang wajib diisi
-// 	requiredFields := []string{"Schemaname", "Kelas"}
-// 	// Validasi request
-// 	err := utils.ValidateFields(req, requiredFields)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	schemaName := req.GetSchemaname()
-// 	kelas := req.GetKelas()
-
-// 	rombelId := uuid.New()
-// 	sekolahId, err := uuid.Parse(kelas.SekolahId)
-// 	if err != nil {
-// 		fmt.Println("Error parsing UUID:", err)
-// 	}
-// 	ptkId, err := uuid.Parse(kelas.PtkId)
-// 	if err != nil {
-// 		fmt.Println("Error parsing UUID:", err)
-// 	}
-// 	kelasModels := ConvertPBToModels(kelas, func(rom *pb.Kelas) *models.RombonganBelajar {
-// 		return &models.RombonganBelajar{
-// 			RombonganBelajarId:  rombelId,
-// 			SekolahId:           sekolahId,
-// 			SemesterId:          rom.SemesterId,
-// 			JurusanId:           rom.JurusanId,
-// 			PtkID:               ptkId,
-// 			NmKelas:             rom.NmKelas,
-// 			TingkatPendidikanId: rom.TingkatPendidikanId,
-// 			JenisRombel:         rom.JenisRombel,
-// 			NamaJurusanSp:       rom.NamaJurusanSp,
-// 			// JurusanSpId:         rom.JurusanSpId,
-// 			KurikulumId: rom.KurikulumId,
-// 		}
-// 	})
-// 	err = s.repo.SaveMany(ctx, schemaName, kelasModels, 100)
-// 	if err != nil {
-// 		log.Printf("Gagal menyimpan Kelas: %v", err)
-// 		return nil, fmt.Errorf("gagal menyimpan Kelas: %w", err)
-// 	}
-
-// 	return &pb.CreateBanyakKelasResponse{
-// 		Message: "Kelas berhasil ditambahkan",
-// 		Status:  true,
-// 	}, nil
-// }
 
 // **GetKelas**
 func (s *RombelServiceServer) GetKelas(ctx context.Context, req *pb.GetKelasRequest) (*pb.GetKelasResponse, error) {
@@ -143,9 +116,6 @@ func (s *RombelServiceServer) GetKelas(ctx context.Context, req *pb.GetKelasRequ
 	if schemaName == "\"\"" {
 		return nil, fmt.Errorf("schema name is required")
 	}
-
-	// Cek apakah harus mengambil semua data atau data spesifik berdasarkan SemesterId
-	// kelasId := req.GetKelasId()
 	semesterId := req.GetSemesterId()
 	var rombelModel []models.RombonganBelajar
 	var conditions = map[string]any{
@@ -158,121 +128,120 @@ func (s *RombelServiceServer) GetKelas(ctx context.Context, req *pb.GetKelasRequ
 	if req.TingkatPendidikanId != 0 {
 		conditions["tabel_kelas.tingkat_pendidikan_id"] = req.TingkatPendidikanId
 	}
-
-	// joins := []string{
-	// 	"JOIN tabel_ptk ON tabel_kelas.ptk_id = tabel_ptk.ptk_id",
-	// 	"JOIN tabel_pembelajaran ON tabel_kelas.rombongan_belajar_id = tabel_pembelajaran.rombongan_belajar_id",
-	// 	fmt.Sprintf("JOIN ref.jurusan ON %s.tabel_kelas.jurusan_id = ref.jurusan.jurusan_id", schemaName),
-	// 	fmt.Sprintf("JOIN ref.kurikulum ON %s.tabel_kelas.kurikulum_id = ref.kurikulum.kurikulum_id", schemaName),
-	// 	fmt.Sprintf("JOIN ref.tingkat_pendidikan ON %s.tabel_kelas.tingkat_pendidikan_id = ref.tingkat_pendidikan.tingkat_pendidikan_id", schemaName),
-	// }
-	preloads := []string{"PTK", "Jurusan", "Kurikulum", "TingkatPendidikan", "AnggotaKelas", "AnggotaKelas.PesertaDidik", "Pembelajaran", "Pembelajaran.PTKTerdaftar", "Pembelajaran.PTKTerdaftar.PTK"}
+	// preloads := []string{"PTK", "Jurusan", "Kurikulum", "TingkatPendidikan", "AnggotaKelas", "AnggotaKelas.PesertaDidik", "Pembelajaran", "Pembelajaran.PTKTerdaftar", "Pembelajaran.PTKTerdaftar.PTK"}
 
 	// groupBy := []string{"tabel_kelas.rombongan_belajar_id"} // Hindari duplikasi
 	orderBy := []string{"tabel_kelas.nm_kelas"} // Hindari duplikasi
-	rombelModel, err = s.repo.FindWithPreloadAndJoins(ctx, schemaName, nil, preloads, conditions, nil, orderBy, false)
+	rombelModel, err = s.repo.FindWithPreloadAndJoins(ctx, schemaName, nil, nil, conditions, nil, orderBy, false)
 	if err != nil {
-		return nil, err
+		return &pb.GetKelasResponse{
+			Status:  false,
+			Message: fmt.Sprintf("Gagal mendapatkan kelas! %s ", err.Error()),
+			Kelas:   nil,
+		}, nil
 	}
 
 	banyakKelasList := utils.ConvertModelsToPB(rombelModel, func(kelas models.RombonganBelajar) *pb.Kelas {
-		jmlhAnggota, err := s.repoRombelAnggota.CountRows(ctx, schemaName, map[string]any{"rombongan_belajar_id": kelas.RombonganBelajarId.String()})
+		// jmlhAnggota, err := s.repoRombelAnggota.CountRows(ctx, schemaName, map[string]any{"rombongan_belajar_id": kelas.RombonganBelajarId.String()})
 		if err != nil {
 			return nil
 		}
 		return &pb.Kelas{
-			RombonganBelajarId:  kelas.RombonganBelajarId.String(),
-			SekolahId:           kelas.SekolahId.String(),
-			SemesterId:          kelas.SemesterId,
-			JurusanId:           utils.SafeString(kelas.JurusanId),
-			PtkId:               kelas.PtkID.String(),
+			RombonganBelajarId: kelas.RombonganBelajarId.String(),
+			// SekolahId:           utils.SafeString(kelas.SekolahId.),
+			SemesterId: kelas.SemesterId,
+			JurusanId:  utils.SafeString(kelas.JurusanId),
+			// PtkId:               utils.kelas.PtkID.String(),
 			NmKelas:             kelas.NmKelas,
 			TingkatPendidikanId: kelas.TingkatPendidikanId,
 			JenisRombel:         utils.SafeInt32(kelas.JenisRombel),
 			NamaJurusanSp:       utils.SafeString(kelas.NamaJurusanSp),
 			KurikulumId:         utils.SafeInt32(kelas.KurikulumId),
-			AnggotaKelas: utils.ConvertPBToModels(utils.SliceToPointer(kelas.AnggotaKelas), func(item *models.RombelAnggota) *pb.AnggotaKelas {
-				return &pb.AnggotaKelas{
-					AnggotaRombelId:    item.AnggotaRombelId.String(),
-					PesertaDidikId:     item.PesertaDidikId.String(),
-					SemesterId:         item.SemesterId,
-					RombonganBelajarId: item.RombonganBelajarId.String(),
-					// NmKelas:            item.RombonganBelajar.NmKelas,
+			
+			// AnggotaKelas: utils.ConvertPBToModels(utils.SliceToPointer(kelas.AnggotaKelas), func(item *models.RombelAnggota) *pb.AnggotaKelas {
+			// 	return &pb.AnggotaKelas{
+			// 		AnggotaRombelId:    item.AnggotaRombelId.String(),
+			// 		PesertaDidikId:     item.PesertaDidikId.String(),
+			// 		SemesterId:         item.SemesterId,
+			// 		RombonganBelajarId: item.RombonganBelajarId.String(),
+			// 		// NmKelas:            item.RombonganBelajar.NmKelas,
 
-					PesertaDidik: &pb.Siswa{
-						Nis:           utils.SafeString(item.PesertaDidik.Nis),
-						Nisn:          utils.SafeString(item.PesertaDidik.Nisn),
-						NmSiswa:       item.PesertaDidik.NmSiswa,
-						TempatLahir:   utils.SafeString(item.PesertaDidik.TempatLahir),
-						TanggalLahir:  utils.SafeTime(item.PesertaDidik.TanggalLahir).Format("2006-01-02"),
-						JenisKelamin:  utils.SafeString(item.PesertaDidik.JenisKelamin),
-						Agama:         utils.SafeString(item.PesertaDidik.Agama),
-						AlamatSiswa:   utils.SafeString(item.PesertaDidik.AlamatSiswa),
-						TeleponSiswa:  utils.SafeString(item.PesertaDidik.TeleponSiswa),
-						NmAyah:        utils.SafeString(item.PesertaDidik.NmAyah),
-						NmIbu:         utils.SafeString(item.PesertaDidik.NmIbu),
-						PekerjaanAyah: utils.SafeString(item.PesertaDidik.PekerjaanAyah),
-						PekerjaanIbu:  utils.SafeString(item.PesertaDidik.PekerjaanIbu),
-						NmWali:        utils.SafeString(item.PesertaDidik.NmWali),
-						PekerjaanWali: utils.SafeString(item.PesertaDidik.PekerjaanWali),
-					},
-				}
-			}),
-			Ptk: &pb.PTK{
-				PtkId:             kelas.PTK.PtkID.String(),
-				Nama:              kelas.PTK.Nama,
-				JenisKelamin:      utils.SafeString(kelas.PTK.JenisKelamin),
-				TempatLahir:       utils.SafeString(kelas.PTK.TempatLahir),
-				JenisPtkId:        kelas.PTK.JenisPtkID,
-				TanggalLahir:      kelas.PTK.TanggalLahir.Format("2006-01-02"),
-				StatusKeaktifanId: kelas.PTK.StatusKeaktifanID,
-			},
-			Jurusan: &pb.Jurusan{
-				JurusanId:           kelas.Jurusan.JurusanID,
-				NamaJurusan:         kelas.Jurusan.NamaJurusan,
-				JenjangPendidikanId: utils.PointerToUint32(utils.Uint16ToUint32Pointer(kelas.Jurusan.JenjangPendidikanID)),
-				UntukSma:            uint32(kelas.Jurusan.UntukSMA),
-				UntukSmk:            uint32(kelas.Jurusan.UntukSMK),
-				UntukPt:             uint32(kelas.Jurusan.UntukPT),
-				UntukSlb:            uint32(kelas.Jurusan.UntukSLB),
-				UntukSmklb:          uint32(kelas.Jurusan.UntukSMKLB),
-				JurusanInduk:        utils.SafeString(kelas.Jurusan.JurusanInduk),
-				LevelBidangId:       kelas.Jurusan.LevelBidangID,
-			},
-			Kurikulum: &pb.Kurikulum{
-				KurikulumId:         uint32(kelas.Kurikulum.KurikulumID),
-				NamaKurikulum:       kelas.Kurikulum.NamaKurikulum,
-				MulaiBerlaku:        kelas.Kurikulum.MulaiBerlaku.Format("2006-01-02"),
-				JenjangPendidikanId: uint32(kelas.Kurikulum.JenjangPendidikanID),
-				SistemSks:           uint32(kelas.Kurikulum.SistemSKS),
-				JurusanId:           utils.SafeString(kelas.Kurikulum.JurusanID),
-			},
-			TingkatPendidikan: &pb.TingkatPendidikan{
-				TingkatPendidikanId: int32(kelas.TingkatPendidikan.TingkatPendidikanID),
-				Kode:                kelas.TingkatPendidikan.Kode,
-				Nama:                kelas.TingkatPendidikan.Nama,
-				JenjangPendidikanId: uint32(kelas.TingkatPendidikan.JenjangPendidikanID),
-			},
-			Pembelajaran: utils.ConvertModelsToPB(kelas.Pembelajaran, func(item models.Pembelajaran) *pb.Pembelajaran {
-				return &pb.Pembelajaran{
-					PembelajaranId:     item.PembelajaranId.String(),
-					RombonganBelajarId: item.RombonganBelajarId.String(),
-					MataPelajaranId:    int32(item.MataPelajaranId),
-					NamaMataPelajaran:  utils.SafeString(item.NamaMataPelajaran),
-					PtkTerdaftarId:     item.PtkTerdaftarId.String(),
-					PtkTerdaftar: &pb.PTKTerdaftar{
-						PtkTerdaftarId: item.PTKTerdaftar.PtkTerdaftarId.String(),
-						Ptk: &pb.PTK{
-							Nama: item.PTKTerdaftar.PTK.Nama,
-						},
-					},
-				}
-			}),
-			JumlahAnggota: uint32(jmlhAnggota),
+			// 		PesertaDidik: &pb.Siswa{
+			// 			Nis:           utils.SafeString(item.PesertaDidik.Nis),
+			// 			Nisn:          utils.SafeString(item.PesertaDidik.Nisn),
+			// 			NmSiswa:       item.PesertaDidik.NmSiswa,
+			// 			TempatLahir:   utils.SafeString(item.PesertaDidik.TempatLahir),
+			// 			TanggalLahir:  utils.SafeTime(item.PesertaDidik.TanggalLahir).Format("2006-01-02"),
+			// 			JenisKelamin:  utils.SafeString(item.PesertaDidik.JenisKelamin),
+			// 			Agama:         utils.SafeString(item.PesertaDidik.Agama),
+			// 			AlamatSiswa:   utils.SafeString(item.PesertaDidik.AlamatSiswa),
+			// 			TeleponSiswa:  utils.SafeString(item.PesertaDidik.TeleponSiswa),
+			// 			NmAyah:        utils.SafeString(item.PesertaDidik.NmAyah),
+			// 			NmIbu:         utils.SafeString(item.PesertaDidik.NmIbu),
+			// 			PekerjaanAyah: utils.SafeString(item.PesertaDidik.PekerjaanAyah),
+			// 			PekerjaanIbu:  utils.SafeString(item.PesertaDidik.PekerjaanIbu),
+			// 			NmWali:        utils.SafeString(item.PesertaDidik.NmWali),
+			// 			PekerjaanWali: utils.SafeString(item.PesertaDidik.PekerjaanWali),
+			// 		},
+			// 	}
+			// }),
+			// Ptk: &pb.PTK{
+			// 	PtkId:             kelas.PTK.PtkID.String(),
+			// 	Nama:              kelas.PTK.Nama,
+			// 	JenisKelamin:      utils.SafeString(kelas.PTK.JenisKelamin),
+			// 	TempatLahir:       utils.SafeString(kelas.PTK.TempatLahir),
+			// 	JenisPtkId:        kelas.PTK.JenisPtkID,
+			// 	TanggalLahir:      kelas.PTK.TanggalLahir.Format("2006-01-02"),
+			// 	StatusKeaktifanId: kelas.PTK.StatusKeaktifanID,
+			// },
+			// Jurusan: &pb.Jurusan{
+			// 	JurusanId:           kelas.Jurusan.JurusanID,
+			// 	NamaJurusan:         kelas.Jurusan.NamaJurusan,
+			// 	JenjangPendidikanId: utils.PointerToUint32(utils.Uint16ToUint32Pointer(kelas.Jurusan.JenjangPendidikanID)),
+			// 	UntukSma:            uint32(kelas.Jurusan.UntukSMA),
+			// 	UntukSmk:            uint32(kelas.Jurusan.UntukSMK),
+			// 	UntukPt:             uint32(kelas.Jurusan.UntukPT),
+			// 	UntukSlb:            uint32(kelas.Jurusan.UntukSLB),
+			// 	UntukSmklb:          uint32(kelas.Jurusan.UntukSMKLB),
+			// 	JurusanInduk:        utils.SafeString(kelas.Jurusan.JurusanInduk),
+			// 	LevelBidangId:       kelas.Jurusan.LevelBidangID,
+			// },
+			// Kurikulum: &pb.Kurikulum{
+			// 	KurikulumId:         uint32(kelas.Kurikulum.KurikulumID),
+			// 	NamaKurikulum:       kelas.Kurikulum.NamaKurikulum,
+			// 	MulaiBerlaku:        kelas.Kurikulum.MulaiBerlaku.Format("2006-01-02"),
+			// 	JenjangPendidikanId: uint32(kelas.Kurikulum.JenjangPendidikanID),
+			// 	SistemSks:           uint32(kelas.Kurikulum.SistemSKS),
+			// 	JurusanId:           utils.SafeString(kelas.Kurikulum.JurusanID),
+			// },
+			// TingkatPendidikan: &pb.TingkatPendidikan{
+			// 	TingkatPendidikanId: int32(kelas.TingkatPendidikan.TingkatPendidikanID),
+			// 	Kode:                kelas.TingkatPendidikan.Kode,
+			// 	Nama:                kelas.TingkatPendidikan.Nama,
+			// 	JenjangPendidikanId: uint32(kelas.TingkatPendidikan.JenjangPendidikanID),
+			// },
+			// Pembelajaran: utils.ConvertModelsToPB(kelas.Pembelajaran, func(item models.Pembelajaran) *pb.Pembelajaran {
+			// 	return &pb.Pembelajaran{
+			// 		PembelajaranId:     item.PembelajaranId.String(),
+			// 		RombonganBelajarId: item.RombonganBelajarId.String(),
+			// 		MataPelajaranId:    int32(item.MataPelajaranId),
+			// 		NamaMataPelajaran:  utils.SafeString(item.NamaMataPelajaran),
+			// 		PtkTerdaftarId:     item.PtkTerdaftarId.String(),
+			// 		PtkTerdaftar: &pb.PTKTerdaftar{
+			// 			PtkTerdaftarId: item.PTKTerdaftar.PtkTerdaftarId.String(),
+			// 			Ptk: &pb.PTK{
+			// 				Nama: item.PTKTerdaftar.PTK.Nama,
+			// 			},
+			// 		},
+			// 	}
+			// }),
+			// JumlahAnggota: uint32(jmlhAnggota),
 		}
 	})
 	return &pb.GetKelasResponse{
-		Kelas: banyakKelasList,
+		Status:  true,
+		Message: "Berhasil mengambil data kelas",
+		Kelas:   banyakKelasList,
 	}, nil
 }
 
@@ -506,3 +475,7 @@ func (s *RombelServiceServer) ImportDapodikRombel(ctx context.Context, req *pb.I
 		},
 	}, nil
 }
+
+// func (s *RombelServiceServer) GetKelasV2(ctx context.Context, req *pb.GetKelasRequest) (*pb.GetKelasResponse, error) {
+
+// }

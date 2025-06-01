@@ -240,11 +240,7 @@ onMounted(() => {
     fetchSiswa()
     // DataLulusanService.getProducts().then((data) => (products.value = data));
 
-});
-// watch(selectedSemester, (newVal, oldVal) => {
-//     console.log(newVal)
-//     // fetchRombel()
-// })
+}); 
 
 
 const dataConnected = ref(true)

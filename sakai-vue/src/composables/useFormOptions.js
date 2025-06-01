@@ -7,7 +7,7 @@ import { useStore } from 'vuex';
 import { useSekolahService } from './useSekolahService';
 
 export function useFormOptions() {
-    const { sekolah } = useSekolahService();
+    const { sekolah, schemaname } = useSekolahService();
     const store = useStore();
     const toast = useToast();
     const tahunAjaranOptions = ref();
@@ -15,6 +15,11 @@ export function useFormOptions() {
     const jenisKelaminOptions = ref([
         { label: 'Laki-Laki', value: 'L' },
         { label: 'Perempuan', value: 'P' }
+    ]);
+    const statusAnakOptions = ref([
+        { label: 'Anak Kandung', value: '1' },
+        { label: 'Anak tiri', value: '2' },
+        { label: 'Anak Angkat', value: '3' }
     ]);
 
     const selectedAgama = ref();
@@ -37,7 +42,8 @@ export function useFormOptions() {
     const jurusanList = store.getters['sekolahService/getJurusan'];
     const jurusanOptions = ref();
     const jurusanLoading = ref(false);
-
+    const ptkLoading = ref(false);
+    const ptkOptions = ref([]);
     const fetchGelarAkademik = () => {
         try {
             let cek = store.getters['sekolahService/getGelarAkademik'];
@@ -78,7 +84,7 @@ export function useFormOptions() {
             let response = await store.getters['sekolahService/getKurikulum'];
             if (!response || response.length == 0) {
                 console.log(response);
-                response = await store.dispatch('sekolahService/fetchKurikulum', sekolah.value?.jenjangPendidikanId);
+                response = await store.dispatch('sekolahService/fetchKurikulum', sekolah.value?.sekolah.jenjangPendidikanId);
                 if (response.status) {
                     toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
                     return response.kurikulum;
@@ -106,9 +112,9 @@ export function useFormOptions() {
         kurikulumLoading.value = true;
 
         if (!searchTerm.query.trim().length) {
-            kurikulumOptions.value = await kurikulumList;
+            kurikulumOptions.value = kurikulumList;
         } else {
-            kurikulumOptions.value = await kurikulumList.filter((item) => item.namaKurikulum.toLowerCase().includes(searchTerm.query.toLowerCase()));
+            kurikulumOptions.value = kurikulumList.filter((item) => item.namaKurikulum.toLowerCase().includes(searchTerm.query.toLowerCase()));
         }
 
         kurikulumLoading.value = false;
@@ -121,7 +127,7 @@ export function useFormOptions() {
             if (!response || response.length == 0) {
                 let param = '';
                 // console.log(sekolah.value.bentukPendidikanId);
-                switch (sekolah.value.bentukPendidikanId) {
+                switch (sekolah.value?.sekolah.bentukPendidikanId) {
                     case 15 || 17:
                         param = 'untuk_smk';
                         break;
@@ -134,7 +140,7 @@ export function useFormOptions() {
                 }
                 // console.log(param);
                 const payload = {
-                    jenjang_pendidikan_id: sekolah.value?.jenjangPendidikanId,
+                    jenjang_pendidikan_id: sekolah.value?.sekolah.jenjangPendidikanId,
                     param: param
                 };
                 response = await store.dispatch('sekolahService/fetchJurusan', payload);
@@ -161,15 +167,29 @@ export function useFormOptions() {
     //     }, 250);
     // };
     const jurusanSearch = debounce(async (searchTerm) => {
-        jurusanLoading.value = true;
-
-        if (!searchTerm.query.trim().length) {
-            jurusanOptions.value = await jurusanList;
-        } else {
-            jurusanOptions.value = await jurusanList.filter((item) => item.namaJurusan.toLowerCase().includes(searchTerm.query.toLowerCase()));
+        try {
+            jurusanLoading.value = true;
+            if (!searchTerm.query.trim().length) {
+                jurusanOptions.value = await jurusanList;
+            } else {
+                jurusanOptions.value = await jurusanList.filter((item) => item.namaJurusan.toLowerCase().includes(searchTerm.query.toLowerCase()));
+            }
+        } catch (error) {
+            alert(error);
+        } finally {
+            jurusanLoading.value = false;
         }
+    }, 250);
 
-        jurusanLoading.value = false;
+    const ptkSearch = debounce(async (searchTerm) => {
+        try {
+            ptkLoading.value = true;
+            ptkOptions.value = await store.dispatch('sekolahService/searchPTKByName', { schemaname: schemaname.value, nama: searchTerm.query.toLowerCase() });
+        } catch (error) {
+            alert('error');
+        } finally {
+            ptkLoading.value = false;
+        }
     }, 250);
 
     return {
@@ -191,6 +211,9 @@ export function useFormOptions() {
         jurusanOptions,
         jurusanLoading,
         jurusanSearch,
-        fetchJurusan
+        fetchJurusan,
+        ptkSearch,
+        ptkOptions,
+        ptkLoading
     };
 }

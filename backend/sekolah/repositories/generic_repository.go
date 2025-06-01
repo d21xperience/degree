@@ -43,20 +43,6 @@ func (r *GenericRepository[T]) Save(ctx context.Context, entity *T, schemaName s
 	})
 }
 
-// func (r *GenericRepository[T]) FindByID(ctx context.Context, id string, schemaName, idColumn string) (*T, error) {
-// 	var entity T
-// 	if err := r.db.WithContext(ctx).Exec(fmt.Sprintf("SET search_path TO %s", strings.ToLower(schemaName))).Error; err != nil {
-// 		return nil, fmt.Errorf("failed to set schema: %w", err)
-// 	}
-
-// 	if err := r.db.WithContext(ctx).
-// 		Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)).
-// 		First(&entity, fmt.Sprintf("%s = ?", idColumn), id).Error; err != nil {
-// 		return nil, fmt.Errorf("failed to find record in schema %s: %w", schemaName, err)
-// 	}
-
-//		return &entity, nil
-//	}
 func (r *GenericRepository[T]) FindByID(ctx context.Context, id string, schemaName, idColumn string) (*T, error) {
 	var entity T
 
@@ -79,6 +65,57 @@ func (r *GenericRepository[T]) FindByID(ctx context.Context, id string, schemaNa
 
 	return &entity, nil
 }
+
+//	func isSafeColumnName(name string) bool {
+//		// Implement validasi nama kolom sesuai kebutuhan
+//		return regexp.MustCompile(`^[a-zA-Z0-9_]+$`).MatchString(name)
+//	}
+
+func (r *GenericRepository[T]) FindWithStringMatch(ctx context.Context, schemaName string, nameValue string, nameColumn string) (*[]T, error) {
+	var entities []T
+	tx := r.db.WithContext(ctx)
+	tableName := fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)
+	err := tx.
+		Table(tableName).
+		Where(fmt.Sprintf("Lower('%s') LIKE '%%' || Lower(%s.%s) || '%%' ", nameValue, tableName, nameColumn)).
+		Order(fmt.Sprintf("Length(%s.%s) DESC", tableName, nameColumn)).
+		// Scan(&entities).Error
+		Find(&entities).Error
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to find records with string match: %w", err)
+	}
+
+	return &entities, nil
+}
+
+//
+// versi 1
+// func (r *GenericRepository[T]) FindWithStringMatch(ctx context.Context, schemaName string, nameValue string, nameColumn string) (*[]T, error) {
+// 	var entities []T
+// 	tx := r.db.WithContext(ctx)
+
+// 	// Buat nama tabel lengkap dengan schema
+// 	tableName := fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)
+
+// 	// Gunakan GORM Scopes untuk membuat query dinamis
+// 	query := tx.Table(tableName)
+
+// 	// Format kondisi LIKE secara aman
+// 	likePattern := "%" + strings.ToLower(nameValue) + "%"
+// 	columnRef := fmt.Sprintf("%s.%s", tableName, nameColumn)
+
+// 	// Gunakan Where dengan parameter placeholder untuk menghindari SQL injection
+// 	err := query.Where("LOWER(?) LIKE LOWER(?)", nameColumn, likePattern).
+// 		Order(fmt.Sprintf("LENGTH(%s) DESC", columnRef)).
+// 		Find(&entities).Error
+
+// 	if err != nil {
+// 		return nil, fmt.Errorf("failed to find records with string match: %w", err)
+// 	}
+
+// 	return &entities, nil
+// }
 
 func (r *GenericRepository[T]) FindOrCreateByID(ctx context.Context, id string, schemaName, idColumn string, createData func(string) *T) (*T, error) {
 	var entity T
@@ -127,6 +164,7 @@ func (r *GenericRepository[T]) FindAll(ctx context.Context, schemaName string, l
 
 	return entities, nil
 }
+
 func (r *GenericRepository[T]) FindAllByConditions(
 	ctx context.Context,
 	schemaName string,
@@ -190,22 +228,6 @@ func (r *GenericRepository[T]) Delete(ctx context.Context, id string, schemaName
 		return nil
 	})
 }
-
-// func (r *GenericRepository[T]) DeleteBatch(ctx context.Context, id []string, schemaName, columnName string) error {
-// 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-// 		if err := tx.Exec(fmt.Sprintf("SET search_path TO %s", strings.ToLower(schemaName))).Error; err != nil {
-// 			return fmt.Errorf("failed to set schema: %w", err)
-// 		}
-
-// 		if err := tx.Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)).
-// 			Where(fmt.Sprintf("%s IN ?", columnName), id).
-// 			Delete(nil).Error; err != nil {
-// 			return fmt.Errorf("failed to delete record in schema %s: %w", schemaName, err)
-// 		}
-
-//			return nil
-//		})
-//	}
 func (r *GenericRepository[T]) DeleteBatch(ctx context.Context, ids []string, schemaName, columnName string) error {
 	// Validasi UUID
 	validIDs := make([]string, 0, len(ids))
@@ -628,93 +650,11 @@ func (r *GenericRepository[T]) FindAllWithPagination(
 	return results, totalCount, nil
 }
 
-// func getFieldValue[T any](entity *T, fieldName string) interface{} {
-// 	val := reflect.ValueOf(entity).Elem()
-// 	field := val.FieldByName(fieldName)
-// 	if !field.IsValid() || !field.CanInterface() {
-// 		return nil
-// 	}
-// 	return field.Interface()
-// }
-
 type ConflictRow[T any] struct {
 	Index  int
 	Entity *T
 	Reason string
 }
-
-// func (r *GenericRepository[T]) SaveManyWithConflictCheck(
-// 	ctx context.Context,
-// 	schemaName string,
-// 	entities []*T,
-// 	uniqueFieldName string,
-// 	uniqueColumnName string,
-// 	batchSize int,
-// ) ([]ConflictRow[T], error) {
-// 	conflictRows := []ConflictRow[T]{}
-
-// 	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-// 		if err := tx.Exec(fmt.Sprintf("SET search_path TO %s", strings.ToLower(schemaName))).Error; err != nil {
-// 			return fmt.Errorf("failed to set schema: %w", err)
-// 		}
-
-// 		// Ambil nilai unik dari entity
-// 		uniqueValues := make([]interface{}, 0, len(entities))
-// 		valueToEntity := make(map[interface{}]*T)
-// 		for _, e := range entities {
-// 			val := getFieldValue(e, uniqueFieldName)
-// 			if val != nil {
-// 				uniqueValues = append(uniqueValues, val)
-// 				valueToEntity[val] = e
-// 			}
-// 		}
-
-// 		// Ambil data yang sudah ada di DB
-// 		var existing []map[string]interface{}
-// 		err := tx.Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)).
-// 			Select(uniqueColumnName).
-// 			Where(fmt.Sprintf("%s IN ?", uniqueColumnName), uniqueValues).
-// 			Find(&existing).Error
-// 		if err != nil {
-// 			return fmt.Errorf("failed to check existing records: %w", err)
-// 		}
-
-// 		// Tandai data yang sudah ada
-// 		existingMap := make(map[interface{}]bool)
-// 		for _, row := range existing {
-// 			if val, ok := row[uniqueColumnName]; ok {
-// 				existingMap[val] = true
-// 			}
-// 		}
-
-// 		// Pisahkan data baru dan konflik
-// 		newEntities := []*T{}
-// 		for idx, e := range entities {
-// 			val := getFieldValue(e, uniqueFieldName)
-// 			if existingMap[val] {
-// 				conflictRows = append(conflictRows, ConflictRow[T]{
-// 					Index:  idx,
-// 					Entity: e,
-// 					Reason: fmt.Sprintf("Conflict on %s = %v", uniqueFieldName, val),
-// 				})
-// 			} else {
-// 				newEntities = append(newEntities, e)
-// 			}
-// 		}
-
-// 		// Insert data baru
-// 		if len(newEntities) > 0 {
-// 			if err := tx.Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)).
-// 				CreateInBatches(newEntities, batchSize).Error; err != nil {
-// 				return fmt.Errorf("failed to insert new records: %w", err)
-// 			}
-// 		}
-
-// 		return nil
-// 	})
-
-// 		return conflictRows, err
-// 	}
 
 func getFieldValue[T any](entity *T, fieldName string) interface{} {
 	val := reflect.ValueOf(entity).Elem()
@@ -724,237 +664,6 @@ func getFieldValue[T any](entity *T, fieldName string) interface{} {
 	}
 	return field.Interface()
 }
-
-// versi 1
-// func (r *GenericRepository[T]) SaveManyWithConflictCheck(
-// 	ctx context.Context,
-// 	schemaName string,
-// 	entities []*T,
-// 	uniqueFieldName string,
-// 	uniqueColumnName string,
-// 	batchSize int,
-// ) ([]ConflictRow[T], error) {
-// 	fmt.Printf("Starting SaveManyWithConflictCheck for %d entities in schema %s\n", len(entities), schemaName)
-// 	conflictRows := []ConflictRow[T]{}
-
-// 	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-// 		// Set schema
-// 		schemaQuery := fmt.Sprintf("SET search_path TO %s", strings.ToLower(schemaName))
-// 		fmt.Printf("Executing schema query: %s\n", schemaQuery)
-// 		if err := tx.Exec(schemaQuery).Error; err != nil {
-// 			fmt.Printf("Error setting schema: %v\n", err)
-// 			return fmt.Errorf("failed to set schema: %w", err)
-// 		}
-
-// 		// Get unique values from entities
-// 		fmt.Printf("Processing %d entities for unique field '%s'\n", len(entities), uniqueFieldName)
-// 		uniqueValues := make([]interface{}, 0, len(entities))
-// 		valueToEntity := make(map[interface{}]*T)
-// 		for i, e := range entities {
-// 			val := getFieldValue(e, uniqueFieldName)
-// 			if val != nil {
-// 				uniqueValues = append(uniqueValues, val)
-// 				valueToEntity[val] = e
-// 			} else {
-// 				fmt.Printf("Warning: Entity at index %d has nil value for field '%s'\n", i, uniqueFieldName)
-// 			}
-// 		}
-// 		fmt.Printf("Found %d unique values to check\n", len(uniqueValues))
-
-// 		// Check existing records in DB
-// 		tableName := fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)
-// 		query := tx.Table(tableName).Select(uniqueColumnName).Where(fmt.Sprintf("%s IN ?", uniqueColumnName), uniqueValues)
-// 		fmt.Printf("Checking existing records with query: %v\n", query.Statement.SQL.String())
-
-// 		var existing []map[string]interface{}
-// 		err := query.Find(&existing).Error
-// 		if err != nil {
-// 			fmt.Printf("Error checking existing records: %v\n", err)
-// 			return fmt.Errorf("failed to check existing records: %w", err)
-// 		}
-// 		fmt.Printf("Found %d existing records that may cause conflicts\n", len(existing))
-
-// 		// Mark existing data
-// 		existingMap := make(map[interface{}]bool)
-// 		for _, row := range existing {
-// 			if val, ok := row[uniqueColumnName]; ok {
-// 				existingMap[val] = true
-// 			}
-// 		}
-
-// 		// Separate new and conflicting entities
-// 		newEntities := []*T{}
-// 		for idx, e := range entities {
-// 			val := getFieldValue(e, uniqueFieldName)
-// 			if val == nil {
-// 				fmt.Printf("Skipping entity at index %d - nil unique value\n", idx)
-// 				continue
-// 			}
-
-// 			if existingMap[val] {
-// 				conflictReason := fmt.Sprintf("Conflict on %s = %v", uniqueFieldName, val)
-// 				fmt.Printf("Conflict detected at index %d: %s\n", idx, conflictReason)
-// 				conflictRows = append(conflictRows, ConflictRow[T]{
-// 					Index:  idx,
-// 					Entity: e,
-// 					Reason: conflictReason,
-// 				})
-// 			} else {
-// 				newEntities = append(newEntities, e)
-// 			}
-// 		}
-// 		fmt.Printf("Identified %d new entities and %d conflicts\n", len(newEntities), len(conflictRows))
-
-// 		// Insert new entities
-// 		if len(newEntities) > 0 {
-// 			fmt.Printf("Inserting %d new entities in batches of %d\n", len(newEntities), batchSize)
-// 			if err := tx.Table(tableName).CreateInBatches(newEntities, batchSize).Error; err != nil {
-// 				fmt.Printf("Error inserting new records: %v\n", err)
-// 				return fmt.Errorf("failed to insert new records: %w", err)
-// 			}
-// 			fmt.Printf("Successfully inserted %d new entities\n", len(newEntities))
-// 		} else {
-// 			fmt.Println("No new entities to insert")
-// 		}
-
-// 		return nil
-// 	})
-
-// 	if err != nil {
-// 		fmt.Printf("Transaction failed: %v\n", err)
-// 	} else {
-// 		fmt.Printf("Transaction completed successfully with %d conflicts\n", len(conflictRows))
-// 	}
-
-// 	return conflictRows, err
-// }
-
-// versi 2
-// func (r *GenericRepository[T]) SaveManyWithConflictCheck(
-// 	ctx context.Context,
-// 	schemaName string,
-// 	entities []*T,
-// 	uniqueFieldName string,
-// 	uniqueColumnName string,
-// 	batchSize int,
-// ) ([]ConflictRow[T], error) {
-// 	fmt.Printf("Starting SaveManyWithConflictCheck for %d entities in schema %s\n", len(entities), schemaName)
-// 	conflictRows := []ConflictRow[T]{}
-
-// 	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-// 		// Set schema
-// 		schemaQuery := fmt.Sprintf("SET search_path TO %s", strings.ToLower(schemaName))
-// 		fmt.Printf("Executing schema query: %s\n", schemaQuery)
-// 		if err := tx.Exec(schemaQuery).Error; err != nil {
-// 			fmt.Printf("Error setting schema: %v\n", err)
-// 			return fmt.Errorf("failed to set schema: %w", err)
-// 		}
-
-// 		// Get unique values from entities
-// 		fmt.Printf("Processing %d entities for unique field '%s'\n", len(entities), uniqueFieldName)
-// 		uniqueValues := make([]interface{}, 0, len(entities))
-// 		valueToEntity := make(map[interface{}]*T)
-// 		for i, e := range entities {
-// 			val := getFieldValue(e, uniqueFieldName)
-// 			if val != nil {
-// 				uniqueValues = append(uniqueValues, val)
-// 				valueToEntity[val] = e
-// 			} else {
-// 				fmt.Printf("Warning: Entity at index %d has nil value for field '%s'\n", i, uniqueFieldName)
-// 			}
-// 		}
-// 		fmt.Printf("Found %d unique values to check\n", len(uniqueValues))
-
-// 		// Check existing records in DB
-// 		tableName := fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)
-// 		query := tx.Table(tableName).Select(uniqueColumnName).Where(fmt.Sprintf("%s IN ?", uniqueColumnName), uniqueValues)
-// 		fmt.Printf("Checking existing records with query: %v\n", query.Statement.SQL.String())
-
-// 		var existing []map[string]interface{}
-// 		err := query.Find(&existing).Error
-// 		if err != nil {
-// 			fmt.Printf("Error checking existing records: %v\n", err)
-// 			return fmt.Errorf("failed to check existing records: %w", err)
-// 		}
-// 		fmt.Printf("Found %d existing records that may cause conflicts\n", len(existing))
-
-// 		// Mark existing data
-// 		existingMap := make(map[interface{}]bool)
-// 		for _, row := range existing {
-// 			if val, ok := row[uniqueColumnName]; ok {
-// 				existingMap[val] = true
-// 			}
-// 		}
-
-// 		// Separate new and conflicting entities
-// 		newEntities := []*T{}
-// 		for idx, e := range entities {
-// 			val := getFieldValue(e, uniqueFieldName)
-// 			if val == nil {
-// 				fmt.Printf("Skipping entity at index %d - nil unique value\n", idx)
-// 				continue
-// 			}
-
-// 			if existingMap[val] {
-// 				conflictReason := fmt.Sprintf("Conflict on %s = %v", uniqueFieldName, val)
-// 				fmt.Printf("Conflict detected at index %d: %s\n", idx, conflictReason)
-// 				conflictRows = append(conflictRows, ConflictRow[T]{
-// 					Index:  idx,
-// 					Entity: e,
-// 					Reason: conflictReason,
-// 				})
-// 			} else {
-// 				newEntities = append(newEntities, e)
-// 			}
-// 		}
-// 		fmt.Printf("Identified %d new entities and %d conflicts\n", len(newEntities), len(conflictRows))
-
-// 		// Insert new entities
-// 		if len(newEntities) > 0 {
-// 			fmt.Printf("Inserting %d new entities in batches of %d\n", len(newEntities), batchSize)
-// 			if err := tx.Table(tableName).CreateInBatches(newEntities, batchSize).Error; err != nil {
-// 				if isForeignKeyViolation(err) {
-// 					// Handle foreign key violation specifically
-// 					fmt.Printf("Foreign key violation detected: %v\n", err)
-
-// 					// Get the IDs of the referenced table that don't exist
-// 					missingRefs := findMissingReferences(tx, newEntities)
-
-// 					// Add these to conflict rows
-// 					for idx, e := range newEntities {
-// 						refVal := getReferenceFieldValue(e, "ptk_id") // Adjust field name as needed
-// 						if _, exists := missingRefs[refVal]; exists {
-// 							conflictReason := fmt.Sprintf("Referenced PTK with ID %v does not exist", refVal)
-// 							fmt.Printf("Reference conflict at index %d: %s\n", idx, conflictReason)
-// 							conflictRows = append(conflictRows, ConflictRow[T]{
-// 								Index:  idx,
-// 								Entity: e,
-// 								Reason: conflictReason,
-// 							})
-// 						}
-// 					}
-
-// 					return nil // Return nil to commit the transaction with the conflict info
-// 				}
-// 				fmt.Printf("Error inserting new records: %v\n", err)
-// 				return fmt.Errorf("failed to insert new records: %w", err)
-// 			}
-// 			fmt.Printf("Successfully inserted %d new entities\n", len(newEntities))
-// 		} else {
-// 			fmt.Println("No new entities to insert")
-// 		}
-
-// 		return nil
-// 	})
-
-// 	if err != nil {
-// 		fmt.Printf("Transaction failed: %v\n", err)
-// 	} else {
-// 		fmt.Printf("Transaction completed successfully with %d conflicts\n", len(conflictRows))
-// 	}
-
-// 	return conflictRows, err
-// }
 
 // ============versi 3===============
 func (r *GenericRepository[T]) SaveManyWithConflictCheck(
