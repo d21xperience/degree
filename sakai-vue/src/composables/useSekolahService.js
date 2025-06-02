@@ -619,6 +619,23 @@ export function useSekolahService() {
             toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error}`, life: 3000 });
         }
     };
+    const createProsesKategoriSekolahDanKelas = async () => {
+        try {
+            const payload = {
+                schemaname: schemaname.value,
+                tahun_ajaran_id: `${initSelectedSemester.value?.tahunAjaranId}`
+            };
+            const response = await store.dispatch('sekolahService/createProsesKelas', payload);
+            // console.log(response);
+            if (response.status) {
+                toast.add({ severity: 'success', summary: 'Success', detail: `${response.message}`, life: 3000 });
+            }
+            return response.kategoriSekolah;
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error}`, life: 3000 });
+        }
+    };
+
     watch(selectedTahunAjaran, (e) => {
         store.commit('sekolahService/SET_SELECTEDTAHUNAJARAN', e);
     });
@@ -668,6 +685,7 @@ export function useSekolahService() {
         updateKategoriSekolah,
         addGuruTerdaftar,
         addKelas,
-        updateSekolah
+        updateSekolah,
+        createProsesKategoriSekolahDanKelas
     };
 }

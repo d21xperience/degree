@@ -871,6 +871,20 @@ const actions = {
             throw error;
         }
     },
+
+    async createProsesKelas({ commit }, payload) {
+        try {
+            const response = await api.post(`/ss/${payload.schemaname}/kategori-sekolah-kelas/proses`, payload);
+            if (response.status) {
+                // commit('SET_DASHBOARD', response.data);
+                return response.data;
+            }
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    },
+
     // =======================
     // ANGGOTA KELAS
     // =======================

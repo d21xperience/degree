@@ -149,7 +149,7 @@
                 </div>
             </div>
             <div class="flex justify-end" v-show="isEditKategoriSekolah">
-                <Button class="px-4 py-2 rounded flex items-center" @click="isEditKategoriSekolah = false" label="Proses" severity="help" />
+                <Button class="px-4 py-2 rounded flex items-center" @click="prosesKategoriSekolahDanKelas = false" label="Proses" severity="help" :loading="isLoadingProsesKategoriSekolahDanKelas" />
             </div>
         </div>
 
@@ -157,12 +157,12 @@
         <Dialog v-model:visible="isDialogAddKategoriSekolah" style="width: 550px" :header="title" :modal="true">
             <div class="mb-4 md:grid md:space-x-2" :class="{ 'md:grid-cols-2': sekolah.sekolah?.jenjangPendidikanId == 6 }">
                 <div class="">
-                    <label for="kurikulum">Kurikulum</label>
-                    <kurikulum-component v-model="kurikulumTerpilih" fluid />
+                    Kurikulum
+                    <kurikulum-component v-model="kurikulumTerpilih" fluid id="kurikulum" />
                 </div>
                 <div v-show="sekolah.sekolah?.jenjangPendidikanId == 6">
-                    <label for="">Jurusan</label>
-                    <jurusan-component v-model="jurusanTerpilih" />
+                    Jurusan
+                    <jurusan-component v-model="jurusanTerpilih" id="jurusan" />
                 </div>
             </div>
             <h6>Jumlah Kelas yg menggunakan kurikulum tersebut</h6>
@@ -194,7 +194,7 @@ import JurusanComponent from '@/components/JurusanComponent.vue';
 import KurikulumComponent from '@/components/KurikulumComponent.vue';
 import { useFormOptions } from '@/composables/useFormOptions';
 import { useSekolahService } from '@/composables/useSekolahService';
-const { fetchSekolah, fetchKategoriSekolah, createKategoriSekolah, deleteKategoriSekolah, updateKategoriSekolah, initSelectedSemester, updateSekolah, fetchTingkat } = useSekolahService();
+const { fetchSekolah, fetchKategoriSekolah, createKategoriSekolah, deleteKategoriSekolah, updateKategoriSekolah, initSelectedSemester, updateSekolah, fetchTingkat, createProsesKategoriSekolahDanKelas } = useSekolahService();
 
 const { fetchJurusan, fetchKurikulum } = useFormOptions();
 
@@ -289,7 +289,7 @@ watch(isEdit, async (newVal) => {
 
 const bentukPendidikan = ref([]);
 const jenjangPendidikan = ref([]);
-const tahunAjaranId = initSelectedSemester.value?.tahunAjaranId; // Misal nilai default, bisa juga pakai dropdown tahun ajaran
+const tahunAjaranId = initSelectedSemester.value?.tahunAjaranId;
 const getWebsiteUrl = (url) => {
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
         return `https://${url}`; // Tambahkan https jika belum ada
@@ -345,10 +345,12 @@ const addKategoriSekolah = () => {
         namaJurusan: jurusanTerpilih.value.namaJurusan || jurusanTerpilih.value,
         jurusanId: jurusanTerpilih.value.jurusanId,
         kurikulumId: kurikulumTerpilih.value.kurikulumId,
-        tahunAjaranId: tahunAjaranId
+        tahunAjaranId: tahunAjaranId,
+        kategoriKelas: {}
     };
 
     kategoriSekolahList.value.push(kategoriBaru);
+    // Kirim ke server
     createKategoriSekolah(kategoriBaru);
     // Reset input dan tutup dialog
     kurikulumTerpilih.value = null;
@@ -377,7 +379,7 @@ const editKategoriSekolah = () => {
             };
         })
     };
-    // console.log(kategoriBaru);
+    console.log(kategoriBaru);
     // return;
 
     // Cari index dari kategori yang diedit
@@ -388,8 +390,6 @@ const editKategoriSekolah = () => {
         kategoriSekolahList.value.splice(index, 1, kategoriBaru);
     } else {
         console.warn('Kategori sekolah tidak ditemukan di list');
-        // Opsional: tambahkan jika ingin fallback ke push()
-        // kategoriSekolahList.value.push(kategoriBaru);
     }
 
     // Kirim ke server
@@ -400,6 +400,7 @@ const editKategoriSekolah = () => {
     jurusanTerpilih.value = null;
     isEditDataKategoriSekolah.value = false;
     isDialogAddKategoriSekolah.value = false;
+    initKategoriSekolah();
 };
 
 // ========================================
@@ -432,7 +433,7 @@ const openEditDialog = async (e) => {
     isDialogAddKategoriSekolah.value = true;
 };
 const cancelKategoriSekolah = () => {
-    selectedKategoriSekolah.value = null;
+    // selectedKategoriSekolah.value = null;
     isDialogAddKategoriSekolah.value = false;
     isEditDataKategoriSekolah.value = false;
 };
@@ -459,23 +460,13 @@ const getKategoriKelas = computed(() => {
     };
 });
 
-// const initKategoriKelas = (tingkatList) => {
-//     const kelas = selectedKategoriSekolah.value.kategoriKelas;
-
-//     for (const tkt of tingkatList) {
-//         const existing = kelas.find((k) => k.tingkatId === parseInt(tkt.kode));
-//         if (!existing) {
-//             kelas.push({
-//                 jumlah: 0,
-//                 kategoriSekolahId: selectedKategoriSekolah.value.kategoriSekolahId || 0,
-//                 tahunAjaranId: selectedKategoriSekolah.value.tahunAjaranId || 0,
-//                 tingkatId: parseInt(tkt.kode)
-//             });
-//         }
-//     }
-
-//     return kelas;
-// };
+const isLoadingProsesKategoriSekolahDanKelas = ref(false);
+const prosesKategoriSekolahDanKelas = () => {
+    isLoadingProsesKategoriSekolahDanKelas.value = true;
+    createProsesKategoriSekolahDanKelas();
+    isLoadingProsesKategoriSekolahDanKelas.value = false;
+    isEditKategoriSekolah.value = false;
+};
 </script>
 
 <style scoped>
