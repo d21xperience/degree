@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type BentukPendidikan struct {
 	BentukPendidikanID   uint32  `gorm:"primaryKey;column:bentuk_pendidikan_id"`
@@ -142,6 +144,24 @@ type MataPelajaran struct {
 
 func (MataPelajaran) TableName() string {
 	return "ref.mata_pelajaran"
+}
+
+type MataPelajaranKurikulum struct {
+	Kurikulum_Id        int32 `gorm:"column:kurikulum_id;primaryKey"`
+	MataPelajaranId     int32 `gorm:"column:mata_pelajaran_id;primaryKey"`
+	TingkatPendidikanId int32 `gorm:"column:tingkat_pendidikan_id;primaryKey"`
+	JumlahJam           int32 `gorm:"column:jumlah_jam"`
+	JumlahJam_Maksimum  int32 `gorm:"column:jumlah_jam_maksimum"`
+	StatusDiKurikulum   int32 `gorm:"column:status_di_kurikulum"`
+	Wajib               int32 `gorm:"column:wajib"`
+	Sks                 int32 `gorm:"column:sks"`
+	APeminatan          int32 `gorm:"column:a_peminatan"`
+	// AreaKompetensi      string    `gorm:"column:area_kompetensi"`
+	// GmpId               *uuid.UUID `gorm:"column:gmp_id"`
+}
+
+func (MataPelajaranKurikulum) TableName() string {
+	return "ref.mata_pelajaran_kurikulum"
 }
 
 type GelarAkademik struct {

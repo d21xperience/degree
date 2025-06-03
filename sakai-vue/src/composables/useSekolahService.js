@@ -562,9 +562,12 @@ export function useSekolahService() {
                     nama_jurusan: kategoriSekolah.namaJurusan,
                     kurikulum_id: kategoriSekolah.kurikulumId,
                     jurusan_id: kategoriSekolah.jurusanId,
-                    tahun_ajaran_id: `${kategoriSekolah.tahunAjaranId}`
+                    tahun_ajaran_id: `${kategoriSekolah.tahunAjaranId}`,
+                    kategori_kelas: kategoriSekolah.kategoriKelas
                 }
             };
+            // console.log(payload)
+            // return
             const response = await store.dispatch('sekolahService/createKategoriSekolah', payload);
             // console.log(response);
             if (response.status) {

@@ -832,6 +832,7 @@ const actions = {
         }
     },
     async createKategoriSekolah({ commit }, payload) {
+        console.log(payload)
         try {
             const response = await api.post(`/ss/${payload.schemaname}/kategori-sekolah/create`, payload);
             if (response.status) {

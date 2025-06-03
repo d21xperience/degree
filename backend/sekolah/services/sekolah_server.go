@@ -20,14 +20,17 @@ import (
 type SekolahService struct {
 	pb.UnimplementedSekolahServiceServer
 	// RedisClient    *redis.Client // Tambahkan Redis sebagai field
-	sekolahService        repositories.SekolahRepository
-	schemaService         SchemaService
-	repoSekolahTenant     repositories.GenericRepository[models.SekolahTenant]
-	repoKategoriSekolah   repositories.GenericRepository[models.KategoriSekolah]
-	repoBentukPendidikan  repositories.GenericRepository[models.BentukPendidikan]
-	repoJenjangPendidikan repositories.GenericRepository[models.JenjangPendidikan]
-	repoKategoriKelas     repositories.GenericRepository[models.KategoriKelas]
-	repoKelas             repositories.GenericRepository[models.RombonganBelajar]
+	sekolahService             repositories.SekolahRepository
+	schemaService              SchemaService
+	repoSekolahTenant          repositories.GenericRepository[models.SekolahTenant]
+	repoKategoriSekolah        repositories.GenericRepository[models.KategoriSekolah]
+	repoBentukPendidikan       repositories.GenericRepository[models.BentukPendidikan]
+	repoJenjangPendidikan      repositories.GenericRepository[models.JenjangPendidikan]
+	repoKategoriKelas          repositories.GenericRepository[models.KategoriKelas]
+	repoKelas                  repositories.GenericRepository[models.RombonganBelajar]
+	repoPembelajaran           repositories.GenericRepository[models.Pembelajaran]
+	repoMataPelajaran          repositories.GenericRepository[models.MataPelajaran]
+	repoMataPelajaranKurikulum repositories.GenericRepository[models.MataPelajaranKurikulum]
 }
 
 func NewSekolahService() *SekolahService {
@@ -40,16 +43,22 @@ func NewSekolahService() *SekolahService {
 	repoJenjangPendidikan := repositories.NewJenjangPendidikanRepository(config.DB)
 	repoKategoriKelas := repositories.NewKategoriKelasRepository(config.DB)
 	repoKelas := repositories.NewrombonganBelajarRepository(config.DB)
+	repoPembelajaran := repositories.NewPembelajaranRepository(config.DB)
+	repoMapel := repositories.NewMapelRepository(config.DB)
+	repoMapelKurikulum := repositories.NewMapelKurikulumRepository(config.DB)
 
 	return &SekolahService{
-		sekolahService:        sekolahRepo,
-		schemaService:         schemaService,
-		repoSekolahTenant:     *SekolahTenant,
-		repoKategoriSekolah:   *repoKategoriSekolah,
-		repoBentukPendidikan:  *repoBentukPendidikan,
-		repoJenjangPendidikan: *repoJenjangPendidikan,
-		repoKategoriKelas:     *repoKategoriKelas,
-		repoKelas:             *repoKelas,
+		sekolahService:             sekolahRepo,
+		schemaService:              schemaService,
+		repoSekolahTenant:          *SekolahTenant,
+		repoKategoriSekolah:        *repoKategoriSekolah,
+		repoBentukPendidikan:       *repoBentukPendidikan,
+		repoJenjangPendidikan:      *repoJenjangPendidikan,
+		repoKategoriKelas:          *repoKategoriKelas,
+		repoKelas:                  *repoKelas,
+		repoPembelajaran:           *repoPembelajaran,
+		repoMataPelajaran:          *repoMapel,
+		repoMataPelajaranKurikulum: *repoMapelKurikulum,
 	}
 }
 
@@ -302,7 +311,7 @@ func (s *SekolahService) CreateKategoriSekolah(ctx context.Context, req *pb.Crea
 			Status:  false,
 		}, nil
 	}
-	kategoriKelasModel := utils.ConvertPBToModels(req.KategoriKelas, func(item *pb.KategoriKelas) *models.KategoriKelas {
+	kategoriKelasModel := utils.ConvertPBToModels(req.KategoriSekolah.KategoriKelas, func(item *pb.KategoriKelas) *models.KategoriKelas {
 		return &models.KategoriKelas{
 			KategorisekolahId: kategoriSekolahModel.KategorisekolahId,
 			TingkatId:         &item.TingkatId,
@@ -357,6 +366,7 @@ func (s *SekolahService) GetKategoriSekolah(ctx context.Context, req *pb.GetKate
 			JurusanId:         utils.SafeString(item.JurusanId),
 			KategoriKelas: utils.ConvertModelsToPB(item.KategoriKelas, func(item models.KategoriKelas) *pb.KategoriKelas {
 				return &pb.KategoriKelas{
+					Id:                item.Id,
 					KategoriSekolahId: item.KategorisekolahId,
 					TingkatId:         utils.SafeInt32(item.TingkatId),
 					Jumlah:            utils.SafeInt32(item.Jumlah),
@@ -426,18 +436,21 @@ func (s *SekolahService) UpdateKategoriSekolah(ctx context.Context, req *pb.Upda
 	}
 	kategoriKelasModel := utils.ConvertPBToModels(req.KategoriSekolah.KategoriKelas, func(item *pb.KategoriKelas) *models.KategoriKelas {
 		return &models.KategoriKelas{
+			Id:                item.Id,
 			KategorisekolahId: int32(pbKategoriSekolah.KategoriSekolahId),
 			TingkatId:         &item.TingkatId,
 			Jumlah:            &item.Jumlah,
 			TahunAjaranId:     kategoriSekolahModel.TahunAjaranId,
 		}
 	})
-	err = s.repoKategoriKelas.SaveMany(ctx, Schemaname, kategoriKelasModel, 100)
-	if err != nil {
-		return &pb.UpdateKategoriSekolahResponse{
-			Message: "Gagal menambahkan kategori kelas",
-			Status:  false,
-		}, nil
+	for _, v := range kategoriKelasModel {
+		err = s.repoKategoriKelas.Update(ctx, v, Schemaname, "id", strconv.FormatInt(int64(v.Id), 10))
+		if err != nil {
+			return &pb.UpdateKategoriSekolahResponse{
+				Message: "Gagal update kategori kelas",
+				Status:  false,
+			}, nil
+		}
 	}
 
 	return &pb.UpdateKategoriSekolahResponse{
@@ -479,6 +492,12 @@ func (s *SekolahService) ProsesKategoriSekolahDanKelas(ctx context.Context, req 
 				nmKelas = "TKR"
 			case "Teknik Sepeda Motor":
 				nmKelas = "TSM"
+			case "Akuntansi":
+				nmKelas = "AK"
+			case "Manajemen Perkantoran":
+				nmKelas = "MP"
+			case "Otomatisasi Tata Kelola Perkantoran":
+				nmKelas = "OTKP"
 			default:
 				nmKelas = "Rombel"
 			}
@@ -488,6 +507,8 @@ func (s *SekolahService) ProsesKategoriSekolahDanKelas(ctx context.Context, req 
 					// jika jumlah > 1 buatkan nama
 					if int(*x.Jumlah) > 1 {
 						kelompokKelas, _ = excelize.ColumnNumberToName(y + 1)
+					} else {
+						kelompokKelas = ""
 					}
 					for z := 1; z <= 2; z++ {
 						entity := &models.RombonganBelajar{
@@ -504,7 +525,7 @@ func (s *SekolahService) ProsesKategoriSekolahDanKelas(ctx context.Context, req 
 						if cek != nil {
 							return nil, err
 						}
-
+						s.createPembelajaran(ctx, entity, Schemaname)
 					}
 				}
 			}
@@ -516,4 +537,37 @@ func (s *SekolahService) ProsesKategoriSekolahDanKelas(ctx context.Context, req 
 		Message: "Berhasil membuat kelas sesusai kurikulum!",
 	}, nil
 
+}
+
+func (s *SekolahService) createPembelajaran(ctx context.Context, modelRombel *models.RombonganBelajar, schemaname string) {
+	var err error
+	conditions := map[string]any{
+		"ref.mata_pelajaran_kurikulum.kurikulum_id": modelRombel.KurikulumId,
+		"ref.mata_pelajaran_kurikulum.wajib":        1,
+	}
+	modelsMapelKurikulum, err := s.repoMataPelajaranKurikulum.FindAllByConditions(ctx, "ref", conditions, 100, 0, nil)
+	if err != nil {
+		log.Print(err)
+	}
+
+	var modelsPembelajaran []models.Pembelajaran
+	for _, v := range modelsMapelKurikulum {
+		modelMapel, err := s.repoMataPelajaran.FindByID(ctx, strconv.FormatInt(int64(v.MataPelajaranId), 10), "ref", "mata_pelajaran_id")
+		if err != nil {
+			log.Print(err)
+		}
+		modelPembelajaran := models.Pembelajaran{
+			PembelajaranId:     uuid.New(),
+			MataPelajaranId:    int(v.MataPelajaranId),
+			SemesterId:         modelRombel.SemesterId,
+			RombonganBelajarId: modelRombel.RombonganBelajarId,
+			NamaMataPelajaran:  &modelMapel.Nama,
+		}
+		modelsPembelajaran = append(modelsPembelajaran, modelPembelajaran)
+	}
+
+	err = s.repoPembelajaran.SaveMany(ctx, schemaname, utils.SliceToPointer(modelsPembelajaran), 100)
+	if err != nil {
+		log.Print(err)
+	}
 }
