@@ -118,6 +118,11 @@ const model = ref([
                         to: `/${sekolah.value}/data-dapodik/info-sekolah`
                     },
                     {
+                        label: 'Data Mapel',
+                        icon: 'pi pi-fw pi-book',
+                        to: `/${sekolah.value}/data-dapodik/info-mapel`
+                    },
+                    {
                         label: 'Data Kelas',
                         icon: 'pi pi-fw pi-building-columns',
                         to: `/${sekolah.value}/data-dapodik/info-kelas`
@@ -131,11 +136,6 @@ const model = ref([
                         label: 'Data Siswa',
                         icon: 'pi pi-fw pi-users',
                         to: `/${sekolah.value}/data-dapodik/info-siswa`
-                    },
-                    {
-                        label: 'Data Mapel',
-                        icon: 'pi pi-fw pi-book',
-                        to: `/${sekolah.value}/data-dapodik/info-mapel`
                     }
                 ]
             },

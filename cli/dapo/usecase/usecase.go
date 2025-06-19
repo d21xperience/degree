@@ -95,8 +95,8 @@ func ProcessPtk(cfg *config.AppConfig, semesterID string) error {
 				JenisKelamin: item.JenisKelamin,
 				TempatLahir:  item.TempatLahir,
 				TanggalLahir: item.TanggalLahir,
-				Nuptk:        item.NUPTK,
-				Nip:          item.NIP,
+				// Nuptk:        item.NUPTK,
+				// Nip:          item.NIP,
 			},
 		}
 	})

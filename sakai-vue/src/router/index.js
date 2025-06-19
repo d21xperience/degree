@@ -131,6 +131,7 @@ const router = createRouter({
                         {
                             path: 'info-mapel',
                             name: 'infoMapel',
+                            meta: { title: 'Info Mapel', namaRoute: 'Mata Pelajaran' },
                             component: () => import('@/views/pages/dapodik/data_matapelajaran/ReadMapel.vue')
                         }
                     ]

@@ -3,7 +3,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 const store = useStore();
 // import FileUpload from 'primevue/fileupload';
-
+import TingkatComponent from '@/components/TingkatComponent.vue';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
 
@@ -64,7 +64,8 @@ const fetchMapel = async () => {
 // ==============================
 const kelasList = ref([]);
 onMounted(async () => {
-    await fetchK();
+    // await fetchK();
+    initFirst();
 });
 const fetchK = async () => {
     try {
@@ -85,19 +86,51 @@ const fetchK = async () => {
 import { useSekolahService } from '@/composables/useSekolahService';
 const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
 const schemaname = computed(() => store.getters['sekolahService/getTabeltenant']?.schemaname);
-const { fetchKelas } = useSekolahService(schemaname, selectedSemester);
+const { fetchKelas, fetchKategoriSekolah, initSelectedSemester, fetchKategoriMapel, deleteKategoriMapel, deleteBatchKategoriMapel } = useSekolahService();
 // ================================
-watch(selectedSemester, async (newVal, oldVal) => {
-    // console.log(newVal)
-    kelasList.value = await fetchKelas();
-});
+// watch(selectedSemester, async (newVal, oldVal) => {
+//     // console.log(newVal)
+//     kelasList.value = await fetchKelas();
+// });
 // import DialogLoading from "@/components/DialogLoading.vue";
 
-const isLoading = ref(false);
+const kategoriSekolahList = ref([]);
+const kategoriMapelList = ref([]);
+const selectedKategoriSekolah = ref();
+const selectedTingkat = ref([]);
+const initKategoriMapel = async () => {
+    const payload = {
+        kurikulumId: selectedKategoriSekolah.value?.kurikulumId,
+        tingkatPendidikan: selectedTingkat.value
+    };
+    if (payload.kurikulumId && payload.tingkatPendidikan) {
+        // alert("Data error")
+        kategoriMapelList.value = await fetchKategoriMapel(payload);
+    }
+};
 
-const dataConnected = ref(true);
+const initFirst = async () => {
+    kategoriSekolahList.value = await fetchKategoriSekolah();
+    selectedKategoriSekolah.value = kategoriSekolahList.value[0];
+    await initKategoriMapel();
+};
+
+watch(initSelectedSemester, () => {
+    // console.log(newVal);
+    initFirst();
+    //    return initSelectedSemester.value?.tahunAjaranId;
+});
+
+watch(selectedKategoriSekolah, () => {
+    initKategoriMapel();
+});
+const isLoading = ref(false);
+watch(selectedTingkat, () => {
+    initKategoriMapel();
+});
+// const dataConnected = ref(true);
 const toast = useToast();
-const dt = ref();
+const dt = ref(null);
 // const products = ref();
 const mapelDialog = ref(false);
 const mapelList = ref([]);
@@ -107,14 +140,9 @@ const product = ref({});
 const dataLulusan = ref();
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    jurusan: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    tingkat: { value: null, matchMode: FilterMatchMode.GREATER_THAN }
+    tingkatPendidikanId: { value: null, matchMode: FilterMatchMode.EQUALS }
 });
 const submitted = ref(false);
-// const openNew = () => {
-//     mapelDialog.value = true
-//     // router.push({ name: "inputMapel" })
-// };
 const addMapelDialog = ref(false);
 const openNewMapel = async () => {
     addMapelDialog.value = true;
@@ -194,7 +222,6 @@ const deletedataLulusan = () => {
 // ==================================
 // ========IMPORT DATA========
 import DialogImport from '@/components/DialogImport.vue';
-const expandedRows = ref();
 const dialogImport = ref(false);
 const saveImport = (e) => {
     // console.log("Data disimpan:", e);
@@ -222,6 +249,7 @@ const collapseAll = () => {
     expandedRows.value = null;
 };
 
+import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
 import AutoComplete from 'primevue/autocomplete';
 // import { debounce } from 'lodash';
 
@@ -288,57 +316,120 @@ const simpanKeDatabase = () => {
     saveToDB(req_Object, endpoint);
     // localStorage.setItem("unsavedPembelajaran", JSON.stringify(pembelajaran.value));
 };
+
+// ======================================
+//  DELETE
+// ======================================
+const isDelete = ref(false);
+const messageDelete = ref('');
+const selectedKategoriMapel = ref();
+const dialogDelete = (data) => {
+    isDelete.value = true;
+    messageDelete.value = `Apakah mapel ${data.nmMapel} akan dihapus pada tahun ajaran ini?`;
+    selectedKategoriMapel.value = data;
+};
+
+const confirmDelete = () => {
+    kategoriMapelList.value = kategoriMapelList.value.filter((item) => item.id != selectedKategoriMapel.value.id);
+    isDelete.value = false;
+    deleteKategoriMapel(selectedKategoriMapel.value?.id);
+    selectedKategoriMapel.value = null;
+};
+
+const isBatchDelete = ref(false);
+const messageBatchDelete = ref('');
+const dialogBatchDelete = () => {
+    isBatchDelete.value = true;
+    messageBatchDelete.value = `Apakah ${selectedKategoriMapel.value.length} mapel yang dipilih akan dihapus pada tahun ajaran ini?`;
+};
+const confirmBatchDelete = () => {
+    if (selectedKategoriMapel.value.length > 1) {
+        kategoriMapelList.value = kategoriMapelList.value.filter((item) => !selectedKategoriMapel.value.includes(item));
+        let ids = selectedKategoriMapel.value.map((item) => item.id);
+        deleteBatchKategoriMapel(ids);
+        selectedKategoriMapel.value = null;
+    }
+};
+const first = ref(0);
 </script>
 <template>
     <div class="">
         <div class="">
+            <Toolbar>
+                <template #start>
+                    <Button
+                        icon="pi pi-trash"
+                        severity="danger"
+                        class="mr-2 text-lg"
+                        @click="dialogBatchDelete"
+                        :disabled="!selectedKategoriMapel || !selectedKategoriMapel.length || selectedKategoriMapel.length == 1"
+                        v-tooltip.bottom="'Hapus banyak mapel'"
+                    />
+                    <!-- <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="openNew" v-tooltip.bottom="'Tambah Siswa'" :loading="isOpenNew" /> -->
+                    <!--<Button icon="pi pi-pencil" severity="warn" @click="openNew" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 2" class="mr-2" v-tooltip.bottom="'Edit siswa'" />
+                    <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Upload siswa'" v-show="selectedSemester.semester == 1" /> -->
+                    <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download siswa'" />
+                    <Select v-model="selectedKategoriSekolah" :options="kategoriSekolahList" optionLabel="namaKurikulum" placeholder="Kurikulum" class="mr-2 !w-96" checkmark fluid />
+                </template>
+                <template #end>
+                    <div class="flex">
+                        <TingkatComponent v-model="selectedTingkat" />
+                        <!-- <IconField>
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
+                            <InputText v-model="filters['global'].value" placeholder="Search..." class="md:w-48" />
+                        </IconField> -->
+                    </div>
+                </template>
+            </Toolbar>
             <div class="w-full my-2 container">
-                <h2 class="text-xl mb-2">Data Mapel</h2>
                 <DataTable
                     ref="dt"
-                    v-model:expandedRows="expandedRows"
+                    v-model:selection="selectedKategoriMapel"
                     stripedRows
                     size="small"
-                    :value="kelasList"
-                    @rowExpand="onRowExpand"
-                    @rowCollapse="onRowCollapse"
-                    dataKey="rombonganBelajarId"
+                    :value="kategoriMapelList"
+                    dataKey="id"
                     :paginator="true"
                     :rows="10"
                     :filters="filters"
+                    :first="first"
+                    @page="(e) => (first = e.first)"
                     paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                     :rowsPerPageOptions="[10, 20, 50]"
                     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} kelas"
                 >
-                    <template #header>
-                        <div class="flex flex-wrap justify-end gap-2">
-                            <Button text icon="pi pi-plus" label="Expand All" @click="expandAll" />
-                            <Button text icon="pi pi-minus" label="Collapse All" @click="collapseAll" />
-                        </div>
-                    </template>
-                    <Column expander style="width: 5rem" />
-                    <Column field="nmKelas" header="Name"></Column>
-                    <Column field="tingkatPendidikanId" header="Tingkat" sortable></Column>
-                    <Column field="jurusan.namaJurusan" header="Jurusan" sortable></Column>
-                    <Column field="ptk.nama" header="Wali Kelas"></Column>
-                    <!-- <Column field="ptk.nama" header="Jml.Mapel"></Column> -->
-                    <Column field="" header="Edit">
-                        <template #body="{ data }">
-                            <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editMapel(data)" />
-                            <!-- <Button icon="pi pi-trash" outlined rounded severity="danger"
-                                    @click="confirmdeleteMapel(data)" /> -->
+                    <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
+                    <Column header="No" style="width: 2rem">
+                        <template #body="slotProps">
+                            <!-- {{ slotProps.index + 1 + (dt.value?.first || 0) }} -->
+                            {{ slotProps.index + 1 + first }}
                         </template>
                     </Column>
-                    <template #expansion="slotProps">
+                    <Column field="nmMapel" header="Nama"></Column>
+                    <Column field="tingkatPendidikan" header="Tingkat" sortable></Column>
+                    <Column field="" header="Jurusan" sortable>
+                        <template #body>
+                            {{ selectedKategoriSekolah?.namaJurusan }}
+                        </template>
+                    </Column>
+                    <!-- <Column field="ptk.nama" header="Guru Mapel"></Column> -->
+                    <!-- <Column field="ptk.nama" header="Jml.Mapel"></Column> -->
+                    <Column field="" header="Aksi">
+                        <template #body="{ data }">
+                            <!-- <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editMapel(data)" size="small" :rounded="true" /> -->
+                            <Button icon="pi pi-trash" outlined rounded severity="danger" @click="dialogDelete(data)" size="small" :rounded="true" />
+                        </template>
+                    </Column>
+                    <!-- <template #expansion="slotProps">
                         <div class="p-4">
                             <DataTable :value="slotProps.data.pembelajaran">
-                                <!-- <p>{{ slotProps.data.pembelajaran }}</p> -->
                                 <Column field="namaMataPelajaran" header="Mata pelajaran" sortable></Column>
                                 <Column field="ptkTerdaftar.ptk.nama" header="Guru Mapel" sortable></Column>
-                                <!-- <Column field="date" header="Date" sortable></Column> -->
                             </DataTable>
                         </div>
-                    </template>
+                    </template> -->
                 </DataTable>
             </div>
         </div>
@@ -370,10 +461,10 @@ const simpanKeDatabase = () => {
                             </template>
                         </Toolbar>
                     </div>
-                    <DataTable ref="dt" :value="pembelajaranList" dataKey="pembelajaran_id">
+                    <!-- <DataTable ref="dt" :value="pembelajaranList" dataKey="pembelajaran_id">
                         <Column field="nama_mata_pelajaran" header="Mata pelajaran"></Column>
                         <Column field="nama" header="Guru Mapel"></Column>
-                    </DataTable>
+                    </DataTable> -->
                 </div>
             </div>
 
@@ -454,7 +545,8 @@ const simpanKeDatabase = () => {
         <!-- import data -->
         <!-- DIALOG IMPORT -->
         <DialogImport v-model:visible="dialogImport" @save="saveImport" @cancel="cancelImport" template-type="mapel" />
-
+        <DialogConfirmDelete v-model:visible="isDelete" @confirm="confirmDelete" :message="messageDelete" />
+        <DialogConfirmDelete v-model:visible="isBatchDelete" @confirm="confirmBatchDelete" :message="messageBatchDelete" />
         <!-- end of import data -->
     </div>
 </template>

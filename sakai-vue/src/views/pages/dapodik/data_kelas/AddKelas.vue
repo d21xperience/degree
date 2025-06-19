@@ -8,7 +8,6 @@ const route = useRoute();
 const kelasId = route.query.kelasId;
 
 import JurusanComponent from '@/components/JurusanComponent.vue';
-import KurikulumSekolahComponent from '@/components/KurikulumSekolahComponent.vue';
 import TingkatComponent from '@/components/TingkatComponent.vue';
 import { useSekolahService } from '@/composables/useSekolahService';
 import { useStore } from 'vuex';
@@ -163,7 +162,9 @@ const batal = async () => {
                 </div> -->
             </div>
         </section>
-
+        <section class="mb-6">
+            <h2 class="text-xl font-semibold mb-4">Daftar Mata Pelajaran</h2>
+        </section>
         <!-- <Toast /> -->
         <!-- Daftar anggota rombel -->
         <!-- <div v-show="isEdit"> -->

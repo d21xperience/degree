@@ -39,9 +39,7 @@ export function useFormOptions() {
     const kurikulumList = store.getters['sekolahService/getKurikulum'];
     const kurikulumOptions = ref();
     const kurikulumLoading = ref(false);
-    const jurusanList = store.getters['sekolahService/getJurusan'];
     const jurusanOptions = ref();
-    const jurusanLoading = ref(false);
     const ptkLoading = ref(false);
     const ptkOptions = ref([]);
     const fetchGelarAkademik = () => {
@@ -81,10 +79,9 @@ export function useFormOptions() {
 
     const fetchKurikulum = async () => {
         try {
-            let response = await store.getters['sekolahService/getKurikulum'];
+            let response = kurikulumList; //await store.getters['sekolahService/getKurikulum'];
             if (!response || response.length == 0) {
-                console.log(response);
-                response = await store.dispatch('sekolahService/fetchKurikulum', sekolah.value?.sekolah.jenjangPendidikanId);
+                response = await store.dispatch('sekolahService/fetchKurikulum', { jenjangPendidikanId: sekolah.value?.sekolah.jenjangPendidikanId, jenjangPendidikanStr: sekolah.value?.bentukPendidikanStr });
                 if (response.status) {
                     toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
                     return response.kurikulum;
@@ -95,96 +92,69 @@ export function useFormOptions() {
             toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error.message}`, life: 3000 });
         }
     };
-
-    // const kurikulumSearch = (searchTerm) => {
-    //     kurikulumLoading.value = true;
-    //     setTimeout(async () => {
-    //         if (!searchTerm.query.trim().length) {
-    //             kurikulumOptions.value = await kurikulumList;
-    //         } else {
-    //             kurikulumOptions.value = await kurikulumList.filter((item) => item.namaKurikulum.toLowerCase().includes(searchTerm.query.toLowerCase()));
-    //         }
-    //         kurikulumLoading.value = false;
-    //     }, 250);
-    // };
-
-    const kurikulumSearch = debounce(async (searchTerm) => {
-        kurikulumLoading.value = true;
-
-        if (!searchTerm.query.trim().length) {
-            kurikulumOptions.value = kurikulumList;
+    const searchKurikulum = debounce(async (searchTerm) => {
+        if (!kurikulumList) {
+            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan kurikulum`, life: 3000 });
+            return;
+        }
+        if (!searchTerm) {
+            kurikulumOptions.value = [...kurikulumList];
         } else {
-            kurikulumOptions.value = kurikulumList.filter((item) => item.namaKurikulum.toLowerCase().includes(searchTerm.query.toLowerCase()));
+            kurikulumOptions.value = kurikulumList.filter((item) => item.namaKurikulum.toLowerCase().includes(searchTerm.toLowerCase()));
         }
-
-        kurikulumLoading.value = false;
     }, 250);
 
-    const fetchJurusan = async () => {
+    // ==============================
+    // Bidang Keahlian
+    const fetchBidangKeahlian = async (jurusanInduk) => {
         try {
-            let response = await store.getters['sekolahService/getJurusan'];
-
-            if (!response || response.length == 0) {
-                let param = '';
-                // console.log(sekolah.value.bentukPendidikanId);
-                switch (sekolah.value?.sekolah.bentukPendidikanId) {
-                    case 15 || 17:
-                        param = 'untuk_smk';
-                        break;
-                    case 13 || 16:
-                        param = 'untuk_sma';
-                        break;
-
-                    default:
-                        break;
-                }
-                // console.log(param);
-                const payload = {
-                    jenjang_pendidikan_id: sekolah.value?.sekolah.jenjangPendidikanId,
-                    param: param
-                };
-                response = await store.dispatch('sekolahService/fetchJurusan', payload);
-                if (response.status) {
-                    toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
-                    return response.kurikulum;
-                }
+            const response = await store.dispatch('sekolahService/fetchBidangKeahlian', { jurusanInduk: jurusanInduk });
+            if (response.status) {
+                toast.add({ severity: 'info', summary: 'Successful', detail: `${response.message}`, life: 3000 });
+                return response.bidangKeahlian;
             }
-            return response;
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error.message}`, life: 3000 });
+        }
+    };
+    const fetchProgramKeahlian = async (jurusanInduk) => {
+        try {
+            const response = await store.dispatch('sekolahService/fetchProgramKeahlian', { jurusanInduk: jurusanInduk });
+            if (response.status) {
+                toast.add({ severity: 'info', summary: 'Successful', detail: `${response.message}`, life: 3000 });
+                return response.programKeahlian;
+            }
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error.message}`, life: 3000 });
         }
     };
 
-    // const jurusanSearch = (searchTerm) => {
-    //     jurusanLoading.value = true;
-    //     setTimeout(async () => {
-    //         if (!searchTerm.query.trim().length) {
-    //             jurusanOptions.value = await jurusanList;
-    //         } else {
-    //             jurusanOptions.value = await jurusanList.filter((item) => item.namaJurusan.toLowerCase().includes(searchTerm.query.toLowerCase()));
-    //         }
-    //         jurusanLoading.value = false;
-    //     }, 250);
-    // };
-    const jurusanSearch = debounce(async (searchTerm) => {
+    const fetchJurusan = async (jurusanInduk) => {
         try {
-            jurusanLoading.value = true;
-            if (!searchTerm.query.trim().length) {
-                jurusanOptions.value = await jurusanList;
-            } else {
-                jurusanOptions.value = await jurusanList.filter((item) => item.namaJurusan.toLowerCase().includes(searchTerm.query.toLowerCase()));
+            const response = await store.dispatch('sekolahService/fetchJurusan', { jurusanInduk: jurusanInduk });
+            if (response.status) {
+                toast.add({ severity: 'info', summary: 'Successful', detail: `${response.message}`, life: 3000 });
+                return response.jurusan;
             }
         } catch (error) {
-            alert(error);
-        } finally {
-            jurusanLoading.value = false;
+            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error.message}`, life: 3000 });
         }
-    }, 250);
+    };
 
     const ptkSearch = debounce(async (searchTerm) => {
         try {
             ptkLoading.value = true;
             ptkOptions.value = await store.dispatch('sekolahService/searchPTKByName', { schemaname: schemaname.value, nama: searchTerm.query.toLowerCase() });
+        } catch (error) {
+            alert('error');
+        } finally {
+            ptkLoading.value = false;
+        }
+    }, 250);
+
+    const fetchMapelKurikulum = debounce(async () => {
+        try {
+            const response = await store.dispatch('sekolahService/fetchMapelKurikulum', { schemaname: schemaname.value, nama: searchTerm.query.toLowerCase() });
         } catch (error) {
             alert('error');
         } finally {
@@ -205,15 +175,16 @@ export function useFormOptions() {
         gelarAkademikBelakangOptions,
         handleKeydown,
         kurikulumOptions,
+        kurikulumList,
         kurikulumLoading,
-        kurikulumSearch,
+        searchKurikulum,
         fetchKurikulum,
         jurusanOptions,
-        jurusanLoading,
-        jurusanSearch,
         fetchJurusan,
         ptkSearch,
         ptkOptions,
-        ptkLoading
+        ptkLoading,
+        fetchBidangKeahlian,
+        fetchProgramKeahlian
     };
 }

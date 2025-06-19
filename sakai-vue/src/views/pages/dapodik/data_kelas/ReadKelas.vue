@@ -52,6 +52,8 @@
                 currentPageReportTemplate="Showing {first} to {last} of {totalRecords} kelas"
                 class="mt-2"
             >
+                <!-- <template #empty> No customers found. </template> -->
+                <!-- <template #loading> Loading customers data. Please wait. </template> -->
                 <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
                 <Column field="nmKelas" header="Nama" style="width: 7rem">
                     <template #loading>

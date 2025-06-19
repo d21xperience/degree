@@ -4,7 +4,7 @@
             <div class="flex justify-between items-center mb-2">
                 <h5>Data Sekolah</h5>
                 <div>
-                    <Button icon="pi pi-pencil" @click="editSekolah" :style="isEdit ? 'background-color:blue;border:none' : 'background-color:gray;border:none'" v-tooltip.bottom="'Edit data'" />
+                    <Button icon="pi pi-pencil" @click="editSekolah" :style="isEdit ? 'background-color:blue;border:none' : 'background-color:gray;border:none'" v-tooltip.bottom="'Edit data sekolah'" size="small" rounded=""/>
                 </div>
             </div>
             <div>
@@ -110,9 +110,7 @@
         <!-- Informasi sekolah -->
         <div>
             <div>
-                <h5>Kategori Sekolah</h5>
-            </div>
-            <div>
+                <h5>Kompetensi keahlian Dilayani</h5>
                 <KategoriSekolahComponent />
             </div>
         </div>
@@ -150,8 +148,10 @@ const initFirst = async () => {
 };
 const tingkat = ref();
 onMounted(async () => {
+    console.log('loading start');
     initFirst();
     tingkat.value = await fetchTingkat();
+    console.log('loading End');
 
     // console.log(tingkat.value);
     // const data = await fetchSekolah();

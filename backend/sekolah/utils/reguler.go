@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"sekolah/models"
 	"strings"
+	"unicode"
 )
 
 func SearchString(input string) string {
@@ -49,29 +50,23 @@ func ClassifyEducationForm(schoolName string, educationForms []models.BentukPend
 	return bestMatch
 }
 
-func ClassifyEducationGrade(educationForms []models.BentukPendidikan) uint32 {
-	if educationForms == nil {
+func ClassifyEducationGrade(educationForm *models.BentukPendidikan) uint32 {
+	if educationForm == nil {
 		return 1
 	}
-	// Simpan semua pattern yang cocok
-	for _, form := range educationForms {
-		if form.JenjangPaud == 1 {
-			return 1
-		} else if form.JenjangTk == 1 {
-			return 2
-		} else if form.JenjangSd == 1 {
-			return 4
-		} else if form.JenjangSmp == 1 {
-			return 5
-		} else if form.JenjangSma == 1 {
-			return 6
-		} else if form.JenjangTinggi == 1 {
-			
-		}
-
+	if educationForm.JenjangPaud == 1 {
+		return 1
+	} else if educationForm.JenjangTk == 1 {
+		return 2
+	} else if educationForm.JenjangSd == 1 {
+		return 4
+	} else if educationForm.JenjangSmp == 1 {
+		return 5
+	} else if educationForm.JenjangSma == 1 {
+		return 6
+	} else {
+		return 1
 	}
-
-	return 1
 }
 
 // Daftar bentuk pendidikan yang dikenali
@@ -96,5 +91,44 @@ func ClassifyEducationGrade(educationForms []models.BentukPendidikan) uint32 {
 // 		}
 // 	}
 
-// 	return "Tidak Diketahui"
-// }
+//		return "Tidak Diketahui"
+//	}
+func BuatSingkatan(nama string) string {
+	var kataYangDiabaikan = map[string]bool{
+		"dan":    true,
+		"dari":   true,
+		"ke":     true,
+		"yang":   true,
+		"untuk":  true,
+		"dengan": true,
+		"di":     true,
+	}
+
+	// Singkatan khusus (override)
+	var singkatanKhusus = map[string]string{
+		"akuntansi": "AK",
+	}
+
+	// Cek override khusus
+	normalisasi := strings.ToLower(strings.TrimSpace(nama))
+	if val, ok := singkatanKhusus[normalisasi]; ok {
+		return val
+	}
+
+	kata := strings.Fields(normalisasi)
+	singkatan := ""
+
+	for _, k := range kata {
+		if kataYangDiabaikan[k] {
+			continue
+		}
+		for _, r := range k {
+			if unicode.IsLetter(r) {
+				singkatan += strings.ToUpper(string(r))
+				break
+			}
+		}
+	}
+
+	return singkatan
+}

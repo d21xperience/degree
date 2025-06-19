@@ -8,18 +8,20 @@ import (
 	"sekolah/models"
 	"sekolah/repositories"
 	"sekolah/utils"
+	"strings"
 )
 
 type ReferensiServiceServer struct {
 	pb.UnimplementedReferensiServiceServer
-	repoBentukPendidikan  repositories.GenericRepository[models.BentukPendidikan]
-	repoJenjangPendidikan repositories.GenericRepository[models.JenjangPendidikan]
-	repoTingkatPendidikan repositories.GenericRepository[models.TingkatPendidikan]
-	repoStatusKepemilikan repositories.GenericRepository[models.StatusKepemilikan]
-	repoKurikulum         repositories.GenericRepository[models.Kurikulum]
-	repoJurusan           repositories.GenericRepository[models.Jurusan]
-	repoMapel             repositories.GenericRepository[models.MataPelajaran]
-	repoGelarAkademik     repositories.GenericRepository[models.GelarAkademik]
+	repoBentukPendidikan       repositories.GenericRepository[models.BentukPendidikan]
+	repoJenjangPendidikan      repositories.GenericRepository[models.JenjangPendidikan]
+	repoTingkatPendidikan      repositories.GenericRepository[models.TingkatPendidikan]
+	repoStatusKepemilikan      repositories.GenericRepository[models.StatusKepemilikan]
+	repoKurikulum              repositories.GenericRepository[models.Kurikulum]
+	repoJurusan                repositories.GenericRepository[models.Jurusan]
+	repoMapel                  repositories.GenericRepository[models.MataPelajaran]
+	repoGelarAkademik          repositories.GenericRepository[models.GelarAkademik]
+	repoMataPelajaranKurikulum repositories.GenericRepository[models.MataPelajaranKurikulum]
 }
 
 func NewReferensiServiceServer() *ReferensiServiceServer {
@@ -31,15 +33,18 @@ func NewReferensiServiceServer() *ReferensiServiceServer {
 	repoJurusan := repositories.NewJurusanRepository(config.DB)
 	repoMapel := repositories.NewMapelRepository(config.DB)
 	repoGelarAkademik := repositories.NewGelarAkademikRepository(config.DB)
+	repoMapelKurikulum := repositories.NewMapelKurikulumRepository(config.DB)
+
 	return &ReferensiServiceServer{
-		repoBentukPendidikan:  *repoBentukPendidikan,
-		repoJenjangPendidikan: *repoJenjangPendidikan,
-		repoTingkatPendidikan: *repoTingkatPendidikan,
-		repoStatusKepemilikan: *repoStatusKepemilikan,
-		repoKurikulum:         *repoKurikulum,
-		repoJurusan:           *repoJurusan,
-		repoMapel:             *repoMapel,
-		repoGelarAkademik:     *repoGelarAkademik,
+		repoBentukPendidikan:       *repoBentukPendidikan,
+		repoJenjangPendidikan:      *repoJenjangPendidikan,
+		repoTingkatPendidikan:      *repoTingkatPendidikan,
+		repoStatusKepemilikan:      *repoStatusKepemilikan,
+		repoKurikulum:              *repoKurikulum,
+		repoJurusan:                *repoJurusan,
+		repoMapel:                  *repoMapel,
+		repoGelarAkademik:          *repoGelarAkademik,
+		repoMataPelajaranKurikulum: *repoMapelKurikulum,
 	}
 }
 
@@ -134,10 +139,51 @@ func (s *ReferensiServiceServer) GetKurikulum(ctx context.Context, req *pb.GetKu
 	if err != nil {
 		return nil, err
 	}
+	// jika SMK
+	/* SELECT * FROM kurikulum k
+	WHERE k.jenjang_pendidikan_id = 6 AND LENGTH(k.jurusan_id) = 8 AND k.nama_kurikulum LIKE '%SMK%'
+	ORDER BY k.mulai_berlaku ASC */
+	// SD, SMP, dll. field jurusan_id IS NULL
+
 	conditions := map[string]any{
-		"jenjang_pendidikan_id": req.GetJenjangPendidikanId(),
+		"kurikulum.jenjang_pendidikan_id": req.GetJenjangPendidikanId(),
 	}
-	mod, err := s.repoKurikulum.FindAllByConditions(ctx, "ref", conditions, 1000, 0, nil)
+	var costumConditions []struct {
+		Query string
+		Args  []any
+	}
+	if req.JenjangPendidikanStr != nil {
+		switch strings.ToUpper(req.GetJenjangPendidikanStr()) {
+		case "SMA":
+			costumConditions = append(costumConditions, struct {
+				Query string
+				Args  []any
+			}{
+				Query: "ref.kurikulum.nama_kurikulum ILIKE " + fmt.Sprintf("'%%%s%%'", req.GetJenjangPendidikanStr()),
+				Args:  []any{},
+			})
+		case "SMK":
+			costumConditions = append(costumConditions, struct {
+				Query string
+				Args  []any
+			}{
+				Query: "ref.kurikulum.nama_kurikulum ILIKE ?",
+				Args:  []any{fmt.Sprintf("%%%s%%", req.GetJenjangPendidikanStr())},
+			}, struct {
+				Query string
+				Args  []any
+			}{
+				Query: "LENGTH(ref.kurikulum.jurusan_id) = ?",
+				Args:  []any{8},
+			},
+			)
+
+		}
+
+	}
+
+	orderBy := []string{"ref.kurikulum.mulai_berlaku DESC"}
+	modelKurikulum, err := s.repoKurikulum.FindWithRelations(ctx, "ref", nil, nil, conditions, costumConditions, nil, orderBy)
 	if err != nil {
 		return &pb.GetKurikulumResponse{
 			Status:    false,
@@ -145,15 +191,15 @@ func (s *ReferensiServiceServer) GetKurikulum(ctx context.Context, req *pb.GetKu
 			Kurikulum: nil,
 		}, err
 	}
-	res := utils.ConvertModelsToPB(mod, func(re *models.Kurikulum) *pb.Kurikulum {
+	res := utils.ConvertModelsToPB(modelKurikulum, func(item models.Kurikulum) *pb.Kurikulum {
 		return &pb.Kurikulum{
-			KurikulumId:         uint32(re.KurikulumID),
-			NamaKurikulum:       re.NamaKurikulum,
-			MulaiBerlaku:        re.MulaiBerlaku.Format("2006-01-02"),
-			SistemSks:           uint32(re.SistemSKS),
-			TotalSks:            uint32(re.TotalSKS),
-			JenjangPendidikanId: uint32(re.JenjangPendidikanID),
-			JurusanId:           utils.SafeString(re.JurusanID),
+			KurikulumId:         uint32(item.KurikulumID),
+			NamaKurikulum:       item.NamaKurikulum,
+			MulaiBerlaku:        item.MulaiBerlaku.Format("2006-01-02"),
+			SistemSks:           uint32(item.SistemSKS),
+			TotalSks:            uint32(item.TotalSKS),
+			JenjangPendidikanId: uint32(item.JenjangPendidikanID),
+			JurusanId:           utils.SafeString(item.JurusanID),
 		}
 	})
 	return &pb.GetKurikulumResponse{
@@ -162,20 +208,87 @@ func (s *ReferensiServiceServer) GetKurikulum(ctx context.Context, req *pb.GetKu
 		Kurikulum: res,
 	}, nil
 }
-func (s *ReferensiServiceServer) GetJurusan(ctx context.Context, req *pb.GetJurusanRequest) (*pb.GetJurusanResponse, error) {
-	// Daftar field yang wajib diisi
-	requiredFields := []string{"JenjangPendidikanId", "Param"}
-	// Validasi request
-	err := utils.ValidateFields(req, requiredFields)
-	if err != nil {
-		return nil, err
-	}
-	param := req.GetParam()
+func (s *ReferensiServiceServer) GetBidangKeahlian(ctx context.Context, req *pb.GetBidangKeahlianRequest) (*pb.GetBidangKeahlianResponse, error) {
 	conditions := map[string]any{
-		"jenjang_pendidikan_id": req.GetJenjangPendidikanId(),
-		param:                   1,
+		"ref.jurusan.level_bidang_id": "10",
 	}
-	mod, err := s.repoJurusan.FindAllByConditions(ctx, "ref", conditions, 100, 0, nil)
+	if req.JurusanInduk != nil {
+		conditions["ref.jurusan.jurusan_id"] = req.GetJurusanInduk()
+	}
+	orderBy := []string{"ref.jurusan.jurusan_id", "ref.jurusan.nama_jurusan"}
+	mod, err := s.repoJurusan.FindAllByConditions(ctx, "ref", conditions, 1000, 0, orderBy)
+	if err != nil {
+		return &pb.GetBidangKeahlianResponse{
+			Status:         false,
+			Message:        "Gagal mengambil bidang keahlian",
+			BidangKeahlian: nil,
+		}, nil
+	}
+	res := utils.ConvertModelsToPB(mod, func(item *models.Jurusan) *pb.Jurusan {
+		return &pb.Jurusan{
+			JurusanId:           item.JurusanID,
+			NamaJurusan:         item.NamaJurusan,
+			UntukSma:            uint32(item.UntukSMA),
+			UntukSmk:            uint32(item.UntukSMK),
+			UntukPt:             uint32(item.UntukPT),
+			UntukSlb:            uint32(item.UntukSLB),
+			UntukSmklb:          uint32(item.UntukSMKLB),
+			JenjangPendidikanId: utils.PointerToUint32(utils.Uint16ToUint32Pointer(item.JenjangPendidikanID)),
+			JurusanInduk:        utils.SafeString(item.JurusanInduk),
+			LevelBidangId:       item.LevelBidangID,
+		}
+	})
+	return &pb.GetBidangKeahlianResponse{
+		Status:         true,
+		Message:        "Berhasil mengambil bidang keahlian",
+		BidangKeahlian: res,
+	}, nil
+}
+func (s *ReferensiServiceServer) GetProgramKeahlian(ctx context.Context, req *pb.GetProgramKeahlianRequest) (*pb.GetProgramKeahlianResponse, error) {
+	conditions := map[string]any{
+		"ref.jurusan.level_bidang_id": "11",
+	}
+	if req.JurusanInduk != nil {
+		conditions["ref.jurusan.jurusan_induk"] = req.GetJurusanInduk()
+	}
+	orderBy := []string{"ref.jurusan.jurusan_id", "ref.jurusan.nama_jurusan"}
+	mod, err := s.repoJurusan.FindAllByConditions(ctx, "ref", conditions, 1000, 0, orderBy)
+	if err != nil {
+		return &pb.GetProgramKeahlianResponse{
+			Status:          false,
+			Message:         "Gagal mengambil program keahlian",
+			ProgramKeahlian: nil,
+		}, nil
+	}
+	res := utils.ConvertModelsToPB(mod, func(item *models.Jurusan) *pb.Jurusan {
+		return &pb.Jurusan{
+			JurusanId:           item.JurusanID,
+			NamaJurusan:         item.NamaJurusan,
+			UntukSma:            uint32(item.UntukSMA),
+			UntukSmk:            uint32(item.UntukSMK),
+			UntukPt:             uint32(item.UntukPT),
+			UntukSlb:            uint32(item.UntukSLB),
+			UntukSmklb:          uint32(item.UntukSMKLB),
+			JenjangPendidikanId: utils.PointerToUint32(utils.Uint16ToUint32Pointer(item.JenjangPendidikanID)),
+			JurusanInduk:        utils.SafeString(item.JurusanInduk),
+			LevelBidangId:       item.LevelBidangID,
+		}
+	})
+	return &pb.GetProgramKeahlianResponse{
+		Status:          true,
+		Message:         "Berhasil mengambil program keahlian",
+		ProgramKeahlian: res,
+	}, nil
+}
+func (s *ReferensiServiceServer) GetJurusan(ctx context.Context, req *pb.GetJurusanRequest) (*pb.GetJurusanResponse, error) {
+	conditions := map[string]any{
+		"ref.jurusan.level_bidang_id": "12",
+	}
+	if req.JurusanInduk != nil {
+		conditions["ref.jurusan.jurusan_induk"] = req.GetJurusanInduk()
+	}
+	orderBy := []string{"ref.jurusan.jurusan_id", "ref.jurusan.nama_jurusan"}
+	mod, err := s.repoJurusan.FindAllByConditions(ctx, "ref", conditions, 1000, 0, orderBy)
 	if err != nil {
 		return &pb.GetJurusanResponse{
 			Status:  false,
@@ -251,5 +364,44 @@ func (s *ReferensiServiceServer) GetGelarAkademik(ctx context.Context, req *pb.G
 	})
 	return &pb.GetGelarAkademikResponse{
 		GelarAkademik: results,
+	}, nil
+}
+
+func (s *ReferensiServiceServer) GetMapelKurikulum(ctx context.Context, req *pb.GetMapelKurikulumRequest) (*pb.GetMapelKurikulumResponse, error) {
+	requiredFields := []string{"KurikulumId"}
+	// Validasi request
+	err := utils.ValidateFields(req, requiredFields)
+	if err != nil {
+		return nil, err
+	}
+
+	joins := []string{
+		"JOIN ref.mata_pelajaran ON ref.mata_pelajaran.mata_pelajaran_id = ref.mata_pelajaran_kurikulum.mata_pelajaran_id ",
+	}
+	conditions := map[string]any{
+		"ref.mata_pelajaran_kurikulum.kurikulum_id": req.KurikulumId,
+		// "ref.mata_pelajaran_kurikulum.tingkat_pendidikan_id": modelRombel.TingkatPendidikanId,
+	}
+	preloads := []string{"MataPelajaran"}
+
+	modelsMapelKurikulum, err := s.repoMataPelajaranKurikulum.FindWithPreloadAndJoins(ctx, "ref", joins, preloads, conditions, nil, nil, false)
+	if err != nil {
+		return &pb.GetMapelKurikulumResponse{
+			Mapel:   nil,
+			Status:  true,
+			Message: fmt.Sprintf("Gagal mengambil mapel kukrikulum %v", err),
+		}, nil
+	}
+	pbMapelKurikulum := utils.ConvertModelsToPB(modelsMapelKurikulum, func(item models.MataPelajaranKurikulum) pb.MapelKurikulum {
+		return pb.MapelKurikulum{
+			KurikulumId:     item.KurikulumId,
+			MataPelajaranId: item.MataPelajaranId,
+			Nama:            item.MataPelajaran.Nama,
+		}
+	})
+	return &pb.GetMapelKurikulumResponse{
+		Mapel:   utils.SliceToPointer(pbMapelKurikulum),
+		Status:  true,
+		Message: "Berhasil mengambil mapel kukrikulum",
 	}, nil
 }

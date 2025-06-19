@@ -1,5 +1,5 @@
 <template>
-    <Select v-model="internalValue" :options="jurusanOptions" :option-label="handleLabelOption" placeholder="Pilih kompetensi keahlian" fluid />
+    <Select v-model="internalValue" :options="programKeahlianOptions" :option-label="handleLabelOption" placeholder="Pilih program keahlian" fluid />
 </template>
 <script setup>
 import { useFormOptions } from '@/composables/useFormOptions';
@@ -7,9 +7,9 @@ import { ref, watch } from 'vue';
 const props = defineProps(['modelValue', 'jurusanInduk']);
 const emit = defineEmits(['update:modelValue']);
 
-const { fetchJurusan } = useFormOptions();
+const { fetchProgramKeahlian } = useFormOptions();
 const internalValue = ref(props.modelValue);
-const jurusanOptions = ref();
+const programKeahlianOptions = ref();
 const handleLabelOption = (newVal) => {
     return `${newVal.jurusanId} - ${newVal.namaJurusan}`;
 };
@@ -20,11 +20,12 @@ watch(
     },
     { immediate: true } // untuk memuat data saat komponen pertama kali dipasang
 );
+
 watch(
     () => props.jurusanInduk,
     async (newVal) => {
         if (newVal) {
-            jurusanOptions.value = await fetchJurusan(newVal);
+            programKeahlianOptions.value = await fetchProgramKeahlian(newVal);
         }
     }
 );

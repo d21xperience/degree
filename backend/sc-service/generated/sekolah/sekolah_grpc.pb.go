@@ -512,6 +512,11 @@ const (
 	SekolahService_GetKategoriSekolah_FullMethodName            = "/sekolah.SekolahService/GetKategoriSekolah"
 	SekolahService_DeleteKategoriSekolah_FullMethodName         = "/sekolah.SekolahService/DeleteKategoriSekolah"
 	SekolahService_ProsesKategoriSekolahDanKelas_FullMethodName = "/sekolah.SekolahService/ProsesKategoriSekolahDanKelas"
+	SekolahService_CreateKategoriMapel_FullMethodName           = "/sekolah.SekolahService/CreateKategoriMapel"
+	SekolahService_UpdateKategoriMapel_FullMethodName           = "/sekolah.SekolahService/UpdateKategoriMapel"
+	SekolahService_GetKategoriMapel_FullMethodName              = "/sekolah.SekolahService/GetKategoriMapel"
+	SekolahService_DeleteKategoriMapel_FullMethodName           = "/sekolah.SekolahService/DeleteKategoriMapel"
+	SekolahService_BatchDeleteKategoriMapel_FullMethodName      = "/sekolah.SekolahService/BatchDeleteKategoriMapel"
 )
 
 // SekolahServiceClient is the client API for SekolahService service.
@@ -536,6 +541,14 @@ type SekolahServiceClient interface {
 	// PROSES KATEGORI SEKOLAH & KELAS --FUNGSI UNTUK MEMBUAT KELAS BERDASARAKAN KATEGORI KELAS DAN SEKOLAH
 	// ====================================
 	ProsesKategoriSekolahDanKelas(ctx context.Context, in *ProsesKategoriSekolahDanKelasRequest, opts ...grpc.CallOption) (*ProsesKategoriSekolahDanKelasResponse, error)
+	// ====================================
+	// KATEGORI SEKOLAH MAPEL
+	// ====================================
+	CreateKategoriMapel(ctx context.Context, in *CreateKategoriMapelRequest, opts ...grpc.CallOption) (*CreateKategoriMapelResponse, error)
+	UpdateKategoriMapel(ctx context.Context, in *UpdateKategoriMapelRequest, opts ...grpc.CallOption) (*UpdateKategoriMapelResponse, error)
+	GetKategoriMapel(ctx context.Context, in *GetKategoriMapelRequest, opts ...grpc.CallOption) (*GetKategoriMapelResponse, error)
+	DeleteKategoriMapel(ctx context.Context, in *DeleteKategoriMapelRequest, opts ...grpc.CallOption) (*DeleteKategoriMapelResponse, error)
+	BatchDeleteKategoriMapel(ctx context.Context, in *BatchDeleteKategoriMapelRequest, opts ...grpc.CallOption) (*BatchDeleteKategoriMapelResponse, error)
 }
 
 type sekolahServiceClient struct {
@@ -656,6 +669,56 @@ func (c *sekolahServiceClient) ProsesKategoriSekolahDanKelas(ctx context.Context
 	return out, nil
 }
 
+func (c *sekolahServiceClient) CreateKategoriMapel(ctx context.Context, in *CreateKategoriMapelRequest, opts ...grpc.CallOption) (*CreateKategoriMapelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateKategoriMapelResponse)
+	err := c.cc.Invoke(ctx, SekolahService_CreateKategoriMapel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sekolahServiceClient) UpdateKategoriMapel(ctx context.Context, in *UpdateKategoriMapelRequest, opts ...grpc.CallOption) (*UpdateKategoriMapelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateKategoriMapelResponse)
+	err := c.cc.Invoke(ctx, SekolahService_UpdateKategoriMapel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sekolahServiceClient) GetKategoriMapel(ctx context.Context, in *GetKategoriMapelRequest, opts ...grpc.CallOption) (*GetKategoriMapelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetKategoriMapelResponse)
+	err := c.cc.Invoke(ctx, SekolahService_GetKategoriMapel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sekolahServiceClient) DeleteKategoriMapel(ctx context.Context, in *DeleteKategoriMapelRequest, opts ...grpc.CallOption) (*DeleteKategoriMapelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteKategoriMapelResponse)
+	err := c.cc.Invoke(ctx, SekolahService_DeleteKategoriMapel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *sekolahServiceClient) BatchDeleteKategoriMapel(ctx context.Context, in *BatchDeleteKategoriMapelRequest, opts ...grpc.CallOption) (*BatchDeleteKategoriMapelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(BatchDeleteKategoriMapelResponse)
+	err := c.cc.Invoke(ctx, SekolahService_BatchDeleteKategoriMapel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SekolahServiceServer is the server API for SekolahService service.
 // All implementations must embed UnimplementedSekolahServiceServer
 // for forward compatibility.
@@ -678,6 +741,14 @@ type SekolahServiceServer interface {
 	// PROSES KATEGORI SEKOLAH & KELAS --FUNGSI UNTUK MEMBUAT KELAS BERDASARAKAN KATEGORI KELAS DAN SEKOLAH
 	// ====================================
 	ProsesKategoriSekolahDanKelas(context.Context, *ProsesKategoriSekolahDanKelasRequest) (*ProsesKategoriSekolahDanKelasResponse, error)
+	// ====================================
+	// KATEGORI SEKOLAH MAPEL
+	// ====================================
+	CreateKategoriMapel(context.Context, *CreateKategoriMapelRequest) (*CreateKategoriMapelResponse, error)
+	UpdateKategoriMapel(context.Context, *UpdateKategoriMapelRequest) (*UpdateKategoriMapelResponse, error)
+	GetKategoriMapel(context.Context, *GetKategoriMapelRequest) (*GetKategoriMapelResponse, error)
+	DeleteKategoriMapel(context.Context, *DeleteKategoriMapelRequest) (*DeleteKategoriMapelResponse, error)
+	BatchDeleteKategoriMapel(context.Context, *BatchDeleteKategoriMapelRequest) (*BatchDeleteKategoriMapelResponse, error)
 	mustEmbedUnimplementedSekolahServiceServer()
 }
 
@@ -720,6 +791,21 @@ func (UnimplementedSekolahServiceServer) DeleteKategoriSekolah(context.Context, 
 }
 func (UnimplementedSekolahServiceServer) ProsesKategoriSekolahDanKelas(context.Context, *ProsesKategoriSekolahDanKelasRequest) (*ProsesKategoriSekolahDanKelasResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ProsesKategoriSekolahDanKelas not implemented")
+}
+func (UnimplementedSekolahServiceServer) CreateKategoriMapel(context.Context, *CreateKategoriMapelRequest) (*CreateKategoriMapelResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateKategoriMapel not implemented")
+}
+func (UnimplementedSekolahServiceServer) UpdateKategoriMapel(context.Context, *UpdateKategoriMapelRequest) (*UpdateKategoriMapelResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateKategoriMapel not implemented")
+}
+func (UnimplementedSekolahServiceServer) GetKategoriMapel(context.Context, *GetKategoriMapelRequest) (*GetKategoriMapelResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetKategoriMapel not implemented")
+}
+func (UnimplementedSekolahServiceServer) DeleteKategoriMapel(context.Context, *DeleteKategoriMapelRequest) (*DeleteKategoriMapelResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteKategoriMapel not implemented")
+}
+func (UnimplementedSekolahServiceServer) BatchDeleteKategoriMapel(context.Context, *BatchDeleteKategoriMapelRequest) (*BatchDeleteKategoriMapelResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method BatchDeleteKategoriMapel not implemented")
 }
 func (UnimplementedSekolahServiceServer) mustEmbedUnimplementedSekolahServiceServer() {}
 func (UnimplementedSekolahServiceServer) testEmbeddedByValue()                        {}
@@ -940,6 +1026,96 @@ func _SekolahService_ProsesKategoriSekolahDanKelas_Handler(srv interface{}, ctx 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SekolahService_CreateKategoriMapel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateKategoriMapelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SekolahServiceServer).CreateKategoriMapel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SekolahService_CreateKategoriMapel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SekolahServiceServer).CreateKategoriMapel(ctx, req.(*CreateKategoriMapelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SekolahService_UpdateKategoriMapel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateKategoriMapelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SekolahServiceServer).UpdateKategoriMapel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SekolahService_UpdateKategoriMapel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SekolahServiceServer).UpdateKategoriMapel(ctx, req.(*UpdateKategoriMapelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SekolahService_GetKategoriMapel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetKategoriMapelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SekolahServiceServer).GetKategoriMapel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SekolahService_GetKategoriMapel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SekolahServiceServer).GetKategoriMapel(ctx, req.(*GetKategoriMapelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SekolahService_DeleteKategoriMapel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteKategoriMapelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SekolahServiceServer).DeleteKategoriMapel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SekolahService_DeleteKategoriMapel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SekolahServiceServer).DeleteKategoriMapel(ctx, req.(*DeleteKategoriMapelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SekolahService_BatchDeleteKategoriMapel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(BatchDeleteKategoriMapelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SekolahServiceServer).BatchDeleteKategoriMapel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SekolahService_BatchDeleteKategoriMapel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SekolahServiceServer).BatchDeleteKategoriMapel(ctx, req.(*BatchDeleteKategoriMapelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SekolahService_ServiceDesc is the grpc.ServiceDesc for SekolahService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -990,6 +1166,26 @@ var SekolahService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ProsesKategoriSekolahDanKelas",
 			Handler:    _SekolahService_ProsesKategoriSekolahDanKelas_Handler,
+		},
+		{
+			MethodName: "CreateKategoriMapel",
+			Handler:    _SekolahService_CreateKategoriMapel_Handler,
+		},
+		{
+			MethodName: "UpdateKategoriMapel",
+			Handler:    _SekolahService_UpdateKategoriMapel_Handler,
+		},
+		{
+			MethodName: "GetKategoriMapel",
+			Handler:    _SekolahService_GetKategoriMapel_Handler,
+		},
+		{
+			MethodName: "DeleteKategoriMapel",
+			Handler:    _SekolahService_DeleteKategoriMapel_Handler,
+		},
+		{
+			MethodName: "BatchDeleteKategoriMapel",
+			Handler:    _SekolahService_BatchDeleteKategoriMapel_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -4264,9 +4460,13 @@ const (
 	ReferensiService_GetJenjang_FullMethodName           = "/sekolah.ReferensiService/GetJenjang"
 	ReferensiService_GetTingkatPendidikan_FullMethodName = "/sekolah.ReferensiService/GetTingkatPendidikan"
 	ReferensiService_GetStatusKepemilikan_FullMethodName = "/sekolah.ReferensiService/GetStatusKepemilikan"
-	ReferensiService_GetJurusan_FullMethodName           = "/sekolah.ReferensiService/GetJurusan"
 	ReferensiService_GetKurikulum_FullMethodName         = "/sekolah.ReferensiService/GetKurikulum"
+	ReferensiService_GetBidangKeahlian_FullMethodName    = "/sekolah.ReferensiService/GetBidangKeahlian"
+	ReferensiService_GetProgramKeahlian_FullMethodName   = "/sekolah.ReferensiService/GetProgramKeahlian"
+	ReferensiService_GetJurusan_FullMethodName           = "/sekolah.ReferensiService/GetJurusan"
 	ReferensiService_GetMapel_FullMethodName             = "/sekolah.ReferensiService/GetMapel"
+	ReferensiService_GetMapelKurikulum_FullMethodName    = "/sekolah.ReferensiService/GetMapelKurikulum"
+	ReferensiService_UpdateMapelKurikulum_FullMethodName = "/sekolah.ReferensiService/UpdateMapelKurikulum"
 	ReferensiService_GetGelarAkademik_FullMethodName     = "/sekolah.ReferensiService/GetGelarAkademik"
 )
 
@@ -4282,9 +4482,13 @@ type ReferensiServiceClient interface {
 	GetJenjang(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetJenjangResponse, error)
 	GetTingkatPendidikan(ctx context.Context, in *GetTingkatPendidikanRequest, opts ...grpc.CallOption) (*GetTingkatPendidikanResponse, error)
 	GetStatusKepemilikan(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetStatusKepemilikanResponse, error)
-	GetJurusan(ctx context.Context, in *GetJurusanRequest, opts ...grpc.CallOption) (*GetJurusanResponse, error)
 	GetKurikulum(ctx context.Context, in *GetKurikulumRequest, opts ...grpc.CallOption) (*GetKurikulumResponse, error)
+	GetBidangKeahlian(ctx context.Context, in *GetBidangKeahlianRequest, opts ...grpc.CallOption) (*GetBidangKeahlianResponse, error)
+	GetProgramKeahlian(ctx context.Context, in *GetProgramKeahlianRequest, opts ...grpc.CallOption) (*GetProgramKeahlianResponse, error)
+	GetJurusan(ctx context.Context, in *GetJurusanRequest, opts ...grpc.CallOption) (*GetJurusanResponse, error)
 	GetMapel(ctx context.Context, in *GetMapelRequest, opts ...grpc.CallOption) (*GetMapelResponse, error)
+	GetMapelKurikulum(ctx context.Context, in *GetMapelKurikulumRequest, opts ...grpc.CallOption) (*GetMapelKurikulumResponse, error)
+	UpdateMapelKurikulum(ctx context.Context, in *UpdateMapelKurikulumRequest, opts ...grpc.CallOption) (*UpdateMapelKurikulumResponse, error)
 	GetGelarAkademik(ctx context.Context, in *GetGelarAkademikRequest, opts ...grpc.CallOption) (*GetGelarAkademikResponse, error)
 }
 
@@ -4336,16 +4540,6 @@ func (c *referensiServiceClient) GetStatusKepemilikan(ctx context.Context, in *E
 	return out, nil
 }
 
-func (c *referensiServiceClient) GetJurusan(ctx context.Context, in *GetJurusanRequest, opts ...grpc.CallOption) (*GetJurusanResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetJurusanResponse)
-	err := c.cc.Invoke(ctx, ReferensiService_GetJurusan_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *referensiServiceClient) GetKurikulum(ctx context.Context, in *GetKurikulumRequest, opts ...grpc.CallOption) (*GetKurikulumResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetKurikulumResponse)
@@ -4356,10 +4550,60 @@ func (c *referensiServiceClient) GetKurikulum(ctx context.Context, in *GetKuriku
 	return out, nil
 }
 
+func (c *referensiServiceClient) GetBidangKeahlian(ctx context.Context, in *GetBidangKeahlianRequest, opts ...grpc.CallOption) (*GetBidangKeahlianResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetBidangKeahlianResponse)
+	err := c.cc.Invoke(ctx, ReferensiService_GetBidangKeahlian_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *referensiServiceClient) GetProgramKeahlian(ctx context.Context, in *GetProgramKeahlianRequest, opts ...grpc.CallOption) (*GetProgramKeahlianResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetProgramKeahlianResponse)
+	err := c.cc.Invoke(ctx, ReferensiService_GetProgramKeahlian_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *referensiServiceClient) GetJurusan(ctx context.Context, in *GetJurusanRequest, opts ...grpc.CallOption) (*GetJurusanResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetJurusanResponse)
+	err := c.cc.Invoke(ctx, ReferensiService_GetJurusan_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *referensiServiceClient) GetMapel(ctx context.Context, in *GetMapelRequest, opts ...grpc.CallOption) (*GetMapelResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetMapelResponse)
 	err := c.cc.Invoke(ctx, ReferensiService_GetMapel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *referensiServiceClient) GetMapelKurikulum(ctx context.Context, in *GetMapelKurikulumRequest, opts ...grpc.CallOption) (*GetMapelKurikulumResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetMapelKurikulumResponse)
+	err := c.cc.Invoke(ctx, ReferensiService_GetMapelKurikulum_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *referensiServiceClient) UpdateMapelKurikulum(ctx context.Context, in *UpdateMapelKurikulumRequest, opts ...grpc.CallOption) (*UpdateMapelKurikulumResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateMapelKurikulumResponse)
+	err := c.cc.Invoke(ctx, ReferensiService_UpdateMapelKurikulum_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -4388,9 +4632,13 @@ type ReferensiServiceServer interface {
 	GetJenjang(context.Context, *Empty) (*GetJenjangResponse, error)
 	GetTingkatPendidikan(context.Context, *GetTingkatPendidikanRequest) (*GetTingkatPendidikanResponse, error)
 	GetStatusKepemilikan(context.Context, *Empty) (*GetStatusKepemilikanResponse, error)
-	GetJurusan(context.Context, *GetJurusanRequest) (*GetJurusanResponse, error)
 	GetKurikulum(context.Context, *GetKurikulumRequest) (*GetKurikulumResponse, error)
+	GetBidangKeahlian(context.Context, *GetBidangKeahlianRequest) (*GetBidangKeahlianResponse, error)
+	GetProgramKeahlian(context.Context, *GetProgramKeahlianRequest) (*GetProgramKeahlianResponse, error)
+	GetJurusan(context.Context, *GetJurusanRequest) (*GetJurusanResponse, error)
 	GetMapel(context.Context, *GetMapelRequest) (*GetMapelResponse, error)
+	GetMapelKurikulum(context.Context, *GetMapelKurikulumRequest) (*GetMapelKurikulumResponse, error)
+	UpdateMapelKurikulum(context.Context, *UpdateMapelKurikulumRequest) (*UpdateMapelKurikulumResponse, error)
 	GetGelarAkademik(context.Context, *GetGelarAkademikRequest) (*GetGelarAkademikResponse, error)
 	mustEmbedUnimplementedReferensiServiceServer()
 }
@@ -4414,14 +4662,26 @@ func (UnimplementedReferensiServiceServer) GetTingkatPendidikan(context.Context,
 func (UnimplementedReferensiServiceServer) GetStatusKepemilikan(context.Context, *Empty) (*GetStatusKepemilikanResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetStatusKepemilikan not implemented")
 }
-func (UnimplementedReferensiServiceServer) GetJurusan(context.Context, *GetJurusanRequest) (*GetJurusanResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetJurusan not implemented")
-}
 func (UnimplementedReferensiServiceServer) GetKurikulum(context.Context, *GetKurikulumRequest) (*GetKurikulumResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetKurikulum not implemented")
 }
+func (UnimplementedReferensiServiceServer) GetBidangKeahlian(context.Context, *GetBidangKeahlianRequest) (*GetBidangKeahlianResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBidangKeahlian not implemented")
+}
+func (UnimplementedReferensiServiceServer) GetProgramKeahlian(context.Context, *GetProgramKeahlianRequest) (*GetProgramKeahlianResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProgramKeahlian not implemented")
+}
+func (UnimplementedReferensiServiceServer) GetJurusan(context.Context, *GetJurusanRequest) (*GetJurusanResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetJurusan not implemented")
+}
 func (UnimplementedReferensiServiceServer) GetMapel(context.Context, *GetMapelRequest) (*GetMapelResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMapel not implemented")
+}
+func (UnimplementedReferensiServiceServer) GetMapelKurikulum(context.Context, *GetMapelKurikulumRequest) (*GetMapelKurikulumResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetMapelKurikulum not implemented")
+}
+func (UnimplementedReferensiServiceServer) UpdateMapelKurikulum(context.Context, *UpdateMapelKurikulumRequest) (*UpdateMapelKurikulumResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateMapelKurikulum not implemented")
 }
 func (UnimplementedReferensiServiceServer) GetGelarAkademik(context.Context, *GetGelarAkademikRequest) (*GetGelarAkademikResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetGelarAkademik not implemented")
@@ -4519,24 +4779,6 @@ func _ReferensiService_GetStatusKepemilikan_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ReferensiService_GetJurusan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetJurusanRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ReferensiServiceServer).GetJurusan(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: ReferensiService_GetJurusan_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReferensiServiceServer).GetJurusan(ctx, req.(*GetJurusanRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _ReferensiService_GetKurikulum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetKurikulumRequest)
 	if err := dec(in); err != nil {
@@ -4555,6 +4797,60 @@ func _ReferensiService_GetKurikulum_Handler(srv interface{}, ctx context.Context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ReferensiService_GetBidangKeahlian_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBidangKeahlianRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReferensiServiceServer).GetBidangKeahlian(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ReferensiService_GetBidangKeahlian_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReferensiServiceServer).GetBidangKeahlian(ctx, req.(*GetBidangKeahlianRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ReferensiService_GetProgramKeahlian_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProgramKeahlianRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReferensiServiceServer).GetProgramKeahlian(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ReferensiService_GetProgramKeahlian_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReferensiServiceServer).GetProgramKeahlian(ctx, req.(*GetProgramKeahlianRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ReferensiService_GetJurusan_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetJurusanRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReferensiServiceServer).GetJurusan(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ReferensiService_GetJurusan_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReferensiServiceServer).GetJurusan(ctx, req.(*GetJurusanRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ReferensiService_GetMapel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetMapelRequest)
 	if err := dec(in); err != nil {
@@ -4569,6 +4865,42 @@ func _ReferensiService_GetMapel_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ReferensiServiceServer).GetMapel(ctx, req.(*GetMapelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ReferensiService_GetMapelKurikulum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetMapelKurikulumRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReferensiServiceServer).GetMapelKurikulum(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ReferensiService_GetMapelKurikulum_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReferensiServiceServer).GetMapelKurikulum(ctx, req.(*GetMapelKurikulumRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ReferensiService_UpdateMapelKurikulum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateMapelKurikulumRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReferensiServiceServer).UpdateMapelKurikulum(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ReferensiService_UpdateMapelKurikulum_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReferensiServiceServer).UpdateMapelKurikulum(ctx, req.(*UpdateMapelKurikulumRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -4615,16 +4947,32 @@ var ReferensiService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _ReferensiService_GetStatusKepemilikan_Handler,
 		},
 		{
-			MethodName: "GetJurusan",
-			Handler:    _ReferensiService_GetJurusan_Handler,
-		},
-		{
 			MethodName: "GetKurikulum",
 			Handler:    _ReferensiService_GetKurikulum_Handler,
 		},
 		{
+			MethodName: "GetBidangKeahlian",
+			Handler:    _ReferensiService_GetBidangKeahlian_Handler,
+		},
+		{
+			MethodName: "GetProgramKeahlian",
+			Handler:    _ReferensiService_GetProgramKeahlian_Handler,
+		},
+		{
+			MethodName: "GetJurusan",
+			Handler:    _ReferensiService_GetJurusan_Handler,
+		},
+		{
 			MethodName: "GetMapel",
 			Handler:    _ReferensiService_GetMapel_Handler,
+		},
+		{
+			MethodName: "GetMapelKurikulum",
+			Handler:    _ReferensiService_GetMapelKurikulum_Handler,
+		},
+		{
+			MethodName: "UpdateMapelKurikulum",
+			Handler:    _ReferensiService_UpdateMapelKurikulum_Handler,
 		},
 		{
 			MethodName: "GetGelarAkademik",

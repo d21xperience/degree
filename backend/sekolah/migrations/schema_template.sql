@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_sekolah (
 	jenjang_pendidikan_id NUMERIC(2,0) NULL DEFAULT NULL,
 	is_dapodik BOOLEAN NULL DEFAULT FALSE,
 	sekolah_id_dapo UUID NULL DEFAULT NULL,
+	lama_pendidikan SMALLINT NULL DEFAULT NULL,
 	PRIMARY KEY (sekolah_id)
 );
 
@@ -260,54 +261,61 @@ CREATE TABLE  IF NOT EXISTS {{schema_name}}.tabel_kategori_sekolah (
 	kurikulum_id SMALLINT NULL DEFAULT NULL,
 	jurusan_id VARCHAR(25) NULL DEFAULT NULL,
 	nama_kurikulum VARCHAR NULL DEFAULT NULL,
+	nama_bidang_keahlian VARCHAR NULL DEFAULT NULL,
+	nama_program_keahlian VARCHAR NULL DEFAULT NULL,
 	nama_jurusan VARCHAR NULL DEFAULT NULL,
+	jenjang_pendidikan_id NUMERIC(2,0) NULL DEFAULT NULL,
+	tingkat_id INTEGER NULL DEFAULT NULL,
+	jumlah INTEGER NULL DEFAULT NULL,
 	tahun_ajaran_id NUMERIC(4,0) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS {{schema_name}}.kategori_sekolah_log (
-    log_id SERIAL PRIMARY KEY,
-    action_type TEXT,
-    kategori_sekolah_id INT,
-    nama_kurikulum TEXT,
-    nama_jurusan TEXT,
-    jurusan_id VARCHAR(25),
-    kurikulum_id SMALLINT,
-    tahun_ajaran_id NUMERIC(4,0),
-    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_kategori_mapel (
+	id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	kategori_sekolah_id INTEGER NOT NULL,
+	mata_pelajaran_id INTEGER NOT NULL,
+	kurikulum_id SMALLINT NULL DEFAULT NULL, 
+	jurusan_id VARCHAR(25) NULL DEFAULT NULL,
+	nm_mapel VARCHAR(100) NULL DEFAULT NULL,
+	tingkat_pendidikan VARCHAR(25) NULL DEFAULT NULL,
+	tahun_ajaran_id VARCHAR(4) NULL DEFAULT NULL,
+	deleted_at TIMESTAMPTZ NULL DEFAULT NULL,
+	CONSTRAINT FK__tabel_kategori_mapel FOREIGN KEY (kategori_sekolah_id) REFERENCES {{schema_name}}.tabel_kategori_sekolah (kategori_sekolah_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
-CREATE OR REPLACE FUNCTION {{schema_name}}.log_kategori_sekolah_changes()
+CREATE OR REPLACE FUNCTION {{schema_name}}.sync_mata_pelajaran_to_tabel_kategori_mapel()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF (TG_OP = 'INSERT') THEN
-        INSERT INTO {{schema_name}}.kategori_sekolah_log(action_type, kategori_sekolah_id, nama_kurikulum, nama_jurusan, jurusan_id, kurikulum_id, tahun_ajaran_id)
-        VALUES ('INSERT', NEW.kategori_sekolah_id, NEW.nama_kurikulum, NEW.nama_jurusan, NEW.jurusan_id, NEW.kurikulum_id, NEW.tahun_ajaran_id);
-        RETURN NEW;
+    INSERT INTO {{schema_name}}.tabel_kategori_mapel (
+		kategori_sekolah_id,
+        mata_pelajaran_id,
+        nm_mapel,
+		tingkat_pendidikan,
+        jurusan_id,
+        kurikulum_id,
+		tahun_ajaran_id
+    )
+    SELECT 
+		NEW.kategori_sekolah_id,
+        mpk.mata_pelajaran_id,
+        mp.nama,
+		tp.tingkat_pendidikan_id,
+        NEW.jurusan_id,
+        mpk.kurikulum_id,
+		NEW.tahun_ajaran_id
+    FROM ref.mata_pelajaran_kurikulum mpk
+    JOIN ref.mata_pelajaran mp
+    ON mp.mata_pelajaran_id = mpk.mata_pelajaran_id
+	JOIN ref.tingkat_pendidikan tp
+	ON tp.jenjang_pendidikan_id = NEW.jenjang_pendidikan_id
+    WHERE mpk.kurikulum_id = NEW.kurikulum_id;
 
-    ELSIF (TG_OP = 'UPDATE') THEN
-        INSERT INTO {{schema_name}}.kategori_sekolah_log(action_type, kategori_sekolah_id, nama_kurikulum, nama_jurusan, jurusan_id, kurikulum_id, tahun_ajaran_id)
-        VALUES ('UPDATE', NEW.kategori_sekolah_id, NEW.nama_kurikulum, NEW.nama_jurusan, NEW.jurusan_id, NEW.kurikulum_id, NEW.tahun_ajaran_id);
-        RETURN NEW;
-
-    ELSIF (TG_OP = 'DELETE') THEN
-        INSERT INTO {{schema_name}}.kategori_sekolah_log(action_type, kategori_sekolah_id, nama_kurikulum, nama_jurusan, jurusan_id, kurikulum_id, tahun_ajaran_id)
-        VALUES ('DELETE', OLD.kategori_sekolah_id, OLD.nama_kurikulum, OLD.nama_jurusan, OLD.jurusan_id, OLD.kurikulum_id, OLD.tahun_ajaran_id);
-        RETURN OLD;
-    END IF;
-    RETURN NULL;
+    RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trigger_kategori_sekolah_log
-AFTER INSERT OR UPDATE OR DELETE ON {{schema_name}}.tabel_kategori_sekolah
+CREATE OR REPLACE TRIGGER trigger_sync_mata_pelajaran
+AFTER INSERT OR UPDATE OF kurikulum_id ON {{schema_name}}.tabel_kategori_sekolah
 FOR EACH ROW
-EXECUTE FUNCTION {{schema_name}}.log_kategori_sekolah_changes();
-
-CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_kategori_kelas (
-	id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	kategori_sekolah_id INTEGER NOT NULL,
-	tingkat_id INTEGER NULL DEFAULT NULL,
-	jumlah INTEGER NULL DEFAULT NULL,
-	tahun_ajaran_id NUMERIC(4,0),
-	CONSTRAINT FK__tabel_kategori_sekolah FOREIGN KEY (kategori_sekolah_id) REFERENCES {{schema_name}}.tabel_kategori_sekolah (kategori_sekolah_id) ON UPDATE CASCADE ON DELETE CASCADE
-);
+WHEN (NEW.kurikulum_id IS NOT NULL AND NEW.jenjang_pendidikan_id IS NOT NULL AND NEW.tahun_ajaran_id IS NOT NULL AND NEW.kategori_sekolah_id IS NOT NULL)
+EXECUTE FUNCTION {{schema_name}}.sync_mata_pelajaran_to_tabel_kategori_mapel();

@@ -648,11 +648,12 @@ const actions = {
             return null;
         }
     },
-    async fetchKurikulum({ commit }, jenjangPendidikanId) {
+    async fetchKurikulum({ commit }, payload) {
         try {
             const response = await api.get(`/ss/ref/kurikulum`, {
                 params: {
-                    jenjang_pendidikan_id: jenjangPendidikanId
+                    jenjang_pendidikan_id: payload.jenjangPendidikanId,
+                    jenjang_pendidikan_str: payload.jenjangPendidikanStr
                 }
             });
             if (response.data.status) {
@@ -663,17 +664,50 @@ const actions = {
             throw error;
         }
     },
+    // ==============================
+    // Bidang Keahlian
+
+    async fetchBidangKeahlian({ commit }, payload) {
+        try {
+            const response = await api.get(`/ss/ref/bidang-keahlian`, {
+                params: {
+                    jurusan_induk: payload.jurusanInduk
+                }
+            });
+            if (response.data.status) {
+                // commit('SET_TABELKURIKULUM', response.data.kurikulum);
+                return response.data;
+            }
+        } catch (error) {
+            throw error;
+        }
+    },
+    // ==============================
+    // Program Keahlian
+
+    async fetchProgramKeahlian({ commit }, payload) {
+        try {
+            const response = await api.get(`/ss/ref/program-keahlian`, {
+                params: {
+                    jurusan_induk: payload.jurusanInduk
+                }
+            });
+            if (response.data.status) {
+                return response.data;
+            }
+        } catch (error) {
+            throw error;
+        }
+    },
     async fetchJurusan({ commit }, payload) {
         try {
             const response = await api.get(`/ss/ref/jurusan`, {
                 params: {
-                    jenjang_pendidikan_id: payload.jenjang_pendidikan_id,
-                    param: payload.param
+                    jurusan_induk: payload.jurusanInduk
                 }
             });
             if (response.status) {
-                commit('SET_TABELJURUSAN', response.data.jurusan);
-                return response.data.jurusan;
+                return response.data;
             }
         } catch (error) {
             throw error;
@@ -682,6 +716,22 @@ const actions = {
     async fetchMapel({ commit }, payload) {
         try {
             const response = await api.get(`/ss/ref/mapel`, {
+                params: {
+                    mapel_id: payload.mapel_id
+                }
+            });
+            console.log('response.data.mapel');
+            commit('SET_TABELMAPEL', response.data.mapel);
+            return response.data.mapel;
+        } catch (error) {
+            // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
+            console.error('Gagal memuat mata pelajaran:', error);
+            return null;
+        }
+    },
+    async fetchMapelKurikulum({ commit }, payload) {
+        try {
+            const response = await api.get(`/ss/ref/mapel-kurikulum`, {
                 params: {
                     mapel_id: payload.mapel_id
                 }
@@ -741,7 +791,6 @@ const actions = {
     },
     async editKelas({ commit }, payload) {
         try {
-            console.log('Payload di edit kelas:', payload);
             const response = await api.put(`/ss/${payload.schemaname}/kelas`, payload);
             // console.log(response.data);
             // commit("SET_TABELSEMESTER", response.data.semester);
@@ -828,11 +877,12 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
+            console.log(error)
             throw error;
         }
     },
     async createKategoriSekolah({ commit }, payload) {
-        console.log(payload)
+        console.log(payload);
         try {
             const response = await api.post(`/ss/${payload.schemaname}/kategori-sekolah/create`, payload);
             if (response.status) {
@@ -872,6 +922,21 @@ const actions = {
             throw error;
         }
     },
+    async deleteKategoriSekolahKurikulum({ commit }, payload) {
+        try {
+            const response = await api.delete(`/ss/${payload.schemaname}/kategori-sekolah/delete`, {
+                params: {
+                    kurikulum_id: payload.kurikulum_id
+                }
+            });
+            if (response) {
+                // commit('SET_DASHBOARD', response.data);
+                return response.data;
+            }
+        } catch (error) {
+            throw error;
+        }
+    },
 
     async createProsesKelas({ commit }, payload) {
         try {
@@ -886,6 +951,58 @@ const actions = {
         }
     },
 
+    async fetchKategoriMapel({ commit }, payload) {
+        try {
+            const response = await api.get(`/ss/${payload.schemaname}/kategori-sekolah/mapel`, {
+                params: {
+                    tahun_ajaran_id: `${payload.tahunAjaranId}`,
+                    tingkat_pendidikan: payload.tingkatPendidikan,
+                    kurikulum_id: payload.kurikulumId
+                }
+            });
+            if (response) {
+                // commit('SET_DASHBOARD', response.data);
+                return response.data;
+            }
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    },
+
+    async deleteKategoriMapel({ commit }, payload) {
+        try {
+            const response = await api.delete(`/ss/${payload.schemaname}/kategori-sekolah/mapel/delete`, {
+                params: {
+                    id: payload.id
+                }
+            });
+            if (response) {
+                // commit('SET_DASHBOARD', response.data);
+                return response.data;
+            }
+        } catch (error) {
+            throw error;
+        }
+    },
+    async deleteBatchKategoriMapel({ commit }, payload) {
+        try {
+            console.log('sekolahService =>', payload);
+            // return;
+            const response = await api.delete(`/ss/${payload.schemaname}/kategori-sekolah/mapel/batch-delete`, {
+                params: {
+                    id: payload.id
+                }
+            });
+            if (response) {
+                // commit('SET_DASHBOARD', response.data);
+                return response.data;
+            }
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    },
     // =======================
     // ANGGOTA KELAS
     // =======================

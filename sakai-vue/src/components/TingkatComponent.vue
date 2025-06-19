@@ -1,5 +1,5 @@
 <template>
-    <Select v-model="internalValue" :options="tingkatPendidikanOptions" optionLabel="nama" optionValue="kode" placeholder="Pilih tingkat..." fluid showClear checkmark />
+    <Select v-model="internalValue" :options="tingkatPendidikanOptions" optionLabel="nama" optionValue="kode" placeholder="Pilih tingkat..." fluid checkmark />
 </template>
 
 <script setup>
@@ -15,8 +15,14 @@ const internalValue = ref(props.modelValue);
 watch(
     () => props.modelValue,
     (newVal) => {
-        internalValue.value = newVal;
-    }
+        // console.log(newVal);
+        if (!newVal) {
+            internalValue.value = tingkatPendidikanOptions.value[0]?.kode;
+        } else {
+            internalValue.value = newVal?.kode;
+        }
+    },
+    { immediate: true }
 );
 
 watch(internalValue, (newVal) => {
@@ -25,5 +31,6 @@ watch(internalValue, (newVal) => {
 
 onMounted(async () => {
     tingkatPendidikanOptions.value = await fetchTingkat();
+    // internalValue.value = tingkatPendidikanOptions.value[0]?.kode;
 });
 </script>

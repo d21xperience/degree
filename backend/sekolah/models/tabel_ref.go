@@ -147,7 +147,7 @@ func (MataPelajaran) TableName() string {
 }
 
 type MataPelajaranKurikulum struct {
-	Kurikulum_Id        int32 `gorm:"column:kurikulum_id;primaryKey"`
+	KurikulumId         int32 `gorm:"column:kurikulum_id;primaryKey"`
 	MataPelajaranId     int32 `gorm:"column:mata_pelajaran_id;primaryKey"`
 	TingkatPendidikanId int32 `gorm:"column:tingkat_pendidikan_id;primaryKey"`
 	JumlahJam           int32 `gorm:"column:jumlah_jam"`
@@ -156,6 +156,8 @@ type MataPelajaranKurikulum struct {
 	Wajib               int32 `gorm:"column:wajib"`
 	Sks                 int32 `gorm:"column:sks"`
 	APeminatan          int32 `gorm:"column:a_peminatan"`
+
+	MataPelajaran MataPelajaran `gorm:"foreignKey:MataPelajaranId;references:MataPelajaranID"`
 	// AreaKompetensi      string    `gorm:"column:area_kompetensi"`
 	// GmpId               *uuid.UUID `gorm:"column:gmp_id"`
 }

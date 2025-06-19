@@ -9,6 +9,7 @@ import (
 	"sekolah/models"
 	"sekolah/repositories"
 	"sekolah/utils"
+	"time"
 )
 
 type PembelajaranServiceServer struct {
@@ -107,49 +108,51 @@ func (s *PembelajaranServiceServer) GetPembelajaran(ctx context.Context, req *pb
 	}
 	schemaName := req.GetSchemaname()
 	semesterId := req.GetSemesterId()
-	var pembelajaranId string
-	if req.GetPembelajaranId() != "" {
-		pembelajaranId = req.GetPembelajaranId()
+	var rombelId string
+	if req.GetRombonganBelajarId() != "" {
+		rombelId = req.GetRombonganBelajarId()
 	}
 	var conditions = map[string]any{
 		"tabel_pembelajaran.semester_id": semesterId,
 	}
-	if pembelajaranId != "" {
-		conditions["tabel_pembelajaran.pembelajar_id"] = pembelajaranId
+	if rombelId != "" {
+		conditions["tabel_pembelajaran.rombongan_belajar_id"] = rombelId
 	}
-	joins := []string{
-		"JOIN tabel_kelas ON tabel_kelas.rombongan_belajar_id = tabel_pembelajaran.rombongan_belajar_id",
-		"JOIN tabel_ptk_terdaftar ON tabel_pembelajaran.ptk_terdaftar_id = tabel_ptk_terdaftar.ptk_terdaftar_id",
-		// "JOIN tabel_ptk ON tabel_ptk_terdaftar.ptk_id = tabel_ptk.ptk_id",
-		// "JOIN ref.mata_pelajaran ON ref.mata_pelajaran.mata_pelajaran_id = tabel_pembelajaran.mata_pelajaran_id",
-	}
-	preloads := []string{"PTKTerdaftar", "PTKTerdaftar.PTK"}
-
-	orderBy := []string{} // Hindari duplikasi
-	pembelajaranModel, err := s.repo.FindWithPreloadAndJoinsOrigin(ctx, schemaName, joins, preloads, conditions, orderBy)
+	// joins := []string{
+	// 	"JOIN tabel_kelas ON tabel_kelas.rombongan_belajar_id = tabel_pembelajaran.rombongan_belajar_id",
+	// 	"JOIN tabel_ptk_terdaftar ON tabel_pembelajaran.ptk_terdaftar_id = tabel_ptk_terdaftar.ptk_terdaftar_id",
+	// 	// "JOIN tabel_ptk ON tabel_ptk_terdaftar.ptk_id = tabel_ptk.ptk_id",
+	// 	// "JOIN ref.mata_pelajaran ON ref.mata_pelajaran.mata_pelajaran_id = tabel_pembelajaran.mata_pelajaran_id",
+	// }
+	// preloads := []string{"PTKTerdaftar", "PTKTerdaftar.PTK"}
+	// orderBy := []string{} // Hindari duplikasi
+	cts, cancel := context.WithTimeout(ctx, 10*time.Second)
+	defer cancel()
+	pembelajaranModel, err := s.repo.FindAll(cts, schemaName, 100, 0)
 	if err != nil {
 		return nil, err
 	}
-	banyakPembelajaranList := utils.ConvertModelsToPB(pembelajaranModel, func(item models.Pembelajaran) *pb.Pembelajaran {
+	banyakPembelajaranList := utils.ConvertModelsToPB(utils.PointerToSlice(pembelajaranModel), func(item models.Pembelajaran) *pb.Pembelajaran {
 		return &pb.Pembelajaran{
 			RombonganBelajarId: item.RombonganBelajarId.String(),
+			PembelajaranId:     item.PembelajaranId.String(),
 			MataPelajaranId:    int32(item.MataPelajaranId),
 			NamaMataPelajaran:  utils.SafeString(item.NamaMataPelajaran),
 			SemesterId:         item.SemesterId,
-			PtkTerdaftarId:     item.PtkTerdaftarId.String(),
-			PembelajaranId:     item.PembelajaranId.String(),
-			PtkTerdaftar: &pb.PTKTerdaftar{
-				PtkId: item.PTKTerdaftar.PtkID.String(),
-				Ptk: &pb.PTK{
-					Nama:              item.PTKTerdaftar.PTK.Nama,
-					PtkId:             item.PTKTerdaftar.PtkID.String(),
-					JenisPtkId:        item.PTKTerdaftar.PTK.JenisPtkID,
-					JenisKelamin:      utils.SafeString(item.PTKTerdaftar.PTK.JenisKelamin),
-					TempatLahir:       utils.SafeString(item.PTKTerdaftar.PTK.TempatLahir),
-					StatusKeaktifanId: item.PTKTerdaftar.PTK.StatusKeaktifanID,
-					TanggalLahir:      item.PTKTerdaftar.PTK.TanggalLahir.Format("2006-01-02"),
-				},
-			},
+
+			// PtkTerdaftarId:     utils.SafeString(utils.PointerStringToUUID(item.PtkTerdaftarId)),
+			// PtkTerdaftar: &pb.PTKTerdaftar{
+			// 	PtkId: item.PTKTerdaftar.PtkID.String(),
+			// 	Ptk: &pb.PTK{
+			// 		Nama:              item.PTKTerdaftar.PTK.Nama,
+			// 		PtkId:             item.PTKTerdaftar.PtkID.String(),
+			// 		JenisPtkId:        item.PTKTerdaftar.PTK.JenisPtkID,
+			// 		JenisKelamin:      utils.SafeString(item.PTKTerdaftar.PTK.JenisKelamin),
+			// 		TempatLahir:       utils.SafeString(item.PTKTerdaftar.PTK.TempatLahir),
+			// 		StatusKeaktifanId: item.PTKTerdaftar.PTK.StatusKeaktifanID,
+			// 		TanggalLahir:      item.PTKTerdaftar.PTK.TanggalLahir.Format("2006-01-02"),
+			// 	},
+			// },
 			// RombonganBelajar: &pb.Kelas{
 			// 	RombonganBelajarId:  item.RombonganBelajarId.String(),
 			// 	NmKelas:             item.RombonganBelajar.NmKelas,
@@ -165,6 +168,8 @@ func (s *PembelajaranServiceServer) GetPembelajaran(ctx context.Context, req *pb
 	})
 	return &pb.GetPembelajaranResponse{
 		Pembelajaran: banyakPembelajaranList,
+		Status:       true,
+		Message:      "Sukes mengambil data pembelajaran",
 	}, nil
 }
 

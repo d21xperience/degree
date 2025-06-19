@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func main() {
+func main1() {
 	// Load configuration from .env
 	cfg := config.LoadConfig()
 
