@@ -877,7 +877,7 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
-            console.log(error)
+            console.log(error);
             throw error;
         }
     },
@@ -940,6 +940,8 @@ const actions = {
 
     async createProsesKelas({ commit }, payload) {
         try {
+            console.log(payload);
+            // return
             const response = await api.post(`/ss/${payload.schemaname}/kategori-sekolah-kelas/proses`, payload);
             if (response.status) {
                 // commit('SET_DASHBOARD', response.data);

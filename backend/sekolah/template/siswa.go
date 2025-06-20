@@ -9,7 +9,6 @@ import (
 func GetSiswaColumns() []TemplateColumn {
 	return []TemplateColumn{
 		{Name: "Tingkat Pendidikan", Example: "10", ColumnWidth: 11},
-		{Name: "Nama Kelas", Example: "X TKJ A (lihat tabel pengisian)", ColumnWidth: 11},
 		{Name: "NIS", Example: "123456"},
 		{Name: "NISN", Example: "99887766"},
 		{Name: "Nama", Example: "Ahmad"},
@@ -24,7 +23,6 @@ func GetSiswaColumns() []TemplateColumn {
 			PromptTitle:      utils.StringToPointer("Input Jk"),
 			ShowInputMessage: true,
 			Prompt:           utils.StringToPointer("Isi L atau P"),
-			
 		}},
 		{Name: "Tempat Lahir", Example: "Jakarta"},
 		{Name: "Tanggal Lahir", Example: "09/12/2016", FormatStyle: &excelize.Style{
@@ -61,5 +59,7 @@ func GetSiswaColumns() []TemplateColumn {
 		{Name: "Telepon Ortu", Example: "0811223344"},
 		{Name: "Alamat Wali", Example: "Jl. Gajah Mada"},
 		{Name: "Telepon Wali", Example: "0813556677"},
+		{Name: "Nama Kelas", Example: "X TKJ A (lihat tabel pengisian)", ColumnWidth: 11},
+		{Name: "Rombel Id", Example: "5ab5ffc8-b0ef-408c-a803-19bf3826920a", ColumnWidth: 11},
 	}
 }

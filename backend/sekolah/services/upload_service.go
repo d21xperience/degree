@@ -362,17 +362,17 @@ func (s *UploadServiceServer) processUploadSiswa(
 		}
 
 		var tglLahir, tglDiterima *time.Time
-		if len(row[4]) != 0 {
-			cek, err := utils.StringToTime(data[i][7], "01-02-06")
+		if len(row[6]) != 0 {
+			cek, err := utils.StringToTime(data[i][6], "02/01/2006")
 			if err != nil {
-				log.Printf("gagal parsing tanggal lahir %s", row[4])
+				log.Printf("gagal parsing tanggal lahir %s", row[6])
 			}
 			tglLahir = utils.TimeToPointer(cek.Format("2006-01-02"))
 		}
-		if len(row[9]) != 0 {
-			cek, err := utils.StringToTime(data[i][11], "01-02-06")
+		if len(row[10]) != 0 {
+			cek, err := utils.StringToTime(data[i][10], "02/01/2006")
 			if err != nil {
-				log.Print("gagal parsing tanggal lahir")
+				log.Printf("gagal parsing tanggal mendaftar %s", row[10])
 				return nil
 			}
 			tglDiterima = utils.TimeToPointer(cek.Format("2006-01-02"))
@@ -381,23 +381,23 @@ func (s *UploadServiceServer) processUploadSiswa(
 		// Simpan ke tabel peserta didik (siswa)
 		err = s.repoSiswa.Save(ctx, &models.PesertaDidik{
 			PesertaDidikId:  pesertaDidikId,
-			Nis:             safeGet(row, 2),
-			Nisn:            safeGet(row, 3),
-			NmSiswa:         row[4],
-			JenisKelamin:    safeGet(row, 5),
-			TempatLahir:     safeGet(row, 6),
+			Nis:             safeGet(row, 1),
+			Nisn:            safeGet(row, 2),
+			NmSiswa:         row[3],
+			JenisKelamin:    safeGet(row, 4),
+			TempatLahir:     safeGet(row, 5),
 			TanggalLahir:    tglLahir,
-			Agama:           safeGet(row, 8),
-			AlamatSiswa:     safeGet(row, 9),
-			TeleponSiswa:    safeGet(row, 10),
+			Agama:           safeGet(row, 7),
+			AlamatSiswa:     safeGet(row, 8),
+			TeleponSiswa:    safeGet(row, 9),
 			DiterimaTanggal: tglDiterima,
-			NmAyah:          safeGet(row, 12),
-			NmIbu:           safeGet(row, 13),
-			PekerjaanAyah:   safeGet(row, 14),
-			PekerjaanIbu:    safeGet(row, 15),
-			NmWali:          safeGet(row, 16),
-			PekerjaanWali:   safeGet(row, 17),
-			Nik:             safeGet(row, 18),
+			NmAyah:          safeGet(row, 11),
+			NmIbu:           safeGet(row, 12),
+			PekerjaanAyah:   safeGet(row, 13),
+			PekerjaanIbu:    safeGet(row, 14),
+			NmWali:          safeGet(row, 15),
+			PekerjaanWali:   safeGet(row, 16),
+			Nik:             safeGet(row, 17),
 		}, param.schemaname)
 
 		if err != nil {
@@ -408,14 +408,14 @@ func (s *UploadServiceServer) processUploadSiswa(
 		err = s.repoSiswaPelengkap.Save(ctx, &models.PesertaDidikPelengkap{
 			PelengkapSiswaId: uuid.New(),
 			PesertaDidikId:   pesertaDidikId,
-			StatusDalamKel:   safeGet(row, 19),
-			AnakKe:           safeGet(row, 20),
-			SekolahAsal:      safeGet(row, 21),
-			DiterimaKelas:    safeGet(row, 22),
-			AlamatOrtu:       safeGet(row, 23),
-			TeleponOrtu:      safeGet(row, 24),
-			AlamatWali:       safeGet(row, 25),
-			TeleponWali:      safeGet(row, 26),
+			StatusDalamKel:   safeGet(row, 18),
+			AnakKe:           safeGet(row, 19),
+			SekolahAsal:      safeGet(row, 20),
+			DiterimaKelas:    safeGet(row, 21),
+			AlamatOrtu:       safeGet(row, 22),
+			TeleponOrtu:      safeGet(row, 23),
+			AlamatWali:       safeGet(row, 24),
+			TeleponWali:      safeGet(row, 25),
 		}, param.schemaname)
 
 		if err != nil {
@@ -424,18 +424,18 @@ func (s *UploadServiceServer) processUploadSiswa(
 
 		// Jika kelas tersedia, simpan ke rombel anggota
 		for j := 1; j <= 2; j++ {
-			rombonganBelajarId := uuid.New()
+			rombonganBelajarId := utils.StringToUUID(row[27]) //uuid.New()
 
 			// Tabel Kelas
-			err = s.repoKelas.Save(ctx, &models.RombonganBelajar{
-				RombonganBelajarId:  rombonganBelajarId,
-				TingkatPendidikanId: int32(utils.ParseInt(row[0])),
-				NmKelas:             row[1],
-				SemesterId:          fmt.Sprintf("%s%d", param.semesterId, j),
-			}, param.schemaname)
-			if err != nil {
-				return err
-			}
+			// err = s.repoKelas.Save(ctx, &models.RombonganBelajar{
+			// 	RombonganBelajarId:  rombonganBelajarId,
+			// 	TingkatPendidikanId: int32(utils.ParseInt(row[0])),
+			// 	NmKelas:             row[26],
+			// 	SemesterId:          fmt.Sprintf("%s%d", param.semesterId, j),
+			// }, param.schemaname)
+			// if err != nil {
+			// 	return err
+			// }
 
 			err = s.repoKelasAnggota.Save(ctx, &models.RombelAnggota{
 				AnggotaRombelId:    uuid.New(),

@@ -134,9 +134,7 @@ const { schemaname, fetchKelas, fetchTingkat, sekolah, addDns } = useSekolahServ
 const kelasList = ref([]);
 const isLoading = ref(false);
 const tingkatPendidikanOptions = ref();
-onMounted(async () => {
-    await fetchK();
-});
+
 const openNew = async () => {
     // console.log(sekolah.value)
     await nextTick();
@@ -169,6 +167,7 @@ watch(selectedSemester, async () => {
 });
 const fetchK = async () => {
     kelasList.value = await fetchKelas();
+    console.log(kelasList.value)
     if (kelasList.value.length > 0) {
         tingkatPendidikanOptions.value = await fetchTingkat();
     }
@@ -287,4 +286,7 @@ const sendToDns = async () => {
     isDialogKelulusan.value = false;
     addDns(anggotaKelas);
 };
+onMounted(async () => {
+    await fetchK();
+});
 </script>

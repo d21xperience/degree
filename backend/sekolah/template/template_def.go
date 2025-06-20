@@ -96,6 +96,37 @@ func GetPetunjukSheet(f *excelize.File, param *DataTemplate, db *gorm.DB) error 
 	}
 }
 
+// func getKelas(f *excelize.File, param *DataTemplate, db *gorm.DB) error {
+// 	repoKelas := repositories.NewrombonganBelajarRepository(db)
+// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+// 	defer cancel()
+// 	conditions := map[string]any{
+// 		"tabel_kelas.semester_id": fmt.Sprintf("%s1", param.TahunAjaranId),
+// 	}
+// 	kelasList, err := repoKelas.FindAllByConditions(ctx, param.Schemaname, conditions, 100, 0, nil)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	infoSheet := "Petunjuk pengisian"
+// 	f.NewSheet(infoSheet)
+
+// 	f.SetCellValue(infoSheet, "A1", "Nama Kelas")
+// 	f.SetCellValue(infoSheet, "B1", "Tingkat")
+// 	// f.SetCellValue(infoSheet, "C1", "Rombel Id")
+
+// 	var cell string
+// 	for i, kelas := range kelasList {
+// 		cell = fmt.Sprintf("A%d", i+2) // Mulai dari A2
+// 		f.SetCellValue(infoSheet, cell, kelas.NmKelas)
+// 		cell = fmt.Sprintf("B%d", i+2) // Mulai dari A2
+// 		f.SetCellValue(infoSheet, cell, kelas.TingkatPendidikanId)
+// 		cell = fmt.Sprintf("G%d", i+2) // Mulai dari A2
+// 		f.SetCellValue(infoSheet, cell, kelas.RombonganBelajarId)
+// 	}
+// 	return nil
+// }
+
+// revisi 1
 func getKelas(f *excelize.File, param *DataTemplate, db *gorm.DB) error {
 	repoKelas := repositories.NewrombonganBelajarRepository(db)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -106,19 +137,27 @@ func getKelas(f *excelize.File, param *DataTemplate, db *gorm.DB) error {
 	kelasList, err := repoKelas.FindAllByConditions(ctx, param.Schemaname, conditions, 100, 0, nil)
 	if err != nil {
 		return err
-	} 
+	}
 	infoSheet := "Petunjuk pengisian"
 	f.NewSheet(infoSheet)
 
+	// Sembunyikan kolom G
+	f.SetColVisible(infoSheet, "C", false)
+
 	f.SetCellValue(infoSheet, "A1", "Nama Kelas")
 	f.SetCellValue(infoSheet, "B1", "Tingkat")
+	f.SetCellValue(infoSheet, "C1", "Rombel Id")
 
 	var cell string
 	for i, kelas := range kelasList {
-		cell = fmt.Sprintf("A%d", i+2) // Mulai dari A2
+		cell = fmt.Sprintf("A%d", i+2)
 		f.SetCellValue(infoSheet, cell, kelas.NmKelas)
-		cell = fmt.Sprintf("B%d", i+2) // Mulai dari A2
+
+		cell = fmt.Sprintf("B%d", i+2)
 		f.SetCellValue(infoSheet, cell, kelas.TingkatPendidikanId)
+
+		cell = fmt.Sprintf("C%d", i+2)
+		f.SetCellValue(infoSheet, cell, kelas.RombonganBelajarId)
 	}
 	return nil
 }

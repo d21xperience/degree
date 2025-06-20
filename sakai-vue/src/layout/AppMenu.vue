@@ -26,17 +26,17 @@ const model = ref([
     //         }
     //     ]
     // },
-    {
-        label: 'Data User',
-        icon: 'pi pi-sign-out',
-        items: [
-            {
-                label: 'Profile',
-                icon: 'pi pi-fw pi-user',
-                to: `/${sekolah.value}/user-profile`
-            }
-        ]
-    },
+    // {
+    //     label: 'Data User',
+    //     icon: 'pi pi-sign-out',
+    //     items: [
+    //         {
+    //             label: 'Profile',
+    //             icon: 'pi pi-fw pi-user',
+    //             to: `/${sekolah.value}/user-profile`
+    //         }
+    //     ]
+    // },
     // {
     //     label: 'UI Components',
     //     items: [

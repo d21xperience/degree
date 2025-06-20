@@ -1,10 +1,10 @@
 <template>
     <div class="flex justify-between items-center mb-2">
-        <label class="text-xl md:text-2xl"
-            >Data <span v-show="namaRoute">{{ `${namaRoute} - ` }}</span> Dapodik</label
-        >
+        <div class="text-2xl font-semibold">
+            Data <span v-show="namaRoute">{{ `${namaRoute} - ` }}</span> Dapodik
+        </div>
         <div class="md:flex md:items-center">
-            <label class="min-w-32">Tahun Pelajaran</label>
+            <div class="min-w-32">Tahun Pelajaran</div>
             <Select v-model="selectedSemester" :options="listSemester" optionLabel="namaSemester" placeholder="Tahun Pelajaran" class="w-full" :disabled="isDisabled" />
         </div>
     </div>

@@ -6,31 +6,27 @@
 import { useSekolahService } from '@/composables/useSekolahService';
 import { onMounted, ref, watch } from 'vue';
 const tingkatPendidikanOptions = ref([]);
-const props = defineProps(['modelValue']); // props dari parent
+const props = defineProps(['modelValue', 'initialValue']); // props dari parent
 const emit = defineEmits(['update:modelValue']); // emit update ke parent
 
-const { fetchTingkat } = useSekolahService();
-const internalValue = ref(props.modelValue);
+const { fetchTingkat } = useSekolahService(); 
+const internalValue = ref();
 
+watch(internalValue, (newVal) => {
+    emit('update:modelValue', newVal);
+}); 
 watch(
-    () => props.modelValue,
-    (newVal) => {
-        // console.log(newVal);
-        if (!newVal) {
-            internalValue.value = tingkatPendidikanOptions.value[0]?.kode;
-        } else {
-            internalValue.value = newVal?.kode;
+    () => props.initialValue,
+    async (newVal) => { 
+        if (newVal) {
+            tingkatPendidikanOptions.value = await fetchTingkat(); 
+            internalValue.value = tingkatPendidikanOptions.value.find(item => item.kode.includes(newVal)).kode 
         }
     },
     { immediate: true }
 );
 
-watch(internalValue, (newVal) => {
-    emit('update:modelValue', newVal);
-});
-
 onMounted(async () => {
-    tingkatPendidikanOptions.value = await fetchTingkat();
-    // internalValue.value = tingkatPendidikanOptions.value[0]?.kode;
+    tingkatPendidikanOptions.value = await fetchTingkat(); 
 });
 </script>

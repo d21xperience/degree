@@ -270,49 +270,60 @@ CREATE TABLE  IF NOT EXISTS {{schema_name}}.tabel_kategori_sekolah (
 	tahun_ajaran_id NUMERIC(4,0) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_kategori_mapel (
-	id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	kategori_sekolah_id INTEGER NOT NULL,
-	mata_pelajaran_id INTEGER NOT NULL,
-	kurikulum_id SMALLINT NULL DEFAULT NULL, 
-	jurusan_id VARCHAR(25) NULL DEFAULT NULL,
-	nm_mapel VARCHAR(100) NULL DEFAULT NULL,
-	tingkat_pendidikan VARCHAR(25) NULL DEFAULT NULL,
-	tahun_ajaran_id VARCHAR(4) NULL DEFAULT NULL,
-	deleted_at TIMESTAMPTZ NULL DEFAULT NULL,
-	CONSTRAINT FK__tabel_kategori_mapel FOREIGN KEY (kategori_sekolah_id) REFERENCES {{schema_name}}.tabel_kategori_sekolah (kategori_sekolah_id) ON UPDATE CASCADE ON DELETE CASCADE
+CREATE TABLE {{schema_name}}.tabel_kategori_mapel (
+	id int4 GENERATED ALWAYS AS IDENTITY( INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START 1 CACHE 1 NO CYCLE) NOT NULL,
+	kategori_sekolah_id int4 NOT NULL,
+	mata_pelajaran_id int4 NOT NULL,
+	kurikulum_id int2 NULL,
+	jurusan_id varchar(25) DEFAULT NULL::character varying NULL,
+	nm_mapel varchar(100) DEFAULT NULL::character varying NULL,
+	tingkat_pendidikan varchar(25) DEFAULT NULL::character varying NULL,
+	tahun_ajaran_id varchar(4) DEFAULT NULL::character varying NULL,
+	deleted_at timestamptz NULL,
+	CONSTRAINT tabel_kategori_mapel_pkey PRIMARY KEY (id),
+	CONSTRAINT unique_mata_pelajaran_id UNIQUE (mata_pelajaran_id, kurikulum_id, jurusan_id, tingkat_pendidikan)
 );
 
 CREATE OR REPLACE FUNCTION {{schema_name}}.sync_mata_pelajaran_to_tabel_kategori_mapel()
 RETURNS TRIGGER AS $$
 BEGIN
     INSERT INTO {{schema_name}}.tabel_kategori_mapel (
-		kategori_sekolah_id,
+        kategori_sekolah_id,
         mata_pelajaran_id,
         nm_mapel,
-		tingkat_pendidikan,
+        tingkat_pendidikan,
         jurusan_id,
         kurikulum_id,
-		tahun_ajaran_id
+        tahun_ajaran_id
     )
     SELECT 
-		NEW.kategori_sekolah_id,
+        NEW.kategori_sekolah_id,
         mpk.mata_pelajaran_id,
         mp.nama,
-		tp.tingkat_pendidikan_id,
+        tp.tingkat_pendidikan_id,
         NEW.jurusan_id,
         mpk.kurikulum_id,
-		NEW.tahun_ajaran_id
+        NEW.tahun_ajaran_id
     FROM ref.mata_pelajaran_kurikulum mpk
     JOIN ref.mata_pelajaran mp
-    ON mp.mata_pelajaran_id = mpk.mata_pelajaran_id
-	JOIN ref.tingkat_pendidikan tp
-	ON tp.jenjang_pendidikan_id = NEW.jenjang_pendidikan_id
-    WHERE mpk.kurikulum_id = NEW.kurikulum_id;
-
+        ON mp.mata_pelajaran_id = mpk.mata_pelajaran_id
+    JOIN ref.tingkat_pendidikan tp
+        ON tp.jenjang_pendidikan_id = NEW.jenjang_pendidikan_id
+    WHERE mpk.kurikulum_id = NEW.kurikulum_id 
+      AND mpk.status_di_kurikulum IN (3,8,9)
+      AND NOT EXISTS (
+          SELECT 1 FROM {{schema_name}}.tabel_kategori_mapel tkm
+          WHERE tkm.kategori_sekolah_id = NEW.kategori_sekolah_id
+            AND tkm.mata_pelajaran_id = mpk.mata_pelajaran_id
+            AND tkm.kurikulum_id = mpk.kurikulum_id
+            AND tkm.tahun_ajaran_id = NEW.tahun_ajaran_id::VARCHAR
+      )
+    ON CONFLICT (mata_pelajaran_id, kurikulum_id, jurusan_id, tingkat_pendidikan)
+    DO NOTHING;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
+
 
 CREATE OR REPLACE TRIGGER trigger_sync_mata_pelajaran
 AFTER INSERT OR UPDATE OF kurikulum_id ON {{schema_name}}.tabel_kategori_sekolah

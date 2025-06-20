@@ -1,362 +1,10 @@
-<script setup>
-import { computed, onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
-const store = useStore();
-// import FileUpload from 'primevue/fileupload';
-import TingkatComponent from '@/components/TingkatComponent.vue';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-
-import Button from 'primevue/button';
-
-import Dialog from 'primevue/dialog';
-
-import { FilterMatchMode } from '@primevue/core/api';
-import InputText from 'primevue/inputtext';
-import Toolbar from 'primevue/toolbar';
-import { useToast } from 'primevue/usetoast';
-// =============UJI FITUR FOTO========================
-// import Image from 'primevue/image';
-// =====================================
-const pembelajaran = ref({});
-const pembelajaranList = ref([]);
-const guruList = ref();
-const rombel = ref();
-
-const fetchGuru = async () => {
-    try {
-        const cekGuru = await store.getters['sekolahService/getPTKTerdaftar'];
-        if (cekGuru == null) {
-            let payload = {
-                tahunAjaranId: selectedSemester.value?.tahunAjaranId,
-                schemaname: schemaname.value
-            };
-            const response = await store.dispatch('sekolahService/fetchPTKTerdaftar', payload);
-            // console.log(response)
-            guruList.value = response;
-        } else {
-            guruList.value = cekGuru;
-        }
-    } catch (error) {
-        console.error(error);
-    }
-};
-
-const fetchMapel = async () => {
-    try {
-        const cekMapel = await store.getters['sekolahService/getMapel'];
-        // console.log(cekMapel)
-        if (cekMapel == null) {
-            const payload = {
-                mapel_id: ''
-            };
-            const response = await store.dispatch('sekolahService/fetchMapel', payload);
-            // console.log(response)
-            mapelList.value = response;
-        } else {
-            mapelList.value = cekMapel;
-        }
-    } catch (error) {
-        console.log(error);
-    }
-};
-
-// ==============================
-const kelasList = ref([]);
-onMounted(async () => {
-    // await fetchK();
-    initFirst();
-});
-const fetchK = async () => {
-    try {
-        const res = store.getters['sekolahService/getKelas'](selectedSemester.value?.semesterId);
-        if (!res || res.length === 0) {
-            // console.log("fetch to backend!")
-            kelasList.value = await fetchKelas();
-        } else {
-            kelasList.value = res;
-        }
-    } catch (error) {
-        console.log(error);
-    }
-};
-// ================================
-// composable
-// ================================
-import { useSekolahService } from '@/composables/useSekolahService';
-const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
-const schemaname = computed(() => store.getters['sekolahService/getTabeltenant']?.schemaname);
-const { fetchKelas, fetchKategoriSekolah, initSelectedSemester, fetchKategoriMapel, deleteKategoriMapel, deleteBatchKategoriMapel } = useSekolahService();
-// ================================
-// watch(selectedSemester, async (newVal, oldVal) => {
-//     // console.log(newVal)
-//     kelasList.value = await fetchKelas();
-// });
-// import DialogLoading from "@/components/DialogLoading.vue";
-
-const kategoriSekolahList = ref([]);
-const kategoriMapelList = ref([]);
-const selectedKategoriSekolah = ref();
-const selectedTingkat = ref([]);
-const initKategoriMapel = async () => {
-    const payload = {
-        kurikulumId: selectedKategoriSekolah.value?.kurikulumId,
-        tingkatPendidikan: selectedTingkat.value
-    };
-    if (payload.kurikulumId && payload.tingkatPendidikan) {
-        // alert("Data error")
-        kategoriMapelList.value = await fetchKategoriMapel(payload);
-    }
-};
-
-const initFirst = async () => {
-    kategoriSekolahList.value = await fetchKategoriSekolah();
-    selectedKategoriSekolah.value = kategoriSekolahList.value[0];
-    await initKategoriMapel();
-};
-
-watch(initSelectedSemester, () => {
-    // console.log(newVal);
-    initFirst();
-    //    return initSelectedSemester.value?.tahunAjaranId;
-});
-
-watch(selectedKategoriSekolah, () => {
-    initKategoriMapel();
-});
-const isLoading = ref(false);
-watch(selectedTingkat, () => {
-    initKategoriMapel();
-});
-// const dataConnected = ref(true);
-const toast = useToast();
-const dt = ref(null);
-// const products = ref();
-const mapelDialog = ref(false);
-const mapelList = ref([]);
-const deletemapelDialog = ref(false);
-const deleteMapelsDialog = ref(false);
-const product = ref({});
-const dataLulusan = ref();
-const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    tingkatPendidikanId: { value: null, matchMode: FilterMatchMode.EQUALS }
-});
-const submitted = ref(false);
-const addMapelDialog = ref(false);
-const openNewMapel = async () => {
-    addMapelDialog.value = true;
-    fetchMapel();
-    fetchGuru();
-};
-const hideDialog = () => {
-    mapelDialog.value = false;
-    // selectedMapel.value =
-    submitted.value = false;
-};
-const tambahPembelajaran = () => {
-    console.log('submitted', submitted.value);
-    // console.log("selecteGuru",!selectedGuru.value)
-    // console.log(submitted.value && !selectedGuru.value)
-    submitted.value = true;
-    if (selectedMapel?.value.nama?.trim()) {
-        if (pembelajaran.value.pembelajaran_id) {
-            pembelajaran.value.inventoryStatus = pembelajaran.value.inventoryStatus.value ? pembelajaran.value.inventoryStatus.value : pembelajaran.value.inventoryStatus;
-            // products.value[findIndexById(product.value.id)] = product.value;
-            toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
-        } else {
-            pembelajaran.value.pembelajaran_id = generateUUID();
-            pembelajaran.value.ptk_terdaftar_id = selectedGuru.value?.ptkTerdaftarId;
-            pembelajaran.value.nama = selectedGuru.value?.ptk.nama;
-            pembelajaran.value.mata_pelajaran_id = selectedMapel.value.mataPelajaranId;
-            pembelajaran.value.nama_mata_pelajaran = selectedMapel.value.nama;
-            // product.value.code = createId();
-            // product.value.image = 'product-placeholder.svg';
-            // product.value.inventoryStatus = product.value.inventoryStatus ? product.value.inventoryStatus.value : 'INSTOCK';
-            pembelajaranList.value.push(pembelajaran.value);
-            toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
-        }
-
-        // console.log(pembelajaran.value)
-
-        selectedGuru.value = {};
-        selectedMapel.value = {};
-        // pembelajaran.value = {};
-    }
-};
-const kelas = ref({});
-const editMapel = (mapel) => {
-    kelas.value = { ...mapel };
-    mapelDialog.value = true;
-    pembelajaran.value.rombongan_belajar_id = kelas.value.rombonganBelajarId;
-    pembelajaran.value.semester_id = kelas.value.semesterId;
-};
-const deleteMapel = () => {
-    products.value = products.value.filter((val) => val.id !== product.value.id);
-    deletemapelDialog.value = false;
-    product.value = {};
-    toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
-};
-const findIndexById = (id) => {
-    let index = -1;
-    for (let i = 0; i < products.value.length; i++) {
-        if (products.value[i].id === id) {
-            index = i;
-            break;
-        }
-    }
-
-    return index;
-};
-const exportCSV = () => {
-    isLoading.value = true;
-    // alert("hello")
-    // dt.value.exportCSV();
-};
-const deletedataLulusan = () => {
-    products.value = products.value.filter((val) => !dataLulusan.value.includes(val));
-    deleteMapelsDialog.value = false;
-    dataLulusan.value = null;
-    toast.add({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
-};
-// ==================================
-// ========IMPORT DATA========
-import DialogImport from '@/components/DialogImport.vue';
-const dialogImport = ref(false);
-const saveImport = (e) => {
-    // console.log("Data disimpan:", e);
-    dialogImport.value = false;
-};
-
-const cancelImport = () => {
-    console.log('Import dibatalkan');
-    dialogImport.value = false;
-};
-// ===========================================
-
-const onRowExpand = (event) => {
-    toast.add({ severity: 'info', summary: 'Product Expanded', detail: event.data.nmKelas, life: 3000 });
-    // Ambil data mapel untuk kelas tertentu
-    console.log(event);
-};
-const onRowCollapse = (event) => {
-    toast.add({ severity: 'success', summary: 'Product Collapsed', detail: event.data.nmKelas, life: 3000 });
-};
-const expandAll = () => {
-    expandedRows.value = kelasList.value.reduce((acc, p) => (acc[p.rombonganBelajarId] = true) && acc, {});
-};
-const collapseAll = () => {
-    expandedRows.value = null;
-};
-
-import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
-import AutoComplete from 'primevue/autocomplete';
-// import { debounce } from 'lodash';
-
-const selectedMapel = ref();
-const filteredMapel = ref();
-const searchMapel = (event) => {
-    setTimeout(() => {
-        let query = event.query.toLowerCase();
-        filteredMapel.value = mapelList.value.filter((mapel) => mapel.nama.toLowerCase().includes(query));
-    }, 250);
-};
-const selectedGuru = ref();
-const filteredGuru = ref();
-const searchGuru = (event) => {
-    setTimeout(() => {
-        let query = event.query.toLowerCase();
-
-        filteredGuru.value = guruList.value.filter((guru) => guru.ptk.nama.toLowerCase().includes(query));
-    }, 250);
-};
-const handleKeydown = (event) => {
-    if (event.key === ' ') {
-        selectedMapel.value += ' '; // Menambahkan spasi ke query
-    }
-};
-
-const cancelAddMapel = () => {
-    addMapelDialog.value = false;
-    selectedGuru.value = {};
-    selectedMapel.value = {};
-};
-
-const generateUUID = () => crypto.randomUUID();
-
-const saveToDB = (req_Object, endpoint_String) => {
-    console.log(endpoint_String);
-    try {
-        const payload = {
-            schemaname: req_Object?.schemaname,
-            pembelajaran: req_Object?.data
-        };
-        const results = store.dispatch(endpoint_String, payload);
-        if (results) {
-            return results;
-        } else {
-            null;
-        }
-    } catch (error) {
-        console.log(error);
-    }
-};
-
-const simpanKeDatabase = () => {
-    // mapelDialog.value = false;
-    // simpan di localstorage
-    const aData = [];
-    aData.push(pembelajaran.value);
-    const req_Object = {
-        schemaname: schemaname.value,
-        data: aData
-    };
-    // console.log(req_Object)
-    const endpoint = 'sekolahService/createPembelajaran';
-    saveToDB(req_Object, endpoint);
-    // localStorage.setItem("unsavedPembelajaran", JSON.stringify(pembelajaran.value));
-};
-
-// ======================================
-//  DELETE
-// ======================================
-const isDelete = ref(false);
-const messageDelete = ref('');
-const selectedKategoriMapel = ref();
-const dialogDelete = (data) => {
-    isDelete.value = true;
-    messageDelete.value = `Apakah mapel ${data.nmMapel} akan dihapus pada tahun ajaran ini?`;
-    selectedKategoriMapel.value = data;
-};
-
-const confirmDelete = () => {
-    kategoriMapelList.value = kategoriMapelList.value.filter((item) => item.id != selectedKategoriMapel.value.id);
-    isDelete.value = false;
-    deleteKategoriMapel(selectedKategoriMapel.value?.id);
-    selectedKategoriMapel.value = null;
-};
-
-const isBatchDelete = ref(false);
-const messageBatchDelete = ref('');
-const dialogBatchDelete = () => {
-    isBatchDelete.value = true;
-    messageBatchDelete.value = `Apakah ${selectedKategoriMapel.value.length} mapel yang dipilih akan dihapus pada tahun ajaran ini?`;
-};
-const confirmBatchDelete = () => {
-    if (selectedKategoriMapel.value.length > 1) {
-        kategoriMapelList.value = kategoriMapelList.value.filter((item) => !selectedKategoriMapel.value.includes(item));
-        let ids = selectedKategoriMapel.value.map((item) => item.id);
-        deleteBatchKategoriMapel(ids);
-        selectedKategoriMapel.value = null;
-    }
-};
-const first = ref(0);
-</script>
 <template>
     <div class="">
         <div class="">
             <Toolbar>
                 <template #start>
+                    <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="isVisible = !isVisible" v-tooltip.bottom="'Tambah Siswa'" />
+
                     <Button
                         icon="pi pi-trash"
                         severity="danger"
@@ -365,15 +13,14 @@ const first = ref(0);
                         :disabled="!selectedKategoriMapel || !selectedKategoriMapel.length || selectedKategoriMapel.length == 1"
                         v-tooltip.bottom="'Hapus banyak mapel'"
                     />
-                    <!-- <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="openNew" v-tooltip.bottom="'Tambah Siswa'" :loading="isOpenNew" /> -->
                     <!--<Button icon="pi pi-pencil" severity="warn" @click="openNew" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 2" class="mr-2" v-tooltip.bottom="'Edit siswa'" />
                     <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Upload siswa'" v-show="selectedSemester.semester == 1" /> -->
                     <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download siswa'" />
-                    <Select v-model="selectedKategoriSekolah" :options="kategoriSekolahList" optionLabel="namaKurikulum" placeholder="Kurikulum" class="mr-2 !w-96" checkmark fluid />
+                    <Select v-model="selectedKategoriSekolah" :options="kategoriSekolahList" optionLabel="nama_kurikulum" placeholder="Kurikulum" class="mr-2 !w-96" checkmark fluid />
                 </template>
                 <template #end>
                     <div class="flex">
-                        <TingkatComponent v-model="selectedTingkat" />
+                        <TingkatComponent v-model="selectedTingkat" :initial-value="initialTingkat" />
                         <!-- <IconField>
                             <InputIcon>
                                 <i class="pi pi-search" />
@@ -548,5 +195,308 @@ const first = ref(0);
         <DialogConfirmDelete v-model:visible="isDelete" @confirm="confirmDelete" :message="messageDelete" />
         <DialogConfirmDelete v-model:visible="isBatchDelete" @confirm="confirmBatchDelete" :message="messageBatchDelete" />
         <!-- end of import data -->
+        <!-- <DialogMapel v-model:visible="isVisible" /> -->
     </div>
 </template>
+
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+const store = useStore();
+
+// import FileUpload from 'primevue/fileupload';
+import DialogImport from '@/components/DialogImport.vue';
+import TingkatComponent from '@/components/TingkatComponent.vue';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
+
+import Button from 'primevue/button';
+
+import Dialog from 'primevue/dialog';
+
+import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
+import DialogMapel from '@/components/DialogMapel.vue';
+import { FilterMatchMode } from '@primevue/core/api';
+import AutoComplete from 'primevue/autocomplete';
+import InputText from 'primevue/inputtext';
+import Toolbar from 'primevue/toolbar';
+import { useToast } from 'primevue/usetoast';
+// =============UJI FITUR FOTO========================
+// import Image from 'primevue/image';
+// =====================================
+const pembelajaran = ref({});
+const pembelajaranList = ref([]);
+const guruList = ref();
+
+// const fetchMapel = async () => {
+//     try {
+//         const cekMapel = await store.getters['sekolahService/getMapel'];
+//         // console.log(cekMapel)
+//         if (cekMapel == null) {
+//             const payload = {
+//                 mapel_id: ''
+//             };
+//             const response = await store.dispatch('sekolahService/fetchMapel', payload);
+//             // console.log(response)
+//             mapelList.value = response;
+//         } else {
+//             mapelList.value = cekMapel;
+//         }
+//     } catch (error) {
+//         console.log(error);
+//     }
+// };
+
+// ==============================
+const kelasList = ref([]);
+// ================================
+// composable
+// ================================
+import { useSekolahService } from '@/composables/useSekolahService';
+const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
+const schemaname = computed(() => store.getters['sekolahService/getTabeltenant']?.schemaname);
+
+const sekolahService = useSekolahService();
+
+const kategoriSekolahList = ref([]);
+const kategoriMapelList = ref([]);
+const selectedKategoriSekolah = ref();
+const selectedTingkat = ref([]);
+const initialTingkat = ref();
+const initKategoriMapel = async () => {
+    const payload = {
+        kurikulumId: selectedKategoriSekolah.value?.kurikulum_id,
+        tingkatPendidikan: Number(selectedTingkat.value)
+    };
+    // console.log(payload);
+    // return;
+    if (payload.kurikulumId && payload.tingkatPendidikan) {
+        // alert("Data error")
+    }
+
+    kategoriMapelList.value = await sekolahService.fetchKategoriMapel(payload);
+    console.log(kategoriMapelList.value);
+};
+
+const initFirst = async () => {
+    await sekolahService.fetchKategoriSekolah();
+    kategoriSekolahList.value = sekolahService.kategoriSekolahTabel.value;
+    selectedKategoriSekolah.value = kategoriSekolahList.value[0];
+
+    const results = await sekolahService.fetchTingkat();
+    initialTingkat.value = results[0].kode;
+};
+
+watch(sekolahService.initSelectedSemester, () => {
+    // console.log(newVal);
+    initFirst();
+    //    return sekolahService.initSelectedSemester.value?.tahunAjaranId;
+});
+
+watch(selectedKategoriSekolah, () => {
+    initKategoriMapel();
+});
+const isLoading = ref(false);
+watch(selectedTingkat, () => {
+    initKategoriMapel();
+});
+// const dataConnected = ref(true);
+const toast = useToast();
+const dt = ref(null);
+// const products = ref();
+const mapelDialog = ref(false);
+const mapelList = ref([]);
+const deletemapelDialog = ref(false);
+const deleteMapelsDialog = ref(false);
+const product = ref({});
+const dataLulusan = ref();
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    tingkatPendidikanId: { value: null, matchMode: FilterMatchMode.EQUALS }
+});
+const submitted = ref(false);
+const addMapelDialog = ref(false);
+const openNewMapel = async () => {
+    addMapelDialog.value = true;
+    fetchMapel();
+    // fetchGuru();
+};
+const hideDialog = () => {
+    mapelDialog.value = false;
+    // selectedMapel.value =
+    submitted.value = false;
+};
+const tambahPembelajaran = () => {
+    console.log('submitted', submitted.value);
+    // console.log("selecteGuru",!selectedGuru.value)
+    // console.log(submitted.value && !selectedGuru.value)
+    submitted.value = true;
+    if (selectedMapel?.value.nama?.trim()) {
+        if (pembelajaran.value.pembelajaran_id) {
+            pembelajaran.value.inventoryStatus = pembelajaran.value.inventoryStatus.value ? pembelajaran.value.inventoryStatus.value : pembelajaran.value.inventoryStatus;
+            // products.value[findIndexById(product.value.id)] = product.value;
+            toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
+        } else {
+            pembelajaran.value.pembelajaran_id = generateUUID();
+            pembelajaran.value.ptk_terdaftar_id = selectedGuru.value?.ptkTerdaftarId;
+            pembelajaran.value.nama = selectedGuru.value?.ptk.nama;
+            pembelajaran.value.mata_pelajaran_id = selectedMapel.value.mataPelajaranId;
+            pembelajaran.value.nama_mata_pelajaran = selectedMapel.value.nama;
+            // product.value.code = createId();
+            // product.value.image = 'product-placeholder.svg';
+            // product.value.inventoryStatus = product.value.inventoryStatus ? product.value.inventoryStatus.value : 'INSTOCK';
+            pembelajaranList.value.push(pembelajaran.value);
+            toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
+        }
+
+        // console.log(pembelajaran.value)
+
+        selectedGuru.value = {};
+        selectedMapel.value = {};
+        // pembelajaran.value = {};
+    }
+};
+const kelas = ref({});
+const editMapel = (mapel) => {
+    kelas.value = { ...mapel };
+    mapelDialog.value = true;
+    pembelajaran.value.rombongan_belajar_id = kelas.value.rombonganBelajarId;
+    pembelajaran.value.semester_id = kelas.value.semesterId;
+};
+const deleteMapel = () => {
+    products.value = products.value.filter((val) => val.id !== product.value.id);
+    deletemapelDialog.value = false;
+    product.value = {};
+    toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
+};
+const exportCSV = () => {
+    isLoading.value = true;
+    // alert("hello")
+    // dt.value.exportCSV();
+};
+const deletedataLulusan = () => {
+    products.value = products.value.filter((val) => !dataLulusan.value.includes(val));
+    deleteMapelsDialog.value = false;
+    dataLulusan.value = null;
+    toast.add({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
+};
+// ==================================
+// ========IMPORT DATA========
+const dialogImport = ref(false);
+const saveImport = (e) => {
+    // console.log("Data disimpan:", e);
+    dialogImport.value = false;
+};
+
+const cancelImport = () => {
+    console.log('Import dibatalkan');
+    dialogImport.value = false;
+};
+// ===========================================
+
+// import { debounce } from 'lodash';
+
+const selectedMapel = ref();
+const filteredMapel = ref();
+const searchMapel = (event) => {
+    setTimeout(() => {
+        let query = event.query.toLowerCase();
+        filteredMapel.value = mapelList.value.filter((mapel) => mapel.nama.toLowerCase().includes(query));
+    }, 250);
+};
+const selectedGuru = ref();
+const filteredGuru = ref();
+const searchGuru = (event) => {
+    setTimeout(() => {
+        let query = event.query.toLowerCase();
+
+        filteredGuru.value = guruList.value.filter((guru) => guru.ptk.nama.toLowerCase().includes(query));
+    }, 250);
+};
+const handleKeydown = (event) => {
+    if (event.key === ' ') {
+        selectedMapel.value += ' '; // Menambahkan spasi ke query
+    }
+};
+
+const cancelAddMapel = () => {
+    addMapelDialog.value = false;
+    selectedGuru.value = {};
+    selectedMapel.value = {};
+};
+
+const generateUUID = () => crypto.randomUUID();
+
+const saveToDB = (req_Object, endpoint_String) => {
+    console.log(endpoint_String);
+    try {
+        const payload = {
+            schemaname: req_Object?.schemaname,
+            pembelajaran: req_Object?.data
+        };
+        const results = store.dispatch(endpoint_String, payload);
+        if (results) {
+            return results;
+        } else {
+            null;
+        }
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+const simpanKeDatabase = () => {
+    // mapelDialog.value = false;
+    // simpan di localstorage
+    const aData = [];
+    aData.push(pembelajaran.value);
+    const req_Object = {
+        schemaname: schemaname.value,
+        data: aData
+    };
+    // console.log(req_Object)
+    const endpoint = 'sekolahService/createPembelajaran';
+    saveToDB(req_Object, endpoint);
+    // localStorage.setItem("unsavedPembelajaran", JSON.stringify(pembelajaran.value));
+};
+
+// ======================================
+//  DELETE
+// ======================================
+const isDelete = ref(false);
+const messageDelete = ref('');
+const selectedKategoriMapel = ref();
+const dialogDelete = (data) => {
+    isDelete.value = true;
+    messageDelete.value = `Apakah mapel ${data.nmMapel} akan dihapus pada tahun ajaran ini?`;
+    selectedKategoriMapel.value = data;
+};
+
+const confirmDelete = () => {
+    kategoriMapelList.value = kategoriMapelList.value.filter((item) => item.id != selectedKategoriMapel.value.id);
+    isDelete.value = false;
+    sekolahService.deleteKategoriMapel(selectedKategoriMapel.value?.id);
+    selectedKategoriMapel.value = null;
+};
+
+const isBatchDelete = ref(false);
+const messageBatchDelete = ref('');
+const dialogBatchDelete = () => {
+    isBatchDelete.value = true;
+    messageBatchDelete.value = `Apakah ${selectedKategoriMapel.value.length} mapel yang dipilih akan dihapus pada tahun ajaran ini?`;
+};
+const confirmBatchDelete = () => {
+    if (selectedKategoriMapel.value.length > 1) {
+        kategoriMapelList.value = kategoriMapelList.value.filter((item) => !selectedKategoriMapel.value.includes(item));
+        let ids = selectedKategoriMapel.value.map((item) => item.id);
+        sekolahService.deleteBatchKategoriMapel(ids);
+        selectedKategoriMapel.value = null;
+    }
+};
+const first = ref(0);
+const isVisible = ref(false);
+onMounted(async () => {
+    // await fetchK();
+    initFirst();
+});
+</script>

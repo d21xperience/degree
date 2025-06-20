@@ -545,7 +545,7 @@ export function useSekolahService() {
             };
             const response = await store.dispatch('sekolahService/fetchKategoriSekolah', payload);
             // console.log(response);
-            if (response.status) { 
+            if (response.status) {
                 toast.add({ severity: 'success', summary: 'Success', detail: `${response.message}`, life: 3000 });
             }
             kategoriSekolahList.value = response.kategoriSekolah;
@@ -635,16 +635,7 @@ export function useSekolahService() {
         try {
             const payload = {
                 schemaname: schemaname.value,
-                kategori_sekolah: {
-                    kategori_sekolah_id: kategoriSekolah.kategoriSekolahId,
-                    nama_kurikulum: kategoriSekolah.namaKurikulum,
-                    nama_jurusan: kategoriSekolah.namaJurusan,
-                    kurikulum_id: kategoriSekolah.kurikulumId,
-                    jurusan_id: kategoriSekolah.jurusanId,
-                    tahun_ajaran_id: `${kategoriSekolah.tahunAjaranId}`,
-                    kategori_kelas: kategoriSekolah.kategoriKelas,
-                    jenjang_pendidikan_id: kategoriSekolah.jenjangPendidikanId
-                }
+                kategori_sekolah: kategoriSekolah
             };
 
             // console.log(payload);
@@ -714,12 +705,11 @@ export function useSekolahService() {
         try {
             const payload = {
                 schemaname: schemaname.value,
-                tahunAjaranId: initSelectedSemester.value?.tahunAjaranId,
+                // tahunAjaranId: initSelectedSemester.value?.tahunAjaranId,
                 kurikulumId: mapel.kurikulumId,
                 tingkatPendidikan: mapel.tingkatPendidikan
             };
             const response = await store.dispatch('sekolahService/fetchKategoriMapel', payload);
-            // console.log(response);
             if (response.status) {
                 toast.add({ severity: 'success', summary: 'Success', detail: `${response.message}`, life: 3000 });
             }
@@ -766,6 +756,20 @@ export function useSekolahService() {
             toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error}`, life: 3000 });
         }
     };
+
+    // const fetchMapel = async (mapel) => {
+    //     try {
+    //         let response = await store.dispatch('sekolahService/fetchMapel');
+
+    //         if (response.status) {
+    //             toast.add({ severity: 'success', summary: 'Success', detail: `${response.message}`, life: 3000 });
+    //         }
+
+    //         return response.kategoriMapel;
+    //     } catch (error) {
+    //         toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error}`, life: 3000 });
+    //     }
+    // };
 
     watch(selectedTahunAjaran, (e) => {
         store.commit('sekolahService/SET_SELECTEDTAHUNAJARAN', e);

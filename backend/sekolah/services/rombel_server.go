@@ -128,11 +128,11 @@ func (s *RombelServiceServer) GetKelas(ctx context.Context, req *pb.GetKelasRequ
 	if req.TingkatPendidikanId != 0 {
 		conditions["tabel_kelas.tingkat_pendidikan_id"] = req.TingkatPendidikanId
 	}
-	// preloads := []string{"PTK", "Jurusan", "Kurikulum", "TingkatPendidikan", "AnggotaKelas", "AnggotaKelas.PesertaDidik", "Pembelajaran", "Pembelajaran.PTKTerdaftar", "Pembelajaran.PTKTerdaftar.PTK"}
+	preloads := []string{"PTK", "Jurusan", "Kurikulum", "TingkatPendidikan", "AnggotaKelas", "AnggotaKelas.PesertaDidik", "Pembelajaran", "Pembelajaran.PTKTerdaftar", "Pembelajaran.PTKTerdaftar.PTK"}
 
 	// groupBy := []string{"tabel_kelas.rombongan_belajar_id"} // Hindari duplikasi
 	orderBy := []string{"tabel_kelas.nm_kelas"} // Hindari duplikasi
-	rombelModel, err = s.repo.FindWithPreloadAndJoins(ctx, schemaName, nil, nil, conditions, nil, orderBy, false)
+	rombelModel, err = s.repo.FindWithPreloadAndJoins(ctx, schemaName, nil, preloads, conditions, nil, orderBy, false)
 	if err != nil {
 		return &pb.GetKelasResponse{
 			Status:  false,
@@ -157,7 +157,7 @@ func (s *RombelServiceServer) GetKelas(ctx context.Context, req *pb.GetKelasRequ
 			JenisRombel:         utils.SafeInt32(kelas.JenisRombel),
 			NamaJurusanSp:       utils.SafeString(kelas.NamaJurusanSp),
 			KurikulumId:         utils.SafeInt32(kelas.KurikulumId),
-			
+
 			// AnggotaKelas: utils.ConvertPBToModels(utils.SliceToPointer(kelas.AnggotaKelas), func(item *models.RombelAnggota) *pb.AnggotaKelas {
 			// 	return &pb.AnggotaKelas{
 			// 		AnggotaRombelId:    item.AnggotaRombelId.String(),
@@ -206,14 +206,14 @@ func (s *RombelServiceServer) GetKelas(ctx context.Context, req *pb.GetKelasRequ
 			// 	JurusanInduk:        utils.SafeString(kelas.Jurusan.JurusanInduk),
 			// 	LevelBidangId:       kelas.Jurusan.LevelBidangID,
 			// },
-			// Kurikulum: &pb.Kurikulum{
-			// 	KurikulumId:         uint32(kelas.Kurikulum.KurikulumID),
-			// 	NamaKurikulum:       kelas.Kurikulum.NamaKurikulum,
-			// 	MulaiBerlaku:        kelas.Kurikulum.MulaiBerlaku.Format("2006-01-02"),
-			// 	JenjangPendidikanId: uint32(kelas.Kurikulum.JenjangPendidikanID),
-			// 	SistemSks:           uint32(kelas.Kurikulum.SistemSKS),
-			// 	JurusanId:           utils.SafeString(kelas.Kurikulum.JurusanID),
-			// },
+			Kurikulum: &pb.Kurikulum{
+				// KurikulumId:         uint32(kelas.Kurikulum.KurikulumID),
+				NamaKurikulum: kelas.Kurikulum.NamaKurikulum,
+				// MulaiBerlaku:        kelas.Kurikulum.MulaiBerlaku.Format("2006-01-02"),
+				// JenjangPendidikanId: uint32(kelas.Kurikulum.JenjangPendidikanID),
+				// SistemSks:           uint32(kelas.Kurikulum.SistemSKS),
+				// JurusanId:           utils.SafeString(kelas.Kurikulum.JurusanID),
+			},
 			// TingkatPendidikan: &pb.TingkatPendidikan{
 			// 	TingkatPendidikanId: int32(kelas.TingkatPendidikan.TingkatPendidikanID),
 			// 	Kode:                kelas.TingkatPendidikan.Kode,

@@ -13,6 +13,7 @@ import (
 	"strconv"
 
 	"github.com/google/uuid"
+	"github.com/xuri/excelize/v2"
 	"gorm.io/gorm"
 )
 
@@ -454,70 +455,70 @@ func (s *SekolahService) UpdateKategoriSekolah(ctx context.Context, req *pb.Upda
 	}, nil
 }
 
-// func (s *SekolahService) ProsesKategoriSekolahDanKelas(ctx context.Context, req *pb.ProsesKategoriSekolahDanKelasRequest) (*pb.ProsesKategoriSekolahDanKelasResponse, error) {
-// 	var err error
-// 	log.Printf("Received Sekolah data request: %+v\n", req)
-// 	requiredFields := []string{"Schemaname", "TahunAjaranId"}
-// 	// Validasi request
-// 	err = utils.ValidateFields(req, requiredFields)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	Schemaname := req.GetSchemaname()
-// 	tahunAjaranId := req.GetTahunAjaranId()
+func (s *SekolahService) ProsesKategoriSekolahDanKelas(ctx context.Context, req *pb.ProsesKategoriSekolahDanKelasRequest) (*pb.ProsesKategoriSekolahDanKelasResponse, error) {
+	var err error
+	log.Printf("Received Sekolah data request: %+v\n", req)
+	requiredFields := []string{"Schemaname", "TahunAjaranId"}
+	// Validasi request
+	err = utils.ValidateFields(req, requiredFields)
+	if err != nil {
+		return nil, err
+	}
+	Schemaname := req.GetSchemaname()
+	tahunAjaranId := req.GetTahunAjaranId()
 
-// 	kondisi := map[string]any{
-// 		"tabel_kategori_sekolah.tahun_ajaran_id": tahunAjaranId,
-// 	}
-// 	// Ambil tabel kategori sekolah dan kelas
-// 	modelKategoriSekolah, err := s.repoKategoriSekolah.FindWithRelations(ctx, Schemaname, nil, nil, kondisi, nil, nil, nil)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	// jmlKelas := len(modelKategoriSekolah)
-// 	var nmKelas string
-// 	var kelompokKelas string
-// 	for _, v := range modelKategoriSekolah {
-// 		fmt.Println(v)
-// 		if v.KategoriKelas != nil {
-// 			nmKelas = utils.BuatSingkatan(*v.NamaJurusan)
-// 			for _, x := range v.KategoriKelas {
-// 				for y := 0; y < int(*x.Jumlah); y++ {
-// 					// buatk kelas
-// 					// jika jumlah > 1 buatkan nama
-// 					if int(*x.Jumlah) > 1 {
-// 						kelompokKelas, _ = excelize.ColumnNumberToName(y + 1)
-// 					} else {
-// 						kelompokKelas = ""
-// 					}
-// 					for z := 1; z <= 2; z++ {
-// 						entity := &models.RombonganBelajar{
-// 							RombonganBelajarId:  uuid.New(),
-// 							SemesterId:          fmt.Sprintf("%s%d", tahunAjaranId, z),
-// 							JurusanId:           v.JurusanId,
-// 							NmKelas:             fmt.Sprintf("%s %s %s", utils.AngkaKeRomawi(int(*x.TingkatId)), nmKelas, kelompokKelas),
-// 							TingkatPendidikanId: *x.TingkatId,
-// 							KurikulumId:         v.KurikulumId,
-// 							JenisRombel:         utils.Int32ToPointer(1),
-// 							NamaJurusanSp:       v.NamaJurusan,
-// 						}
-// 						cek := s.repoKelas.Save(ctx, entity, Schemaname)
-// 						if cek != nil {
-// 							return nil, err
-// 						}
-// 						// s.createPembelajaran(ctx, entity, Schemaname)
-// 					}
-// 				}
-// 			}
-// 		}
-// 	}
+	kondisi := map[string]any{
+		"tabel_kategori_sekolah.tahun_ajaran_id": tahunAjaranId,
+	}
+	// Ambil tabel kategori sekolah dan kelas
+	modelKategoriSekolah, err := s.repoKategoriSekolah.FindWithRelations(ctx, Schemaname, nil, nil, kondisi, nil, nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	// jmlKelas := len(modelKategoriSekolah)
+	var nmKelas string
+	var kelompokKelas string
+	for _, v := range modelKategoriSekolah {
+		fmt.Println(v)
+		// if v. != nil {
+		nmKelas = utils.BuatSingkatan(*v.NamaJurusan)
+		// for _, x := range v. {
+		for y := 0; y < int(*v.Jumlah); y++ {
+			// buatk kelas
+			// jika jumlah > 1 buatkan nama
+			if int(*v.Jumlah) > 1 {
+				kelompokKelas, _ = excelize.ColumnNumberToName(y + 1)
+			} else {
+				kelompokKelas = ""
+			}
+			for z := 1; z <= 2; z++ {
+				entity := &models.RombonganBelajar{
+					RombonganBelajarId:  uuid.New(),
+					SemesterId:          fmt.Sprintf("%s%d", tahunAjaranId, z),
+					JurusanId:           v.JurusanId,
+					NmKelas:             fmt.Sprintf("%s %s %s", utils.AngkaKeRomawi(int(v.TingkatId)), nmKelas, kelompokKelas),
+					TingkatPendidikanId: v.TingkatId,
+					KurikulumId:         &v.KurikulumId,
+					JenisRombel:         utils.Int32ToPointer(1),
+					NamaJurusanSp:       v.NamaJurusan,
+				}
+				cek := s.repoKelas.Save(ctx, entity, Schemaname)
+				if cek != nil {
+					return nil, err
+				}
+				// s.createPembelajaran(ctx, entity, Schemaname)
+			}
+		}
+		// }
+		// }
+	}
 
-// 	return &pb.ProsesKategoriSekolahDanKelasResponse{
-// 		Status:  true,
-// 		Message: "Berhasil membuat kelas sesusai kurikulum!",
-// 	}, nil
+	return &pb.ProsesKategoriSekolahDanKelasResponse{
+		Status:  true,
+		Message: "Berhasil membuat kelas sesusai kurikulum!",
+	}, nil
 
-// }
+}
 
 // rev 1
 func (s *SekolahService) createPembelajaran(ctx context.Context, modelRombel *models.RombonganBelajar, schemaname string) error {
@@ -565,19 +566,19 @@ func (s *SekolahService) createPembelajaran(ctx context.Context, modelRombel *mo
 
 func (s *SekolahService) GetKategoriMapel(ctx context.Context, req *pb.GetKategoriMapelRequest) (*pb.GetKategoriMapelResponse, error) {
 	var err error
-	log.Printf("sekoklah_server/GetKategoriKelas, received data request: %+v\n", req)
-	requiredFields := []string{"Schemaname", "TahunAjaranId", "TingkatPendidikan", "KurikulumId"}
+	log.Printf("sekolah_server/GetKategoriKelas, received data request: %+v\n", req)
+	requiredFields := []string{"Schemaname", "TingkatPendidikan", "KurikulumId"}
 	// Validasi request
 	err = utils.ValidateFields(req, requiredFields)
 	if err != nil {
 		return nil, err
 	}
 	Schemaname := req.GetSchemaname()
-	tahunAjaranId := req.GetTahunAjaranId()
+	// tahunAjaranId := req.GetTahunAjaranId()
 	tingkatPendidikan := req.GetTingkatPendidikan()
 	kurikulumId := req.GetKurikulumId()
 	conditions := map[string]any{
-		"tabel_kategori_mapel.tahun_ajaran_id":    tahunAjaranId,
+		// "tabel_kategori_mapel.tahun_ajaran_id":    tahunAjaranId,
 		"tabel_kategori_mapel.tingkat_pendidikan": tingkatPendidikan,
 		"tabel_kategori_mapel.kurikulum_id":       kurikulumId,
 	}
