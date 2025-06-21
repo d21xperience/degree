@@ -63,10 +63,8 @@ const saveData = async () => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_type', props.templateType);
-    formData.append('schemaname', JSON.stringify(schemaname.value));
-    // console.log(schemaname.value);
-    // Debugging
-    console.log('Upload URL:', uploadUrl);
+    formData.append('schemaname', JSON.stringify(schemaname.value)); 
+    // console.log('Upload URL:', uploadUrl);
     for (let pair of formData.entries()) {
         console.log(pair[0] + ': ', pair[1]);
     }

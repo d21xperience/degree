@@ -772,6 +772,8 @@ const actions = {
                 semesterId: payload.semester_id,
                 kelas: response.data.kelas
             };
+            console.log(data);
+            // return
             commit('SET_TABELKELAS', data);
             return response.data;
         } catch (error) {
@@ -882,7 +884,7 @@ const actions = {
         }
     },
     async createKategoriSekolah({ commit }, payload) {
-        console.log(payload);
+        // console.log(payload);
         try {
             const response = await api.post(`/ss/${payload.schemaname}/kategori-sekolah/create`, payload);
             if (response.status) {
@@ -940,7 +942,7 @@ const actions = {
 
     async createProsesKelas({ commit }, payload) {
         try {
-            console.log(payload);
+            // console.log(payload);
             // return
             const response = await api.post(`/ss/${payload.schemaname}/kategori-sekolah-kelas/proses`, payload);
             if (response.status) {

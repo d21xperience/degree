@@ -90,43 +90,64 @@ func GetPetunjukSheet(f *excelize.File, param *DataTemplate, db *gorm.DB) error 
 	// // case "ijazah":
 	// // 	return GetIjazahColumns()
 	// case "nilai_akhir":
-	// 	return GetNilaiAkhirColumns()
+	// 	return getNilaiAkhir(f, param, db)
 	default:
 		return nil
 	}
 }
 
-// func getKelas(f *excelize.File, param *DataTemplate, db *gorm.DB) error {
+// revisi 1
+// func getNilaiAkhir(f *excelize.File, param *DataTemplate, db *gorm.DB) error {
 // 	repoKelas := repositories.NewrombonganBelajarRepository(db)
+// 	repoSiswa := repositories.NewSiswaRepository(db)
+// 	repoMapel := repositories.NewKategoriMapelRepository(db)
 // 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 // 	defer cancel()
 // 	conditions := map[string]any{
 // 		"tabel_kelas.semester_id": fmt.Sprintf("%s1", param.TahunAjaranId),
 // 	}
+// 	resp
 // 	kelasList, err := repoKelas.FindAllByConditions(ctx, param.Schemaname, conditions, 100, 0, nil)
 // 	if err != nil {
 // 		return err
 // 	}
-// 	infoSheet := "Petunjuk pengisian"
+// 	mapelList, err := repoMapel.FindAllByConditions(ctx, param.Schemaname, nil, 0, 1000, nil)
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	infoSheet := "Nilai Akhir"
 // 	f.NewSheet(infoSheet)
 
-// 	f.SetCellValue(infoSheet, "A1", "Nama Kelas")
-// 	f.SetCellValue(infoSheet, "B1", "Tingkat")
-// 	// f.SetCellValue(infoSheet, "C1", "Rombel Id")
+// 	// Sembunyikan kolom G
+// 	f.SetColVisible(infoSheet, "C", false)
 
-// 	var cell string
-// 	for i, kelas := range kelasList {
-// 		cell = fmt.Sprintf("A%d", i+2) // Mulai dari A2
-// 		f.SetCellValue(infoSheet, cell, kelas.NmKelas)
-// 		cell = fmt.Sprintf("B%d", i+2) // Mulai dari A2
-// 		f.SetCellValue(infoSheet, cell, kelas.TingkatPendidikanId)
-// 		cell = fmt.Sprintf("G%d", i+2) // Mulai dari A2
-// 		f.SetCellValue(infoSheet, cell, kelas.RombonganBelajarId)
+// 	f.SetCellValue(infoSheet, "A1", "Peserta Didik ID")
+// 	f.SetCellValue(infoSheet, "B1", "Nama")
+// 	f.SetCellValue(infoSheet, "C1", "Mapel")
+// 	for i, mapel := range mapelList {
+// 		kolom, err := excelize.ColumnNumberToName(i + 3)
+// 		if err != nil {
+// 			return err
+// 		}
+// 		for j := 0; j < len(mapelList); j++ {
+// 			cell := fmt.Sprintf("%s%d",kolom, j)
+// 			f.SetCellValue(infoSheet, cell, mapel.NmMapel)
+// 		}
 // 	}
-// 	return nil
-// }
+// 	var cell string
+// 	for i, kelas := range siswaList {
+// 		cell = fmt.Sprintf("A%d", i+2)
+// 		f.SetCellValue(infoSheet, cell, kelas.NmKelas)
 
-// revisi 1
+// 		cell = fmt.Sprintf("B%d", i+2)
+// 		f.SetCellValue(infoSheet, cell, kelas.TingkatPendidikanId)
+
+//			cell = fmt.Sprintf("C%d", i+2)
+//			f.SetCellValue(infoSheet, cell, kelas.RombonganBelajarId)
+//		}
+//		return nil
+//	}
 func getKelas(f *excelize.File, param *DataTemplate, db *gorm.DB) error {
 	repoKelas := repositories.NewrombonganBelajarRepository(db)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

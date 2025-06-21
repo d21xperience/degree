@@ -262,7 +262,10 @@ func (h *UploadServiceServer) DownloadTemplateHTTP(w http.ResponseWriter, r *htt
 	}
 	templatePath := fmt.Sprintf("templates/template_%s_%s_%s.xlsx", templateType, param.schemaname, param.semesterId)
 	param.filePath = templatePath
-
+	// Hapus file setelah berhasil dikirim
+	if err := os.Remove(templatePath); err != nil {
+		log.Printf("Gagal menghapus file sementara: %v", err)
+	}
 	// Buat file template jika belum ada
 	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
 		err := GenerateTemplateV2(param, config.DB)
@@ -270,22 +273,7 @@ func (h *UploadServiceServer) DownloadTemplateHTTP(w http.ResponseWriter, r *htt
 			http.Error(w, fmt.Sprintf("Gagal membuat template: %v", err), http.StatusInternalServerError)
 			return
 		}
-		// } else {
-		// Cek templateType dan bandingka di database
-		// cek, err := h.repoKategoriSekolahLog.FindByID(context.Background(), param.semesterId, param.schemaname, "tahun_ajaran_id")
-		// if err != nil {
-		// 	http.Error(w, fmt.Sprintf("Terjadi masalah pada saat mengambil data di database: %v", err), http.StatusInternalServerError)
-		// 	return
-		// }
-		// // Bandingkan waktu perubahan dengan waktu pada saat download
-		// if cek != nil {
-		// 	err := GenerateTemplateV2(param, config.DB)
-		// 	if err != nil {
-		// 		http.Error(w, fmt.Sprintf("Gagal membuat template: %v", err), http.StatusInternalServerError)
-		// 		return
-		// 	}
 	}
-	// }
 
 	// Buka file template
 	file, err := os.Open(templatePath)
@@ -401,47 +389,60 @@ func (s *UploadServiceServer) processUploadSiswa(
 		}, param.schemaname)
 
 		if err != nil {
-			return fmt.Errorf("gagal menyimpan peserta didik: %v", err)
-		}
+			// Jika duplikat NISN, ambil pesertaDidikId dari database
+			if strings.Contains(err.Error(), "failed to save record") {
+				log.Printf("Duplikat NISN ditemukan baris %d: %s — mengambil ID dari DB", i+1, row[2])
 
-		// Simpan ke tabel pelengkap siswa (opsional)
-		err = s.repoSiswaPelengkap.Save(ctx, &models.PesertaDidikPelengkap{
-			PelengkapSiswaId: uuid.New(),
-			PesertaDidikId:   pesertaDidikId,
-			StatusDalamKel:   safeGet(row, 18),
-			AnakKe:           safeGet(row, 19),
-			SekolahAsal:      safeGet(row, 20),
-			DiterimaKelas:    safeGet(row, 21),
-			AlamatOrtu:       safeGet(row, 22),
-			TeleponOrtu:      safeGet(row, 23),
-			AlamatWali:       safeGet(row, 24),
-			TeleponWali:      safeGet(row, 25),
-		}, param.schemaname)
+				// Ambil ID dari database berdasarkan NISN
+				pd, getErr := s.repoSiswa.FindByID(ctx, row[2], param.schemaname, "nisn")
+				if getErr != nil {
+					return fmt.Errorf("duplikat NISN, tetapi gagal ambil ID: %v", getErr)
+				}
+				pesertaDidikId = pd.PesertaDidikId
+			} else {
+				return fmt.Errorf("gagal menyimpan peserta didik: %v", err)
+			}
+		} else {
+			// Simpan ke tabel pelengkap siswa (opsional)
+			err = s.repoSiswaPelengkap.Save(ctx, &models.PesertaDidikPelengkap{
+				PelengkapSiswaId: uuid.New(),
+				PesertaDidikId:   pesertaDidikId,
+				StatusDalamKel:   safeGet(row, 18),
+				AnakKe:           safeGet(row, 19),
+				SekolahAsal:      safeGet(row, 20),
+				DiterimaKelas:    safeGet(row, 21),
+				AlamatOrtu:       safeGet(row, 22),
+				TeleponOrtu:      safeGet(row, 23),
+				AlamatWali:       safeGet(row, 24),
+				TeleponWali:      safeGet(row, 25),
+			}, param.schemaname)
 
-		if err != nil {
-			return fmt.Errorf("gagal menyimpan data pelengkap siswa: %v", err)
+			if err != nil {
+				// Jika duplikat NISN, ambil pesertaDidikId dari database
+				if strings.Contains(err.Error(), "failed to save record") {
+					log.Printf("Duplikat peserta_didik_id ditemukan baris %d: %s — mengambil ID dari DB", i+1, row[2])
+				} else {
+					return fmt.Errorf("gagal menyimpan peserta didik: %v", err)
+				}
+			}
 		}
 
 		// Jika kelas tersedia, simpan ke rombel anggota
 		for j := 1; j <= 2; j++ {
-			rombonganBelajarId := utils.StringToUUID(row[27]) //uuid.New()
-
-			// Tabel Kelas
-			// err = s.repoKelas.Save(ctx, &models.RombonganBelajar{
-			// 	RombonganBelajarId:  rombonganBelajarId,
-			// 	TingkatPendidikanId: int32(utils.ParseInt(row[0])),
-			// 	NmKelas:             row[26],
-			// 	SemesterId:          fmt.Sprintf("%s%d", param.semesterId, j),
-			// }, param.schemaname)
-			// if err != nil {
-			// 	return err
-			// }
-
+			// rombonganBelajarId := utils.StringToUUID(row[27])
+			conditions := map[string]any{
+				"tabel_kelas.nm_kelas":    row[26],
+				"tabel_kelas.semester_id": fmt.Sprintf("%s%d", param.semesterId, j),
+			}
+			rombonganBelajarId, err1 := s.repoKelas.FindWithPreloadAndJoinsOrigin(ctx, param.schemaname, nil, nil, conditions, nil) //utils.StringToUUID(row[27])
+			if err1 != nil {
+				return err1
+			}
 			err = s.repoKelasAnggota.Save(ctx, &models.RombelAnggota{
 				AnggotaRombelId:    uuid.New(),
 				PesertaDidikId:     pesertaDidikId,
 				SemesterId:         fmt.Sprintf("%s%d", param.semesterId, j),
-				RombonganBelajarId: utils.UUIDToPointer(rombonganBelajarId),
+				RombonganBelajarId: utils.UUIDToPointer(rombonganBelajarId[0].RombonganBelajarId),
 			}, param.schemaname)
 
 			if err != nil {

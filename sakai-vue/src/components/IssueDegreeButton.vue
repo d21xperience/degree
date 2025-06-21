@@ -7,13 +7,14 @@ import { useSCService } from '@/composables/useSCService';
 import DegreeContractABI from '@/VerifikasiIjazahABI.json';
 import { ethers, keccak256, toUtf8Bytes } from 'ethers';
 import { onMounted, ref } from 'vue';
-const { createMetamaskConnected } = useSCService();
+const { createMetamaskConnected, createSCIjazah } = useSCService();
 const contractAddress = '0xdc64a140aa3e981100a9beca4e685f962f0cf6c9';
 const props = defineProps({
     degreeData: Object, // { name, nisn, graduationYear, major }
     sekolah: String,
     ipfsUrl: String,
-    transcript: Object // { subjects: ["B. Indonesia", "Matematika"], grades: [85, 90] }
+    transcript: Object, // { subjects: ["B. Indonesia", "Matematika"], grades: [85, 90] }
+    tahunAjaranId: String
 });
 const emit = defineEmits(['submit']);
 // State
@@ -38,12 +39,12 @@ const generateDegreeHash = (data) => {
 };
 
 const handleSubmit = async () => {
+    // let txtHas = '1232443';
+    // let degreeHash = '123244dfdfdf';
+    // saveToBackend(txtHas, degreeHash);
+
     isLoading.value = true;
     try {
-        // console.log("props.transcript:", props.transcript);
-        // console.log("subjects:", props.transcript?.subjects);
-        // console.log("grades:", props.transcript?.grades);
-
         if (!contract.value) await loadContract();
 
         const degreeHash = generateDegreeHash(props.degreeData);
@@ -73,7 +74,7 @@ const handleSubmit = async () => {
         await tx.wait();
         alert('Ijazah berhasil diverifikasi di blockchain!');
         emit('submit');
-        // saveToBackend(tx.hash, degreeHash);
+        saveToBackend(tx.hash, degreeHash);
     } catch (err) {
         console.error(err);
         alert(`Gagal memproses: ${err.message}`);
@@ -138,64 +139,43 @@ onMounted(async () => {
 });
 // 🗄️ Simpan ke backend
 const saveToBackend = async (txHash, degreeHash) => {
-    try {
-        if (!props.degreeData) {
-            console.error('degreeData is undefined');
-            return;
-        }
-
-        const tenantData = await store.getters['sekolahService/getTabeltenant'];
-        const schemaname = tenantData?.schemaname;
-
-        if (!schemaname) {
-            console.error('schemaname not found in tenant data');
-            return;
-        }
-
-        // Validasi tanggal lulus
-        // let tanggalLulus = props.degreeData?.tanggalLulus;
-        // let tanggalIjazah = null;
-
-        // if (tanggalLulus) {
-        //     const parsedDate = new Date(tanggalLulus);
-        //     if (!isNaN(parsedDate.getTime())) {
-        //         tanggalIjazah = parsedDate.toISOString();
-        //     } else {
-        //         console.warn('Tanggal lulus tidak valid, menggunakan tanggal saat ini');
-        //         tanggalIjazah = new Date().toISOString();
-        //     }
-        // } else {
-        //     console.warn('Tanggal lulus tidak tersedia, menggunakan tanggal saat ini');
-        //     tanggalIjazah = new Date().toISOString();
-        // }
-
-        let degreeData = {
-            degreeHash: degreeHash,
-            txHash: txHash,
-            ipfsUrl: props.ipfsUrl,
-            bcType: 'Ethereum',
-            linkBcExplorer: 'http://localhost:26000',
-            tahunAjaranId: props.degreeData?.tahun_lulus,
-            ijazah: {
-                pesertaDidikId: props.degreeData?.pesertaDidikId,
-                nomorIjazah: props.degreeData?.nomorIjazah,
-                programKeahlian: props.degreeData?.major,
-                namaOrtuwali: props.degreeData?.namaOrtu,
-                tempatIjazah: props.degreeData?.tempatLahir,
-                // tanggalIjazah: tanggalIjazah,
-                paketKeahlian: props.degreeData?.paketKeahlian
-            }
-        };
-
-        const payload = {
-            schemaname: schemaname,
-            degreeData: degreeData
-        };
-
-        const response = await store.dispatch('scService/createIjazahBC', payload);
-        console.log('Response from backend:', response);
-    } catch (error) {
-        console.error('Error saving to backend:', error.response || error.message || error);
+    if (!props.degreeData) {
+        console.error('degreeData is undefined');
+        return;
     }
+    // console.log(props.degreeData);
+    const penerimaIjazah = props.degreeData[0];
+    let degreeData = {
+        degreeHash: degreeHash,
+        txHash: txHash,
+        ipfsUrl: props.ipfsUrl,
+        bcType: 'Ethereum',
+        linkBcExplorer: 'http://localhost:26000',
+        tahunAjaranId: props?.tahunAjaranId,
+        sekolah_id: penerimaIjazah?.sekolahId,
+        ijazah: {
+            peserta_didik_id: penerimaIjazah?.pesertaDidikId,
+            nama: penerimaIjazah?.nama,
+            nis: penerimaIjazah?.nis,
+            nisn: penerimaIjazah?.nisn,
+            npsn: penerimaIjazah?.npsn,
+            nomor_ijazah: penerimaIjazah?.nomorIjazah,
+            tempat_lahir: penerimaIjazah?.tempatLahir,
+            tanggal_lahir: penerimaIjazah?.tanggalLahir,
+            nama_ortuwali: penerimaIjazah?.namaOrtuWali,
+            paket_keahlian: penerimaIjazah?.paketKeahlian,
+            kabupatenkota: penerimaIjazah?.kabupatenKota,
+            provinsi: penerimaIjazah?.provinsi,
+            program_keahlian: penerimaIjazah?.programKeahlian,
+            sekolah_penyelenggara_ujian_us: penerimaIjazah?.sekolahPenyelenggaraUjianUs,
+            sekolah_penyelenggara_ujian_un: penerimaIjazah?.sekolahPenyelenggaraUjianUn,
+            asal_sekolah: penerimaIjazah?.asalSekolah,
+            tempat_ijazah: penerimaIjazah?.tempatIjazah,
+            tanggal_ijazah: penerimaIjazah?.tanggalIjazah
+        },
+        transkrip: { subjects: props.transcript?.subjects, grades: props.transcript?.grades }
+    };
+
+    createSCIjazah(degreeData);
 };
 </script>

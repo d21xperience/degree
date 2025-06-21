@@ -184,7 +184,7 @@ func (s *RombelAnggotaService) GetAnggotaKelas(ctx context.Context, req *pb.GetA
 	anggotaRombelId := req.GetAnggotaRombelId()
 	var conditions = map[string]any{
 		"tabel_anggotakelas.semester_id": semesterId,
-		"jenis_rombel":                   1,
+		// "jenis_rombel":                   1,
 	}
 	if anggotaRombelId != "" {
 		conditions["tabel_anggotakelas.anggota_rombel_id"] = anggotaRombelId
@@ -192,9 +192,9 @@ func (s *RombelAnggotaService) GetAnggotaKelas(ctx context.Context, req *pb.GetA
 	joins := []string{
 		"JOIN tabel_siswa ON tabel_siswa.peserta_didik_id = tabel_anggotakelas.peserta_didik_id",
 		"JOIN tabel_kelas ON tabel_kelas.rombongan_belajar_id = tabel_anggotakelas.rombongan_belajar_id",
-		"JOIN tabel_ptk ON tabel_ptk.ptk_id = tabel_kelas.ptk_id",
+		// "JOIN tabel_ptk ON tabel_ptk.ptk_id = tabel_kelas.ptk_id",
 	}
-	preloads := []string{"PesertaDidik", "RombonganBelajar", "RombonganBelajar.PTK", "NilaiAkhir", "NilaiAkhir.MataPelajaran"}
+	preloads := []string{"PesertaDidik", "RombonganBelajar"}
 
 	orderBy := []string{"tabel_kelas.nm_kelas ASC", "tabel_siswa.nm_siswa ASC"} // Hindari duplikasi
 	anggotaRombelModel, err := s.repo.FindWithPreloadAndJoins(ctx, schemaName, joins, preloads, conditions, nil, orderBy, false)

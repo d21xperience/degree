@@ -167,7 +167,6 @@ watch(selectedSemester, async () => {
 });
 const fetchK = async () => {
     kelasList.value = await fetchKelas();
-    console.log(kelasList.value)
     if (kelasList.value.length > 0) {
         tingkatPendidikanOptions.value = await fetchTingkat();
     }
@@ -257,32 +256,35 @@ const luluskan = async () => {
 const dialogImport = ref(false);
 
 const sendToDns = async () => {
+    // console.log(selectedSemester.value);
+
     const sekolah = store.getters['sekolahService/getSekolah'];
     const anggotaKelas = selectedKelas.value[0].anggotaKelas.map((item) => ({
         peserta_didik_id: item.pesertaDidikId || '',
         rombongan_belajar_id: item.rombonganBelajarId || '',
         program_keahlian: selectedKelas.value[0].namaJurusanSp || '',
         paket_keahlian: selectedKelas.value[0].namaJurusanSp || '',
-        sekolah_id: selectedKelas.value[0].sekolahId || '',
-        npsn: sekolah.npsn || '', // jika ada, ambil dari sekolah
-        kabupaten_kota: sekolah.kabKota || '',
-        provinsi: sekolah.propinsi || '',
+        sekolah_id: sekolah.sekolah.sekolah_id || '',
+        npsn: sekolah.sekolah.npsn || '', // jika ada, ambil dari sekolah
+        kabupaten_kota: sekolah.sekolah.kabKota || '',
+        provinsi: sekolah.sekolah.propinsi || '',
         nama: item.pesertaDidik.nmSiswa || '',
         tempat_lahir: item.pesertaDidik.tempatLahir || '',
         tanggal_lahir: item.pesertaDidik.tanggalLahir || '',
         nis: item.pesertaDidik.nis || '',
         nisn: item.pesertaDidik.nisn || '',
         nama_ortu_wali: item.pesertaDidik.nmAyah || '',
-        sekolah_penyelenggara_ujian_us: sekolah.nama || '',
-        sekolah_penyelenggara_ujian_un: sekolah.nama || '',
-        asal_sekolah: sekolah.nama || '',
+        sekolah_penyelenggara_ujian_us: sekolah.sekolah.nama || '',
+        sekolah_penyelenggara_ujian_un: sekolah.sekolah.nama || '',
+        asal_sekolah: sekolah.sekolah.nama || '',
         nomor_ijazah: '',
-        tempat_ijazah: sekolah.kabKota || '',
+        tempat_ijazah: sekolah.sekolah.kabKota || '',
         tanggal_ijazah: '',
-        tahun_ajaran_id: selectedSemester.tahunAjaranId,
+        tahun_ajaran_id: `${selectedSemester.value.tahunAjaranId}`,
         is_complete: false
     }));
-
+    // console.log(anggotaKelas);
+    // return;
     isDialogKelulusan.value = false;
     addDns(anggotaKelas);
 };

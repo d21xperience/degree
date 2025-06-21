@@ -34,27 +34,28 @@ type Verification struct {
 }
 
 type IjazahBc struct {
-	ID                          uuid.UUID `gorm:"primaryKey;type:uuid"` // atau varchar sesuai kebutuhan
-	PesertaDidikID              uuid.UUID `gorm:"not null"`
-	Nama                        string
-	NIS                         string
-	NISN                        string
-	NPSN                        string
-	NomorIjazah                 string
-	TempatLahir                 string
-	TanggalLahir                *time.Time
-	NamaOrtuwali                string
-	PaketKeahlian               string
-	KabupatenKota               string
-	Provinsi                    string
-	ProgramKeahlian             string
-	SekolahPenyelenggaraUjianUS string
-	SekolahPenyelenggaraUjianUN string
-	AsalSekolah                 string
-	TempatIjazah                string
-	TanggalIjazah               *time.Time
-	CreatedAt                   time.Time
-	UpdatedAt                   time.Time
+	ID                          uuid.UUID  `gorm:"primaryKey;type:uuid"` // atau varchar sesuai kebutuhan
+	PesertaDidikID              uuid.UUID  `gorm:"not null"`
+	Nama                        string     `gorm:"column:nama"`
+	NIS                         string     `gorm:"column:nis"`
+	NISN                        string     `gorm:"column:nisn"`
+	NPSN                        string     `gorm:"column:npsn"`
+	NomorIjazah                 string     `gorm:"column:nomor_ijazah"`
+	TempatLahir                 string     `gorm:"column:tempat_lahir"`
+	TanggalLahir                *time.Time `gorm:"column:tanggal_lahir"`
+	NamaOrtuwali                string     `gorm:"column:nama_ortuwali"`
+	PaketKeahlian               string     `gorm:"column:paket_keahlian"`
+	KabupatenKota               string     `gorm:"column:kabupatenkota"`
+	Provinsi                    string     `gorm:"column:provinsi"`
+	ProgramKeahlian             string     `gorm:"column:program_keahlian"`
+	SekolahPenyelenggaraUjianUS string     `gorm:"column:sekolah_penyelenggara_ujian_us"`
+	SekolahPenyelenggaraUjianUN string     `gorm:"column:sekolah_penyelenggara_ujian_un"`
+	AsalSekolah                 string     `gorm:"column:asal_sekolah"`
+	TempatIjazah                string     `gorm:"column:tempat_ijazah"`
+	TanggalIjazah               *time.Time `gorm:"column:tanggal_ijazah"`
+
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (IjazahBc) TableName() string {
@@ -70,13 +71,13 @@ type DegreeData struct {
 	IpfsURL        string
 	BcType         string
 	LinkBcExplorer string
+	TahunAjaranId  string     `gorm:"column:tahun_ajaran_id"`
+	SekolahId      *uuid.UUID `gorm:"column:sekolah_id"`
+	CreatedAt      time.Time
+	UpdatedAt      time.Time
 	// UrlBCExplorerEther  string `gorm:"column:url_bc_explorerEther"`
 	// UrlBCExplorerQuorum string `gorm:"column:url_bc_explorerQuorum"`
 	// UrlBCExplorerFabric string `gorm:"column:url_bc_explorerFabric"`
-	SekolahId     uuid.UUID
-	TahunAjaranId uint32
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
 }
 
 func (DegreeData) TableName() string {

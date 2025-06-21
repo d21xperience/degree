@@ -185,8 +185,8 @@ export function useSekolahService() {
     const fetchKelas = async (kelasId = null, tingkatPendidikanId = null) => {
         try {
             let response = store.getters['sekolahService/getKelas'];
-
-            if (!response || response.length == 0 || initSelectedSemester.value?.semesterId != response?.semesterId) {
+            console.log(response);
+            if (!response || response.kelas.length == 0 || initSelectedSemester.value?.semesterId != response?.semesterId) {
                 const payload = {
                     schemaname: schemaname.value,
                     semester_id: initSelectedSemester.value?.semesterId
@@ -260,7 +260,7 @@ export function useSekolahService() {
         let res = await store.getters['sekolahService/getSiswaAktif'];
 
         // console.log(res.semester_id != payload.semesterId);
-        if (!res) {
+        if (!res || res?.peserta_didik.length == 0) {
             res = await store.dispatch('sekolahService/fetchSiswaAktif', payload);
         } else {
             if (res.semester_id != payload.semesterId) {
@@ -379,7 +379,7 @@ export function useSekolahService() {
                 const payload = {
                     jenjang_pendidikan_id: await store.getters['sekolahService/getSekolah']?.sekolah.jenjangPendidikanId //sekolah.value?.jenjangPendidikanId
                 };
-                console.log(payload);
+                // console.log(payload);
                 response = await store.dispatch('sekolahService/fetchTingkatPendidikan', payload);
             }
             return response;
@@ -426,6 +426,8 @@ export function useSekolahService() {
                 tahun_ajaran_id: `${initSelectedSemester.value?.tahunAjaranId}`,
                 data_nominasi_sementara: dns
             };
+            // console.log(payload);
+            // return;
             const response = await store.dispatch('sekolahService/createDns', payload);
             if (response.status) {
                 toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
@@ -437,7 +439,8 @@ export function useSekolahService() {
     const getDns = async (tahunAjaranId) => {
         try {
             let response = await store.getters['sekolahService/getDns'];
-            if (!response || response.length == 0 || response.tahun_ajaran_id != tahunAjaranId) {
+            console.log(response)
+            if (!response || response?.dataNominasiSementara.length == 0 || response.tahun_ajaran_id != tahunAjaranId) {
                 const payload = {
                     schemaname: schemaname.value,
                     tahun_ajaran_id: tahunAjaranId,

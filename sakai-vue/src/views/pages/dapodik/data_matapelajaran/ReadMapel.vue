@@ -275,7 +275,7 @@ const initKategoriMapel = async () => {
     }
 
     kategoriMapelList.value = await sekolahService.fetchKategoriMapel(payload);
-    console.log(kategoriMapelList.value);
+    // console.log(kategoriMapelList.value);
 };
 
 const initFirst = async () => {

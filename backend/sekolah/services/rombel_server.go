@@ -130,8 +130,7 @@ func (s *RombelServiceServer) GetKelas(ctx context.Context, req *pb.GetKelasRequ
 	}
 	preloads := []string{"PTK", "Jurusan", "Kurikulum", "TingkatPendidikan", "AnggotaKelas", "AnggotaKelas.PesertaDidik", "Pembelajaran", "Pembelajaran.PTKTerdaftar", "Pembelajaran.PTKTerdaftar.PTK"}
 
-	// groupBy := []string{"tabel_kelas.rombongan_belajar_id"} // Hindari duplikasi
-	orderBy := []string{"tabel_kelas.nm_kelas"} // Hindari duplikasi
+	orderBy := []string{"tabel_kelas.nm_kelas"}
 	rombelModel, err = s.repo.FindWithPreloadAndJoins(ctx, schemaName, nil, preloads, conditions, nil, orderBy, false)
 	if err != nil {
 		return &pb.GetKelasResponse{
@@ -142,7 +141,7 @@ func (s *RombelServiceServer) GetKelas(ctx context.Context, req *pb.GetKelasRequ
 	}
 
 	banyakKelasList := utils.ConvertModelsToPB(rombelModel, func(kelas models.RombonganBelajar) *pb.Kelas {
-		// jmlhAnggota, err := s.repoRombelAnggota.CountRows(ctx, schemaName, map[string]any{"rombongan_belajar_id": kelas.RombonganBelajarId.String()})
+		jmlhAnggota, err := s.repoRombelAnggota.CountRows(ctx, schemaName, map[string]any{"rombongan_belajar_id": kelas.RombonganBelajarId.String(), "semester_id": semesterId})
 		if err != nil {
 			return nil
 		}
@@ -158,33 +157,33 @@ func (s *RombelServiceServer) GetKelas(ctx context.Context, req *pb.GetKelasRequ
 			NamaJurusanSp:       utils.SafeString(kelas.NamaJurusanSp),
 			KurikulumId:         utils.SafeInt32(kelas.KurikulumId),
 
-			// AnggotaKelas: utils.ConvertPBToModels(utils.SliceToPointer(kelas.AnggotaKelas), func(item *models.RombelAnggota) *pb.AnggotaKelas {
-			// 	return &pb.AnggotaKelas{
-			// 		AnggotaRombelId:    item.AnggotaRombelId.String(),
-			// 		PesertaDidikId:     item.PesertaDidikId.String(),
-			// 		SemesterId:         item.SemesterId,
-			// 		RombonganBelajarId: item.RombonganBelajarId.String(),
-			// 		// NmKelas:            item.RombonganBelajar.NmKelas,
+			AnggotaKelas: utils.ConvertPBToModels(utils.SliceToPointer(kelas.AnggotaKelas), func(item *models.RombelAnggota) *pb.AnggotaKelas {
+				return &pb.AnggotaKelas{
+					AnggotaRombelId:    item.AnggotaRombelId.String(),
+					PesertaDidikId:     item.PesertaDidikId.String(),
+					SemesterId:         item.SemesterId,
+					RombonganBelajarId: item.RombonganBelajarId.String(),
+					// NmKelas:            item.RombonganBelajar.NmKelas,
 
-			// 		PesertaDidik: &pb.Siswa{
-			// 			Nis:           utils.SafeString(item.PesertaDidik.Nis),
-			// 			Nisn:          utils.SafeString(item.PesertaDidik.Nisn),
-			// 			NmSiswa:       item.PesertaDidik.NmSiswa,
-			// 			TempatLahir:   utils.SafeString(item.PesertaDidik.TempatLahir),
-			// 			TanggalLahir:  utils.SafeTime(item.PesertaDidik.TanggalLahir).Format("2006-01-02"),
-			// 			JenisKelamin:  utils.SafeString(item.PesertaDidik.JenisKelamin),
-			// 			Agama:         utils.SafeString(item.PesertaDidik.Agama),
-			// 			AlamatSiswa:   utils.SafeString(item.PesertaDidik.AlamatSiswa),
-			// 			TeleponSiswa:  utils.SafeString(item.PesertaDidik.TeleponSiswa),
-			// 			NmAyah:        utils.SafeString(item.PesertaDidik.NmAyah),
-			// 			NmIbu:         utils.SafeString(item.PesertaDidik.NmIbu),
-			// 			PekerjaanAyah: utils.SafeString(item.PesertaDidik.PekerjaanAyah),
-			// 			PekerjaanIbu:  utils.SafeString(item.PesertaDidik.PekerjaanIbu),
-			// 			NmWali:        utils.SafeString(item.PesertaDidik.NmWali),
-			// 			PekerjaanWali: utils.SafeString(item.PesertaDidik.PekerjaanWali),
-			// 		},
-			// 	}
-			// }),
+					PesertaDidik: &pb.Siswa{
+						Nis:           utils.SafeString(item.PesertaDidik.Nis),
+						Nisn:          utils.SafeString(item.PesertaDidik.Nisn),
+						NmSiswa:       item.PesertaDidik.NmSiswa,
+						TempatLahir:   utils.SafeString(item.PesertaDidik.TempatLahir),
+						TanggalLahir:  utils.SafeTime(item.PesertaDidik.TanggalLahir).Format("2006-01-02"),
+						JenisKelamin:  utils.SafeString(item.PesertaDidik.JenisKelamin),
+						Agama:         utils.SafeString(item.PesertaDidik.Agama),
+						AlamatSiswa:   utils.SafeString(item.PesertaDidik.AlamatSiswa),
+						TeleponSiswa:  utils.SafeString(item.PesertaDidik.TeleponSiswa),
+						NmAyah:        utils.SafeString(item.PesertaDidik.NmAyah),
+						NmIbu:         utils.SafeString(item.PesertaDidik.NmIbu),
+						PekerjaanAyah: utils.SafeString(item.PesertaDidik.PekerjaanAyah),
+						PekerjaanIbu:  utils.SafeString(item.PesertaDidik.PekerjaanIbu),
+						NmWali:        utils.SafeString(item.PesertaDidik.NmWali),
+						PekerjaanWali: utils.SafeString(item.PesertaDidik.PekerjaanWali),
+					},
+				}
+			}),
 			// Ptk: &pb.PTK{
 			// 	PtkId:             kelas.PTK.PtkID.String(),
 			// 	Nama:              kelas.PTK.Nama,
@@ -235,7 +234,7 @@ func (s *RombelServiceServer) GetKelas(ctx context.Context, req *pb.GetKelasRequ
 			// 		},
 			// 	}
 			// }),
-			// JumlahAnggota: uint32(jmlhAnggota),
+			JumlahAnggota: uint32(jmlhAnggota),
 		}
 	})
 	return &pb.GetKelasResponse{

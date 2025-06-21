@@ -93,6 +93,46 @@ func ClassifyEducationGrade(educationForm *models.BentukPendidikan) uint32 {
 
 //		return "Tidak Diketahui"
 //	}
+// func BuatSingkatan(nama string) string {
+// 	var kataYangDiabaikan = map[string]bool{
+// 		"dan":    true,
+// 		"dari":   true,
+// 		"ke":     true,
+// 		"yang":   true,
+// 		"untuk":  true,
+// 		"dengan": true,
+// 		"di":     true,
+// 	}
+
+// 	// Singkatan khusus (override)
+// 	var singkatanKhusus = map[string]string{
+// 		"akuntansi": "AK",
+// 	}
+
+// 	// Cek override khusus
+// 	normalisasi := strings.ToLower(strings.TrimSpace(nama))
+// 	if val, ok := singkatanKhusus[normalisasi]; ok {
+// 		return val
+// 	}
+
+// 	kata := strings.Fields(normalisasi)
+// 	singkatan := ""
+
+// 	for _, k := range kata {
+// 		if kataYangDiabaikan[k] {
+// 			continue
+// 		}
+// 		for _, r := range k {
+// 			if unicode.IsLetter(r) {
+// 				singkatan += strings.ToUpper(string(r))
+// 				break
+// 			}
+// 		}
+// 	}
+
+// 	return singkatan
+// }
+// VERSI 2
 func BuatSingkatan(nama string) string {
 	var kataYangDiabaikan = map[string]bool{
 		"dan":    true,
@@ -104,12 +144,10 @@ func BuatSingkatan(nama string) string {
 		"di":     true,
 	}
 
-	// Singkatan khusus (override)
 	var singkatanKhusus = map[string]string{
 		"akuntansi": "AK",
 	}
 
-	// Cek override khusus
 	normalisasi := strings.ToLower(strings.TrimSpace(nama))
 	if val, ok := singkatanKhusus[normalisasi]; ok {
 		return val
@@ -130,5 +168,5 @@ func BuatSingkatan(nama string) string {
 		}
 	}
 
-	return singkatan
+	return strings.TrimSpace(singkatan)
 }

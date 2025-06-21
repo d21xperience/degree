@@ -14,6 +14,7 @@
                             :sekolah="sekolah"
                             :ipfsUrl="ipfsUrl"
                             :transcript="transcript"
+                            :tahunAjaranId="`${tahunAjaranId}`"
                             :contract="contract"
                             class="bg-blue-600 p-3 rounded-lg text-white"
                             :disabled="!selectedSiswa"
@@ -48,7 +49,7 @@
             :filters="filters"
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rowsPerPageOptions="[10, 20, 50]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} siswa"
         >
             <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
             <Column field="kelas.nmKelas" header="Kelas" style="width: 5rem"></Column>
@@ -90,9 +91,8 @@ import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import InputText from 'primevue/inputtext';
 import Toolbar from 'primevue/toolbar';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 const { formatterDateID } = useUtils();
-
 const visible = ref(false);
 const tingkatPendidikanOptions = ref();
 const selectedSiswa = ref();
@@ -103,7 +103,7 @@ const filters = ref({
     'kelas.nmKelas': { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
 const { getDns, deleteDns, initSelectedTahunAjaran, fetchSekolah } = useSekolahService();
-
+const tahunAjaranId = computed(() => initSelectedTahunAjaran.value.tahunAjaranId);
 watch(initSelectedTahunAjaran, async (e) => {
     // console.log(`${e.tahunAjaranId}`);
     siswa.value = await getDns(`${e.tahunAjaranId}`);
@@ -148,11 +148,12 @@ watch(selectedSiswa, (newVal) => {
 const namaKelas = ref();
 onMounted(async () => {
     siswa.value = await getDns(initSelectedTahunAjaran.value?.tahunAjaranId);
-    // namaKelas.value = [...new Set(siswa.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
-    //     nama: nm,
-    //     value: nm.toLowerCase()
-    // }));
-    namaKelas.value = getNmKelas(siswa);
+    // console.log(siswa.value)
+    namaKelas.value = [...new Set(siswa.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
+        nama: nm,
+        value: nm.toLowerCase()
+    }));
+    // namaKelas.value = getNmKelas(siswa);
 });
 
 const getNmKelas = (data) => {

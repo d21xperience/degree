@@ -27,47 +27,50 @@ CREATE TABLE sekolah_tenants (
     user_id INTEGER DEFAULT NULL,
     sekolah_id INTEGER DEFAULT NULL,
     schema_name TEXT NOT NULL,
+    sekolah_tenant_id BIGINT NOT NULL,
     CONSTRAINT uni_sekolah_tenants_schema_name UNIQUE (schema_name)
 );
 
 CREATE INDEX idx_sekolah_tenants_deleted_at ON sekolah_tenants (deleted_at);
 
 CREATE TABLE IF NOT EXISTS ijazah_bc (
-    id UUID PRIMARY KEY,
-    peserta_didik_id UUID NOT NULL,
-    nama VARCHAR(255),
-    nis VARCHAR(50),
-    nisn VARCHAR(50),
-    npsn VARCHAR(50),
-    nomor_ijazah VARCHAR(100),
-    tempat_lahir VARCHAR(100),
-    tanggal_lahir DATE,
-    nama_ortuwali VARCHAR(255),
-    paket_keahlian VARCHAR(255),
-    kabupatenkota VARCHAR(100),
-    provinsi VARCHAR(100),
-    program_keahlian VARCHAR(255),
-    sekolah_penyelenggara_ujian_us VARCHAR(255),
-    sekolah_penyelenggara_ujian_un VARCHAR(255),
-    asal_sekolah VARCHAR(255),
-    tempat_ijazah VARCHAR(100),
-    tanggal_ijazah DATE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	id uuid NOT NULL,
+	peserta_didik_id uuid NOT NULL,
+	nama varchar(255) NULL,
+	nis varchar(50) NULL,
+	nisn varchar(50) NULL,
+	npsn varchar(50) NULL,
+	nomor_ijazah varchar(100) NULL,
+	tempat_lahir varchar(100) NULL,
+	tanggal_lahir date NULL,
+	nama_ortuwali varchar(255) NULL,
+	paket_keahlian varchar(255) NULL,
+	kabupatenkota varchar(100) NULL,
+	provinsi varchar(100) NULL,
+	program_keahlian varchar(255) NULL,
+	sekolah_penyelenggara_ujian_us varchar(255) NULL,
+	sekolah_penyelenggara_ujian_un varchar(255) NULL,
+	asal_sekolah varchar(255) NULL,
+	tempat_ijazah varchar(100) NULL,
+	tanggal_ijazah date NULL,
+	created_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	updated_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	CONSTRAINT ijazah_bc_pkey PRIMARY KEY (id),
+	CONSTRAINT ijazah_bc_unique UNIQUE (peserta_didik_id)
 );
 CREATE TABLE IF NOT EXISTS degree_data (
-    id SERIAL PRIMARY KEY,
-    ijazah_id UUID NOT NULL,
-    degree_hash VARCHAR(255),
-    tx_hash VARCHAR(255),
-    ipfs_url TEXT,
-    bc_type VARCHAR(50),
-    link_bc_explorer TEXT,
-    sekolah_id UUID NOT NULL,
-    tahun_ajaran_id INTEGER NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_ijazah FOREIGN KEY (ijazah_id) REFERENCES ijazah_bc(id) ON UPDATE CASCADE ON DELETE CASCADE
+	id serial4 NOT NULL,
+	ijazah_id uuid NOT NULL,
+	degree_hash varchar(255) NULL,
+	tx_hash varchar(255) NULL,
+	ipfs_url text NULL,
+	bc_type varchar(50) NULL,
+	link_bc_explorer text NULL,
+	sekolah_id uuid NOT NULL,
+	tahun_ajaran_id varchar NOT NULL,
+	created_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	updated_at timestamp DEFAULT CURRENT_TIMESTAMP NULL,
+	CONSTRAINT degree_data_pkey PRIMARY KEY (id)
 );
 
 

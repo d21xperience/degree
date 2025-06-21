@@ -25,8 +25,8 @@ func (SekolahTenant) TableName() string {
 }
 
 type TaskPayload struct {
-	SekolahTenant SekolahTenant
-	UserId  uint32
+	SekolahTenant SekolahTenant `json:"sekolah"`
+	UserId        uint32        `json:"user_id"`
 }
 
 // type SekolahRef struct {

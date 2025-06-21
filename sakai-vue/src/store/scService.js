@@ -193,6 +193,8 @@ const actions = {
     },
     async createIjazahBC({ commit }, payload) {
         try {
+            // console.log(JSON.stringify(payload));
+            // return;
             const response = await api.post(`/sc/ijazah-bc/create`, JSON.stringify(payload));
             return response.data;
         } catch (error) {

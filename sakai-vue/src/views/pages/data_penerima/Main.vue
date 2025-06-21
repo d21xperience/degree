@@ -13,7 +13,7 @@
                 <div class="md:flex md:items-center md:space-x-2">
                     <label class="text-slate-500 md:text-base text-sm">Tahun Pelajaran</label>
                     <div>
-                        <Select v-model="selectedTahunAjaran" :options="listTahunAjaran" optionLabel="nama" placeholder="Tahun Pelajaran" class="w-full md:w-52 mr-2" :disabled="isDisabled" />
+                        <Select v-model="sekolahService.selectedTahunAjaran" :options="listTahunAjaran" optionLabel="nama" placeholder="Tahun Pelajaran" class="w-full md:w-52 mr-2" :disabled="isDisabled" />
                     </div>
                 </div>
             </div>
@@ -48,7 +48,8 @@ const route = useRoute();
 import Dialog from 'primevue/dialog';
 import Select from 'primevue/select';
 
-const { selectedTahunAjaran, initSelectedTahunAjaran, listTahunAjaran } = useSekolahService();
+// const { selectedTahunAjaran, initSelectedTahunAjaran, listTahunAjaran } = useSekolahService();
+const sekolahService = useSekolahService();
 const platformsActivate = ref({});
 const platforms = ref(null);
 
@@ -119,11 +120,15 @@ const platformDiactive = async () => {
     platformsActivate.value = {};
     selectedPlatform.value = '';
 };
+const listTahunAjaran = ref([]);
+// const selectedTahunAjaran = ref();
 onMounted(async () => {
-    selectedTahunAjaran.value = initSelectedTahunAjaran.value;
-    // await fetchPlatforms();
+    await sekolahService.fetchTahunAjaran();
+    listTahunAjaran.value = sekolahService.listTahunAjaran.value._rawValue;
+    sekolahService.selectedTahunAjaran.value = sekolahService.initSelectedTahunAjaran.value;
+    // // await fetchPlatforms();
     // await fetchSemester();
-});
+}); 
 // const semester = ref();
 // const fetchSemester = async () => {
 //     try {

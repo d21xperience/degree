@@ -11,6 +11,7 @@ import (
 	"sekolah/repositories"
 	"sekolah/utils"
 	"strconv"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/xuri/excelize/v2"
@@ -493,10 +494,11 @@ func (s *SekolahService) ProsesKategoriSekolahDanKelas(ctx context.Context, req 
 			}
 			for z := 1; z <= 2; z++ {
 				entity := &models.RombonganBelajar{
-					RombonganBelajarId:  uuid.New(),
-					SemesterId:          fmt.Sprintf("%s%d", tahunAjaranId, z),
-					JurusanId:           v.JurusanId,
-					NmKelas:             fmt.Sprintf("%s %s %s", utils.AngkaKeRomawi(int(v.TingkatId)), nmKelas, kelompokKelas),
+					RombonganBelajarId: uuid.New(),
+					SemesterId:         fmt.Sprintf("%s%d", tahunAjaranId, z),
+					JurusanId:          v.JurusanId,
+					// NmKelas:             fmt.Sprintf("%s %s %s", utils.AngkaKeRomawi(int(v.TingkatId)), nmKelas, kelompokKelas),
+					NmKelas:             strings.TrimSpace(fmt.Sprintf("%s %s %s", utils.AngkaKeRomawi(int(v.TingkatId)), nmKelas, kelompokKelas)),
 					TingkatPendidikanId: v.TingkatId,
 					KurikulumId:         &v.KurikulumId,
 					JenisRombel:         utils.Int32ToPointer(1),
@@ -509,8 +511,6 @@ func (s *SekolahService) ProsesKategoriSekolahDanKelas(ctx context.Context, req 
 				// s.createPembelajaran(ctx, entity, Schemaname)
 			}
 		}
-		// }
-		// }
 	}
 
 	return &pb.ProsesKategoriSekolahDanKelasResponse{

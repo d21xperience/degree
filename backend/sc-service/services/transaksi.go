@@ -41,22 +41,7 @@ func (s *TransaksiService) CreateIjazahBlockchain(ctx context.Context, req *pb.C
 	if err != nil {
 		return nil, err
 	}
-	// dataJSON, err := json.MarshalIndent(req.DegreeData, "", "  ")
-	// if err != nil {
-	// 	log.Printf("Gagal serialisasi DegreeData: %v", err)
-	// } else {
-	// 	log.Printf("Isi lengkap DegreeData:\n%s", dataJSON)
-	// }
 	degreeData := req.GetDegreeData()
-	// log.Printf("%s", degreeData)
-	// =================
-	// proto sekolah
-	sekolahClient, err := NewSekolahServiceClient()
-	if err != nil {
-		return nil, err
-	}
-	// =================
-	sekolah := sekolahClient.SearchSekolah(req.Schemaname)
 
 	var ijazahBcModels = &models.IjazahBc{
 		ID:                          uuid.New(),
@@ -72,14 +57,13 @@ func (s *TransaksiService) CreateIjazahBlockchain(ctx context.Context, req *pb.C
 		TempatIjazah:                degreeData.Ijazah.TempatIjazah,
 		TanggalIjazah:               utils.TimeToPointer(degreeData.Ijazah.TanggalIjazah),
 		PaketKeahlian:               degreeData.Ijazah.PaketKeahlian,
-		KabupatenKota:               sekolah.KabKota,
-		Provinsi:                    sekolah.Propinsi,
-		SekolahPenyelenggaraUjianUS: sekolah.Nama,
-		SekolahPenyelenggaraUjianUN: sekolah.Nama,
-		NPSN:                        sekolah.Npsn,
+		KabupatenKota:               degreeData.Ijazah.Kabupatenkota,
+		Provinsi:                    degreeData.Ijazah.Provinsi,
+		SekolahPenyelenggaraUjianUS: degreeData.Ijazah.SekolahPenyelenggaraUjianUs,
+		SekolahPenyelenggaraUjianUN: degreeData.Ijazah.SekolahPenyelenggaraUjianUn,
+		NPSN:                        degreeData.Ijazah.Npsn,
+		TanggalLahir:                utils.TimeToPointer(degreeData.Ijazah.TanggalLahir),
 	}
-
-	// ijazahBcModels = append(ijazahBcModels, cek)
 	degreeDataModels := &models.DegreeData{
 		IjazahID:       ijazahBcModels.ID,
 		DegreeHash:     degreeData.DegreeHash,
@@ -87,14 +71,22 @@ func (s *TransaksiService) CreateIjazahBlockchain(ctx context.Context, req *pb.C
 		IpfsURL:        degreeData.IpfsUrl,
 		BcType:         degreeData.BcType,
 		LinkBcExplorer: degreeData.LinkBcExplorer,
+		TahunAjaranId:  degreeData.TahunAjaranId,
+		SekolahId:      utils.UUIDToPointer(utils.StringToUUID(degreeData.SekolahId)),
 	}
 	ijazahBc := s.repoIjazahBc.Save(ctx, ijazahBcModels, "public")
 	if ijazahBc != nil {
-		return nil, err
+		return &pb.CreateIjazahBlockchainResponse{
+			Status:  false,
+			Message: "Gagal menyimpan Ijazah",
+		}, nil
 	}
 	degreData := s.repoDegreeData.Save(ctx, degreeDataModels, "public")
 	if degreData != nil {
-		return nil, err
+		return &pb.CreateIjazahBlockchainResponse{
+			Status:  false,
+			Message: "Gagal menyimpan Hash",
+		}, nil
 	}
 
 	return &pb.CreateIjazahBlockchainResponse{

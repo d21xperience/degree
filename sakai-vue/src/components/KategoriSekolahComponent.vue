@@ -74,8 +74,8 @@
                 </div>
             </div>
             <div class="flex justify-end space-x-4 mt-10">
-                <Button v-if="formState.isEditMode" @click="editKategoriSekolah" label="Update" severity="warn" class="w-20" :disabled="formState.isSubmitDisabled" />
-                <Button v-else @click="addKategoriSekolah" :label="formState.submitButtonText" severity="warn" :disabled="formState.isSubmitDisabled" />
+                <!-- <Button v-if="formState.isEditMode" @click="editKategoriSekolah" label="Update" severity="warn" class="w-20" :disabled="formState.isSubmitDisabled" /> -->
+                <Button @click="addKategoriSekolah" :label="formState.submitButtonText" severity="warn" :disabled="formState.isSubmitDisabled" />
                 <Button @click="isDialogVisible.addKategoriSekolah = false" severity="help" label="Batal" class="w-20" />
             </div>
         </Dialog>

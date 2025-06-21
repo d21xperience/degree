@@ -243,7 +243,8 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.data_nominasi_sementara (
 	is_complete BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    deleted_at TIMESTAMP NULL
+    deleted_at TIMESTAMP NULL,
+	CONSTRAINT data_nominasi_sementara_unique UNIQUE (peserta_didik_id)
 );
 
 CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_informasi_ijazah (

@@ -4,8 +4,7 @@ coverage
 .nuxt
 .nitro
 .cache
-.output
-.env
+.output 
 dist
 .DS_Store
 .idea

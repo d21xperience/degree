@@ -275,7 +275,7 @@ func (r *GenericRepository[T]) SoftDelete(ctx context.Context, schemaName string
 		return nil
 	})
 }
-func (r *GenericRepository[T]) SoftDeleteBatch(ctx context.Context, schemaName string, entities []*T, ids []string,  columnName string) error {
+func (r *GenericRepository[T]) SoftDeleteBatch(ctx context.Context, schemaName string, entities []*T, ids []string, columnName string) error {
 	// Validasi UUID
 	validIDs := make([]string, 0, len(ids))
 	for _, id := range ids {
@@ -307,7 +307,6 @@ func (r *GenericRepository[T]) SoftDeleteBatch(ctx context.Context, schemaName s
 		return nil
 	})
 }
-
 
 func (r *GenericRepository[T]) SaveMany(ctx context.Context, schemaName string, entities []*T, batchSize int) error {
 	// fmt.Println("eksekusi di savemany")
@@ -372,9 +371,9 @@ func (r *GenericRepository[T]) FindWithPreloadAndJoinsOrigin(
 ) ([]T, error) {
 	var results []T
 	tx := r.db.WithContext(ctx)
-
+	tableName := fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)
 	// Set Schema (Multi-Tenant)
-	if err := tx.Exec(fmt.Sprintf("SET search_path TO %s", schemaName)).Error; err != nil {
+	if err := tx.Table(tableName).Error; err != nil {
 		return nil, fmt.Errorf("failed to set schema: %w", err)
 	}
 
@@ -400,6 +399,46 @@ func (r *GenericRepository[T]) FindWithPreloadAndJoinsOrigin(
 
 	return results, nil
 }
+
+// versi 2
+// func (r *GenericRepository[T]) FindWithPreloadAndJoinsOrigin(
+// 	ctx context.Context,
+// 	schemaName string,
+// 	joins []string,
+// 	preloads []string,
+// 	conditions map[string]interface{},
+// 	orderBy []string,
+// ) ([]T, error) {
+// 	var results []T
+// 	tx := r.db.WithContext(ctx).Session(&gorm.Session{NewDB: true})
+
+// 	// 👇 GANTI ini:
+// 	// tx.Exec(fmt.Sprintf("SET search_path TO %s", schemaName))
+// 	// DENGAN ini:
+// 	tx = tx.Table(fmt.Sprintf("%s.%s", schemaName, "tabel_kelas"))
+
+// 	// Tambahkan Join
+// 	for _, join := range joins {
+// 		tx = tx.Joins(join)
+// 	}
+
+// 	// Tambahkan Preload
+// 	for _, preload := range preloads {
+// 		tx = tx.Preload(preload)
+// 	}
+
+// 	// Tambahkan Order
+// 	if len(orderBy) > 0 {
+// 		tx = tx.Order(strings.Join(orderBy, ", "))
+// 	}
+
+// 	// Tambahkan Where
+// 	if err := tx.Where(conditions).Find(&results).Error; err != nil {
+// 		return nil, err
+// 	}
+
+// 	return results, nil
+// }
 
 // Fungsi Generic untuk Preload One-To-Many
 func (r *GenericRepository[T]) FindWithPreloadAndJoins(

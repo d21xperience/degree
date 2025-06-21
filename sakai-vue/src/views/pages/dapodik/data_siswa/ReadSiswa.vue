@@ -141,13 +141,16 @@ watch(selectedSemester, async (e, b) => {
 });
 // ========IMPORT DATA========
 const dialogImport = ref(false);
-const saveImport = (e) => {
-    // console.log("Data disimpan:", e);
+const saveImport = async (e) => {
+    console.log('Data disimpan:', e);
     dialogImport.value = false;
+    const cek = await fetchSiswaAktif();
+    console.log(cek)
+    siswa.value = cek
 };
 
 const cancelImport = () => {
-    console.log('Import dibatalkan');
+    // console.log('Import dibatalkan');
     dialogImport.value = false;
 };
 
