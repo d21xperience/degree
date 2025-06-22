@@ -467,7 +467,7 @@ export function useSekolahService() {
         try {
             let response = await store.getters['sekolahService/getDns'];
             // console.log(response)
-            if (!response || response?.dataNominasiSementara.length == 0 || response.tahun_ajaran_id != tahunAjaranId) {
+            if (!response || !Array.isArray(response.dataNominasiSementara) || response.dataNominasiSementara.length === 0 || response.tahun_ajaran_id != tahunAjaranId) {
                 const payload = {
                     schemaname: schemaname.value,
                     tahun_ajaran_id: tahunAjaranId,

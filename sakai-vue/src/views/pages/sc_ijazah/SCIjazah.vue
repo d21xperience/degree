@@ -33,19 +33,27 @@
         >
             <!-- <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column> -->
             <!-- <Column field="kelas.nmKelas" header="Kelas" style="width: 5rem"></Column> -->
-            <Column field="nisn" header="NISN"></Column>
-            <Column field="nama" header="Nama" sortable></Column>
-            <Column field="nomorIjazah" header="No Ijazah"></Column>
-            <Column field="tempatLahir" header="Txt Hash"></Column>
-            <Column field="tempatLahir" header="Ijazah Hash"></Column>
+            <Column field="ijazah.nisn" header="NISN"></Column>
+            <Column field="ijazah.nama" header="Nama" sortable></Column>
+            <Column field="ijazah.nomorIjazah" header="No Ijazah"></Column>
+            <Column field="" header="Txt Hash">
+                <template #body="slotProps">
+                    {{ utils.ringkasHash(slotProps.data.txHash) }}
+                </template>
+            </Column>
+            <Column field="" header="Ijazah Hash">
+                <template #body="slotProps">
+                    {{ utils.ringkasHash(slotProps.data.degreeHash) }}
+                </template>
+            </Column>
             <Column field="" header="Tgl Trx">
                 <template #body="slotProps">
-                    {{ formatterDateID(slotProps.data.tanggalLahir) }}
+                    {{ slotProps.data.tglTransaksi }}
                 </template>
             </Column>
             <Column field="namaOrtuWali" header="Aksi">
                 <template #body="slotProps">
-                    <Button icon="pi pi-ethereum" class="mr-2 !text-sm" severity="danger" @click="handleDeleteKategoriKelas(slotProps.data)" size="small" rounded v-tooltip.bottom="'block explorer'" />
+                    <Button icon="pi pi-ethereum" class="mr-2 !text-sm" severity="danger" @click="handleLinkBlockscout(slotProps.data)" size="small" rounded v-tooltip.bottom="'block explorer'" />
                     <!-- <Button icon="pi pi-pencil" class="mr-2 !text-sm" severity="warn" @click="dialogEditKelas(slotProps.data)" size="small" rounded v-tooltip.bottom="'Edit kelas'" /> -->
                 </template>
             </Column>
@@ -67,6 +75,7 @@
 </template>
 
 <script setup>
+import { useSCService } from '@/composables/useSCService';
 import { useSekolahService } from '@/composables/useSekolahService';
 import { useUtils } from '@/composables/useUtils';
 import { FilterMatchMode } from '@primevue/core/api';
@@ -77,7 +86,7 @@ import InputIcon from 'primevue/inputicon';
 import InputText from 'primevue/inputtext';
 import Toolbar from 'primevue/toolbar';
 import { computed, onMounted, ref, watch } from 'vue';
-const { formatterDateID } = useUtils();
+const utils = useUtils();
 const visible = ref(false);
 const tingkatPendidikanOptions = ref();
 const selectedSiswa = ref();
@@ -87,12 +96,18 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     'kelas.nmKelas': { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
-const { getDns, deleteDns, initSelectedTahunAjaran, fetchSekolah } = useSekolahService();
-const tahunAjaranId = computed(() => initSelectedTahunAjaran.value.tahunAjaranId);
-watch(initSelectedTahunAjaran, async (e) => {
+// const { getDns, deleteDns, initSelectedTahunAjaran, fetchSekolah } = useSekolahService();
+
+const scService = useSCService();
+const sekolahService = useSekolahService();
+
+const sekolah = computed(() => sekolahService.sekolah.value);
+const tahunAjaranId = computed(() => sekolahService.initSelectedTahunAjaran.value.tahunAjaranId);
+watch(tahunAjaranId, async (e) => {
+    initialFirst();
     // console.log(`${e.tahunAjaranId}`);
-    siswa.value = await getDns(`${e.tahunAjaranId}`);
-    namaKelas.value = getNmKelas(siswa);
+    // siswa.value = await getDns(`${e.tahunAjaranId}`);
+    // namaKelas.value = getNmKelas(siswa);
 });
 
 // ==================================
@@ -113,7 +128,6 @@ import router from '@/router';
 //     tahun_lulus: 2024,
 //     major: 'Rekayasa Perangkat Lunak'
 // });
-const sekolah = ref('SMK PASUNDAN JATINANGOR');
 
 const ipfsUrl = ref('https://ipfs.io/ipfs/Qm...examplehash');
 const transcript = ref({
@@ -131,15 +145,6 @@ watch(selectedSiswa, (newVal) => {
     // }
 });
 const namaKelas = ref();
-onMounted(async () => {
-    siswa.value = await getDns(initSelectedTahunAjaran.value?.tahunAjaranId);
-    // console.log(siswa.value)
-    namaKelas.value = [...new Set(siswa.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
-        nama: nm,
-        value: nm.toLowerCase()
-    }));
-    // namaKelas.value = getNmKelas(siswa);
-});
 
 const getNmKelas = (data) => {
     return [...new Set(data.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
@@ -149,7 +154,7 @@ const getNmKelas = (data) => {
 };
 
 const editIjazah = async () => {
-    const sekolah = await fetchSekolah();
+    // const sekolah = await fetchSekolah();
     const nmSekolah = sekolah.sekolah?.nama.toLowerCase().replace(/\s+/g, '');
     // console.log(selectedSiswa.value);
     router.push({
@@ -180,5 +185,26 @@ const closeDialog = () => {
 const onSubmitIjazah = () => {
     deleteData();
 };
+
+const initialFirst = async () => {
+    siswa.value = await scService.getSCIjazah({ tahun_ajaran_id: tahunAjaranId.value, sekolah_id: sekolah.value.sekolah.sekolah_id });
+};
+
+const handleLinkBlockscout = (e) => {
+    const url = `http://localhost:26000/tx/${e.txHash}/internal-transactions`;
+    window.open(url, '_blank'); // Buka di tab baru
+};
+
 // ==================================
+onMounted(async () => {
+    // console.log(tahunAjaranId.value);
+    // console.log(sekolah.value);
+    // console.log(siswa.value);
+    initialFirst();
+    // namaKelas.value = [...new Set(siswa.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
+    //     nama: nm,
+    //     value: nm.toLowerCase()
+    // }));
+    // namaKelas.value = getNmKelas(siswa);
+});
 </script>

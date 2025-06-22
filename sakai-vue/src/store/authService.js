@@ -67,6 +67,8 @@ const mutations = {
         localStorage.removeItem('tabelDns');
         localStorage.removeItem('tabelJurusan');
         localStorage.removeItem('tabelSekolah');
+        localStorage.removeItem('CONTRACT');
+        localStorage.removeItem('SCIjazah');
         state.token = null;
         state.userRole = null;
         state.user = null;

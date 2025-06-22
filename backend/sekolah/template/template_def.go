@@ -38,7 +38,7 @@ func GetTemplateColumns(param *DataTemplate) ([]TemplateColumn, bool) {
 		return GetKelasColumns(), true
 	// case "ijazah":
 	// 	return GetIjazahColumns(), true
-	case "nilai_akhir":
+	case "transkrip":
 		return GetNilaiAkhirColumns(), true
 	default:
 		return nil, false

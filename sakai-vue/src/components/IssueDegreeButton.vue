@@ -72,8 +72,9 @@ const handleSubmit = async () => {
         }
 
         const gasEstimate = await contract.value.issueDegree.estimateGas(degreeHash, props.sekolah, issueDate, props.ipfsUrl, subjects, grades);
-
-        const proceed = confirm(`Biaya gas kira-kira: ${ethers.formatUnits(gasEstimate, 'gwei')} Gwei. Lanjutkan?`);
+        console.log(gasEstimate);
+        const biayaGas = ethers.formatUnits(gasEstimate, 'gwei');
+        const proceed = confirm(`Biaya gas kira-kira: ${biayaGas} Gwei. Lanjutkan?`);
         if (!proceed) return;
 
         const tx = await contract.value.issueDegree(degreeHash, props.sekolah, issueDate, props.ipfsUrl, subjects, grades);
@@ -81,7 +82,7 @@ const handleSubmit = async () => {
         await tx.wait();
         alert('Ijazah berhasil diverifikasi di blockchain!');
         emit('submit');
-        saveToBackend(tx.hash, degreeHash);
+        saveToBackend(tx.hash, degreeHash, biayaGas);
     } catch (err) {
         console.error(err);
         alert(`Gagal memproses: ${err.message}`);
@@ -149,7 +150,7 @@ onMounted(async () => {
     }
 });
 // 🗄️ Simpan ke backend
-const saveToBackend = async (txHash, degreeHash) => {
+const saveToBackend = async (txHash, degreeHash, biayaGas) => {
     if (!props.degreeData) {
         console.error('degreeData is undefined');
         return;

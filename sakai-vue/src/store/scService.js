@@ -12,7 +12,8 @@ const state = {
     BCPlatformSelected: JSON.parse(localStorage.getItem('BCPlatformSelected')) || null,
     BCAccountActivate: null,
     MetamasConnected: JSON.parse(localStorage.getItem('METAMASK_CONNECTED')) || null,
-    contract: JSON.parse(localStorage.getItem('CONTRACT')) || null
+    contract: JSON.parse(localStorage.getItem('CONTRACT')) || null,
+    SCIjazah: JSON.parse(localStorage.getItem('SCIjazah')) || null
 };
 
 const mutations = {
@@ -37,6 +38,10 @@ const mutations = {
     SET_CONTRACT(state, value) {
         state.contract = value;
         localStorage.setItem('CONTRACT', JSON.stringify(value));
+    },
+    SET_SCIjazah(state, value) {
+        state.SCIjazah = value;
+        localStorage.setItem('SCIjazah', JSON.stringify(value));
     }
 };
 
@@ -256,9 +261,29 @@ const actions = {
         } catch (error) {
             throw error;
         }
-    }
+    },
 
-    // }
+    // ============================================
+    // BC IJAZAH
+    // ============================================
+    async fetchSCIjazah({ commit }, payload) {
+        try {
+            // console.log(payload);
+            const response = await api.get(`sc/ijazah-bc`, {
+                params: {
+                    sekolah_id: payload.sekolah_id,
+                    tahun_ajaran_id: `${payload.tahun_ajaran_id}`
+                }
+            }); 
+            if (response) {
+                const results = { tahun_ajaran_id: `${payload.tahun_ajaran_id}`, degreeData: response.data.degreeData };
+                commit('SET_SCIjazah', results);
+                return response.data;
+            }
+        } catch (error) {
+            throw error;
+        }
+    } 
 };
 
 // ==========================================
@@ -269,7 +294,8 @@ const getters = {
     getBCAccount: (state) => state.BCACCOUNT,
     getBCAccountActivate: (state) => state.BCAccountActivate,
     getMetamaskConnected: (state) => state.MetamasConnected,
-    getContract: (state) => state.contract
+    getContract: (state) => state.contract,
+    getSCIjazah: (state) => state.SCIjazah
 };
 
 export default {

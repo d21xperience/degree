@@ -146,15 +146,6 @@ watch(selectedSiswa, (newVal) => {
     // }
 });
 const namaKelas = ref();
-onMounted(async () => {
-    siswa.value = await getDns(initSelectedTahunAjaran.value?.tahunAjaranId);
-    // console.log(siswa.value)
-    namaKelas.value = [...new Set(siswa.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
-        nama: nm,
-        value: nm.toLowerCase()
-    }));
-    // namaKelas.value = getNmKelas(siswa);
-});
 
 const getNmKelas = (data) => {
     return [...new Set(data.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
@@ -196,4 +187,14 @@ const onSubmitIjazah = () => {
     deleteData();
 };
 // ==================================
+
+onMounted(async () => {
+    siswa.value = await getDns(initSelectedTahunAjaran.value?.tahunAjaranId);
+    // console.log(siswa.value);
+    namaKelas.value = [...new Set(siswa.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
+        nama: nm,
+        value: nm.toLowerCase()
+    }));
+    // namaKelas.value = getNmKelas(siswa);
+});
 </script>

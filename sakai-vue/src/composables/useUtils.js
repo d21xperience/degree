@@ -2,58 +2,69 @@
 // import { computed } from "vue";
 
 export function useUtils(dataRombel) {
-  //   const tingkatPendidikanOptions = computed(() => {
-  //     const map = new Map();
-  //     for (const item of dataRombel.value) {
-  //       const tp = item.tingkatPendidikan;
-  //       if (tp && !map.has(tp.tingkatPendidikanId)) {
-  //         map.set(tp.tingkatPendidikanId, {
-  //           label: tp.nama,
-  //           value: tp.tingkatPendidikanId,
-  //         });
-  //       }
-  //     }
-  //     return Array.from(map.values());
-  //   });
+    //   const tingkatPendidikanOptions = computed(() => {
+    //     const map = new Map();
+    //     for (const item of dataRombel.value) {
+    //       const tp = item.tingkatPendidikan;
+    //       if (tp && !map.has(tp.tingkatPendidikanId)) {
+    //         map.set(tp.tingkatPendidikanId, {
+    //           label: tp.nama,
+    //           value: tp.tingkatPendidikanId,
+    //         });
+    //       }
+    //     }
+    //     return Array.from(map.values());
+    //   });
 
-  //   const jurusanOptions = computed(() => {
-  //     const map = new Map();
-  //     for (const item of dataRombel.value) {
-  //       const jur = item.jurusan;
-  //       if (jur && !map.has(jur.jurusanId)) {
-  //         map.set(jur.jurusanId, {
-  //           label: jur.namaJurusan,
-  //           value: jur.jurusanId,
-  //         });
-  //       }
-  //     }
-  //     return Array.from(map.values());
-  //   });
+    //   const jurusanOptions = computed(() => {
+    //     const map = new Map();
+    //     for (const item of dataRombel.value) {
+    //       const jur = item.jurusan;
+    //       if (jur && !map.has(jur.jurusanId)) {
+    //         map.set(jur.jurusanId, {
+    //           label: jur.namaJurusan,
+    //           value: jur.jurusanId,
+    //         });
+    //       }
+    //     }
+    //     return Array.from(map.values());
+    //   });
 
-  const formatterDateID = (tanggalRaw) => {
-    if (!tanggalRaw) return "-";
+    const formatterDateID = (tanggalRaw) => {
+        if (!tanggalRaw) return '-';
 
-    // Normalize format: Ganti spasi ke 'T' jika diperlukan
-    let normalizedDate = tanggalRaw.replace(" ", "T");
+        // Normalize format: Ganti spasi ke 'T' jika diperlukan
+        let normalizedDate = tanggalRaw.replace(' ', 'T');
 
-    // Buat objek Date
-    const tanggal = new Date(normalizedDate);
+        // Buat objek Date
+        const tanggal = new Date(normalizedDate);
 
-    // Cek validitas
-    if (isNaN(tanggal)) return "-";
+        // Cek validitas
+        if (isNaN(tanggal)) return '-';
 
-    const formatter = new Intl.DateTimeFormat("id-ID", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
+        const formatter = new Intl.DateTimeFormat('id-ID', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        });
 
-    return formatter.format(tanggal);
-  };
-
-  return {
-    // tingkatPendidikanOptions,
-    // jurusanOptions,
-    formatterDateID,
-  };
+        return formatter.format(tanggal);
+    };
+    const ringkasHash = (hash, awal = 6, akhir = 6) => {
+        if (!hash || hash.length < awal + akhir + 2) return hash;
+        return `${hash.slice(0, awal + 2)}...${hash.slice(-akhir)}`;
+    };
+    const getWebsiteUrl = (url) => {
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            return `https://${url}`; // Tambahkan https jika belum ada
+        }
+        return url;
+    };
+    return {
+        // tingkatPendidikanOptions,
+        // jurusanOptions,
+        formatterDateID,
+        ringkasHash,
+        getWebsiteUrl
+    };
 }

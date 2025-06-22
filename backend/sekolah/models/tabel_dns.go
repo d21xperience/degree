@@ -30,7 +30,7 @@ type DataNominasiSementara struct {
 	TanggalIjazah               time.Time `gorm:"type:date;not null"`
 	IsComplete                  bool      `gorm:"type:boolean;default:false;not null"`
 	TahunAjaranId               string    `gorm:"column:tahun_ajaran_id"`
-	JenisKelamin                string   `gorm:"column:jenis_kelamin"`
+	JenisKelamin                string    `gorm:"column:jenis_kelamin"`
 	// CreatedAt                   time.Time      `gorm:"type:timestamp;default:current_timestamp"`
 	// UpdatedAt                   time.Time      `gorm:"type:timestamp;default:current_timestamp"`
 	// DeletedAt                   gorm.DeletedAt `gorm:"index"`
@@ -38,6 +38,7 @@ type DataNominasiSementara struct {
 	// Relasi opsional
 	PesertaDidik     *PesertaDidik     `gorm:"foreignKey:PesertaDidikId;references:PesertaDidikId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 	RombonganBelajar *RombonganBelajar `gorm:"foreignKey:RombonganBelajarId;references:RombonganBelajarId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
+	NilaiAkhir       []NilaiAkhir      `gorm:"foreignKey:PesertaDidikId;references:PesertaDidikId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE"`
 }
 
 func (DataNominasiSementara) TableName() string {

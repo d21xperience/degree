@@ -113,10 +113,9 @@ func (s *TransaksiService) GetIjazahBlockchain(ctx context.Context, req *pb.GetI
 		return nil, fmt.Errorf("sekolah_id is required")
 	}
 	conditions := map[string]any{
-		"tahun_ajaran_id": tahunAjaranId,
+		"tahun_ajaran_id": fmt.Sprintf("%d", tahunAjaranId),
 		"sekolah_id":      sekolahId,
 	}
-
 	// joins := []string{
 	// 	// "JOIN tabel_ptk ON tabel_kelas.ptk_id = tabel_ptk.ptk_id",
 	// 	// "JOIN tabel_pembelajaran ON tabel_kelas.rombongan_belajar_id = tabel_pembelajaran.rombongan_belajar_id",
@@ -140,6 +139,7 @@ func (s *TransaksiService) GetIjazahBlockchain(ctx context.Context, req *pb.GetI
 			BcType:         item.BcType,
 			LinkBcExplorer: item.LinkBcExplorer,
 			TahunAjaranId:  item.TahunAjaranId,
+			TglTransaksi:   item.CreatedAt.Format("2006-01-26"),
 			Ijazah: &pb.Ijazah{
 				PesertaDidikId: item.Ijazah.PesertaDidikID.String(),
 				Nama:           item.Ijazah.Nama,

@@ -164,6 +164,12 @@ func (s *UploadServiceServer) UploadFileHTTP(w http.ResponseWriter, r *http.Requ
 				BacaDataExcel,
 			)
 		},
+		"transkrip": func() error {
+			return s.processUploadTranskrip(
+				context.Background(), param,
+				BacaDataExcel,
+			)
+		},
 		// Tambahkan tipe lain di sini...
 	}
 
@@ -305,31 +311,7 @@ func (h *UploadServiceServer) DownloadTemplateHTTP(w http.ResponseWriter, r *htt
 	}
 
 }
-
-// Definisikan fungsi untuk menangani upload berdasarkan tipe data
-// func processUpload[T any](
-// 	ctx context.Context,
-// 	param ParamTemplate,
-// 	uploadFunc func(ParamTemplate) ([]T, error),
-// 	saveFunc func(context.Context, *T, string) error,
-// ) error {
-// 	// Ambil data dari file
-// 	data, err := uploadFunc(param)
-// 	if err != nil {
-// 		return fmt.Errorf("gagal memproses file: %v", err)
-// 	}
-
-// 	// Iterasi data dan simpan ke database
-// 	for i := range data {
-// 		utils.HandleNilPointers(&data[i]) // Hindari pointer nil
-
-//			// Simpan ke database
-//			if err := saveFunc(ctx, &data[i], param.schemaname); err != nil {
-//				return fmt.Errorf("gagal menyimpan data: %v", err)
-//			}
-//		}
-//		return nil
-//	}
+ 
 func (s *UploadServiceServer) processUploadSiswa(
 	ctx context.Context,
 	param ParamTemplate,
@@ -562,6 +544,41 @@ func (s *UploadServiceServer) processUploadKelas(
 		}
 
 	}
+	return nil
+}
+
+func (s *UploadServiceServer) processUploadTranskrip(
+	ctx context.Context,
+	param ParamTemplate,
+	uploadFunc func(*ParamTemplate) ([][]string, error),
+) error {
+	// Ambil data dari file
+	// data, err := uploadFunc(&param)
+	// if err != nil {
+	// 	return fmt.Errorf("gagal memproses file: %v", err)
+	// }
+
+	// Iterasi data dan simpan ke database
+	// for _, row := range data {
+	// tingkat, err1 := strconv.Atoi(row[1])
+	// if err1 != nil {
+	// 	return err
+	// }
+	// // Jika kelas tersedia, simpan ke rombel anggota
+	// for j := 1; j <= 2; j++ {
+	// 	err := s.repoKelas.Save(ctx, &models.RombonganBelajar{
+	// 		RombonganBelajarId:  uuid.New(),
+	// 		SemesterId:          fmt.Sprintf("%s%d", param.semesterId, j),
+	// 		NmKelas:             row[0],
+	// 		TingkatPendidikanId: int32(tingkat),
+	// 		JenisRombel:         utils.Int32ToPointer(1),
+	// 	}, param.schemaname)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// }
+
+	// }
 	return nil
 }
 

@@ -18,6 +18,8 @@ export function useSCService() {
             console.log(error);
         }
     };
+
+    // BC IJAZAH
     const createSCIjazah = async (payload) => {
         try {
             const response = await store.dispatch('scService/createIjazahBC', { degree_data: payload });
@@ -30,6 +32,28 @@ export function useSCService() {
         }
     };
 
+    const getSCIjazah = async (payload) => {
+        try {
+            let response = await store.getters['scService/getSCIjazah'];
+            // console.log(response);
+            // return
+            if (!response || !Array.isArray(response.degreeData) || response.degreeData.length == 0 || response.tahun_ajaran_id != payload.tahun_ajaran_id) {
+                response = await store.dispatch('scService/fetchSCIjazah', payload);
+                // console.log(response);
+                if (response) {
+                    toast.add({ severity: 'success', summary: 'Successful', detail: `"${response.message}"`, life: 3000 });
+                    return response.degreeData;
+                } else {
+                    toast.add({ severity: 'info', summary: 'Failled', detail: `Silahkan reload aplikasi: "${response.message}"`, life: 3000 });
+                    return [];
+                }
+            }
+            return response.degreeData;
+        } catch (error) {
+            console.log(error);
+            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengirimkan  BC Ijazah: ${error}`, life: 3000 });
+        }
+    };
     const getContract = () => {
         try {
             let response = store.getters['scService/getContract'];
@@ -44,10 +68,12 @@ export function useSCService() {
             console.log(error);
         }
     };
+
     return {
         createMetamaskConnected,
         getMetamaskConnected,
         createSCIjazah,
-        getContract
+        getContract,
+        getSCIjazah
     };
 }

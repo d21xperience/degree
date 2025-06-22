@@ -206,7 +206,7 @@ func (s *IjazahServiceServer) GetDns(ctx context.Context, req *pb.GetDnsRequest)
 	joins := []string{
 		"JOIN tabel_kelas ON tabel_kelas.rombongan_belajar_id = data_nominasi_sementara.rombongan_belajar_id",
 	}
-	preloads := []string{"RombonganBelajar", "PesertaDidik"}
+	preloads := []string{"RombonganBelajar", "PesertaDidik", "NilaiAkhir"}
 	conditions := map[string]any{
 		"data_nominasi_sementara.tahun_ajaran_id": req.TahunAjaranId,
 		"data_nominasi_sementara.is_complete":     false,
@@ -245,6 +245,13 @@ func (s *IjazahServiceServer) GetDns(ctx context.Context, req *pb.GetDnsRequest)
 			Siswa: &pb.Siswa{
 				JenisKelamin: utils.SafeString(item.PesertaDidik.JenisKelamin),
 			},
+			NilaiAkhir: utils.ConvertModelsToPB(item.NilaiAkhir, func(item models.NilaiAkhir) *pb.NilaiAkhir {
+				return &pb.NilaiAkhir{
+					SemesterId:      item.SemesterId,
+					NilaiPeng:       utils.SafeUint32(item.NilaiPeng),
+					MataPelajaranId: utils.SafeUint32(item.MataPelajaranId),
+				}
+			}),
 		}
 	})
 
