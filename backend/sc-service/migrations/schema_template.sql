@@ -45,3 +45,9 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.transactions (
     timestamp TIMESTAMPTZ,
     UNIQUE (tx_hash)
 );
+
+CREATE TABLE IF NOT EXISTS {{schema_name}}.contracts (
+	id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	contract_address VARCHAR NULL DEFAULT NULL,
+	contract_owner VARCHAR NULL DEFAULT NULL
+);

@@ -13,7 +13,7 @@
                         </template>
                         <template #end>
                             <div class="flex">
-                                <Select v-model="filters['tingkatPendidikanId'].value" :options="tingkatPendidikanOptions" optionLabel="nama" optionValue="kode" placeholder="Tingkat" class="w-full md:w-36 mr-2" checkmark show-clear />
+                                <Select v-model="filters['tingkatPendidikanId'].value" :options="tingkatPendidikanOptions" optionLabel="nama" optionValue="kode" placeholder="Tingkat" class="w-full mr-2" checkmark show-clear />
                                 <IconField>
                                     <InputIcon>
                                         <i class="pi pi-search" />
@@ -142,11 +142,11 @@ watch(selectedSemester, async (e, b) => {
 // ========IMPORT DATA========
 const dialogImport = ref(false);
 const saveImport = async (e) => {
-    console.log('Data disimpan:', e);
+    // console.log('Data disimpan:', e);
     dialogImport.value = false;
     const cek = await fetchSiswaAktif();
-    console.log(cek)
-    siswa.value = cek
+    // console.log(cek)
+    siswa.value = cek;
 };
 
 const cancelImport = () => {

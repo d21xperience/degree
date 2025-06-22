@@ -111,7 +111,7 @@ func (s *IjazahServiceServer) CreateDns(ctx context.Context, req *pb.CreateDnsRe
 func (s *IjazahServiceServer) UpdateDns(ctx context.Context, req *pb.UpdateDnsRequest) (*pb.UpdateDnsResponse, error) {
 	var err error
 	// Daftar field yang wajib diisi
-	requiredFields := []string{"Schemaname", "SemesterId"}
+	requiredFields := []string{"Schemaname", "TahunAjaranId"}
 	// Validasi request
 	err = utils.ValidateFields(req, requiredFields)
 	if err != nil {
@@ -122,45 +122,48 @@ func (s *IjazahServiceServer) UpdateDns(ctx context.Context, req *pb.UpdateDnsRe
 		return nil, fmt.Errorf("schema name is required")
 	}
 	pbDns := req.GetDataNominasiSementara()
-	dns := utils.ConvertPBToModels(pbDns, func(item *pb.Dns) *models.DataNominasiSementara {
-		tglLahir, err := utils.StringToTime(item.TanggalLahir, "2006-01-02")
-		if err != nil {
-			return nil
-		}
-		tglIjazah, err := utils.StringToTime(item.TanggalIjazah, "2006-01-02")
-		if err != nil {
-			return nil
-		}
-		return &models.DataNominasiSementara{
-			PesertaDidikId:              utils.StringToUUID(item.PesertaDidikId),
-			RombonganBelajarId:          utils.StringToUUID(item.RombonganBelajarId),
-			Nama:                        item.Nama,
-			NIS:                         item.Nis,
-			NISN:                        item.Nisn,
-			TempatLahir:                 item.TempatLahir,
-			TanggalLahir:                tglLahir,
-			NamaOrtuWali:                item.NamaOrtuWali,
-			NPSN:                        item.Npsn,
-			ProgramKeahlian:             item.ProgramKeahlian,
-			KabupatenKota:               item.KabupatenKota,
-			SekolahPenyelenggaraUjianUS: item.SekolahPenyelenggaraUjianUn,
-			SekolahPenyelenggaraUjianUN: item.SekolahPenyelenggaraUjianUn,
-			PaketKeahlian:               item.PaketKeahlian,
-			Provinsi:                    item.Provinsi,
-			SekolahID:                   item.SekolahId,
-			AsalSekolah:                 item.AsalSekolah,
-			NomorIjazah:                 item.NomorIjazah,
-			TempatIjazah:                item.TempatIjazah,
-			TanggalIjazah:               tglIjazah,
-			// IsComplete:                  true,
-		}
-	})
-	err = s.repoDns.SaveMany(ctx, schemaName, dns, 100)
+	// dns := utils.ConvertPBToModels(pbDns, func(item *pb.Dns) *models.DataNominasiSementara {
+	tglLahir, err := utils.StringToTime(pbDns.TanggalLahir, "2006-01-02")
 	if err != nil {
 		return nil, err
 	}
+	tglIjazah, err := utils.StringToTime(pbDns.TanggalIjazah, "2006-01-02")
+	if err != nil {
+		return nil, err
+	}
+	dns := models.DataNominasiSementara{
+		//PesertaDidikId:              utils.StringToUUID(pbDns.PesertaDidikId),
+		RombonganBelajarId:          utils.StringToUUID(pbDns.RombonganBelajarId),
+		Nama:                        pbDns.Nama,
+		NIS:                         pbDns.Nis,
+		NISN:                        pbDns.Nisn,
+		TempatLahir:                 pbDns.TempatLahir,
+		TanggalLahir:                tglLahir,
+		NamaOrtuWali:                pbDns.NamaOrtuWali,
+		NPSN:                        pbDns.Npsn,
+		ProgramKeahlian:             pbDns.ProgramKeahlian,
+		KabupatenKota:               pbDns.KabupatenKota,
+		SekolahPenyelenggaraUjianUS: pbDns.SekolahPenyelenggaraUjianUn,
+		SekolahPenyelenggaraUjianUN: pbDns.SekolahPenyelenggaraUjianUn,
+		PaketKeahlian:               pbDns.PaketKeahlian,
+		Provinsi:                    pbDns.Provinsi,
+		SekolahID:                   pbDns.SekolahId,
+		AsalSekolah:                 pbDns.AsalSekolah,
+		NomorIjazah:                 pbDns.NomorIjazah,
+		TempatIjazah:                pbDns.TempatIjazah,
+		TanggalIjazah:               tglIjazah,
+
+		// IsComplete:                  true,
+	}
+	err = s.repoDns.Update(ctx, &dns, schemaName, "peserta_didik_id", pbDns.PesertaDidikId)
+	if err != nil {
+		return &pb.UpdateDnsResponse{
+			Message: fmt.Sprintf("Data nominasi sementara berhasil diupdate:%v", err),
+			Status:  false,
+		}, nil
+	}
 	return &pb.UpdateDnsResponse{
-		Message: "Data nominasi sementara berhasil disimpan",
+		Message: "Data nominasi sementara berhasil diupdate",
 		Status:  true,
 	}, nil
 }
@@ -265,12 +268,13 @@ func (s *IjazahServiceServer) SearchDns(ctx context.Context, req *pb.SearchDnsRe
 		return nil, fmt.Errorf("schema name is required")
 	}
 	pesertaDidikId := req.GetPesertaDidikId()
-	joins := []string{
-		"JOIN tabel_siswa ON tabel_siswa.peserta_didik_id = data_nominasi_sementara.peserta_didik_id",
-	}
-	preloads := []string{"PesertaDidik", "RombonganBelajar"}
-	conditions := map[string]any{"data_nominasi_sementara.tahun_ajaran_id": req.GetTahunAjaranId(), "data_nominasi_sementara.peserta_didik_id": pesertaDidikId}
-	pdModels, err := s.repoDns.FindWithPreloadAndJoins(ctx, schemaName, joins, preloads, conditions, nil, nil, false)
+	// joins := []string{
+	// 	"JOIN tabel_siswa ON tabel_siswa.peserta_didik_id = data_nominasi_sementara.peserta_didik_id",
+	// }
+	// preloads := []string{"PesertaDidik", "RombonganBelajar"}
+	// conditions := map[string]any{"data_nominasi_sementara.tahun_ajaran_id": req.GetTahunAjaranId(), "data_nominasi_sementara.peserta_didik_id": pesertaDidikId}
+	conditions := map[string]any{"data_nominasi_sementara.peserta_didik_id": pesertaDidikId}
+	pdModels, err := s.repoDns.FindWithPreloadAndJoinsOrigin(ctx, schemaName, nil, nil, conditions, nil)
 	if err != nil {
 		return &pb.SearchDnsResponse{
 			Status:  false,
@@ -309,38 +313,39 @@ func (s *IjazahServiceServer) SearchDns(ctx context.Context, req *pb.SearchDnsRe
 			TempatIjazah:                pdModels[0].TempatIjazah,
 			TanggalIjazah:               pdModels[0].TanggalLahir.Format("2006-01-02"),
 			IsComplete:                  pdModels[0].IsComplete,
-
-			Kelas: &pb.Kelas{
-				RombonganBelajarId:  pdModels[0].RombonganBelajar.RombonganBelajarId.String(),
-				SekolahId:           pdModels[0].RombonganBelajar.SekolahId.String(),
-				SemesterId:          pdModels[0].RombonganBelajar.SemesterId,
-				JurusanId:           utils.SafeString(pdModels[0].RombonganBelajar.JurusanId),
-				PtkId:               pdModels[0].RombonganBelajar.PtkID.String(),
-				NmKelas:             pdModels[0].RombonganBelajar.NmKelas,
-				TingkatPendidikanId: pdModels[0].RombonganBelajar.TingkatPendidikanId,
-				JenisRombel:         utils.SafeInt32(pdModels[0].RombonganBelajar.JenisRombel),
-				NamaJurusanSp:       utils.SafeString(pdModels[0].RombonganBelajar.NamaJurusanSp),
-				KurikulumId:         utils.SafeInt32(pdModels[0].RombonganBelajar.KurikulumId),
-			},
-			Siswa: &pb.Siswa{
-				Nis:           utils.SafeString(pdModels[0].PesertaDidik.Nis),
-				Nisn:          utils.SafeString(pdModels[0].PesertaDidik.Nisn),
-				NmSiswa:       pdModels[0].PesertaDidik.NmSiswa,
-				TempatLahir:   utils.SafeString(pdModels[0].PesertaDidik.TempatLahir),
-				TanggalLahir:  utils.SafeTime(pdModels[0].PesertaDidik.TanggalLahir).Format("2006-01-02"),
-				JenisKelamin:  utils.SafeString(pdModels[0].PesertaDidik.JenisKelamin),
-				Agama:         utils.SafeString(pdModels[0].PesertaDidik.Agama),
-				AlamatSiswa:   utils.SafeString(pdModels[0].PesertaDidik.AlamatSiswa),
-				TeleponSiswa:  utils.SafeString(pdModels[0].PesertaDidik.TeleponSiswa),
-				NmAyah:        utils.SafeString(pdModels[0].PesertaDidik.NmAyah),
-				NmIbu:         utils.SafeString(pdModels[0].PesertaDidik.NmIbu),
-				PekerjaanAyah: utils.SafeString(pdModels[0].PesertaDidik.PekerjaanAyah),
-				PekerjaanIbu:  utils.SafeString(pdModels[0].PesertaDidik.PekerjaanIbu),
-				NmWali:        utils.SafeString(pdModels[0].PesertaDidik.NmWali),
-				PekerjaanWali: utils.SafeString(pdModels[0].PesertaDidik.PekerjaanWali),
-				// DiterimaTanggal: utils.TimeToString(*siswa.PesertaDidik.DiterimaTanggal, "2006-01-02"),
-				// DiterimaTanggal: utils.SafeString(*siswa.PesertaDidik.DiterimaTanggal),
-			},
+			JenisKelamin:                pdModels[0].JenisKelamin,
+			TahunAjaranId:               pdModels[0].TahunAjaranId,
+			// Kelas: &pb.Kelas{
+			// 	RombonganBelajarId:  pdModels[0].RombonganBelajar.RombonganBelajarId.String(),
+			// 	SekolahId:           pdModels[0].RombonganBelajar.SekolahId.String(),
+			// 	SemesterId:          pdModels[0].RombonganBelajar.SemesterId,
+			// 	JurusanId:           utils.SafeString(pdModels[0].RombonganBelajar.JurusanId),
+			// 	PtkId:               pdModels[0].RombonganBelajar.PtkID.String(),
+			// 	NmKelas:             pdModels[0].RombonganBelajar.NmKelas,
+			// 	TingkatPendidikanId: pdModels[0].RombonganBelajar.TingkatPendidikanId,
+			// 	JenisRombel:         utils.SafeInt32(pdModels[0].RombonganBelajar.JenisRombel),
+			// 	NamaJurusanSp:       utils.SafeString(pdModels[0].RombonganBelajar.NamaJurusanSp),
+			// 	KurikulumId:         utils.SafeInt32(pdModels[0].RombonganBelajar.KurikulumId),
+			// },
+			// Siswa: &pb.Siswa{
+			// 	Nis:           utils.SafeString(pdModels[0].PesertaDidik.Nis),
+			// 	Nisn:          utils.SafeString(pdModels[0].PesertaDidik.Nisn),
+			// 	NmSiswa:       pdModels[0].PesertaDidik.NmSiswa,
+			// 	TempatLahir:   utils.SafeString(pdModels[0].PesertaDidik.TempatLahir),
+			// 	TanggalLahir:  utils.SafeTime(pdModels[0].PesertaDidik.TanggalLahir).Format("2006-01-02"),
+			// 	JenisKelamin:  utils.SafeString(pdModels[0].PesertaDidik.JenisKelamin),
+			// 	Agama:         utils.SafeString(pdModels[0].PesertaDidik.Agama),
+			// 	AlamatSiswa:   utils.SafeString(pdModels[0].PesertaDidik.AlamatSiswa),
+			// 	TeleponSiswa:  utils.SafeString(pdModels[0].PesertaDidik.TeleponSiswa),
+			// 	NmAyah:        utils.SafeString(pdModels[0].PesertaDidik.NmAyah),
+			// 	NmIbu:         utils.SafeString(pdModels[0].PesertaDidik.NmIbu),
+			// 	PekerjaanAyah: utils.SafeString(pdModels[0].PesertaDidik.PekerjaanAyah),
+			// 	PekerjaanIbu:  utils.SafeString(pdModels[0].PesertaDidik.PekerjaanIbu),
+			// 	NmWali:        utils.SafeString(pdModels[0].PesertaDidik.NmWali),
+			// 	PekerjaanWali: utils.SafeString(pdModels[0].PesertaDidik.PekerjaanWali),
+			// DiterimaTanggal: utils.TimeToString(*siswa.PesertaDidik.DiterimaTanggal, "2006-01-02"),
+			// DiterimaTanggal: utils.SafeString(*siswa.PesertaDidik.DiterimaTanggal),
+			// },
 		},
 	}, nil
 

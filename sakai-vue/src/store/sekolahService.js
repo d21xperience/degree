@@ -1081,6 +1081,15 @@ const actions = {
             throw error;
         }
     },
+    async updateDns({ commit }, payload) {
+        try {
+            const response = await api.put(`ss/ijazah/data-nominasi_sementara/update`, payload);
+            
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
     async fetchDns({ commit }, payload) {
         try {
             const response = await api.get(`/ss/data-nominasi_sementara`, {

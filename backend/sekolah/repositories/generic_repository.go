@@ -367,15 +367,13 @@ func (r *GenericRepository[T]) FindWithPreloadAndJoinsOrigin(
 	joins []string,
 	preloads []string,
 	conditions map[string]interface{},
-	orderBy []string, // Tambahkan parameter orderBy
+	orderBy []string,
 ) ([]T, error) {
 	var results []T
 	tx := r.db.WithContext(ctx)
-	tableName := fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)
-	// Set Schema (Multi-Tenant)
-	if err := tx.Table(tableName).Error; err != nil {
-		return nil, fmt.Errorf("failed to set schema: %w", err)
-	}
+
+	// Set schema dan nama tabel secara dinamis
+	tx = tx.Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName))
 
 	// Tambahkan Joins jika ada
 	for _, join := range joins {
@@ -389,7 +387,7 @@ func (r *GenericRepository[T]) FindWithPreloadAndJoinsOrigin(
 
 	// Tambahkan ORDER BY jika ada
 	if len(orderBy) > 0 {
-		tx = tx.Order(strings.Join(orderBy, ", ")) // Gabungkan semua kolom ORDER BY
+		tx = tx.Order(strings.Join(orderBy, ", "))
 	}
 
 	// Eksekusi Query dengan kondisi

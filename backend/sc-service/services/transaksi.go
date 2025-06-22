@@ -17,15 +17,18 @@ type TransaksiService struct {
 	pb.UnimplementedTransaksiServiceServer
 	repoIjazahBc   repositories.GenericRepository[models.IjazahBc]
 	repoDegreeData repositories.GenericRepository[models.DegreeData]
+	repoContract   repositories.GenericRepository[models.ContractData]
 	// repoTransaksiTenant repositories.GenericRepository[models.TransaksiTabelTenant]
 }
 
 func NewTransaksiService() *TransaksiService {
 	repoIjazahBc := repositories.NewIjazahBcRepository(config.DB)
 	repoDegreeData := repositories.NewDegreeDataRepository(config.DB)
+	repoContract := repositories.NewContractDataRepository(config.DB)
 	return &TransaksiService{
 		repoIjazahBc:   *repoIjazahBc,
 		repoDegreeData: *repoDegreeData,
+		repoContract:   *repoContract,
 	}
 }
 
@@ -202,5 +205,45 @@ func (s *TransaksiService) SearchIjazahBlockchain(ctx context.Context, req *pb.S
 		Status:   true,
 		Message:  "Berahail",
 		IjazahBc: respon,
+	}, nil
+}
+
+func (s *TransaksiService) SaveContractAddress(ctx context.Context, req *pb.SaveContractAddressRequest) (*pb.SaveContractAddressResponse, error) {
+
+	pbContract := models.ContractData{
+		ContractAddres: &req.Contract.ContractAddress,
+		ContractOwner:  &req.Contract.Owner,
+	}
+	err := s.repoContract.Save(ctx, &pbContract, "public")
+	if err != nil {
+		return &pb.SaveContractAddressResponse{
+			Status:  false,
+			Message: "Gagal menyimpan kontrak",
+		}, nil
+	}
+
+	return &pb.SaveContractAddressResponse{
+		Status:  true,
+		Message: "Berhasil menyimpan kontrak",
+	}, nil
+}
+func (s *TransaksiService) GetContractAddress(ctx context.Context, req *pb.GetContractAddressRequest) (*pb.GetContractAddressResponse, error) {
+	modelContract, err := s.repoContract.FindAll(ctx, "public", 100, 0)
+	if err != nil {
+		return &pb.GetContractAddressResponse{
+			Status:   true,
+			Message:  "Gagal mengambil data",
+			Contract: nil,
+		}, nil
+	}
+	pbModelContract := &pb.Contract{
+		ContractAddress: utils.SafeString(modelContract[0].ContractAddres),
+		Owner:           utils.SafeString(modelContract[0].ContractOwner),
+	}
+
+	return &pb.GetContractAddressResponse{
+		Status:   true,
+		Message:  "Berhasil mengambil data",
+		Contract: pbModelContract,
 	}, nil
 }

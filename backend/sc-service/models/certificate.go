@@ -83,3 +83,13 @@ type DegreeData struct {
 func (DegreeData) TableName() string {
 	return "degree_data"
 }
+
+type ContractData struct {
+	Id             int32   `gorm:"column:id;primaryKey;autoIncrement" `
+	ContractAddres *string `gorm:"column:contract_address"`
+	ContractOwner  *string `gorm:"column:contract_owner"`
+}
+
+func (ContractData) TableName() string {
+	return "contracts"
+}

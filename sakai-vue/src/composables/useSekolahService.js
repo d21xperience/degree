@@ -436,10 +436,37 @@ export function useSekolahService() {
             toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengirimkan DNS: ${error}`, life: 3000 });
         }
     };
+    const updateDns = async (dns) => {
+        try {
+            const payload = {
+                schemaname: schemaname.value,
+                tahun_ajaran_id: `${initSelectedSemester.value?.tahunAjaranId}`,
+                data_nominasi_sementara: dns
+            };
+            const response = await store.dispatch('sekolahService/updateDns', payload);
+            if (response.status) {
+                const dnsTabel = store.getters['sekolahService/getDns'];
+                // console.log(dnsTabel)
+                const dns = dnsTabel.dataNominasiSementara.find((item) => item.pesertaDidikId == payload.data_nominasi_sementara.pesertaDidikId);
+
+                // console.log("sebelum",dns)
+                if (dns) {
+                    Object.assign(dns, payload.data_nominasi_sementara);
+                }
+                // console.log("sesudah",dnsTabel)
+                // return
+                store.commit('sekolahService/SET_TABELDNS', dnsTabel);
+                toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
+                return true;
+            }
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengirimkan DNS: ${error}`, life: 3000 });
+        }
+    };
     const getDns = async (tahunAjaranId) => {
         try {
             let response = await store.getters['sekolahService/getDns'];
-            console.log(response)
+            // console.log(response)
             if (!response || response?.dataNominasiSementara.length == 0 || response.tahun_ajaran_id != tahunAjaranId) {
                 const payload = {
                     schemaname: schemaname.value,
@@ -465,15 +492,35 @@ export function useSekolahService() {
         try {
             const payload = {
                 schemaname: schemaname.value,
-                tahun_ajaran_id: initSelectedTahunAjaran.value?.tahunAjaranId,
+                tahun_ajaran_id: `${initSelectedTahunAjaran.value?.tahunAjaranId}`,
                 peserta_didik_id: pesertaDidikId
             };
+            // console.log(payload);
+            // return;
             const response = await store.dispatch('sekolahService/searchDns', payload);
+            // console.log(response)
+            // return
             if (response.status) {
                 toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
                 return response.dataNominasiSementara;
             } else {
                 toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengirimkan DNS: ${response.message}`, life: 3000 });
+            }
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengirimkan DNS: ${error}`, life: 3000 });
+        }
+    };
+    const searchDnsLokal = async (pesertaDidikId) => {
+        try {
+            const dnsTabel = store.getters['sekolahService/getDns'];
+            const dns = dnsTabel.dataNominasiSementara.find((item) => item.pesertaDidikId == pesertaDidikId);
+            // console.log(dns);
+            // return
+            if (dns) {
+                toast.add({ severity: 'success', summary: 'Successful', detail: `${pesertaDidikId}`, life: 3000 });
+                return dns;
+            } else {
+                toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengirimkan DNS: ${pesertaDidikId}`, life: 3000 });
             }
         } catch (error) {
             toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengirimkan DNS: ${error}`, life: 3000 });
@@ -830,6 +877,8 @@ export function useSekolahService() {
         deleteBatchKategoriMapel,
         kategoriSekolahTabel,
         kategoriSekolahList,
-        deleteKategoriSekolahKurikulum
+        deleteKategoriSekolahKurikulum,
+        updateDns,
+        searchDnsLokal
     };
 }

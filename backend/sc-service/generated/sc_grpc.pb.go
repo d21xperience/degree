@@ -1493,6 +1493,7 @@ const (
 	TransaksiService_GetIjazahBlockchain_FullMethodName    = "/sc_service.TransaksiService/GetIjazahBlockchain"
 	TransaksiService_SearchIjazahBlockchain_FullMethodName = "/sc_service.TransaksiService/SearchIjazahBlockchain"
 	TransaksiService_SaveContractAddress_FullMethodName    = "/sc_service.TransaksiService/SaveContractAddress"
+	TransaksiService_GetContractAddress_FullMethodName     = "/sc_service.TransaksiService/GetContractAddress"
 )
 
 // TransaksiServiceClient is the client API for TransaksiService service.
@@ -1505,7 +1506,9 @@ type TransaksiServiceClient interface {
 	CreateIjazahBlockchain(ctx context.Context, in *CreateIjazahBlockchainRequest, opts ...grpc.CallOption) (*CreateIjazahBlockchainResponse, error)
 	GetIjazahBlockchain(ctx context.Context, in *GetIjazahBlockchainRequest, opts ...grpc.CallOption) (*GetIjazahBlockchainResponse, error)
 	SearchIjazahBlockchain(ctx context.Context, in *SearchIjazahBlockchainRequest, opts ...grpc.CallOption) (*SearchIjazahBlockchainResponse, error)
+	// Contract
 	SaveContractAddress(ctx context.Context, in *SaveContractAddressRequest, opts ...grpc.CallOption) (*SaveContractAddressResponse, error)
+	GetContractAddress(ctx context.Context, in *GetContractAddressRequest, opts ...grpc.CallOption) (*GetContractAddressResponse, error)
 }
 
 type transaksiServiceClient struct {
@@ -1556,6 +1559,16 @@ func (c *transaksiServiceClient) SaveContractAddress(ctx context.Context, in *Sa
 	return out, nil
 }
 
+func (c *transaksiServiceClient) GetContractAddress(ctx context.Context, in *GetContractAddressRequest, opts ...grpc.CallOption) (*GetContractAddressResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetContractAddressResponse)
+	err := c.cc.Invoke(ctx, TransaksiService_GetContractAddress_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // TransaksiServiceServer is the server API for TransaksiService service.
 // All implementations must embed UnimplementedTransaksiServiceServer
 // for forward compatibility.
@@ -1566,7 +1579,9 @@ type TransaksiServiceServer interface {
 	CreateIjazahBlockchain(context.Context, *CreateIjazahBlockchainRequest) (*CreateIjazahBlockchainResponse, error)
 	GetIjazahBlockchain(context.Context, *GetIjazahBlockchainRequest) (*GetIjazahBlockchainResponse, error)
 	SearchIjazahBlockchain(context.Context, *SearchIjazahBlockchainRequest) (*SearchIjazahBlockchainResponse, error)
+	// Contract
 	SaveContractAddress(context.Context, *SaveContractAddressRequest) (*SaveContractAddressResponse, error)
+	GetContractAddress(context.Context, *GetContractAddressRequest) (*GetContractAddressResponse, error)
 	mustEmbedUnimplementedTransaksiServiceServer()
 }
 
@@ -1588,6 +1603,9 @@ func (UnimplementedTransaksiServiceServer) SearchIjazahBlockchain(context.Contex
 }
 func (UnimplementedTransaksiServiceServer) SaveContractAddress(context.Context, *SaveContractAddressRequest) (*SaveContractAddressResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveContractAddress not implemented")
+}
+func (UnimplementedTransaksiServiceServer) GetContractAddress(context.Context, *GetContractAddressRequest) (*GetContractAddressResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetContractAddress not implemented")
 }
 func (UnimplementedTransaksiServiceServer) mustEmbedUnimplementedTransaksiServiceServer() {}
 func (UnimplementedTransaksiServiceServer) testEmbeddedByValue()                          {}
@@ -1682,6 +1700,24 @@ func _TransaksiService_SaveContractAddress_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
+func _TransaksiService_GetContractAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetContractAddressRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TransaksiServiceServer).GetContractAddress(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TransaksiService_GetContractAddress_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TransaksiServiceServer).GetContractAddress(ctx, req.(*GetContractAddressRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // TransaksiService_ServiceDesc is the grpc.ServiceDesc for TransaksiService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1704,6 +1740,10 @@ var TransaksiService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SaveContractAddress",
 			Handler:    _TransaksiService_SaveContractAddress_Handler,
+		},
+		{
+			MethodName: "GetContractAddress",
+			Handler:    _TransaksiService_GetContractAddress_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

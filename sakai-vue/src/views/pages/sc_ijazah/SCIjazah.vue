@@ -1,38 +1,10 @@
 <template>
     <div class="">
         <div class=" ">
-            <div class="flex flex-wrap justify-between items-center">
-                <h4 class="text-md">Data Ijazah</h4>
-                <!-- <div class="md:flex md:items-center md:space-x-2">
-                    <h3 class="text-slate-500 md:text-base text-sm">Tahun Lulus</h3>
-                    <div>
-                        <Select v-model="selectedTahunAjaran" :options="tahunAjaranOptions" optionLabel="label"
-                            optionValue="value" placeholder="Tahun Pelajaran" class="w-full md:w-52 mr-2" />
-
-                    </div>
-                </div> -->
-            </div>
             <div class="mb-2">
                 <Toolbar>
-                    <template #start>
-                        <!-- <Button icon="pi pi-plus" severity="success" class="mr-2" @click="visible = true"
-                            v-tooltip.bottom="'Tambah data'" /> -->
-                        <Button icon="pi pi-pencil" severity="warn" @click="visible = true" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 1" class="mr-2" v-tooltip.bottom="'Edit data'" />
-                        <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!selectedSiswa || !selectedSiswa.length" v-tooltip.bottom="'Delete data'" />
-                        <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2" v-tooltip.bottom="'Download data'" />
-                        <!-- <Button label="Proses" icon="pi pi-send" severity="info" @click="exportCSV($event)" /> -->
-                        <!-- <IssueDegreeButton
-                            :degreeData="degreeData"
-                            :sekolah="sekolah"
-                            :ipfsUrl="ipfsUrl"
-                            :transcript="transcript"
-                            :contract="contract"
-                            class="bg-blue-600 p-3 rounded-lg text-white"
-                            :disabled="!selectedSiswa"
-                            :class="{ 'bg-slate-500': !selectedSiswa || selectedSiswa.length === 0 || selectedSiswa.length > 2 }"
-                        /> -->
-                    </template>
                     <template #end>
+                        <!-- <Select v-model="filters['kelas.nmKelas'].value" :options="namaKelas" optionLabel="nama" optionValue="value" placeholder="Kelas" class="w-full md:w-48 md:mr-2" checkmark show-clear /> -->
                         <IconField>
                             <InputIcon>
                                 <i class="pi pi-search" />
@@ -51,118 +23,78 @@
             :value="siswa"
             scrollable
             scrollHeight="29rem"
-            dataKey="anggotaRombelId"
+            dataKey="pesertaDidikId"
             :paginator="true"
             :rows="10"
             :filters="filters"
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rowsPerPageOptions="[10, 20, 50]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} siswa"
         >
-            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-            <Column field="rombonganBelajar.nmKelas" header="Kelas"></Column>
-            <Column field="pesertaDidik.nis" header="NIS"></Column>
-            <Column field="pesertaDidik.nisn" header="NISN"></Column>
-            <Column field="pesertaDidik.nmSiswa" header="Nama" sortable></Column>
-            <Column field="pesertaDidik.jenisKelamin" header="JK"></Column>
-            <Column field="pesertaDidik.tempatLahir" header="Tpt. Lahir"></Column>
-            <Column field="namaOrtuWali" header="Nama Wali"></Column>
-            <Column field="cidUrl" header="CID Ijazah"></Column>
-            <Column field="nomorIjazah" header="No. Ijazah"></Column>
-            <Column field="" header="Status">
-                <template #body> belum terkirim </template>
-            </Column>
-            <Column field="" header="Kelengkapan">
-                <template #body="{ data: siswaRow }">
-                    <div class="card flex flex-col items-center gap-6">
-                        <p class="text-sm text-red-500">Belum lengkap</p>
-                        <!-- <FileUpload mode="basic" customUpload auto accept="image/*" chooseLabel="Pilih File"
-                            @select="(e) => onFileSelect(e, siswaRow)" @uploader="(e) => onFileUpload(e, siswaRow)"
-                            class="p-button-outlined" />
-                        <img v-if="siswaRow.preview" :src="siswaRow.preview" alt="Image"
-                            class="shadow-md rounded-xl w-full sm:w-64" style="filter: grayscale(100%)" /> -->
-                    </div>
+            <!-- <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column> -->
+            <!-- <Column field="kelas.nmKelas" header="Kelas" style="width: 5rem"></Column> -->
+            <Column field="nisn" header="NISN"></Column>
+            <Column field="nama" header="Nama" sortable></Column>
+            <Column field="nomorIjazah" header="No Ijazah"></Column>
+            <Column field="tempatLahir" header="Txt Hash"></Column>
+            <Column field="tempatLahir" header="Ijazah Hash"></Column>
+            <Column field="" header="Tgl Trx">
+                <template #body="slotProps">
+                    {{ formatterDateID(slotProps.data.tanggalLahir) }}
                 </template>
             </Column>
+            <Column field="namaOrtuWali" header="Aksi">
+                <template #body="slotProps">
+                    <Button icon="pi pi-ethereum" class="mr-2 !text-sm" severity="danger" @click="handleDeleteKategoriKelas(slotProps.data)" size="small" rounded v-tooltip.bottom="'block explorer'" />
+                    <!-- <Button icon="pi pi-pencil" class="mr-2 !text-sm" severity="warn" @click="dialogEditKelas(slotProps.data)" size="small" rounded v-tooltip.bottom="'Edit kelas'" /> -->
+                </template>
+            </Column>
+            <!-- <Column field="cidUrl" header="CID Ijazah"></Column> -->
+            <!-- <Column field="nomorIjazah" header="No. Ijazah"></Column> -->
+            <!-- <Column field="nis" header="NIS"></Column> -->
+            <!-- <Column field="" header="Status">
+                <template #body="slotProps">
+                    <span :class="{ 'text-red-600': !slotProps.data.isComplete }">{{ slotProps.data.isComplete ? '✔' : 'X' }}</span>
+                </template>
+            </Column> -->
         </DataTable>
-        <Dialog v-model:visible="visible" modal header="Data ijazah" :style="{ width: '60rem', height: '100rem' }">
+        <!-- <Dialog v-model:visible="visible" modal header="Data ijazah" :style="{ width: '60rem', height: '100rem' }">
             <DialogIjazah :peserta-didik="selectedSiswa" :visible="visible" />
-        </Dialog>
-        <!-- <Dialog v-model:visible="deleteSiswaSelected" header="Delete">
-            <p>Apakah siswa ini akan dihapus?</p>
-        </Dialog> -->
-        <Dialog v-model:visible="deleteSiswaSelected" :style="{ width: '450px' }" header="Confirm" :modal="true">
-            <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
-                <span v-if="selectedSiswa.length === 1"
-                    >Apakah siswa <b>{{ selectedSiswa[0].pesertaDidik?.nmSiswa }} ini akan dihapus</b>?</span
-                >
-                <span v-else>Apakah siswa yang dipilih ini akan dihapus ?</span>
-            </div>
-            <template #footer>
-                <Button label="No" icon="pi pi-times" text @click="deleteSiswaSelected = false" />
-                <!-- <Button label="Yes" icon="pi pi-check" @click="deleteSiswa" /> -->
-            </template>
-        </Dialog>
-
-        <DialogImport :visible="dialogImport" />
+        </Dialog>  -->
+        <DialogConfirmDelete message="Apakah data ini akan dihapus?" v-model:visible="visible" @confirm="deleteData" @closeDialog="closeDialog" />
+        <!-- <DialogImport :visible="dialogImport" /> -->
     </div>
-    <IpfsInterface />
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
-const store = useStore();
-
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-
+import { useSekolahService } from '@/composables/useSekolahService';
 import { useUtils } from '@/composables/useUtils';
 import { FilterMatchMode } from '@primevue/core/api';
-import Button from 'primevue/button';
-import Dialog from 'primevue/dialog';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
 import InputText from 'primevue/inputtext';
 import Toolbar from 'primevue/toolbar';
+import { computed, onMounted, ref, watch } from 'vue';
 const { formatterDateID } = useUtils();
-
 const visible = ref(false);
-
+const tingkatPendidikanOptions = ref();
 const selectedSiswa = ref();
-const siswa = ref();
+const siswa = ref([]);
 const bentukPendidikan = ref('smk');
 const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'kelas.nmKelas': { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
+const { getDns, deleteDns, initSelectedTahunAjaran, fetchSekolah } = useSekolahService();
+const tahunAjaranId = computed(() => initSelectedTahunAjaran.value.tahunAjaranId);
+watch(initSelectedTahunAjaran, async (e) => {
+    // console.log(`${e.tahunAjaranId}`);
+    siswa.value = await getDns(`${e.tahunAjaranId}`);
+    namaKelas.value = getNmKelas(siswa);
 });
 
-// ================================
-const selectedTahunAjaran = computed(() => store.getters['sekolahService/getSelectedTahunAjaran']);
-const schemaname = computed(() => store.getters['sekolahService/getTabeltenant']?.schemaname);
-watch(selectedTahunAjaran, async () => {
-    await fetchSiswaLulus();
-});
-
-const fetchSiswaLulus = async () => {
-    try {
-        let payload = {
-            schemaname: schemaname.value,
-            tahun_ajaran_id: `${selectedTahunAjaran.value.slice(0, 4)}`
-        };
-        // console.log("fetchSiswaLulus", payload)
-        const results = await store.dispatch('sekolahService/fetchProsesIjazah', payload);
-        // console.log(results)
-        siswa.value = results;
-    } catch (error) {
-        console.log(error);
-    }
-};
-// ==================================
-const deleteSiswaSelected = ref(false);
-const confirmDeleteSelected = () => {
-    deleteSiswaSelected.value = true;
-};
 // ==================================
 const scData = ref({
     degreeData: null,
@@ -170,19 +102,17 @@ const scData = ref({
     ipfsUrl: null,
     transcript: null
 });
-const dataLulusan = ref();
 // const selectedJurusan = ref();
-import DialogIjazah from '@/components/DialogIjazah.vue';
-import DialogImport from '@/components/DialogImport.vue';
-import IpfsInterface from '@/components/IpfsInterface.vue';
+import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
+import router from '@/router';
 // Dummy data (bisa kamu ambil dari API atau input form)
-const degreeData = ref({
-    nama: '',
-    nisn: '',
-    nik: '3211142109820004',
-    tahun_lulus: 2024,
-    major: 'Rekayasa Perangkat Lunak'
-});
+// const degreeData = ref({
+//     nama: '',
+//     nisn: '',
+//     nik: '3211142109820004',
+//     tahun_lulus: 2024,
+//     major: 'Rekayasa Perangkat Lunak'
+// });
 const sekolah = ref('SMK PASUNDAN JATINANGOR');
 
 const ipfsUrl = ref('https://ipfs.io/ipfs/Qm...examplehash');
@@ -193,32 +123,62 @@ const transcript = ref({
 const contract = null;
 
 watch(selectedSiswa, (newVal) => {
-    if (newVal.length === 1) {
-        console.log(newVal[0].pesertaDidik.nmSiswa);
-        degreeData.value.nama = newVal[0].pesertaDidik.nmSiswa;
-        degreeData.value.nisn = newVal[0].pesertaDidik.nisn;
-        degreeData.value.tahun_lulus = 2023;
-    }
+    // if (newVal.length === 1) {
+    //     console.log(newVal[0].pesertaDidik.nmSiswa);
+    //     degreeData.value.nama = newVal[0].pesertaDidik.nmSiswa;
+    //     degreeData.value.nisn = newVal[0].pesertaDidik.nisn;
+    //     degreeData.value.tahun_lulus = 2023;
+    // }
 });
-
+const namaKelas = ref();
 onMounted(async () => {
-    await fetchSiswaLulus();
-    // await initContract();
-    // await fetchSemester()
+    siswa.value = await getDns(initSelectedTahunAjaran.value?.tahunAjaranId);
+    // console.log(siswa.value)
+    namaKelas.value = [...new Set(siswa.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
+        nama: nm,
+        value: nm.toLowerCase()
+    }));
+    // namaKelas.value = getNmKelas(siswa);
 });
-// ==================================
 
-const src = ref(null);
+const getNmKelas = (data) => {
+    return [...new Set(data.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
+        nama: nm,
+        value: nm.toLowerCase()
+    }));
+};
 
-const onFileSelect = (event, siswaRow) => {
-    const file = event.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            siswaRow.preview = e.target.result; // Set ke row-nya!
-        };
-        reader.readAsDataURL(file);
+const editIjazah = async () => {
+    const sekolah = await fetchSekolah();
+    const nmSekolah = sekolah.sekolah?.nama.toLowerCase().replace(/\s+/g, '');
+    // console.log(selectedSiswa.value);
+    router.push({
+        name: 'editIjazah',
+        query: {
+            pesertaDidikId: selectedSiswa.value[0]?.pesertaDidikId.toString()
+        },
+        params: {
+            sekolah: nmSekolah
+        }
+    });
+};
+const confirmDeleteSelected = () => {
+    visible.value = true;
+};
+const deleteData = () => {
+    siswa.value = siswa.value.filter((val) => !selectedSiswa.value.includes(val));
+    if (selectedSiswa.value.length == 1) {
+        deleteDns(selectedSiswa.value[0].pesertaDidikId);
+        // } else if (selectedSiswa.value.length > 1) {
+        //     const ids = selectedSiswa.value.map((item) => item.anggotaRombelId);
+        //     deleteBatchSiswaAktif(ids);
     }
 };
-const dialogImport = ref(false);
+const closeDialog = () => {
+    selectedSiswa.value = null;
+};
+const onSubmitIjazah = () => {
+    deleteData();
+};
+// ==================================
 </script>

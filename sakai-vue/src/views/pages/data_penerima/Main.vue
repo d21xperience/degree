@@ -2,7 +2,7 @@
     <div class="">
         <div class="">
             <div class="flex justify-between p-2">
-                <div class="text-xl" md:text-2xl>Data Penerima Ijazah</div>
+                <div class="text-xl" md:text-2xl>Data Nominasi Sementara Penerima Ijazah</div>
                 <!-- <div class="flex items-center space-x-2">
                     <label class="text-gray-500">Platform</label>
                     <button @click="dialogSelectplatforms = true" class="rounded-full bg-slate-300 py-2 px-4 hover:opacity-80">

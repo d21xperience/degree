@@ -979,6 +979,24 @@ func local_request_TransaksiService_SaveContractAddress_0(ctx context.Context, m
 	return msg, metadata, err
 }
 
+func request_TransaksiService_GetContractAddress_0(ctx context.Context, marshaler runtime.Marshaler, client TransaksiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetContractAddressRequest
+		metadata runtime.ServerMetadata
+	)
+	msg, err := client.GetContractAddress(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_TransaksiService_GetContractAddress_0(ctx context.Context, marshaler runtime.Marshaler, server TransaksiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetContractAddressRequest
+		metadata runtime.ServerMetadata
+	)
+	msg, err := server.GetContractAddress(ctx, &protoReq)
+	return msg, metadata, err
+}
+
 func request_UploadDataSekolahService_UploadDataSekolah_0(ctx context.Context, marshaler runtime.Marshaler, client UploadDataSekolahServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq UploadDataSekolahRequest
@@ -1750,6 +1768,26 @@ func RegisterTransaksiServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		forward_TransaksiService_SaveContractAddress_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodGet, pattern_TransaksiService_GetContractAddress_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/GetContractAddress", runtime.WithHTTPPathPattern("/api/v1/sc/contract-address"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_TransaksiService_GetContractAddress_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_GetContractAddress_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 
 	return nil
@@ -2685,6 +2723,23 @@ func RegisterTransaksiServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 		}
 		forward_TransaksiService_SaveContractAddress_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodGet, pattern_TransaksiService_GetContractAddress_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/GetContractAddress", runtime.WithHTTPPathPattern("/api/v1/sc/contract-address"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_TransaksiService_GetContractAddress_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_GetContractAddress_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	return nil
 }
 
@@ -2693,6 +2748,7 @@ var (
 	pattern_TransaksiService_GetIjazahBlockchain_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "sc", "ijazah-bc"}, ""))
 	pattern_TransaksiService_SearchIjazahBlockchain_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "ijazah-bc", "search"}, ""))
 	pattern_TransaksiService_SaveContractAddress_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "sc", "contract-address"}, ""))
+	pattern_TransaksiService_GetContractAddress_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "sc", "contract-address"}, ""))
 )
 
 var (
@@ -2700,6 +2756,7 @@ var (
 	forward_TransaksiService_GetIjazahBlockchain_0    = runtime.ForwardResponseMessage
 	forward_TransaksiService_SearchIjazahBlockchain_0 = runtime.ForwardResponseMessage
 	forward_TransaksiService_SaveContractAddress_0    = runtime.ForwardResponseMessage
+	forward_TransaksiService_GetContractAddress_0     = runtime.ForwardResponseMessage
 )
 
 // RegisterUploadDataSekolahServiceHandlerFromEndpoint is same as RegisterUploadDataSekolahServiceHandler but

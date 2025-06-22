@@ -6,7 +6,7 @@
                     <template #start>
                         <!-- <Button icon="pi pi-plus" severity="success" class="mr-2" @click="visible = true"
                             v-tooltip.bottom="'Tambah data'" /> -->
-                        <!-- <Button icon="pi pi-pencil" severity="warn" @click="editIjazah" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 1" class="mr-2" v-tooltip.bottom="'Edit data'" /> -->
+                        <Button icon="pi pi-pencil" severity="warn" @click="editIjazah" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 1" class="mr-2" v-tooltip.bottom="'Edit data'" />
                         <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!selectedSiswa || !selectedSiswa.length" v-tooltip.bottom="'Delete data'" />
                         <!-- <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2" v-tooltip.bottom="'Download data'" /> -->
                         <IssueDegreeButton
@@ -55,7 +55,7 @@
             <Column field="kelas.nmKelas" header="Kelas" style="width: 5rem"></Column>
             <Column field="nisn" header="NISN"></Column>
             <Column field="nama" header="Nama" sortable></Column>
-            <Column field="paketKeahlian" header="Kompetensi keahlian"></Column>
+            <Column field="nomorIjazah" header="No Ijazah"></Column>
             <Column field="tempatLahir" header="Tpt. Lahir"></Column>
             <Column field="" header="Tgl. Lahir">
                 <template #body="slotProps">
@@ -165,7 +165,7 @@ const getNmKelas = (data) => {
 
 const editIjazah = async () => {
     const sekolah = await fetchSekolah();
-    const nmSekolah = sekolah?.nama.toLowerCase().replace(/\s+/g, '');
+    const nmSekolah = sekolah.sekolah?.nama.toLowerCase().replace(/\s+/g, '');
     // console.log(selectedSiswa.value);
     router.push({
         name: 'editIjazah',

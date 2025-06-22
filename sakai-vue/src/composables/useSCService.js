@@ -30,9 +30,24 @@ export function useSCService() {
         }
     };
 
+    const getContract = () => {
+        try {
+            let response = store.getters['scService/getContract'];
+            if (!response) {
+                response = store.dispatch('scService/fetchContract');
+                if (response.status) {
+                    return response.contract;
+                }
+            }
+            return response;
+        } catch (error) {
+            console.log(error);
+        }
+    };
     return {
         createMetamaskConnected,
         getMetamaskConnected,
-        createSCIjazah
+        createSCIjazah,
+        getContract
     };
 }

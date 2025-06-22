@@ -1,6 +1,6 @@
 <template>
     <!-- Dialog start -->
-    <Dialog v-model:visible="isVisible" :style="{ width: '450px' }" header="Keluar" :modal="true" position="top">
+    <Dialog v-model:visible="isVisible" :style="{ width: '450px' }" header="Tambah Mapel" :modal="true" position="top">
         <!-- <AutoComplete
             v-model="internalValue"
             :suggestions="kurikulumOptions"
@@ -12,25 +12,25 @@
             dropdown
             :loading="kurikulumLoading"
         /> -->
-        <!-- <template #footer>
-            <Button label="Tidak" icon="pi pi-times" text @click="isVisible = false" severity="warn" />
-            <Button label="Ya" icon="pi pi-check" text @click="onLogout" />
-        </template> -->
+        <template #footer>
+            <Button label="Batal" icon="pi pi-times" text @click="isVisible = false" severity="warn" />
+            <Button label="Tambah" icon="pi pi-check" text @click="onLogout" />
+        </template>
     </Dialog>
     <!-- Dialog end -->
 </template>
 <script setup>
-import { useSekolahService } from '@/composables/useSekolahService'; 
-import { computed } from 'vue';
+import { useSekolahService } from '@/composables/useSekolahService';
+import { computed, onMounted } from 'vue';
 
 // const { fetchKurikulum, kurikulumLoading, searchKurikulum, kurikulumOptions } = useFormOptions();
 // const internalValue = ref(props.modelValue);
-const sekolahService = useFormOptions();
+const sekolahService = useSekolahService();
 // const dialogSignOut = () => {};
 // const onLogout = () => {
 //     emit('confirm');
 // };
-const props = defineProps('visible','modelValue');
+const props = defineProps('visible', 'modelValue');
 const emit = defineEmits(['update:visible', 'confirm']);
 
 const isVisible = computed({
@@ -63,6 +63,6 @@ const isVisible = computed({
 //     }
 // };
 onMounted(async () => {
-    await sekolahService.fetchKurikulum();
+    // await sekolahService.fetchKurikulum();
 });
 </script>

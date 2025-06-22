@@ -147,34 +147,35 @@ const model = ref([
                         label: 'Ijazah',
                         icon: 'pi pi-fw pi-bookmark',
                         to: `/${sekolah.value}/data-penerima/ijazah`
-                    }
-                    // {
-                    //     label: 'Transkrip Nilai',
-                    //     icon: 'pi pi-fw pi-bookmark'
-                    // }
-                ]
-            },
-            {
-                label: 'Seting',
-                icon: 'pi pi-fw pi-cog',
-                items: [
-                    {
-                        label: 'Ijazah & Transkrip',
-                        icon: 'pi pi-fw pi-file',
-                        to: `/${sekolah.value}/settings/ijazah`
                     },
                     {
-                        label: 'Blockahain',
-                        icon: 'pi pi-fw pi-globe',
-                        to: `/${sekolah.value}/settings/blockchain`
-                    },
-                    {
-                        label: 'IPFS',
-                        icon: 'pi pi-fw pi-desktop',
-                        to: `/${sekolah.value}/settings/ipfs`
+                        label: 'Transkrip Nilai',
+                        icon: 'pi pi-fw pi-bookmark',
+                        to: `/${sekolah.value}/data-penerima/transkrip`
                     }
                 ]
             },
+            // {
+            //     label: 'Seting',
+            //     icon: 'pi pi-fw pi-cog',
+            //     items: [
+            //         {
+            //             label: 'Ijazah & Transkrip',
+            //             icon: 'pi pi-fw pi-file',
+            //             to: `/${sekolah.value}/settings/ijazah`
+            //         },
+            //         {
+            //             label: 'Blockahain',
+            //             icon: 'pi pi-fw pi-globe',
+            //             to: `/${sekolah.value}/settings/blockchain`
+            //         },
+            //         {
+            //             label: 'IPFS',
+            //             icon: 'pi pi-fw pi-desktop',
+            //             to: `/${sekolah.value}/settings/ipfs`
+            //         }
+            //     ]
+            // },
             {
                 label: 'SC-Ijazah',
                 icon: 'pi pi-fw pi-file-check',

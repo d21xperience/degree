@@ -188,7 +188,25 @@ const router = createRouter({
                             component: () => import('@/views/pages/data_penerima/EditDataPenerima.vue')
                         }
                     ]
-                }
+                },
+                {
+                    path: 'data-penerima',
+                    component: () => import('@/views/pages/data_penerima/Main.vue'),
+                    children: [
+                        {
+                            path: 'transkrip',
+                            name: 'readTranskrip',
+                            component: () => import('@/views/pages/data_penerima/Transkrip.vue')
+                        },
+                        // {
+                        //     path: 'edit-transkrip',
+                        //     name: 'editTranskrip',
+                        //     meta: { disableSelect: true, title: 'Tambah Transkrip', namaRoute: 'transkrip' },
+                        //     props: true,
+                        //     component: () => import('@/views/pages/data_penerima/EditDataPenerima.vue')
+                        // }
+                    ]
+                },
             ]
         },
         {

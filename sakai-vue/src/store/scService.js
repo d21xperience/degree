@@ -11,7 +11,8 @@ const api = axios.create({
 const state = {
     BCPlatformSelected: JSON.parse(localStorage.getItem('BCPlatformSelected')) || null,
     BCAccountActivate: null,
-    MetamasConnected: JSON.parse(localStorage.getItem('METAMASK_CONNECTED')) || null
+    MetamasConnected: JSON.parse(localStorage.getItem('METAMASK_CONNECTED')) || null,
+    contract: JSON.parse(localStorage.getItem('CONTRACT')) || null
 };
 
 const mutations = {
@@ -32,6 +33,10 @@ const mutations = {
     SET_METAMASKCONNECTED(state, value) {
         state.MetamasConnected = value;
         localStorage.setItem('METAMASK_CONNECTED', JSON.stringify(value));
+    },
+    SET_CONTRACT(state, value) {
+        state.contract = value;
+        localStorage.setItem('CONTRACT', JSON.stringify(value));
     }
 };
 
@@ -230,7 +235,7 @@ const actions = {
 
     async updateBCAccountActivate({ commit }, value) {
         commit('setBCAccountActivate', value);
-    }
+    },
     // ==================================
     // METAMASK
     // ==================================
@@ -240,6 +245,19 @@ const actions = {
     //     } catch (error) {
     //         throw error
     //     }
+
+    async fetchContract({ commit }, payload) {
+        try {
+            const response = await api.get(`sc/contract-address`);
+            if (response) {
+                commit('SET_CONTRACT', response.data.contract);
+                return response.data;
+            }
+        } catch (error) {
+            throw error;
+        }
+    }
+
     // }
 };
 
@@ -250,7 +268,8 @@ const getters = {
     getBCPlatformSelected: (state) => state.BCPlatformSelected,
     getBCAccount: (state) => state.BCACCOUNT,
     getBCAccountActivate: (state) => state.BCAccountActivate,
-    getMetamaskConnected: (state) => state.MetamasConnected
+    getMetamaskConnected: (state) => state.MetamasConnected,
+    getContract: (state) => state.contract
 };
 
 export default {

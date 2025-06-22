@@ -3,7 +3,7 @@
         <div class="">
             <Toolbar>
                 <template #start>
-                    <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="isVisible = !isVisible" v-tooltip.bottom="'Tambah Siswa'" />
+                    <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="isVisible = !isVisible" v-tooltip.bottom="'Tambah Mapel'" />
 
                     <Button
                         icon="pi pi-trash"
@@ -15,7 +15,7 @@
                     />
                     <!--<Button icon="pi pi-pencil" severity="warn" @click="openNew" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 2" class="mr-2" v-tooltip.bottom="'Edit siswa'" />
                     <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Upload siswa'" v-show="selectedSemester.semester == 1" /> -->
-                    <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download siswa'" />
+                    <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download Mapel'" />
                     <Select v-model="selectedKategoriSekolah" :options="kategoriSekolahList" optionLabel="nama_kurikulum" placeholder="Kurikulum" class="mr-2 !w-96" checkmark fluid />
                 </template>
                 <template #end>
@@ -195,7 +195,7 @@
         <DialogConfirmDelete v-model:visible="isDelete" @confirm="confirmDelete" :message="messageDelete" />
         <DialogConfirmDelete v-model:visible="isBatchDelete" @confirm="confirmBatchDelete" :message="messageBatchDelete" />
         <!-- end of import data -->
-        <!-- <DialogMapel v-model:visible="isVisible" /> -->
+        <DialogMapel v-model:visible="isVisible" />
     </div>
 </template>
 
@@ -215,7 +215,6 @@ import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 
 import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
-import DialogMapel from '@/components/DialogMapel.vue';
 import { FilterMatchMode } from '@primevue/core/api';
 import AutoComplete from 'primevue/autocomplete';
 import InputText from 'primevue/inputtext';
