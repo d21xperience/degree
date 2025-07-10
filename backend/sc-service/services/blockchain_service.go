@@ -7,20 +7,21 @@ import (
 	"log"
 
 	pb "sc-service/generated"
+	"sc-service/services/clients"
 
 	"sc-service/utils"
 )
 
 type BlockchainService struct {
 	pb.UnimplementedBlockchainServiceServer
-	config *Config // Konfigurasi runtime
-	client BlockchainClient
+	config *clients.Config // Konfigurasi runtime
+	client clients.BlockchainClient
 }
 
 // Constructor untuk BlockchainService
 func NewBlockchainService() *BlockchainService {
 	return &BlockchainService{
-		config: &Config{},
+		config: &clients.Config{},
 		client: nil,
 	}
 }
@@ -35,26 +36,26 @@ func (s *BlockchainService) SetConfig(ctx context.Context, req *pb.SetConfigRequ
 		return nil, err
 	}
 	// Load konfigurasi dari environment variables
-	cfg, err := LoadConfig()
+	cfg, err := clients.LoadConfig()
 	if err != nil {
 		log.Fatalf("Gagal memuat konfigurasi: %v", err)
 	}
 	// Overwrite dengan nilai dari request
 	network := req.Network
-	if network.Architecture == "EVM" {
-		cfg.BlockchainType = "ethereum"
-	} else if network.Architecture == "NONEVM" {
-		cfg.BlockchainType = "hyperledger"
-	} else {
-		return nil, errors.New("blockchain_type harus 'ethereum' atau 'quorum'")
-	}
+	// if network.Architecture == "EVM" {
+	// 	cfg.BlockchainType = "ethereum"
+	// } else if network.Architecture == "NONEVM" {
+	// 	cfg.BlockchainType = "hyperledger"
+	// } else {
+	// 	return nil, errors.New("blockchain_type harus 'ethereum' atau 'quorum'")
+	// }
 	// Overwrite RPCURL jika ada dalam request
 	if network.RPCURL != "" {
 		cfg.RPCURL = network.RPCURL
 	}
 
 	// Buat blockchain client sesuai config
-	client, err := CreateClientFactory(cfg)
+	client, err := clients.CreateClientFactory(cfg)
 	if err != nil {
 		log.Fatalf("Gagal membuat klien: %v", err)
 	}

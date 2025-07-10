@@ -1,7 +1,7 @@
 import AppLayout from '@/layout/AppLayout.vue';
-import store from '@/store';
 import { createRouter, createWebHistory } from 'vue-router';
-const kondisi = true;
+import authGuard from './guards/authGuard';
+let kondisi = false;
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
@@ -38,13 +38,7 @@ const router = createRouter({
             component: AppLayout,
             // name: 'main',
             props: true,
-            beforeEnter: (to, from, next) => {
-                if (kondisi) {
-                    next();
-                } else {
-                    next({ name: 'not-found' });
-                }
-            },
+            beforeEnter: authGuard,
             meta: { requiresAuth: true },
             children: [
                 {
@@ -64,6 +58,7 @@ const router = createRouter({
                 {
                     path: 'data-dapodik',
                     component: () => import('@/views/pages/dapodik/Main.vue'),
+                    meta: { role: 'admin' },
                     children: [
                         {
                             path: 'info-siswa',
@@ -129,33 +124,62 @@ const router = createRouter({
                             component: () => import('@/views/pages/dapodik/data_siswa/AddSiswa.vue')
                         },
                         {
+                            path: 'edit-siswa',
+                            name: 'editSiswa',
+                            props: true,
+                            meta: { disableSelect: true, title: 'Edit Siswa' },
+                            component: () => import('@/views/pages/dapodik/data_siswa/AddSiswa.vue')
+                        },
+                        {
                             path: 'info-mapel',
                             name: 'infoMapel',
                             meta: { title: 'Info Mapel', namaRoute: 'Mata Pelajaran' },
                             component: () => import('@/views/pages/dapodik/data_matapelajaran/ReadMapel.vue')
-                        }
-                    ]
-                },
-                {
-                    path: 'blockhain',
-                    name: 'blockhain',
-                    component: () => import('@/views/pages/sc_ijazah/Main.vue'),
-                    children: [
-                        {
-                            path: 'sc-ijazah',
-                            name: 'scIjazah',
-                            component: () => import('@/views/pages/sc_ijazah/SCIjazah.vue')
                         },
                         {
-                            path: 'daftar-trx',
-                            name: 'daftarTrx',
-                            component: () => import('@/views/pages/sc_ijazah/ListTrx.vue')
+                            path: 'info-nilai',
+                            name: 'infoNilai',
+                            props: true,
+                            meta: { disableSelect: true, title: 'Nilai', namaRoute: 'Info NIlai' },
+                            component: () => import('@/views/pages/dapodik/data_nilai/DataNilai.vue')
+                        },
+                        {
+                            path: 'input-nilai',
+                            name: 'inputNilai',
+                            props: true,
+                            meta: { disableSelect: true, title: 'Tambah Nilai', namaRoute: 'Siswa' },
+                            component: () => import('@/views/pages/dapodik/data_siswa/AddSiswa.vue')
+                        },
+                        {
+                            path: 'edit-siswa',
+                            name: 'editSiswa',
+                            props: true,
+                            meta: { disableSelect: true, title: 'Edit Siswa' },
+                            component: () => import('@/views/pages/dapodik/data_siswa/AddSiswa.vue')
                         }
                     ]
                 },
+                // {
+                //     path: 'blockhain',
+                //     name: 'blockhain',
+                //     component: () => import('@/views/super_admin/Main.vue'),
+                //     children: [
+                //         {
+                //             path: 'sc-ijazah',
+                //             name: 'scIjazah',
+                //             component: () => import('@/views/pages/sc_ijazah/SCIjazah.vue')
+                //         },
+                //         {
+                //             path: 'daftar-trx',
+                //             name: 'daftarTrx',
+                //             component: () => import('@/views/pages/sc_ijazah/ListTrx.vue')
+                //         }
+                //     ]
+                // },
                 {
                     path: 'settings',
                     name: 'settings',
+                    meta: { role: 'admin' },
                     children: [
                         {
                             path: 'blockchain',
@@ -174,6 +198,7 @@ const router = createRouter({
                 {
                     path: 'data-penerima',
                     component: () => import('@/views/pages/data_penerima/Main.vue'),
+                    meta: { role: 'admin' },
                     children: [
                         {
                             path: 'ijazah',
@@ -186,27 +211,14 @@ const router = createRouter({
                             meta: { disableSelect: true, title: 'Tambah Kelas', namaRoute: 'Kelas' },
                             props: true,
                             component: () => import('@/views/pages/data_penerima/EditDataPenerima.vue')
-                        }
-                    ]
-                },
-                {
-                    path: 'data-penerima',
-                    component: () => import('@/views/pages/data_penerima/Main.vue'),
-                    children: [
+                        },
                         {
                             path: 'transkrip',
                             name: 'readTranskrip',
                             component: () => import('@/views/pages/data_penerima/Transkrip.vue')
-                        },
-                        // {
-                        //     path: 'edit-transkrip',
-                        //     name: 'editTranskrip',
-                        //     meta: { disableSelect: true, title: 'Tambah Transkrip', namaRoute: 'transkrip' },
-                        //     props: true,
-                        //     component: () => import('@/views/pages/data_penerima/EditDataPenerima.vue')
-                        // }
+                        }
                     ]
-                },
+                }
             ]
         },
         {
@@ -223,38 +235,57 @@ const router = createRouter({
         {
             path: '/:pathMatch(.*)*',
             redirect: '/not-found'
+        },
+        {
+            path: '/su',
+            name: 'superAdmin',
+            props: true,
+            beforeEnter: authGuard,
+            meta: { requiresAuth: true, role: 'superadmin' },
+            component: AppLayout,
+            children: [
+                {
+                    path: 'dashboard',
+                    name: 'suDashboard',
+                    component: () => import('@/views/pages/super_admin/Dashboard.vue')
+                },
+                {
+                    path: 'daftar-sekolah',
+                    name: 'daftarSekolah',
+                    component: () => import('@/views/pages/super_admin/Dashboard.vue')
+                },
+                {
+                    path: 'cms',
+                    name: 'cms',
+                    component: () => import('@/views/pages/super_admin/cms/Content.vue')
+                },
+                {
+                    path: 'blockchain',
+                    // name: 'smartContract',
+                    component: () => import('@/views/pages/super_admin/blockchain/Main.vue'),
+                    children: [
+                        {
+                            path: 'smart-contract',
+                            name: 'smartcontract',
+                            component: () => import('@/views/pages/super_admin/blockchain/BlockchainSettings.vue')
+                        },
+                        {
+                            path: 'networks',
+                            name: 'networks',
+
+                            component: () => import('@/views/pages/super_admin/blockchain/ListBCNetwork.vue')
+                        },
+                        {
+                            path: 'ipfs',
+                            name: 'ipfs'
+
+                            // component: () => import('@views/pages/super_admin/smart_contract/ListBCNetworks')
+                        }
+                    ]
+                }
+            ]
         }
     ]
-});
-
-router.beforeEach(async (to, from, next) => {
-    document.title = to.meta.title || 'Verifikasi Ijazah App';
-
-    // Ambil informasi autentikasi dan peran pengguna dari store
-    const isAuthenticated = await store.getters['authService/isAuthenticated'];
-    // console.log(isAuthenticated);
-    const userRole = await store.getters['authService/userRole']; // 'admin' atau 'siswa'
-    // console.log(userRole);
-    if (to.meta.requiresAuth && !isAuthenticated) {
-        // Redirect ke Login jika tidak login
-        next({ name: 'login' });
-    } else if ((to.name === 'login' || to.name === 'register') && isAuthenticated) {
-        // Redirect ke dashboard jika sudah login
-        next({ name: 'landing' });
-    } else {
-        // Periksa peran pengguna untuk akses khusus
-        if (to.meta.role && to.meta.role !== userRole) {
-            // Jika pengguna tidak memiliki akses ke rute tertentu
-            if (userRole === 'admin') {
-                next();
-                // next({ name: "adminDashboard" }); // Redirect ke dashboard admin
-            } else {
-                // next({ name: "studentDashboard" }); // Redirect ke dashboard siswa
-            }
-        } else {
-            next();
-        }
-    }
 });
 
 export default router;

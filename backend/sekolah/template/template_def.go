@@ -3,6 +3,7 @@ package template
 import (
 	"context"
 	"fmt"
+	"sekolah/handler"
 	"sekolah/repositories"
 	"time"
 
@@ -22,9 +23,11 @@ type TemplateColumn struct {
 }
 
 type DataTemplate struct {
-	TemplateType  string
-	Schemaname    string
-	TahunAjaranId string
+	TemplateType       string
+	Schemaname         string
+	TahunAjaranId      string
+	RombonganBelajarId string
+	SemesterId         string
 }
 
 // Mengembalikan daftar kolom berdasarkan tipe template
@@ -39,7 +42,9 @@ func GetTemplateColumns(param *DataTemplate) ([]TemplateColumn, bool) {
 	// case "ijazah":
 	// 	return GetIjazahColumns(), true
 	case "transkrip":
-		return GetNilaiAkhirColumns(), true
+		return GetTranskripColumns(), true
+	case "nilai":
+		return GetNilaiColumns(), true
 	default:
 		return nil, false
 	}
@@ -89,8 +94,8 @@ func GetPetunjukSheet(f *excelize.File, param *DataTemplate, db *gorm.DB) error 
 	// 	return GetKelasColumns()
 	// // case "ijazah":
 	// // 	return GetIjazahColumns()
-	// case "nilai_akhir":
-	// 	return getNilaiAkhir(f, param, db)
+	case "nilai":
+		return getNilaiAkhir(f, param)
 	default:
 		return nil
 	}
@@ -179,6 +184,43 @@ func getKelas(f *excelize.File, param *DataTemplate, db *gorm.DB) error {
 
 		cell = fmt.Sprintf("C%d", i+2)
 		f.SetCellValue(infoSheet, cell, kelas.RombonganBelajarId)
+	}
+	return nil
+}
+
+func getNilaiAkhir(f *excelize.File, param *DataTemplate) error {
+	// tahunAjaranId := param.TahunAjaranId
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	handlerNilai := handler.NewNilaiSiswaHandler()
+	nilaiSiswa, err := handlerNilai.GetNilaiSiswa(ctx, param.Schemaname, param.SemesterId, param.RombonganBelajarId)
+	if err != nil {
+		return err
+	}
+	var cell string
+	for i, v := range nilaiSiswa {
+		cell = fmt.Sprintf("A%d", i+2)
+		f.SetCellValue("template", cell, v.NmSiswa)
+
+		cell = fmt.Sprintf("B%d", i+2)
+		f.SetCellValue("template", cell, v.NmKelas)
+
+		cell = fmt.Sprintf("C%d", i+2)
+		f.SetCellValue("template", cell, v.SemesterId)
+		for j, mapel := range *v.NilaiMapel {
+			col, err := excelize.ColumnNumberToName(j + 4)
+			if err != nil {
+				return err
+			}
+			cell = fmt.Sprintf("%s%d", col, i+1)
+			f.SetCellValue("template", cell, mapel.NmSingkatan)
+
+			cell = fmt.Sprintf("%s%d", col, i+2)
+			f.SetCellValue("template", cell, mapel.NilaiPeng)
+
+			cell = fmt.Sprintf("%s%d", col, i+3)
+			f.SetCellValue("template", cell, mapel.NmMapel)
+		}
 	}
 	return nil
 }

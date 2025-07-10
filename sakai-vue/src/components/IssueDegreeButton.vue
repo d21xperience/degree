@@ -9,7 +9,7 @@ import { ethers, keccak256, toUtf8Bytes } from 'ethers';
 import { onMounted, ref } from 'vue';
 const scService = useSCService();
 
-const contractAddress = ref(''); //'0xdc64a140aa3e981100a9beca4e685f962f0cf6c9';
+const contractAddress = ref('0x700b6a60ce7eaaea56f065753d8dcb9653dbad35'); //'0xdc64a140aa3e981100a9beca4e685f962f0cf6c9';
 const props = defineProps({
     degreeData: Object, // { name, nisn, graduationYear, major }
     sekolah: String,
@@ -84,7 +84,14 @@ const handleSubmit = async () => {
         emit('submit');
         saveToBackend(tx.hash, degreeHash, biayaGas);
     } catch (err) {
-        console.error(err);
+        console.error(err.message?.TypeError);
+        // switch (err) {
+        //     case value:
+        //         break;
+
+        //     default:
+        //         break;
+        // }
         alert(`Gagal memproses: ${err.message}`);
     } finally {
         isLoading.value = false;
@@ -128,15 +135,16 @@ const handleSubmit = async () => {
 
 onMounted(async () => {
     try {
-        const cek = await scService.getContract();
-        contractAddress.value = cek.contractAddress;
+        // const cek = await scService.getContract();
+        // contractAddress.value = cek.contractAddress;
         // console.log(contractAddress.value);
         // return;
         if (window.ethereum) {
             await window.ethereum.request({ method: 'eth_requestAccounts' });
             const provider = new ethers.BrowserProvider(window.ethereum);
             const signer = await provider.getSigner();
-
+            console.log(signer);
+            scService.createWalletInfo(signer);
             // const contractAddress = '0x700b6A60ce7EaaEA56F065753d8dcB9653dbAD35'; // HARUS STRING BUKAN undefined/objek
             contract.value = new ethers.Contract(contractAddress.value, DegreeContractABI, signer);
             if (contract.value) {
@@ -147,6 +155,7 @@ onMounted(async () => {
         }
     } catch (err) {
         console.error('Gagal menginisialisasi kontrak:', err);
+        // alert("Alamat kontrak tidak terdeteksi")
     }
 });
 // 🗄️ Simpan ke backend

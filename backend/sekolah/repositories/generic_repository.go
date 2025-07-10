@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -87,6 +89,35 @@ func (r *GenericRepository[T]) FindWithStringMatch(ctx context.Context, schemaNa
 	}
 
 	return &entities, nil
+}
+func (r *GenericRepository[T]) FindWithStringMatch1(ctx context.Context, schemaName string, nameValue string, nameColumn string) (*[]T, error) {
+	var entities []T
+	tx := r.db.WithContext(ctx)
+	tableName := fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)
+
+	if !isValidColumnName(nameColumn) {
+		return nil, fmt.Errorf("invalid column name")
+	}
+
+	column := fmt.Sprintf("%s.%s", tableName, nameColumn)
+	whereClause := gorm.Expr("Lower(?) LIKE Lower(?)", gorm.Expr(column), "%"+nameValue+"%")
+
+	err := tx.Table(tableName).
+		Where(whereClause).
+		Order(gorm.Expr("Length(?) ASC", gorm.Expr(column))).
+		Find(&entities).Error
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to find records with string match: %w", err)
+	}
+
+	return &entities, nil
+}
+
+func isValidColumnName(name string) bool {
+	// Hanya izinkan huruf, angka, dan garis bawah
+	matched, _ := regexp.MatchString(`^[a-zA-Z_][a-zA-Z0-9_]*$`, name)
+	return matched
 }
 
 //
@@ -229,6 +260,40 @@ func (r *GenericRepository[T]) Delete(ctx context.Context, id string, schemaName
 	})
 }
 
+func (r *GenericRepository[T]) DeleteV1(ctx context.Context, schemaName, rawID, idColumn, idType string) error {
+	var ids any
+	id := strings.TrimSpace(rawID)
+	switch idType {
+	case "uuid":
+		if u, err := uuid.Parse(id); err == nil {
+			ids = u
+		}
+	case "int":
+		if i, err := strconv.Atoi(id); err == nil {
+			ids = i
+		}
+	case "int64":
+		if i, err := strconv.ParseInt(id, 10, 64); err == nil {
+			ids = i
+		}
+	default:
+		ids = id // fallback: string
+	}
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec(fmt.Sprintf("SET search_path TO %s", strings.ToLower(schemaName))).Error; err != nil {
+			return fmt.Errorf("failed to set schema: %w", err)
+		}
+
+		if err := tx.Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)).
+			Where(fmt.Sprintf("%s = ?", idColumn), ids).
+			Delete(nil).Error; err != nil {
+			return fmt.Errorf("failed to delete record in schema %s: %w", schemaName, err)
+		}
+
+		return nil
+	})
+}
+
 func (r *GenericRepository[T]) DeleteBatch(ctx context.Context, ids []string, schemaName, columnName string) error {
 	// Validasi UUID
 	validIDs := make([]string, 0, len(ids))
@@ -252,6 +317,48 @@ func (r *GenericRepository[T]) DeleteBatch(ctx context.Context, ids []string, sc
 		// Eksekusi delete
 		if err := tx.Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)).
 			Where(fmt.Sprintf("%s IN ?", columnName), validIDs).
+			Delete(nil).Error; err != nil {
+			return fmt.Errorf("gagal menghapus record pada schema %s: %w", schemaName, err)
+		}
+
+		return nil
+	})
+}
+
+func (r *GenericRepository[T]) DeleteBatchV1(ctx context.Context, rawIDs []string, schemaName, columnName, idType string) error {
+	var ids []any
+
+	for _, id := range rawIDs {
+		id = strings.TrimSpace(id)
+		switch idType {
+		case "uuid":
+			if u, err := uuid.Parse(id); err == nil {
+				ids = append(ids, u)
+			}
+		case "int":
+			if i, err := strconv.Atoi(id); err == nil {
+				ids = append(ids, i)
+			}
+		case "int64":
+			if i, err := strconv.ParseInt(id, 10, 64); err == nil {
+				ids = append(ids, i)
+			}
+		default:
+			ids = append(ids, id) // fallback: string
+		}
+	}
+
+	if len(ids) == 0 {
+		return fmt.Errorf("tidak ada ID valid untuk dihapus")
+	}
+
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec(fmt.Sprintf("SET search_path TO %s", strings.ToLower(schemaName))).Error; err != nil {
+			return fmt.Errorf("gagal mengatur schema: %w", err)
+		}
+
+		if err := tx.Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)).
+			Where(fmt.Sprintf("%s IN ?", columnName), ids).
 			Delete(nil).Error; err != nil {
 			return fmt.Errorf("gagal menghapus record pada schema %s: %w", schemaName, err)
 		}
@@ -370,7 +477,10 @@ func (r *GenericRepository[T]) FindWithPreloadAndJoinsOrigin(
 	orderBy []string,
 ) ([]T, error) {
 	var results []T
-	tx := r.db.WithContext(ctx)
+	var entity T // zero‑value T untuk Model()
+	tx := r.db.WithContext(ctx).
+		Model(&entity) //. // <-- penting!
+		// Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName))
 
 	// Set schema dan nama tabel secara dinamis
 	tx = tx.Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName))
@@ -398,45 +508,48 @@ func (r *GenericRepository[T]) FindWithPreloadAndJoinsOrigin(
 	return results, nil
 }
 
-// versi 2
-// func (r *GenericRepository[T]) FindWithPreloadAndJoinsOrigin(
-// 	ctx context.Context,
-// 	schemaName string,
-// 	joins []string,
-// 	preloads []string,
-// 	conditions map[string]interface{},
-// 	orderBy []string,
-// ) ([]T, error) {
-// 	var results []T
-// 	tx := r.db.WithContext(ctx).Session(&gorm.Session{NewDB: true})
+func (r *GenericRepository[T]) FindWithJoinAndScan(
+	ctx context.Context,
+	schemaName string,
+	joins []string,
+	conditions map[string]interface{},
+	orderBy []string,
+	selectFields []string,
+	dest interface{}, // pointer ke slice hasil (ex: *[]NilaiSiswaJoin)
+) error {
+	// var entity T
+	// tx := r.db.WithContext(ctx).
+	// 	Model(&entity) //. // <-- penting!
+	// 	// Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName))
 
-// 	// 👇 GANTI ini:
-// 	// tx.Exec(fmt.Sprintf("SET search_path TO %s", schemaName))
-// 	// DENGAN ini:
-// 	tx = tx.Table(fmt.Sprintf("%s.%s", schemaName, "tabel_kelas"))
+	// // Set schema dan nama tabel secara dinamis
+	// tx = tx.Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName))
+	tx := r.db.WithContext(ctx)
 
-// 	// Tambahkan Join
-// 	for _, join := range joins {
-// 		tx = tx.Joins(join)
-// 	}
+	// Set Schema
+	if err := tx.Exec(fmt.Sprintf("SET search_path TO %s", schemaName)).Error; err != nil {
+		return fmt.Errorf("failed to set schema: %w", err)
+	}
+	// Query dengan joins
+	tx = tx.Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName))
+	// JOIN
+	for _, join := range joins {
+		tx = tx.Joins(join)
+	}
 
-// 	// Tambahkan Preload
-// 	for _, preload := range preloads {
-// 		tx = tx.Preload(preload)
-// 	}
+	// SELECT
+	if len(selectFields) > 0 {
+		tx = tx.Select(strings.Join(selectFields, ", "))
+	}
 
-// 	// Tambahkan Order
-// 	if len(orderBy) > 0 {
-// 		tx = tx.Order(strings.Join(orderBy, ", "))
-// 	}
+	// ORDER
+	if len(orderBy) > 0 {
+		tx = tx.Order(strings.Join(orderBy, ", "))
+	}
 
-// 	// Tambahkan Where
-// 	if err := tx.Where(conditions).Find(&results).Error; err != nil {
-// 		return nil, err
-// 	}
-
-// 	return results, nil
-// }
+	// WHERE + SCAN
+	return tx.Where(conditions).Scan(dest).Error
+}
 
 // Fungsi Generic untuk Preload One-To-Many
 func (r *GenericRepository[T]) FindWithPreloadAndJoins(

@@ -11,3 +11,4 @@ dist
 .eslintcache
 api-generator/typedoc.json
 **/.DS_Store
+src/components/IssueDegreeButton.vue

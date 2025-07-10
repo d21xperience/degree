@@ -47,14 +47,14 @@ func (Ijazah) TableName() string {
 	return "ijazah"
 }
 
-type TranskripNilai struct {
-	gorm.Model
-	NamaMapel          string
-	PesertaDidikId     uuid.UUID
-	RombonganBelajarId uuid.UUID
-	NilaRata           uint32
-	TahunAjaranId      string `gorm:"column:tahun_ajaran_id"`
-}
+// type TranskripNilai struct {
+// 	gorm.Model
+// 	NamaMapel          string
+// 	PesertaDidikId     uuid.UUID
+// 	RombonganBelajarId uuid.UUID
+// 	NilaRata           uint32
+// 	TahunAjaranId      string `gorm:"column:tahun_ajaran_id"`
+// }
 
 type TabelInformasiIjazah struct {
 	ID                       uuid.UUID  `gorm:"type:uuid;primaryKey;default:uuid_generate_v4()"`

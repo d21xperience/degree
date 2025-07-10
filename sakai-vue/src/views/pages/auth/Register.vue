@@ -89,7 +89,7 @@ const handleSubmit = async () => {
     try {
         dataReg.sekolah = formatValues(dataReg.sekolah);
         const response = await store.dispatch('authService/registerAdmin', dataReg);
-        console.log(response);
+        // console.log(response);
         // Jika sukses, arahkan ke beranda
         if (response.ok) {
             // const result = resp?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');

@@ -134,6 +134,7 @@
 </template>
 
 <script setup>
+import IpfsInterface from '@/components/IpfsInterface.vue';
 import { useSekolahService } from '@/composables/useSekolahService';
 import router from '@/router';
 import InputText from 'primevue/inputtext';
@@ -145,7 +146,6 @@ import Tabs from 'primevue/tabs';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
-import IpfsInterface from '@/components/IpfsInterface.vue';
 
 const store = useStore();
 const sekolahService = useSekolahService();
@@ -271,7 +271,7 @@ const submit = ref(false);
 
 onMounted(async () => {
     const cek = await sekolahService.searchDnsLokal(pesertaDidikId);
-
+    console.log(cek);
     if (cek) {
         dns.value = { ...cek };
     }

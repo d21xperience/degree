@@ -402,55 +402,55 @@ FOR EACH ROW
 EXECUTE FUNCTION {{schema_name}}.move_to_ijazah_when_complete();
 
 
-CREATE OR REPLACE FUNCTION {{schema_name}}.insert_nilaiakhir_on_anggotakelas()
-RETURNS TRIGGER AS $$
-DECLARE
-  v_kurikulum_id SMALLINT;
-  v_jurusan_id VARCHAR(25);
-  v_tingkat_pendidikan VARCHAR(25);
-  v_mapel RECORD;
-BEGIN
-  -- Ambil data kelas dari tabel_kelas berdasarkan rombongan_belajar_id
-  SELECT 
-    kurikulum_id, 
-    jurusan_id, 
-    tingkat_pendidikan_id::VARCHAR
-  INTO 
-    v_kurikulum_id, 
-    v_jurusan_id, 
-    v_tingkat_pendidikan
-  FROM tabel_kelas
-  WHERE rombongan_belajar_id = NEW.rombongan_belajar_id;
+-- CREATE OR REPLACE FUNCTION {{schema_name}}.insert_nilaiakhir_on_anggotakelas()
+-- RETURNS TRIGGER AS $$
+-- DECLARE
+--   v_kurikulum_id SMALLINT;
+--   v_jurusan_id VARCHAR(25);
+--   v_tingkat_pendidikan VARCHAR(25);
+--   v_mapel RECORD;
+-- BEGIN
+--   -- Ambil data kelas dari tabel_kelas berdasarkan rombongan_belajar_id
+--   SELECT 
+--     kurikulum_id, 
+--     jurusan_id, 
+--     tingkat_pendidikan_id::VARCHAR
+--   INTO 
+--     v_kurikulum_id, 
+--     v_jurusan_id, 
+--     v_tingkat_pendidikan
+--   FROM tabel_kelas
+--   WHERE rombongan_belajar_id = NEW.rombongan_belajar_id;
 
-  -- Loop semua mata_pelajaran_id dari tabel_kategori_mapel yang cocok
-  FOR v_mapel IN
-    SELECT mata_pelajaran_id
-    FROM tabel_kategori_mapel
-    WHERE kurikulum_id = v_kurikulum_id
-      AND jurusan_id = v_jurusan_id
-      AND tingkat_pendidikan = v_tingkat_pendidikan
-      AND deleted_at IS NULL
-  LOOP
-    INSERT INTO tabel_nilaiakhir (
-      peserta_didik_id,
-      anggota_rombel_id,
-      semester_id,
-      semester,
-      mata_pelajaran_id
-    ) VALUES (
-      NEW.peserta_didik_id,
-      NEW.anggota_rombel_id,
-      NEW.semester_id,
-      SUBSTRING(NEW.semester_id FROM 5 FOR 1)::NUMERIC, -- semester 1 atau 2 dari semester_id
-      v_mapel.mata_pelajaran_id
-    );
-  END LOOP;
+--   -- Loop semua mata_pelajaran_id dari tabel_kategori_mapel yang cocok
+--   FOR v_mapel IN
+--     SELECT mata_pelajaran_id
+--     FROM tabel_kategori_mapel
+--     WHERE kurikulum_id = v_kurikulum_id
+--       AND jurusan_id = v_jurusan_id
+--       AND tingkat_pendidikan = v_tingkat_pendidikan
+--       AND deleted_at IS NULL
+--   LOOP
+--     INSERT INTO tabel_nilaiakhir (
+--       peserta_didik_id,
+--       anggota_rombel_id,
+--       semester_id,
+--       semester,
+--       mata_pelajaran_id
+--     ) VALUES (
+--       NEW.peserta_didik_id,
+--       NEW.anggota_rombel_id,
+--       NEW.semester_id,
+--       SUBSTRING(NEW.semester_id FROM 5 FOR 1)::NUMERIC, -- semester 1 atau 2 dari semester_id
+--       v_mapel.mata_pelajaran_id
+--     );
+--   END LOOP;
 
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+--   RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_insert_nilaiakhir_from_anggotakelas
-AFTER INSERT ON {{schema_name}}.tabel_anggotakelas
-FOR EACH ROW
-EXECUTE FUNCTION {{schema_name}}.insert_nilaiakhir_on_anggotakelas();
+-- CREATE TRIGGER trg_insert_nilaiakhir_from_anggotakelas
+-- AFTER INSERT ON {{schema_name}}.tabel_anggotakelas
+-- FOR EACH ROW
+-- EXECUTE FUNCTION {{schema_name}}.insert_nilaiakhir_on_anggotakelas();

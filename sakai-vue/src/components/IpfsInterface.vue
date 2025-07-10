@@ -1,6 +1,6 @@
 <template>
     <div class="ipfs-interface">
-        <h1>IPFS Interface via Golang</h1>
+        <!-- <h1>IPFS Interface via Golang</h1>
 
         <div class="section">
             <h2>Node Info</h2>
@@ -8,10 +8,10 @@
             <div v-if="nodeInfo">
                 <pre>{{ nodeInfo }}</pre>
             </div>
-        </div>
+        </div> -->
 
         <div class="section">
-            <h2>Upload File</h2>
+            <h2>Upload File Ijazah</h2>
             <input type="file" @change="handleFileUpload" />
             <button @click="uploadFile" :disabled="!selectedFile">Upload</button>
             <div v-if="uploadResult">

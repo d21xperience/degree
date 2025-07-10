@@ -1,103 +1,3 @@
-<script setup>
-import { computed, ref } from 'vue';
-
-import InputText from 'primevue/inputtext';
-import Select from 'primevue/select';
-
-import { useFormOptions } from '@/composables/useFormOptions'; 
-const { selectedJenisKelamin, jenisKelaminOptions, agamaOptions, selectedAgama } = useFormOptions();
-
-// const toast = useToast();
-
-// import router from '@/router';
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
-const alamatLengkap = ref({
-    alamatJalan: '',
-    rt: '',
-    rw: '',
-    desa: '',
-    kec: '',
-    kab: '',
-    prov: ''
-});
-// Model Peserta Didik
-const pesertaDidik = ref({
-    pesertaDidikId: '',
-    nis: '',
-    nisn: '',
-    nmSiswa: '',
-    tempatLahir: '',
-    tanggalLahir: '',
-    jenisKelamin: '',
-    agama: '',
-    alamatSiswa: computed(
-        () => `${alamatLengkap.value.alamatJalan} RT.${alamatLengkap.value.rt} RW.${alamatLengkap.value.rw} Desa ${alamatLengkap.value.desa} Kec. ${alamatLengkap.value.kec} Kab. ${alamatLengkap.value.kab} Prov. ${alamatLengkap.value.prov}`
-    ),
-    teleponSiswa: '',
-    diterimaTanggal: '',
-    nmAyah: '',
-    nmIbu: '',
-    pekerjaanAyah: '',
-    pekerjaanIbu: '',
-    nmWali: '',
-    pekerjaanWali: ''
-});
-
-// Model Peserta Didik Pelengkap
-const pesertaDidikPelengkap = ref({
-    pelengkapSiswaId: '',
-    pesertaDidikId: '',
-    statusDalamKel: '',
-    anakKe: '',
-    sekolahAsal: '',
-    diterimaKelas: '',
-    alamatOrtu: '',
-    teleponOrtu: '',
-    alamatWali: '',
-    teleponWali: '',
-    fotoSiswa: null
-});
-
-// Opsi Dropdown
-const isValidate = () => {
-    if (pesertaDidik.value.nmSiswa.trim().length == 0) {
-        return false;
-    } else {
-        return true;
-    }
-};
-
-const update = () => {};
-// Handle Submit Form
-const tambah = () => {
-    submitted.value = true;
-    if (!isValidate()) {
-        alert('Data harus diisi!');
-        return;
-    }
-    isLoadingTambah.value = true;
-};
-
-// Handle Upload Foto
-const onUpload = (event) => {
-    const file = event.files[0];
-    pesertaDidikPelengkap.value.fotoSiswa = URL.createObjectURL(file);
-    toast.add({ severity: 'info', summary: 'Foto Diunggah', detail: file.name, life: 3000 });
-};
-
-const batal = () => {
-    // isLoadingBatal.value = true;
-    router.push({ name: 'infoSiswa' });
-};
-const isEdit = ref(false);
-const isLoadingBatal = ref(false);
-const isLoadingTambah = ref(false);
-const isLoadingUpdate = ref(false);
-const submitted = ref(false);
-</script>
-
 <template>
     <div class="">
         <div class="flex justify-between items-center mb-1">
@@ -115,7 +15,7 @@ const submitted = ref(false);
                 </div>
                 <div class="w-full">
                     <label class="block text-gray-700">Jenis Kelamin</label>
-                    <Select v-model="pesertaDidik.jenisKelamin" :options="jenisKelaminOptions" placeholder="Pilih jenis kelamin" optionLabel="label" optionValue="value" fluid :invalid="submitted && !pesertaDidik.jenisKelamin" />
+                    <JKComponent v-model="pesertaDidik.jenisKelamin" />
                     <small v-if="submitted && !pesertaDidik.jenisKelamin" class="text-red-500">Jenis kelalmin harus diisi.</small>
                 </div>
                 <div>
@@ -141,7 +41,7 @@ const submitted = ref(false);
 
                 <div>
                     <label class="block text-gray-700">Agama</label>
-                    <Select v-model="selectedAgama" :options="agamaOptions" placeholder="Pilih Agama" optionLabel="label" fluid class="w-full" />
+                    <AgamaComponent v-model="pesertaDidik.agama" />
                 </div>
                 <div>
                     <label class="block text-gray-700" for="nis">NIS</label>
@@ -306,9 +206,121 @@ const submitted = ref(false);
             <Button class="w-32" @click="batal" label="Batal" :loading="isLoadingBatal" />
         </div>
     </div>
-
-    <Toast />
 </template>
+
+<script setup>
+import AgamaComponent from '@/components/AgamaComponent.vue';
+import JKComponent from '@/components/JKComponent.vue';
+import { useSekolahService } from '@/composables/useSekolahService';
+import router from '@/router';
+import InputText from 'primevue/inputtext';
+import { computed, onMounted, ref } from 'vue';
+const sekolahService = useSekolahService();
+
+// const toast = useToast();
+
+// import router from '@/router';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+
+const pesertaDidikId = route.query.pesertaDidikId;
+const isEdit = ref(false);
+
+const alamatLengkap = ref({
+    alamatJalan: '',
+    rt: '',
+    rw: '',
+    desa: '',
+    kec: '',
+    kab: '',
+    prov: ''
+});
+// Model Peserta Didik
+const pesertaDidik = ref({
+    pesertaDidikId: '',
+    nis: '',
+    nisn: '',
+    nmSiswa: '',
+    tempatLahir: '',
+    tanggalLahir: '',
+    jenisKelamin: '',
+    agama: '',
+    alamatSiswa: computed(
+        () => `${alamatLengkap.value.alamatJalan} RT.${alamatLengkap.value.rt} RW.${alamatLengkap.value.rw} Desa ${alamatLengkap.value.desa} Kec. ${alamatLengkap.value.kec} Kab. ${alamatLengkap.value.kab} Prov. ${alamatLengkap.value.prov}`
+    ),
+    teleponSiswa: '',
+    diterimaTanggal: '',
+    nmAyah: '',
+    nmIbu: '',
+    pekerjaanAyah: '',
+    pekerjaanIbu: '',
+    nmWali: '',
+    pekerjaanWali: ''
+});
+
+// Model Peserta Didik Pelengkap
+const pesertaDidikPelengkap = ref({
+    pelengkapSiswaId: '',
+    pesertaDidikId: '',
+    statusDalamKel: '',
+    anakKe: '',
+    sekolahAsal: '',
+    diterimaKelas: '',
+    alamatOrtu: '',
+    teleponOrtu: '',
+    alamatWali: '',
+    teleponWali: '',
+    fotoSiswa: null
+});
+
+// Opsi Dropdown
+const isValidate = () => {
+    if (pesertaDidik.value.nmSiswa.trim().length == 0) {
+        return false;
+    } else {
+        return true;
+    }
+};
+
+const update = () => {};
+// Handle Submit Form
+const tambah = () => {
+    submitted.value = true;
+    if (!isValidate()) {
+        alert('Data harus diisi!');
+        return;
+    }
+    isLoadingTambah.value = true;
+};
+
+// Handle Upload Foto
+const onUpload = (event) => {
+    const file = event.files[0];
+    pesertaDidikPelengkap.value.fotoSiswa = URL.createObjectURL(file);
+    toast.add({ severity: 'info', summary: 'Foto Diunggah', detail: file.name, life: 3000 });
+};
+
+const batal = () => {
+    // isLoadingBatal.value = true;
+    router.push({ name: 'infoSiswa' });
+};
+const isLoadingBatal = ref(false);
+const isLoadingTambah = ref(false);
+const isLoadingUpdate = ref(false);
+const submitted = ref(false);
+
+onMounted(async () => {
+    if (pesertaDidikId) {
+        isEdit.value = true;
+        // console.log(pesertaDidikId);
+        const cek = await sekolahService.searchSiswaAktif(pesertaDidikId);
+        console.log(cek);
+        Object.assign(pesertaDidik.value, cek);
+        Object.assign(pesertaDidikPelengkap.value, cek);
+    }
+});
+</script>
 
 <style scoped>
 /* label {

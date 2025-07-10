@@ -6,6 +6,8 @@ import (
 	"auth_service/utils"
 	"errors"
 	"fmt"
+	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -18,6 +20,9 @@ type AuthService interface {
 	RegisterAdmin(user *models.User) error
 	Login(username, password string) (*models.User, error)
 	GenerateToken(userID int, role string) (string, error)
+	SetAuthCookies(w http.ResponseWriter, accessToken, refreshToken string)
+	ClearAuthCookies(w http.ResponseWriter)
+	GetUserByID(userId uint64) (*models.User, error)
 }
 
 // AuthServiceImpl is the implementation of AuthService
@@ -158,4 +163,53 @@ func (as *authServiceImpl) GenerateToken(userID int, role string) (string, error
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString([]byte(as.secretKey))
+}
+
+func (s *authServiceImpl) SetAuthCookies(w http.ResponseWriter, accessToken, refreshToken string) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "access_token",
+		Value:    accessToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true, // aktifkan jika https
+		MaxAge:   15 * 60,
+		SameSite: http.SameSiteStrictMode,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    refreshToken,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+		MaxAge:   7 * 24 * 60 * 60,
+		SameSite: http.SameSiteStrictMode,
+	})
+}
+
+func (s *authServiceImpl) ClearAuthCookies(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "access_token",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   true,
+	})
+	http.SetCookie(w, &http.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   true,
+	})
+}
+
+func (s *authServiceImpl) GetUserByID(userId uint64) (*models.User, error) {
+	cekUser, err := s.repo.FindByID(strconv.FormatUint(userId, 10))
+	if err != nil {
+		return nil, err
+	}
+	return cekUser, nil
 }

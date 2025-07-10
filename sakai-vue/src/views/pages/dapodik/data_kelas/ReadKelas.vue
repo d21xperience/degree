@@ -4,14 +4,14 @@
             <div class="mb-2">
                 <Toolbar>
                     <template #start>
-                        <!-- <Button icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" v-tooltip.bottom="'Tambah data'" v-show="selectedSemester.semester == 1" /> -->
-                        <Button icon="pi pi-pencil" severity="warn" @click="editKelas" :disabled="!selectedKelas || !selectedKelas.length || selectedKelas.length > 1" class="mr-2" v-tooltip.bottom="'Edit data'" />
-                        <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!selectedKelas || !selectedKelas.length" v-tooltip.bottom="'Hapus data'" />
-                        <!-- <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2" v-tooltip.bottom="'Upload'" v-show="selectedSemester.semester == 1" /> -->
-                        <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2" v-tooltip.bottom="'Download'" />
+                        <div v-show="kelasList?.length > 0">
+                            <!-- <Button icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" v-tooltip.bottom="'Tambah data'" v-show="selectedSemester.semester == 1" /> -->
+                            <Button icon="pi pi-pencil" severity="warn" @click="editKelas" :disabled="!selectedKelas || !selectedKelas.length || selectedKelas.length > 1" class="mr-2" v-tooltip.bottom="'Edit data'" />
+                            <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!selectedKelas || !selectedKelas.length" v-tooltip.bottom="'Hapus data'" />
+                            <!-- <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2" v-tooltip.bottom="'Upload'" v-show="selectedSemester.semester == 1" /> -->
+                            <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2" v-tooltip.bottom="'Download'" />
 
-                        <div v-show="selectedSemester.semester == 2">
-                            <Button label="Lulus" severity="help" class="mr-2 text-sm" @click="isDialogKelulusan = true" :disabled="!isLulus || !selectedKelas.length || selectedKelas.length > 1" v-tooltip.bottom="'Pilih tingkat tertinggi'" />
+                            <Button v-show="selectedSemester.semester == 2" label="Lulus" severity="help" class="mr-2 text-sm" @click="isDialogKelulusan = true" :disabled="!isLulus || !selectedKelas.length || selectedKelas.length > 1" v-tooltip.bottom="'Pilih tingkat tertinggi'" />
                         </div>
                     </template>
                     <template #end>

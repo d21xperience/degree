@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -12,14 +11,14 @@ import (
 
 var jwtKey = []byte("secret_key")
 
-func GenerateJWT(user interface{}) (string, error) {
-	claims := &jwt.StandardClaims{
-		IssuedAt:  time.Now().Unix(),
-		ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString(jwtKey)
-}
+//	func GenerateJWT(user any, duration time.Duration) (string, error) {
+//		claims := &jwt.StandardClaims{
+//			IssuedAt:  time.Now().Unix(),
+//			ExpiresAt: time.Now().Add(duration).Unix(),
+//		}
+//		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+//		return token.SignedString(jwtKey)
+//	}
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authHeader := ctx.GetHeader("Authorization")

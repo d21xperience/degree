@@ -26,14 +26,14 @@ func LoadConfig() Config {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
 
-	port, _ := strconv.Atoi(os.Getenv("SC_PORT"))
+	port, _ := strconv.Atoi(os.Getenv("SCDB_PORT"))
 
 	return Config{
-		Host:            os.Getenv("SC_HOST"),
-		Password:        os.Getenv("SC_PASSWORD"),
+		Host:            os.Getenv("SCDB_HOST"),
+		Password:        os.Getenv("SCDB_PASSWORD"),
 		Port:            port,
-		User:            os.Getenv("SC_USER"),
-		DBName:          os.Getenv("SC_DB"),
+		User:            os.Getenv("SCDB_USER"),
+		DBName:          os.Getenv("SCDB_DB"),
 		MaxIdleConns:    10,
 		MaxOpenConns:    100,
 		ConnMaxLifetime: 30 * time.Minute,

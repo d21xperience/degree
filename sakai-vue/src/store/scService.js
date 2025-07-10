@@ -13,7 +13,8 @@ const state = {
     BCAccountActivate: null,
     MetamasConnected: JSON.parse(localStorage.getItem('METAMASK_CONNECTED')) || null,
     contract: JSON.parse(localStorage.getItem('CONTRACT')) || null,
-    SCIjazah: JSON.parse(localStorage.getItem('SCIjazah')) || null
+    SCIjazah: JSON.parse(localStorage.getItem('SCIjazah')) || null,
+    walletInfo: JSON.parse(localStorage.getItem('WALLET_INFO')) || null
 };
 
 const mutations = {
@@ -42,6 +43,10 @@ const mutations = {
     SET_SCIjazah(state, value) {
         state.SCIjazah = value;
         localStorage.setItem('SCIjazah', JSON.stringify(value));
+    },
+    SET_WALLETINFO(state, value) {
+        state.walletInfo = value;
+        localStorage.setItem('WALLETINFO', JSON.stringify(value));
     }
 };
 
@@ -97,7 +102,7 @@ const actions = {
         // console.log(sekolahId);
 
         try {
-            const response = await api.get(`/blockchain/list`);
+            const response = await api.get(`sc/bc-networks`);
             commit('SET_BCNETWORK', response.data.network);
             return response.data; // Mengembalikan data sekolah
         } catch (error) {
@@ -274,7 +279,7 @@ const actions = {
                     sekolah_id: payload.sekolah_id,
                     tahun_ajaran_id: `${payload.tahun_ajaran_id}`
                 }
-            }); 
+            });
             if (response) {
                 const results = { tahun_ajaran_id: `${payload.tahun_ajaran_id}`, degreeData: response.data.degreeData };
                 commit('SET_SCIjazah', results);
@@ -283,7 +288,27 @@ const actions = {
         } catch (error) {
             throw error;
         }
-    } 
+    },
+    async fetchBCTransaction({ commit }, payload) {
+        try {
+            const response = await api.get('sc/bc-transaction', {
+                params: {
+                    schemaname: payload.schemaname
+                }
+            });
+            if (response.status) {
+                return response.data;
+            }
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    },
+    async createWalletInfo({ commit }, payload) {
+        try {
+            commit('SET_WALLETINFO', payload);
+        } catch (error) {}
+    }
 };
 
 // ==========================================
@@ -295,7 +320,8 @@ const getters = {
     getBCAccountActivate: (state) => state.BCAccountActivate,
     getMetamaskConnected: (state) => state.MetamasConnected,
     getContract: (state) => state.contract,
-    getSCIjazah: (state) => state.SCIjazah
+    getSCIjazah: (state) => state.SCIjazah,
+    getWalletInfo: (state) => state.walletInfo
 };
 
 export default {

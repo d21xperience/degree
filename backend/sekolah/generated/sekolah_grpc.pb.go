@@ -1641,7 +1641,7 @@ var UploadDataSekolahService_ServiceDesc = grpc.ServiceDesc{
 
 const (
 	NilaiAkhirService_CreateNilaiAkhir_FullMethodName = "/sekolah.NilaiAkhirService/CreateNilaiAkhir"
-	NilaiAkhirService_GetNilaiAkhir_FullMethodName    = "/sekolah.NilaiAkhirService/GetNilaiAkhir"
+	NilaiAkhirService_GetNilaiSiswa_FullMethodName    = "/sekolah.NilaiAkhirService/GetNilaiSiswa"
 	NilaiAkhirService_UpdateNilaiAkhir_FullMethodName = "/sekolah.NilaiAkhirService/UpdateNilaiAkhir"
 	NilaiAkhirService_DeleteNilaiAkhir_FullMethodName = "/sekolah.NilaiAkhirService/DeleteNilaiAkhir"
 	NilaiAkhirService_SearchNilaiAkhir_FullMethodName = "/sekolah.NilaiAkhirService/SearchNilaiAkhir"
@@ -1655,7 +1655,7 @@ const (
 type NilaiAkhirServiceClient interface {
 	// Nilai Akhir
 	CreateNilaiAkhir(ctx context.Context, in *CreateNilaiAkhirRequest, opts ...grpc.CallOption) (*CreateNilaiAkhirResponse, error)
-	GetNilaiAkhir(ctx context.Context, in *GetNilaiAkhirRequest, opts ...grpc.CallOption) (*GetNilaiAkhirResponse, error)
+	GetNilaiSiswa(ctx context.Context, in *GetNilaiSiswaRequest, opts ...grpc.CallOption) (*GetNilaiSiswaResponse, error)
 	UpdateNilaiAkhir(ctx context.Context, in *UpdateNilaiAkhirRequest, opts ...grpc.CallOption) (*UpdateNilaiAkhirResponse, error)
 	DeleteNilaiAkhir(ctx context.Context, in *DeleteNilaiAkhirRequest, opts ...grpc.CallOption) (*DeleteNilaiAkhirResponse, error)
 	SearchNilaiAkhir(ctx context.Context, in *SearchNilaiAkhirRequest, opts ...grpc.CallOption) (*SearchNilaiAkhirResponse, error)
@@ -1679,10 +1679,10 @@ func (c *nilaiAkhirServiceClient) CreateNilaiAkhir(ctx context.Context, in *Crea
 	return out, nil
 }
 
-func (c *nilaiAkhirServiceClient) GetNilaiAkhir(ctx context.Context, in *GetNilaiAkhirRequest, opts ...grpc.CallOption) (*GetNilaiAkhirResponse, error) {
+func (c *nilaiAkhirServiceClient) GetNilaiSiswa(ctx context.Context, in *GetNilaiSiswaRequest, opts ...grpc.CallOption) (*GetNilaiSiswaResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetNilaiAkhirResponse)
-	err := c.cc.Invoke(ctx, NilaiAkhirService_GetNilaiAkhir_FullMethodName, in, out, cOpts...)
+	out := new(GetNilaiSiswaResponse)
+	err := c.cc.Invoke(ctx, NilaiAkhirService_GetNilaiSiswa_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1727,7 +1727,7 @@ func (c *nilaiAkhirServiceClient) SearchNilaiAkhir(ctx context.Context, in *Sear
 type NilaiAkhirServiceServer interface {
 	// Nilai Akhir
 	CreateNilaiAkhir(context.Context, *CreateNilaiAkhirRequest) (*CreateNilaiAkhirResponse, error)
-	GetNilaiAkhir(context.Context, *GetNilaiAkhirRequest) (*GetNilaiAkhirResponse, error)
+	GetNilaiSiswa(context.Context, *GetNilaiSiswaRequest) (*GetNilaiSiswaResponse, error)
 	UpdateNilaiAkhir(context.Context, *UpdateNilaiAkhirRequest) (*UpdateNilaiAkhirResponse, error)
 	DeleteNilaiAkhir(context.Context, *DeleteNilaiAkhirRequest) (*DeleteNilaiAkhirResponse, error)
 	SearchNilaiAkhir(context.Context, *SearchNilaiAkhirRequest) (*SearchNilaiAkhirResponse, error)
@@ -1744,8 +1744,8 @@ type UnimplementedNilaiAkhirServiceServer struct{}
 func (UnimplementedNilaiAkhirServiceServer) CreateNilaiAkhir(context.Context, *CreateNilaiAkhirRequest) (*CreateNilaiAkhirResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateNilaiAkhir not implemented")
 }
-func (UnimplementedNilaiAkhirServiceServer) GetNilaiAkhir(context.Context, *GetNilaiAkhirRequest) (*GetNilaiAkhirResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetNilaiAkhir not implemented")
+func (UnimplementedNilaiAkhirServiceServer) GetNilaiSiswa(context.Context, *GetNilaiSiswaRequest) (*GetNilaiSiswaResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetNilaiSiswa not implemented")
 }
 func (UnimplementedNilaiAkhirServiceServer) UpdateNilaiAkhir(context.Context, *UpdateNilaiAkhirRequest) (*UpdateNilaiAkhirResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateNilaiAkhir not implemented")
@@ -1795,20 +1795,20 @@ func _NilaiAkhirService_CreateNilaiAkhir_Handler(srv interface{}, ctx context.Co
 	return interceptor(ctx, in, info, handler)
 }
 
-func _NilaiAkhirService_GetNilaiAkhir_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetNilaiAkhirRequest)
+func _NilaiAkhirService_GetNilaiSiswa_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetNilaiSiswaRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(NilaiAkhirServiceServer).GetNilaiAkhir(ctx, in)
+		return srv.(NilaiAkhirServiceServer).GetNilaiSiswa(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: NilaiAkhirService_GetNilaiAkhir_FullMethodName,
+		FullMethod: NilaiAkhirService_GetNilaiSiswa_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NilaiAkhirServiceServer).GetNilaiAkhir(ctx, req.(*GetNilaiAkhirRequest))
+		return srv.(NilaiAkhirServiceServer).GetNilaiSiswa(ctx, req.(*GetNilaiSiswaRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1879,8 +1879,8 @@ var NilaiAkhirService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _NilaiAkhirService_CreateNilaiAkhir_Handler,
 		},
 		{
-			MethodName: "GetNilaiAkhir",
-			Handler:    _NilaiAkhirService_GetNilaiAkhir_Handler,
+			MethodName: "GetNilaiSiswa",
+			Handler:    _NilaiAkhirService_GetNilaiSiswa_Handler,
 		},
 		{
 			MethodName: "UpdateNilaiAkhir",
@@ -1893,6 +1893,232 @@ var NilaiAkhirService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SearchNilaiAkhir",
 			Handler:    _NilaiAkhirService_SearchNilaiAkhir_Handler,
+		},
+	},
+	Streams:  []grpc.StreamDesc{},
+	Metadata: "sekolah.proto",
+}
+
+const (
+	TranskripNilaiService_CreateTranskripNilai_FullMethodName = "/sekolah.TranskripNilaiService/CreateTranskripNilai"
+	TranskripNilaiService_GetTranskripNilai_FullMethodName    = "/sekolah.TranskripNilaiService/GetTranskripNilai"
+	TranskripNilaiService_UpdateTranskripNilai_FullMethodName = "/sekolah.TranskripNilaiService/UpdateTranskripNilai"
+	TranskripNilaiService_DeleteTranskripNilai_FullMethodName = "/sekolah.TranskripNilaiService/DeleteTranskripNilai"
+)
+
+// TranskripNilaiServiceClient is the client API for TranskripNilaiService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
+//
+// =========================================
+// service untuk transkrip
+// =========================================
+type TranskripNilaiServiceClient interface {
+	// CRUD TRANSKRIP NILAI
+	CreateTranskripNilai(ctx context.Context, in *CreateTranskripNilaiRequest, opts ...grpc.CallOption) (*CreateTranskripNilaiResponse, error)
+	GetTranskripNilai(ctx context.Context, in *GetTranskripNilaiRequest, opts ...grpc.CallOption) (*GetTranskripNilaiResponse, error)
+	UpdateTranskripNilai(ctx context.Context, in *UpdateTranskripNilaiRequest, opts ...grpc.CallOption) (*UpdateTranskripNilaiResponse, error)
+	DeleteTranskripNilai(ctx context.Context, in *DeleteTranskripNilaiRequest, opts ...grpc.CallOption) (*DeleteTranskripNilaiResponse, error)
+}
+
+type transkripNilaiServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewTranskripNilaiServiceClient(cc grpc.ClientConnInterface) TranskripNilaiServiceClient {
+	return &transkripNilaiServiceClient{cc}
+}
+
+func (c *transkripNilaiServiceClient) CreateTranskripNilai(ctx context.Context, in *CreateTranskripNilaiRequest, opts ...grpc.CallOption) (*CreateTranskripNilaiResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateTranskripNilaiResponse)
+	err := c.cc.Invoke(ctx, TranskripNilaiService_CreateTranskripNilai_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transkripNilaiServiceClient) GetTranskripNilai(ctx context.Context, in *GetTranskripNilaiRequest, opts ...grpc.CallOption) (*GetTranskripNilaiResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTranskripNilaiResponse)
+	err := c.cc.Invoke(ctx, TranskripNilaiService_GetTranskripNilai_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transkripNilaiServiceClient) UpdateTranskripNilai(ctx context.Context, in *UpdateTranskripNilaiRequest, opts ...grpc.CallOption) (*UpdateTranskripNilaiResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateTranskripNilaiResponse)
+	err := c.cc.Invoke(ctx, TranskripNilaiService_UpdateTranskripNilai_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *transkripNilaiServiceClient) DeleteTranskripNilai(ctx context.Context, in *DeleteTranskripNilaiRequest, opts ...grpc.CallOption) (*DeleteTranskripNilaiResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteTranskripNilaiResponse)
+	err := c.cc.Invoke(ctx, TranskripNilaiService_DeleteTranskripNilai_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// TranskripNilaiServiceServer is the server API for TranskripNilaiService service.
+// All implementations must embed UnimplementedTranskripNilaiServiceServer
+// for forward compatibility.
+//
+// =========================================
+// service untuk transkrip
+// =========================================
+type TranskripNilaiServiceServer interface {
+	// CRUD TRANSKRIP NILAI
+	CreateTranskripNilai(context.Context, *CreateTranskripNilaiRequest) (*CreateTranskripNilaiResponse, error)
+	GetTranskripNilai(context.Context, *GetTranskripNilaiRequest) (*GetTranskripNilaiResponse, error)
+	UpdateTranskripNilai(context.Context, *UpdateTranskripNilaiRequest) (*UpdateTranskripNilaiResponse, error)
+	DeleteTranskripNilai(context.Context, *DeleteTranskripNilaiRequest) (*DeleteTranskripNilaiResponse, error)
+	mustEmbedUnimplementedTranskripNilaiServiceServer()
+}
+
+// UnimplementedTranskripNilaiServiceServer must be embedded to have
+// forward compatible implementations.
+//
+// NOTE: this should be embedded by value instead of pointer to avoid a nil
+// pointer dereference when methods are called.
+type UnimplementedTranskripNilaiServiceServer struct{}
+
+func (UnimplementedTranskripNilaiServiceServer) CreateTranskripNilai(context.Context, *CreateTranskripNilaiRequest) (*CreateTranskripNilaiResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateTranskripNilai not implemented")
+}
+func (UnimplementedTranskripNilaiServiceServer) GetTranskripNilai(context.Context, *GetTranskripNilaiRequest) (*GetTranskripNilaiResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTranskripNilai not implemented")
+}
+func (UnimplementedTranskripNilaiServiceServer) UpdateTranskripNilai(context.Context, *UpdateTranskripNilaiRequest) (*UpdateTranskripNilaiResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateTranskripNilai not implemented")
+}
+func (UnimplementedTranskripNilaiServiceServer) DeleteTranskripNilai(context.Context, *DeleteTranskripNilaiRequest) (*DeleteTranskripNilaiResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTranskripNilai not implemented")
+}
+func (UnimplementedTranskripNilaiServiceServer) mustEmbedUnimplementedTranskripNilaiServiceServer() {}
+func (UnimplementedTranskripNilaiServiceServer) testEmbeddedByValue()                               {}
+
+// UnsafeTranskripNilaiServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to TranskripNilaiServiceServer will
+// result in compilation errors.
+type UnsafeTranskripNilaiServiceServer interface {
+	mustEmbedUnimplementedTranskripNilaiServiceServer()
+}
+
+func RegisterTranskripNilaiServiceServer(s grpc.ServiceRegistrar, srv TranskripNilaiServiceServer) {
+	// If the following call pancis, it indicates UnimplementedTranskripNilaiServiceServer was
+	// embedded by pointer and is nil.  This will cause panics if an
+	// unimplemented method is ever invoked, so we test this at initialization
+	// time to prevent it from happening at runtime later due to I/O.
+	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
+		t.testEmbeddedByValue()
+	}
+	s.RegisterService(&TranskripNilaiService_ServiceDesc, srv)
+}
+
+func _TranskripNilaiService_CreateTranskripNilai_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateTranskripNilaiRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TranskripNilaiServiceServer).CreateTranskripNilai(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TranskripNilaiService_CreateTranskripNilai_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TranskripNilaiServiceServer).CreateTranskripNilai(ctx, req.(*CreateTranskripNilaiRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TranskripNilaiService_GetTranskripNilai_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTranskripNilaiRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TranskripNilaiServiceServer).GetTranskripNilai(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TranskripNilaiService_GetTranskripNilai_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TranskripNilaiServiceServer).GetTranskripNilai(ctx, req.(*GetTranskripNilaiRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TranskripNilaiService_UpdateTranskripNilai_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateTranskripNilaiRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TranskripNilaiServiceServer).UpdateTranskripNilai(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TranskripNilaiService_UpdateTranskripNilai_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TranskripNilaiServiceServer).UpdateTranskripNilai(ctx, req.(*UpdateTranskripNilaiRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _TranskripNilaiService_DeleteTranskripNilai_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteTranskripNilaiRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(TranskripNilaiServiceServer).DeleteTranskripNilai(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: TranskripNilaiService_DeleteTranskripNilai_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(TranskripNilaiServiceServer).DeleteTranskripNilai(ctx, req.(*DeleteTranskripNilaiRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+// TranskripNilaiService_ServiceDesc is the grpc.ServiceDesc for TranskripNilaiService service.
+// It's only intended for direct use with grpc.RegisterService,
+// and not to be introspected or modified (even as a copy)
+var TranskripNilaiService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "sekolah.TranskripNilaiService",
+	HandlerType: (*TranskripNilaiServiceServer)(nil),
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "CreateTranskripNilai",
+			Handler:    _TranskripNilaiService_CreateTranskripNilai_Handler,
+		},
+		{
+			MethodName: "GetTranskripNilai",
+			Handler:    _TranskripNilaiService_GetTranskripNilai_Handler,
+		},
+		{
+			MethodName: "UpdateTranskripNilai",
+			Handler:    _TranskripNilaiService_UpdateTranskripNilai_Handler,
+		},
+		{
+			MethodName: "DeleteTranskripNilai",
+			Handler:    _TranskripNilaiService_DeleteTranskripNilai_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -1913,6 +2139,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
+// =========================================
 // =======================================
 // KELAS SERVICE
 type KelasServiceClient interface {
@@ -2008,6 +2235,7 @@ func (c *kelasServiceClient) ImportDapodikRombel(ctx context.Context, in *Import
 // All implementations must embed UnimplementedKelasServiceServer
 // for forward compatibility.
 //
+// =========================================
 // =======================================
 // KELAS SERVICE
 type KelasServiceServer interface {
@@ -3966,272 +4194,6 @@ var IjazahService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	TranskripNilaiService_CreateTranskripNilai_FullMethodName  = "/sekolah.TranskripNilaiService/CreateTranskripNilai"
-	TranskripNilaiService_GetTranskripNilai_FullMethodName     = "/sekolah.TranskripNilaiService/GetTranskripNilai"
-	TranskripNilaiService_UpdateTranskripNilai_FullMethodName  = "/sekolah.TranskripNilaiService/UpdateTranskripNilai"
-	TranskripNilaiService_DeleteTranskripNilai_FullMethodName  = "/sekolah.TranskripNilaiService/DeleteTranskripNilai"
-	TranskripNilaiService_UploadITranskripNilai_FullMethodName = "/sekolah.TranskripNilaiService/UploadITranskripNilai"
-)
-
-// TranskripNilaiServiceClient is the client API for TranskripNilaiService service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-//
-// =========================================
-// service untuk transkrip
-// =========================================
-type TranskripNilaiServiceClient interface {
-	// CRUD TRANSKRIP NILAI
-	CreateTranskripNilai(ctx context.Context, in *CreateTranskripNilaiRequest, opts ...grpc.CallOption) (*CreateTranskripNilaiResponse, error)
-	GetTranskripNilai(ctx context.Context, in *GetTranskripNilaiRequest, opts ...grpc.CallOption) (*GetTranskripNilaiResponse, error)
-	UpdateTranskripNilai(ctx context.Context, in *UpdateTranskripNilaiRequest, opts ...grpc.CallOption) (*UpdateTranskripNilaiResponse, error)
-	DeleteTranskripNilai(ctx context.Context, in *DeleteTranskripNilaiRequest, opts ...grpc.CallOption) (*DeleteTranskripNilaiResponse, error)
-	// UPLOAD IJAZAH DAN TRANSKRIP NILAI
-	UploadITranskripNilai(ctx context.Context, in *UploadTranskripNilaiRequest, opts ...grpc.CallOption) (*UploadTranskripNilaiResponse, error)
-}
-
-type transkripNilaiServiceClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewTranskripNilaiServiceClient(cc grpc.ClientConnInterface) TranskripNilaiServiceClient {
-	return &transkripNilaiServiceClient{cc}
-}
-
-func (c *transkripNilaiServiceClient) CreateTranskripNilai(ctx context.Context, in *CreateTranskripNilaiRequest, opts ...grpc.CallOption) (*CreateTranskripNilaiResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(CreateTranskripNilaiResponse)
-	err := c.cc.Invoke(ctx, TranskripNilaiService_CreateTranskripNilai_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *transkripNilaiServiceClient) GetTranskripNilai(ctx context.Context, in *GetTranskripNilaiRequest, opts ...grpc.CallOption) (*GetTranskripNilaiResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetTranskripNilaiResponse)
-	err := c.cc.Invoke(ctx, TranskripNilaiService_GetTranskripNilai_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *transkripNilaiServiceClient) UpdateTranskripNilai(ctx context.Context, in *UpdateTranskripNilaiRequest, opts ...grpc.CallOption) (*UpdateTranskripNilaiResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UpdateTranskripNilaiResponse)
-	err := c.cc.Invoke(ctx, TranskripNilaiService_UpdateTranskripNilai_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *transkripNilaiServiceClient) DeleteTranskripNilai(ctx context.Context, in *DeleteTranskripNilaiRequest, opts ...grpc.CallOption) (*DeleteTranskripNilaiResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeleteTranskripNilaiResponse)
-	err := c.cc.Invoke(ctx, TranskripNilaiService_DeleteTranskripNilai_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *transkripNilaiServiceClient) UploadITranskripNilai(ctx context.Context, in *UploadTranskripNilaiRequest, opts ...grpc.CallOption) (*UploadTranskripNilaiResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UploadTranskripNilaiResponse)
-	err := c.cc.Invoke(ctx, TranskripNilaiService_UploadITranskripNilai_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// TranskripNilaiServiceServer is the server API for TranskripNilaiService service.
-// All implementations must embed UnimplementedTranskripNilaiServiceServer
-// for forward compatibility.
-//
-// =========================================
-// service untuk transkrip
-// =========================================
-type TranskripNilaiServiceServer interface {
-	// CRUD TRANSKRIP NILAI
-	CreateTranskripNilai(context.Context, *CreateTranskripNilaiRequest) (*CreateTranskripNilaiResponse, error)
-	GetTranskripNilai(context.Context, *GetTranskripNilaiRequest) (*GetTranskripNilaiResponse, error)
-	UpdateTranskripNilai(context.Context, *UpdateTranskripNilaiRequest) (*UpdateTranskripNilaiResponse, error)
-	DeleteTranskripNilai(context.Context, *DeleteTranskripNilaiRequest) (*DeleteTranskripNilaiResponse, error)
-	// UPLOAD IJAZAH DAN TRANSKRIP NILAI
-	UploadITranskripNilai(context.Context, *UploadTranskripNilaiRequest) (*UploadTranskripNilaiResponse, error)
-	mustEmbedUnimplementedTranskripNilaiServiceServer()
-}
-
-// UnimplementedTranskripNilaiServiceServer must be embedded to have
-// forward compatible implementations.
-//
-// NOTE: this should be embedded by value instead of pointer to avoid a nil
-// pointer dereference when methods are called.
-type UnimplementedTranskripNilaiServiceServer struct{}
-
-func (UnimplementedTranskripNilaiServiceServer) CreateTranskripNilai(context.Context, *CreateTranskripNilaiRequest) (*CreateTranskripNilaiResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateTranskripNilai not implemented")
-}
-func (UnimplementedTranskripNilaiServiceServer) GetTranskripNilai(context.Context, *GetTranskripNilaiRequest) (*GetTranskripNilaiResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetTranskripNilai not implemented")
-}
-func (UnimplementedTranskripNilaiServiceServer) UpdateTranskripNilai(context.Context, *UpdateTranskripNilaiRequest) (*UpdateTranskripNilaiResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateTranskripNilai not implemented")
-}
-func (UnimplementedTranskripNilaiServiceServer) DeleteTranskripNilai(context.Context, *DeleteTranskripNilaiRequest) (*DeleteTranskripNilaiResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeleteTranskripNilai not implemented")
-}
-func (UnimplementedTranskripNilaiServiceServer) UploadITranskripNilai(context.Context, *UploadTranskripNilaiRequest) (*UploadTranskripNilaiResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UploadITranskripNilai not implemented")
-}
-func (UnimplementedTranskripNilaiServiceServer) mustEmbedUnimplementedTranskripNilaiServiceServer() {}
-func (UnimplementedTranskripNilaiServiceServer) testEmbeddedByValue()                               {}
-
-// UnsafeTranskripNilaiServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to TranskripNilaiServiceServer will
-// result in compilation errors.
-type UnsafeTranskripNilaiServiceServer interface {
-	mustEmbedUnimplementedTranskripNilaiServiceServer()
-}
-
-func RegisterTranskripNilaiServiceServer(s grpc.ServiceRegistrar, srv TranskripNilaiServiceServer) {
-	// If the following call pancis, it indicates UnimplementedTranskripNilaiServiceServer was
-	// embedded by pointer and is nil.  This will cause panics if an
-	// unimplemented method is ever invoked, so we test this at initialization
-	// time to prevent it from happening at runtime later due to I/O.
-	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
-		t.testEmbeddedByValue()
-	}
-	s.RegisterService(&TranskripNilaiService_ServiceDesc, srv)
-}
-
-func _TranskripNilaiService_CreateTranskripNilai_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateTranskripNilaiRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TranskripNilaiServiceServer).CreateTranskripNilai(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TranskripNilaiService_CreateTranskripNilai_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TranskripNilaiServiceServer).CreateTranskripNilai(ctx, req.(*CreateTranskripNilaiRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TranskripNilaiService_GetTranskripNilai_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetTranskripNilaiRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TranskripNilaiServiceServer).GetTranskripNilai(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TranskripNilaiService_GetTranskripNilai_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TranskripNilaiServiceServer).GetTranskripNilai(ctx, req.(*GetTranskripNilaiRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TranskripNilaiService_UpdateTranskripNilai_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateTranskripNilaiRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TranskripNilaiServiceServer).UpdateTranskripNilai(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TranskripNilaiService_UpdateTranskripNilai_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TranskripNilaiServiceServer).UpdateTranskripNilai(ctx, req.(*UpdateTranskripNilaiRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TranskripNilaiService_DeleteTranskripNilai_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeleteTranskripNilaiRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TranskripNilaiServiceServer).DeleteTranskripNilai(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TranskripNilaiService_DeleteTranskripNilai_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TranskripNilaiServiceServer).DeleteTranskripNilai(ctx, req.(*DeleteTranskripNilaiRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TranskripNilaiService_UploadITranskripNilai_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UploadTranskripNilaiRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TranskripNilaiServiceServer).UploadITranskripNilai(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TranskripNilaiService_UploadITranskripNilai_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TranskripNilaiServiceServer).UploadITranskripNilai(ctx, req.(*UploadTranskripNilaiRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-// TranskripNilaiService_ServiceDesc is the grpc.ServiceDesc for TranskripNilaiService service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var TranskripNilaiService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "sekolah.TranskripNilaiService",
-	HandlerType: (*TranskripNilaiServiceServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "CreateTranskripNilai",
-			Handler:    _TranskripNilaiService_CreateTranskripNilai_Handler,
-		},
-		{
-			MethodName: "GetTranskripNilai",
-			Handler:    _TranskripNilaiService_GetTranskripNilai_Handler,
-		},
-		{
-			MethodName: "UpdateTranskripNilai",
-			Handler:    _TranskripNilaiService_UpdateTranskripNilai_Handler,
-		},
-		{
-			MethodName: "DeleteTranskripNilai",
-			Handler:    _TranskripNilaiService_DeleteTranskripNilai_Handler,
-		},
-		{
-			MethodName: "UploadITranskripNilai",
-			Handler:    _TranskripNilaiService_UploadITranskripNilai_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "sekolah.proto",
-}
-
-const (
 	DownloadService_DownloadSekolahService_FullMethodName = "/sekolah.DownloadService/DownloadSekolahService"
 )
 
@@ -4239,7 +4201,6 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
-// =========================================
 // =========================================
 // =============DOWNLOAD SERVICE============
 // =========================================
@@ -4270,7 +4231,6 @@ func (c *downloadServiceClient) DownloadSekolahService(ctx context.Context, in *
 // All implementations must embed UnimplementedDownloadServiceServer
 // for forward compatibility.
 //
-// =========================================
 // =========================================
 // =============DOWNLOAD SERVICE============
 // =========================================
@@ -4465,6 +4425,7 @@ const (
 	ReferensiService_GetProgramKeahlian_FullMethodName   = "/sekolah.ReferensiService/GetProgramKeahlian"
 	ReferensiService_GetJurusan_FullMethodName           = "/sekolah.ReferensiService/GetJurusan"
 	ReferensiService_GetMapel_FullMethodName             = "/sekolah.ReferensiService/GetMapel"
+	ReferensiService_FilterMapel_FullMethodName          = "/sekolah.ReferensiService/FilterMapel"
 	ReferensiService_GetMapelKurikulum_FullMethodName    = "/sekolah.ReferensiService/GetMapelKurikulum"
 	ReferensiService_UpdateMapelKurikulum_FullMethodName = "/sekolah.ReferensiService/UpdateMapelKurikulum"
 	ReferensiService_GetGelarAkademik_FullMethodName     = "/sekolah.ReferensiService/GetGelarAkademik"
@@ -4487,6 +4448,7 @@ type ReferensiServiceClient interface {
 	GetProgramKeahlian(ctx context.Context, in *GetProgramKeahlianRequest, opts ...grpc.CallOption) (*GetProgramKeahlianResponse, error)
 	GetJurusan(ctx context.Context, in *GetJurusanRequest, opts ...grpc.CallOption) (*GetJurusanResponse, error)
 	GetMapel(ctx context.Context, in *GetMapelRequest, opts ...grpc.CallOption) (*GetMapelResponse, error)
+	FilterMapel(ctx context.Context, in *FilterMapelRequest, opts ...grpc.CallOption) (*FilterMapelResponse, error)
 	GetMapelKurikulum(ctx context.Context, in *GetMapelKurikulumRequest, opts ...grpc.CallOption) (*GetMapelKurikulumResponse, error)
 	UpdateMapelKurikulum(ctx context.Context, in *UpdateMapelKurikulumRequest, opts ...grpc.CallOption) (*UpdateMapelKurikulumResponse, error)
 	GetGelarAkademik(ctx context.Context, in *GetGelarAkademikRequest, opts ...grpc.CallOption) (*GetGelarAkademikResponse, error)
@@ -4590,6 +4552,16 @@ func (c *referensiServiceClient) GetMapel(ctx context.Context, in *GetMapelReque
 	return out, nil
 }
 
+func (c *referensiServiceClient) FilterMapel(ctx context.Context, in *FilterMapelRequest, opts ...grpc.CallOption) (*FilterMapelResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(FilterMapelResponse)
+	err := c.cc.Invoke(ctx, ReferensiService_FilterMapel_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *referensiServiceClient) GetMapelKurikulum(ctx context.Context, in *GetMapelKurikulumRequest, opts ...grpc.CallOption) (*GetMapelKurikulumResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetMapelKurikulumResponse)
@@ -4637,6 +4609,7 @@ type ReferensiServiceServer interface {
 	GetProgramKeahlian(context.Context, *GetProgramKeahlianRequest) (*GetProgramKeahlianResponse, error)
 	GetJurusan(context.Context, *GetJurusanRequest) (*GetJurusanResponse, error)
 	GetMapel(context.Context, *GetMapelRequest) (*GetMapelResponse, error)
+	FilterMapel(context.Context, *FilterMapelRequest) (*FilterMapelResponse, error)
 	GetMapelKurikulum(context.Context, *GetMapelKurikulumRequest) (*GetMapelKurikulumResponse, error)
 	UpdateMapelKurikulum(context.Context, *UpdateMapelKurikulumRequest) (*UpdateMapelKurikulumResponse, error)
 	GetGelarAkademik(context.Context, *GetGelarAkademikRequest) (*GetGelarAkademikResponse, error)
@@ -4676,6 +4649,9 @@ func (UnimplementedReferensiServiceServer) GetJurusan(context.Context, *GetJurus
 }
 func (UnimplementedReferensiServiceServer) GetMapel(context.Context, *GetMapelRequest) (*GetMapelResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMapel not implemented")
+}
+func (UnimplementedReferensiServiceServer) FilterMapel(context.Context, *FilterMapelRequest) (*FilterMapelResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method FilterMapel not implemented")
 }
 func (UnimplementedReferensiServiceServer) GetMapelKurikulum(context.Context, *GetMapelKurikulumRequest) (*GetMapelKurikulumResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMapelKurikulum not implemented")
@@ -4869,6 +4845,24 @@ func _ReferensiService_GetMapel_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ReferensiService_FilterMapel_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(FilterMapelRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ReferensiServiceServer).FilterMapel(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ReferensiService_FilterMapel_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ReferensiServiceServer).FilterMapel(ctx, req.(*FilterMapelRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ReferensiService_GetMapelKurikulum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetMapelKurikulumRequest)
 	if err := dec(in); err != nil {
@@ -4965,6 +4959,10 @@ var ReferensiService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMapel",
 			Handler:    _ReferensiService_GetMapel_Handler,
+		},
+		{
+			MethodName: "FilterMapel",
+			Handler:    _ReferensiService_FilterMapel_Handler,
 		},
 		{
 			MethodName: "GetMapelKurikulum",

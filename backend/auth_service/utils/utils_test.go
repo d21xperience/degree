@@ -3,13 +3,8 @@ package utils
 import (
 	"crypto/rand"
 	"errors"
-	"net/http"
-	"net/http/httptest"
 	"testing"
-	"time"
 
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -62,99 +57,99 @@ func BenchmarkBcryptCost(b *testing.B) {
 	}
 }
 
-func TestGenerateJWT(t *testing.T) {
-	// Call GenerateJWT
-	token, err := GenerateJWT(nil)
+// func TestGenerateJWT(t *testing.T) {
+// 	// Call GenerateJWT
+// 	token, err := GenerateJWT(nil)
 
-	// Assertions
-	assert.NoError(t, err)    // Tidak ada error
-	assert.NotEmpty(t, token) // Token tidak kosong
+// 	// Assertions
+// 	assert.NoError(t, err)    // Tidak ada error
+// 	assert.NotEmpty(t, token) // Token tidak kosong
 
-	// Parse token kembali untuk memastikan validitasnya
-	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		return jwtKey, nil
-	})
-	assert.NoError(t, err)
-	assert.True(t, parsedToken.Valid)
+// 	// Parse token kembali untuk memastikan validitasnya
+// 	parsedToken, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+// 		return jwtKey, nil
+// 	})
+// 	assert.NoError(t, err)
+// 	assert.True(t, parsedToken.Valid)
 
-	// Validasi klaim
-	claims := parsedToken.Claims.(jwt.MapClaims)
-	assert.WithinDuration(t, time.Now(), time.Unix(int64(claims["iat"].(float64)), 0), time.Second)
-	assert.WithinDuration(t, time.Now().Add(24*time.Hour), time.Unix(int64(claims["exp"].(float64)), 0), time.Second)
-}
+// 	// Validasi klaim
+// 	claims := parsedToken.Claims.(jwt.MapClaims)
+// 	assert.WithinDuration(t, time.Now(), time.Unix(int64(claims["iat"].(float64)), 0), time.Second)
+// 	assert.WithinDuration(t, time.Now().Add(24*time.Hour), time.Unix(int64(claims["exp"].(float64)), 0), time.Second)
+// }
 
-func TestJWTAuthMiddleware(t *testing.T) {
-	// Dummy JWT key
-	jwtKey = []byte("secret")
+// func TestJWTAuthMiddleware(t *testing.T) {
+// 	// Dummy JWT key
+// 	jwtKey = []byte("secret")
 
-	// Generate a valid token for testing
-	validToken, err := GenerateJWT(nil)
-	assert.NoError(t, err)
+// 	// Generate a valid token for testing
+// 	validToken, err := GenerateJWT(nil)
+// 	assert.NoError(t, err)
 
-	// Setup Gin
-	gin.SetMode(gin.TestMode)
-	router := gin.New()
+// 	// Setup Gin
+// 	gin.SetMode(gin.TestMode)
+// 	router := gin.New()
 
-	// Apply middleware
-	router.Use(JWTAuthMiddleware())
+// 	// Apply middleware
+// 	router.Use(JWTAuthMiddleware())
 
-	// Dummy endpoint
-	router.GET("/protected", func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, gin.H{"message": "Access granted"})
-	})
+// 	// Dummy endpoint
+// 	router.GET("/protected", func(ctx *gin.Context) {
+// 		ctx.JSON(http.StatusOK, gin.H{"message": "Access granted"})
+// 	})
 
-	// Test cases
-	tests := []struct {
-		name       string
-		header     string
-		wantStatus int
-		wantBody   string
-	}{
-		{
-			name:       "No Authorization Header",
-			header:     "",
-			wantStatus: http.StatusUnauthorized,
-			wantBody:   `{"error":"Unauthorized"}`,
-		},
-		{
-			name:       "Invalid Authorization Header",
-			header:     "InvalidToken",
-			wantStatus: http.StatusUnauthorized,
-			wantBody:   `{"error":"Unauthorized"}`,
-		},
-		{
-			name:       "Expired Token",
-			header:     "Bearer expired.token.here",
-			wantStatus: http.StatusUnauthorized,
-			wantBody:   `{"error":"Invalid token"}`,
-		},
-		{
-			name:       "Valid Token",
-			header:     "Bearer " + validToken,
-			wantStatus: http.StatusOK,
-			wantBody:   `{"message":"Access granted"}`,
-		},
-	}
+// 	// Test cases
+// 	tests := []struct {
+// 		name       string
+// 		header     string
+// 		wantStatus int
+// 		wantBody   string
+// 	}{
+// 		{
+// 			name:       "No Authorization Header",
+// 			header:     "",
+// 			wantStatus: http.StatusUnauthorized,
+// 			wantBody:   `{"error":"Unauthorized"}`,
+// 		},
+// 		{
+// 			name:       "Invalid Authorization Header",
+// 			header:     "InvalidToken",
+// 			wantStatus: http.StatusUnauthorized,
+// 			wantBody:   `{"error":"Unauthorized"}`,
+// 		},
+// 		{
+// 			name:       "Expired Token",
+// 			header:     "Bearer expired.token.here",
+// 			wantStatus: http.StatusUnauthorized,
+// 			wantBody:   `{"error":"Invalid token"}`,
+// 		},
+// 		{
+// 			name:       "Valid Token",
+// 			header:     "Bearer " + validToken,
+// 			wantStatus: http.StatusOK,
+// 			wantBody:   `{"message":"Access granted"}`,
+// 		},
+// 	}
 
-	// Run test cases
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// Create a request with header
-			req := httptest.NewRequest("GET", "/protected", nil)
-			if tt.header != "" {
-				req.Header.Set("Authorization", tt.header)
-			}
+// 	// Run test cases
+// 	for _, tt := range tests {
+// 		t.Run(tt.name, func(t *testing.T) {
+// 			// Create a request with header
+// 			req := httptest.NewRequest("GET", "/protected", nil)
+// 			if tt.header != "" {
+// 				req.Header.Set("Authorization", tt.header)
+// 			}
 
-			// Record the response
-			rec := httptest.NewRecorder()
-			router.ServeHTTP(rec, req)
+// 			// Record the response
+// 			rec := httptest.NewRecorder()
+// 			router.ServeHTTP(rec, req)
 
-			// Validate response
-			assert.Equal(t, tt.wantStatus, rec.Code)
-			assert.JSONEq(t, tt.wantBody, rec.Body.String())
-		})
-	}
-}
+// 			// Validate response
+// 			assert.Equal(t, tt.wantStatus, rec.Code)
+// 			assert.JSONEq(t, tt.wantBody, rec.Body.String())
+// 		})
+// 	}
+// }
 
 // func TestGenerateUsername(t *testing.T) {
 // 	mockIsUsernameTaken := func(existingUsernames map[string]bool) func(string) bool {

@@ -16,10 +16,14 @@ function smoothScroll(id) {
 const isAuthenticated = ref(false);
 onMounted(async () => {
     isAuthenticated.value = await store.getters['authService/isAuthenticated'];
+    console.log(isAuthenticated.value);
 });
 
 const toDashboard = async () => {
     const sekolah = await store.getters['authService/getSekolah']?.namaSekolah;
+    if (isAuthenticated) {
+        router.push({ name: 'suDashboard' });
+    }
     router.push({ name: 'dashboard', params: { sekolah: sekolah.toLowerCase().replace(/\s+/g, '') } });
 };
 </script>

@@ -1,46 +1,69 @@
 import axios from 'axios';
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_AUTH_BASE_URL, //'http://localhost:8182/api/v1',
-    withCredentials: true, // Untuk mengirim cookie atau credensial
+    baseURL: import.meta.env.VITE_API_AUTH_BASE_URL,
+    withCredentials: true, // penting agar cookie dikirim
+    timeout: 10000,
     headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer your_token'
-    },
-    timeout: 10000
+        'Content-Type': 'application/json'
+    }
 });
+
+// Optional: response interceptor untuk auto-refresh
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
+            try {
+                await api.post('/auth/web/refresh');
+                return api(originalRequest); // retry
+            } catch (refreshError) {
+                return Promise.reject(refreshError);
+            }
+        }
+        return Promise.reject(error);
+    }
+);
 
 const state = {
     token: localStorage.getItem('token') || null,
+    refreshToken: null,
     userRole: localStorage.getItem('userRole') || null,
-    user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null,
     userProfile: JSON.parse(localStorage.getItem('userProfile')) || null, // Ambil dari localStorage
     sekolah: JSON.parse(localStorage.getItem('sekolah')) || null, // Ambil dari localStorage
-    refreshToken: null
+    user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null,
+    isAuthenticated: false
 };
 
 const mutations = {
-    setUser(state, user) {
+    SET_USER(state, user) {
         state.user = user;
         localStorage.setItem('user', JSON.stringify(user)); // Simpan user ke localStorage
     },
-    setUserRole(state, userRole) {
+    SET_USER_ROLE(state, userRole) {
         state.userRole = userRole;
         localStorage.setItem('userRole', userRole);
     },
-    setUserProfile(state, userProfile) {
+    SET_USER_PROFILE(state, userProfile) {
         state.userProfile = userProfile;
         localStorage.setItem('userProfile', JSON.stringify(userProfile));
     },
-
-    setToken(state, token) {
-        state.token = token;
-        localStorage.setItem('token', token);
+    SET_AUTH(state, user) {
+        state.isAuthenticated = true;
+        state.user = user;
     },
-    setRefreshToken(state, refreshToken) {
-        state.refreshToken = refreshToken;
-    },
-    clearAuthData(state) {
-        localStorage.removeItem('token'); // Hapus token saat logout
+    // setToken(state, token) {
+    //     state.token = token;
+    //     localStorage.setItem('token', token);
+    // },
+    // setRefreshToken(state, refreshToken) {
+    //     state.refreshToken = refreshToken;
+    // },
+    CLEAR_AUTH(state) {
+        state.isAuthenticated = false;
+        state.user = null;
         localStorage.removeItem('userRole'); // Hapus userRole saat logout
         localStorage.removeItem('userProfile'); // Hapus userProfile saat logout
         localStorage.removeItem('user');
@@ -91,12 +114,13 @@ const mutations = {
 const actions = {
     async login({ commit }, payload) {
         try {
-            const response = await api.post('/auth/login', payload);
-            const { ok } = response.data;
-            if (ok) {
-                commit('setToken', response.data.token);
-                commit('setUserRole', response.data.user.role);
-                commit('setUser', response.data.user);
+            const response = await api.post('/auth/web/login', payload);
+            const { status } = response.data;
+            if (status) {
+                commit('SET_AUTH', response.data.user);
+                // commit('setToken', response.data.token);
+                commit('SET_USER_ROLE', response.data.user.role);
+                commit('SET_USER', response.data.user);
                 commit('SET_SEKOLAH', response.data.sekolahTenant);
                 const results = {
                     status: true,
@@ -109,28 +133,46 @@ const actions = {
                 throw new Error(response.data.message || 'Login gagal');
             }
         } catch (error) {
+            console.log(error);
             // console.log(error.response);
             throw error.response.data;
+        }
+    },
+    async refreshToken({ commit }) {
+        try {
+            console.log('refreshToken');
+            const res = await api.post('/auth/web/refresh');
+            console.log(res);
+            // commit('SET_AUTH', res.data.user); // atau abaikan jika hanya refresh token
+            return res.data;
+        } catch (error) {
+            commit('CLEAR_AUTH');
+            throw error;
         }
     },
 
     async logout({ commit }) {
         try {
-            commit('clearAuthData');
+            const response = await api.post('/auth/web/logout');
+            const { status } = response.data;
+            if (status) {
+                commit('CLEAR_AUTH');
+            }
         } finally {
-            commit('clearAuthData');
+            commit('CLEAR_AUTH');
         }
     },
     async registerAdmin({ commit }, payload) {
         try {
             const response = await api.post('/auth/register', payload);
+            console.log('authService/registerAdmin', response);
             if (response.data.ok) {
                 commit('setToken', response.data.token);
                 // Simpan informasi pengguna setelah login
-                commit('setUser', response.data.user);
-                commit('setUserRole', response.data.user.role);
+                commit('SET_USER', response.data.user);
+                commit('SET_USER_ROLE', response.data.user.role);
             }
-            console.log('from Register:', response.data);
+            // console.log('from Register:', response.data);
             return response.data;
         } catch (error) {
             throw error.response.data;
@@ -166,7 +208,7 @@ const actions = {
     async getUserProfile({ commit }, userID) {
         try {
             const response = await api.get(`/user/${userID}/profile`);
-            commit('setUserProfile', response.data.userProfile);
+            commit('SET_USER_PROFILE', response.data.userProfile);
             return response.data;
         } catch (error) {
             throw error;
@@ -195,7 +237,7 @@ const actions = {
             });
 
             if (response.data.status === 'success') {
-                commit('setUserProfile', response.data.user_profile);
+                commit('SET_USER_PROFILE', response.data.user_profile);
                 return response.data;
             } else {
                 console.error('Gagal memperbarui profil:', response.data);
@@ -218,28 +260,31 @@ const actions = {
                 }
             });
 
-            commit('setUser', response.data);
+            commit('SET_USER', response.data);
             return response.data;
         } catch (error) {
             console.error('Gagal mengunggah foto profil:', error);
             return null;
         }
+    },
+    /*—— BOOTSTRAP di App.vue created() ——*/
+    async bootstrap({ commit }) {
+        try {
+            const { data } = await api.get('/auth/me'); // backend validasi cookie
+            commit('SET_USER', data.user);
+            commit('SET_SEKOLAH', data.sekolahTenant);
+        } catch {
+            commit('RESET');
+        } // belum login
     }
 };
 
 const getters = {
-    isAuthenticated: (state) => {
-        if (state.token) {
-            return true;
-        }
-        return false;
-    },
-    userRole(state) {
-        return state.userRole;
-    },
-    getSekolah(state) {
-        return state.sekolah;
-    },
+    isAuthenticated: (s) => !!s.user,
+    // isAuthenticated: (state) => state.isAuthenticated,
+    currentUser: (state) => state.user,
+    userRole: (state) => state.userRole,
+    getSekolah: (state) => state.sekolah,
     getUserProfile(state) {
         const userData = { ...state.user, ...state.userProfile };
         return userData;

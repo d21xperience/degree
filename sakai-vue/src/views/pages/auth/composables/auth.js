@@ -16,6 +16,8 @@ export function useAuth() {
     const { fetchSekolah } = useSekolahService();
     const store = useStore();
     const currentUser = computed(() => store.getters['authService/getUserProfile']);
+    const user = store.getters['authService/userRole'];
+
     const onLogin = async ({ values }) => {
         const { username, password } = values;
         // cek apakah username merupakan username atau email
@@ -27,23 +29,28 @@ export function useAuth() {
             alert('Username atau email tidak valid.');
             return;
         }
-        let cek = {};
         try {
             const response = await store.dispatch('authService/login', {
                 [loginIdentifier]: username,
                 password
             });
+
             if (response.status) {
-                await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
-                await fetchSekolah();
+                console.log(response);
 
-                // Ambil tahun ajaran
-                await store.dispatch('sekolahService/fetchTahunAjaran');
-                await store.dispatch('sekolahService/fetchSemester');
+                if (response.userRole != 'superadmin') {
+                    // await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
+                    // await fetchSekolah();
+                    // // Ambil tahun ajaran
+                    // await store.dispatch('sekolahService/fetchTahunAjaran');
+                    // await store.dispatch('sekolahService/fetchSemester');
 
-                const namaSekolah = response?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
-
-                await router.push({ name: 'dashboard', params: { sekolah: namaSekolah } });
+                    const namaSekolah = response?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
+                    console.log(namaSekolah);
+                    await router.push({ name: 'dashboard', params: { sekolah: namaSekolah } });
+                } else {
+                    await router.push({ name: 'suDashboard' });
+                }
             }
         } catch (error) {
             console.error('Login gagal:', error);
@@ -61,6 +68,7 @@ export function useAuth() {
     return {
         onLogin,
         onLogout,
-        currentUser
+        currentUser,
+        user
     };
 }

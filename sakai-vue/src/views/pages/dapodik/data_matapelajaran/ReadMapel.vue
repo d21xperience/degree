@@ -3,19 +3,18 @@
         <div class="">
             <Toolbar>
                 <template #start>
-                    <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="isVisible = !isVisible" v-tooltip.bottom="'Tambah Mapel'" />
-
-                    <Button
-                        icon="pi pi-trash"
-                        severity="danger"
-                        class="mr-2 text-lg"
-                        @click="dialogBatchDelete"
-                        :disabled="!selectedKategoriMapel || !selectedKategoriMapel.length || selectedKategoriMapel.length == 1"
-                        v-tooltip.bottom="'Hapus banyak mapel'"
-                    />
-                    <!--<Button icon="pi pi-pencil" severity="warn" @click="openNew" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 2" class="mr-2" v-tooltip.bottom="'Edit siswa'" />
-                    <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Upload siswa'" v-show="selectedSemester.semester == 1" /> -->
-                    <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download Mapel'" />
+                    <div v-show="kategoriMapelList.length > 0">
+                        <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="isVisible = !isVisible" v-tooltip.bottom="'Tambah Mapel'" />
+                        <Button
+                            icon="pi pi-trash"
+                            severity="danger"
+                            class="mr-2 text-lg"
+                            @click="dialogBatchDelete"
+                            :disabled="!selectedKategoriMapel || !selectedKategoriMapel.length || selectedKategoriMapel.length == 1"
+                            v-tooltip.bottom="'Hapus banyak mapel'"
+                        />
+                        <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download Mapel'" />
+                    </div>
                     <Select v-model="selectedKategoriSekolah" :options="kategoriSekolahList" optionLabel="nama_kurikulum" placeholder="Kurikulum" class="mr-2 !w-96" checkmark fluid />
                 </template>
                 <template #end>
@@ -54,7 +53,7 @@
                             {{ slotProps.index + 1 + first }}
                         </template>
                     </Column>
-                    <Column field="nmMapel" header="Nama"></Column>
+                    <Column field="nmMapel" header="Nama" sortable></Column>
                     <Column field="tingkatPendidikan" header="Tingkat" sortable></Column>
                     <Column field="" header="Jurusan" sortable>
                         <template #body>
@@ -188,14 +187,12 @@
                 <Button label="Tambah" icon="pi pi-check" text @click="tambahPembelajaran" />
             </template>
         </Dialog>
-
-        <!-- import data -->
-        <!-- DIALOG IMPORT -->
-        <DialogImport v-model:visible="dialogImport" @save="saveImport" @cancel="cancelImport" template-type="mapel" />
         <DialogConfirmDelete v-model:visible="isDelete" @confirm="confirmDelete" :message="messageDelete" />
         <DialogConfirmDelete v-model:visible="isBatchDelete" @confirm="confirmBatchDelete" :message="messageBatchDelete" />
         <!-- end of import data -->
-        <DialogMapel v-model:visible="isVisible" />
+        <Dialog v-model:visible="isVisible" :style="{ width: '450px' }" header="Tambah Mapel" :modal="true" position="top">
+            <DialogMapel v-model="cekMapel" @addMapel="addMapel1" />
+        </Dialog>
     </div>
 </template>
 
@@ -204,8 +201,6 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 const store = useStore();
 
-// import FileUpload from 'primevue/fileupload';
-import DialogImport from '@/components/DialogImport.vue';
 import TingkatComponent from '@/components/TingkatComponent.vue';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
@@ -251,6 +246,7 @@ const kelasList = ref([]);
 // ================================
 // composable
 // ================================
+import DialogMapel from '@/components/DialogMapel.vue';
 import { useSekolahService } from '@/composables/useSekolahService';
 const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
 const schemaname = computed(() => store.getters['sekolahService/getTabeltenant']?.schemaname);
@@ -281,7 +277,6 @@ const initFirst = async () => {
     await sekolahService.fetchKategoriSekolah();
     kategoriSekolahList.value = sekolahService.kategoriSekolahTabel.value;
     selectedKategoriSekolah.value = kategoriSekolahList.value[0];
-
     const results = await sekolahService.fetchTingkat();
     initialTingkat.value = results[0].kode;
 };
@@ -394,7 +389,7 @@ const cancelImport = () => {
 // ===========================================
 
 // import { debounce } from 'lodash';
-
+const cekMapel = ref();
 const selectedMapel = ref();
 const filteredMapel = ref();
 const searchMapel = (event) => {
@@ -412,17 +407,17 @@ const searchGuru = (event) => {
         filteredGuru.value = guruList.value.filter((guru) => guru.ptk.nama.toLowerCase().includes(query));
     }, 250);
 };
-const handleKeydown = (event) => {
-    if (event.key === ' ') {
-        selectedMapel.value += ' '; // Menambahkan spasi ke query
-    }
-};
+// const handleKeydown = (event) => {
+//     if (event.key === ' ') {
+//         selectedMapel.value += ' '; // Menambahkan spasi ke query
+//     }
+// };
 
-const cancelAddMapel = () => {
-    addMapelDialog.value = false;
-    selectedGuru.value = {};
-    selectedMapel.value = {};
-};
+// const cancelAddMapel = () => {
+//     addMapelDialog.value = false;
+//     selectedGuru.value = {};
+//     selectedMapel.value = {};
+// };
 
 const generateUUID = () => crypto.randomUUID();
 
@@ -494,6 +489,19 @@ const confirmBatchDelete = () => {
 };
 const first = ref(0);
 const isVisible = ref(false);
+
+const addMapel1 = (e) => {
+    console.log(e.value);
+    isVisible.value = false;
+    cekMapel.value = null;
+    const kategoriMapel = {
+
+    }
+    // kategoriMapelList.value.push()
+    // Kirim ke backend
+
+};
+
 onMounted(async () => {
     // await fetchK();
     initFirst();

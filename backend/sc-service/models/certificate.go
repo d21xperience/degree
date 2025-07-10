@@ -93,3 +93,20 @@ type ContractData struct {
 func (ContractData) TableName() string {
 	return "contracts"
 }
+
+type BCTransaction struct {
+	FromAddress string
+	ToAddress   string
+	Value       string
+	GasLimit    string
+	GasPrice    string
+	Nonce       string
+	Data        string
+	ChainId     string
+	BlockNumber string
+	Status      int32
+}
+
+func (BCTransaction) TableName() string {
+	return "transaksi_blockchain"
+}

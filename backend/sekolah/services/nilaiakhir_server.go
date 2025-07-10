@@ -6,6 +6,7 @@ import (
 	"log"
 	"sekolah/config"
 	pb "sekolah/generated"
+	"sekolah/handler"
 	"sekolah/models"
 	"sekolah/repositories"
 	"sekolah/utils"
@@ -15,12 +16,14 @@ import (
 
 type NilaiAkhirServiceServer struct {
 	pb.UnimplementedNilaiAkhirServiceServer
-	repo              repositories.GenericRepository[models.NilaiAkhir]
+	repo repositories.GenericRepository[models.NilaiAkhir]
+	// repoNilaiSiswa repositories.GenericRepository[models.NilaiSiswa]
 	repoRombelAnggota repositories.GenericRepository[models.RombelAnggota]
 }
 
 func NewNilaiAkhirServiceServer() *NilaiAkhirServiceServer {
 	repoNilaiAkhir := repositories.NewNilaiAkhirRepository(config.DB)
+	// repoNilaiSiswa := repositories.NewN
 	repoRombelAnggota := repositories.NewRombelAnggotaRepository(config.DB)
 	return &NilaiAkhirServiceServer{
 		repo:              *repoNilaiAkhir,
@@ -80,74 +83,44 @@ func (s *NilaiAkhirServiceServer) CreateNilaiAkhir(ctx context.Context, req *pb.
 }
 
 // **GetNilai akhir**
-func (s *NilaiAkhirServiceServer) GetNilaiAkhir(ctx context.Context, req *pb.GetNilaiAkhirRequest) (*pb.GetNilaiAkhirResponse, error) {
+func (s *NilaiAkhirServiceServer) GetNilaiSiswa(ctx context.Context, req *pb.GetNilaiSiswaRequest) (*pb.GetNilaiSiswaResponse, error) {
 	// Debugging: Cek nilai request yang diterima
 	// log.Printf("Received Sekolah data request: %+v\n", req)
 	// Daftar field yang wajib diisi
-	requiredFields := []string{"Schemaname", "SemesterId"}
+	requiredFields := []string{"Schemaname", "SemesterId", "RombonganBelajarId"}
 	// Validasi request
 	err := utils.ValidateFields(req, requiredFields)
 	if err != nil {
 		return nil, err
 	}
 	schemaName := req.GetSchemaname()
-	semesterId := req.GetSemesterId()
-
-	var conditions = map[string]interface{}{
-		"tabel_anggotakelas.semester_id": semesterId,
-		"tabel_kelas.jenis_rombel":       1,
-	}
-	if req.GetPesertaDidikId() != "" {
-		conditions["tabel_anggotakelas.peserta_didik_id"] = req.GetPesertaDidikId()
-	}
-	joins := []string{
-		"JOIN tabel_siswa ON tabel_siswa.peserta_didik_id = tabel_anggotakelas.peserta_didik_id",
-		"JOIN tabel_kelas ON tabel_kelas.rombongan_belajar_id = tabel_anggotakelas.rombongan_belajar_id",
-		"JOIN tabel_ptk ON tabel_ptk.ptk_id = tabel_kelas.ptk_id",
-	}
-	// preloads := []string{"PesertaDidik", "RombonganBelajar", "RombonganBelajar.PTK", "NilaiAkhir", "NilaiAkhir.MataPelajaran"}
-	preloads := []string{"PesertaDidik", "RombonganBelajar", "RombonganBelajar.PTK"}
-
-	orderBy := []string{"tabel_kelas.nm_kelas ASC", "tabel_siswa.nm_siswa ASC"} // Hindari duplikasi
-	anggotaRombelModel, err := s.repoRombelAnggota.FindWithPreloadAndJoinsOrigin(ctx, schemaName, joins, preloads, conditions, orderBy)
+	rombelId := req.GetRombonganBelajarId()
+	handlerNilai := handler.NewNilaiSiswaHandler()
+	nilaiSiswa, err := handlerNilai.GetNilaiSiswa(ctx, schemaName, req.SemesterId, rombelId)
 	if err != nil {
 		return nil, err
 	}
 
-	NilaiAkhirList := utils.ConvertModelsToPB(anggotaRombelModel, func(item models.RombelAnggota) *pb.NilaiSiswa {
-		// nilaiAkhir, err := s.repo.FindWithRelations(ctx, schemaName, nil, []string{"MataPelajaran"}, map[string]any{"peserta_didik_id": item.PesertaDidikId.String()}, []struct {
-		// 	Query string
-		// 	Args  []interface{}
-		// }{
-		// 	{"semester_id <= ?", []interface{}{item.SemesterId}},
-		// 	// {"created_at BETWEEN ? AND ?", []interface{}{startDate, endDate}},
-		// }, nil, nil)
-		// if err != nil {
-		// 	return nil
-		// }
-
+	NilaiAkhirList := utils.ConvertModelsToPB(nilaiSiswa, func(item handler.NilaiSiswa) *pb.NilaiSiswa {
 		return &pb.NilaiSiswa{
-			PesertaDidikId:      item.PesertaDidikId.String(),
-			NmSiswa:             item.PesertaDidik.NmSiswa,
-			RombonganBelajarId:  item.AnggotaRombelId.String(),
-			NmKelas:             item.RombonganBelajar.NmKelas,
-			TingkatPendidikanId: item.RombonganBelajar.TingkatPendidikanId,
-			// NilaiAkhir: utils.ConvertModelsToPB(nilaiAkhir, func(item models.NilaiAkhir) *pb.NilaiAkhir {
-			// 	return &pb.NilaiAkhir{
-			// 		IdNilaiAkhir:    item.IdNilaiAkhir.String(),
-			// 		NilaiPeng:       utils.PointerToUint32(item.NilaiPeng),
-			// 		MataPelajaranId: utils.PointerToUint32(item.MataPelajaranId),
-			// 		SemesterId:      item.SemesterId,
-			// 		Semester:        utils.PointerToUint32(item.Semester),
-			// 		MataPelajaran: &pb.Mapel{
-			// 			Nama: item.MataPelajaran.Nama,
-			// 		},
-			// 	}
-			// }),
+			NmSiswa:             item.NmSiswa,
+			NmKelas:             item.NmKelas,
+			TingkatPendidikanId: item.TingkatPendidikanId,
+			SemesterId:          item.SemesterId,
+			NilaiAkhir: utils.ConvertModelsToPB(*item.NilaiMapel, func(item handler.NilaiMapel) *pb.NilaiMapel {
+				return &pb.NilaiMapel{
+					NmMapel:         item.NmMapel,
+					MataPelajaranId: item.MataPelajaranId,
+					SemesterId:      item.SemesterId,
+					NilaiPeng:       item.NilaiPeng,
+				}
+			}),
 		}
 	})
-	return &pb.GetNilaiAkhirResponse{
+	return &pb.GetNilaiSiswaResponse{
 		NilaiSiswa: NilaiAkhirList,
+		Status:     true,
+		Message:    "berhasil mengambil data",
 	}, nil
 }
 

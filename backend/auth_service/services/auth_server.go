@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/http"
+	"time"
 
 	"auth_service/config"
 	pb "auth_service/generated"
@@ -14,6 +16,10 @@ import (
 
 	"auth_service/utils"
 
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -49,56 +55,176 @@ type SchoolRegistration struct {
 	AdminEmail string `json:"admin_email"`
 }
 
-func (s *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-	// log.Printf("Received Sekolah data request: %+v\n", req)
+// func (s *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+// 	// log.Printf("Received Sekolah data request: %+v\n", req)
+// 	username := req.GetUsername()
+// 	email := req.GetEmail()
+// 	password := req.Password
+// 	var resp *models.User
+// 	var err error
+// 	if email != "" {
+// 		resp, err = s.authService.Login(email, password)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 	}
+// 	if username != "" {
+// 		resp, err = s.authService.Login(username, password)
+// 		if err != nil {
+// 			log.Printf("Error username/password salah : %v", err)
+// 			return nil, err
+// 		}
+// 	}
+// 	// Generate JWT
+// 	accessToken, _ := utils.GenerateJWT(resp, 15*time.Minute)
+// 	refreshToken, _ := utils.GenerateJWT(resp, 7*24*time.Hour)
+// 	// if err != nil {
+// 	// 	return nil, errors.New("failed to generate token")
+// 	// }
 
+// 	// Set cookie via grpc-gateway
+// 	if md, ok := runtime.ServerMetadataFromContext(ctx); ok {
+// 		if vals := md.HeaderMD.Get("grpc-gateway-ctx-http-response"); len(vals) > 0 {
+// 			if w, ok := vals[0].(http.ResponseWriter); ok {
+// 				s.authService.SetAuthCookies(w, accessToken, refreshToken)
+// 			}
+// 		}
+// 	}
+// 	user := &pb.User{
+// 		Id:              resp.ID,
+// 		Username:        resp.Username,
+// 		Email:           resp.Email,
+// 		Role:            resp.Role,
+// 		SekolahTenantId: resp.SekolahTenantID,
+// 	}
+
+// 	// Ambil data sekolah
+// 	sekolahModel, err := s.repoSekolah.GetSekolahByTenantId(resp.SekolahTenantID)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return &pb.LoginResponse{
+// 		// Token: token,
+// 		Ok:   true,
+// 		User: user,
+// 		SekolahTenant: &pb.SekolahTenant{
+// 			NamaSekolah: sekolahModel.NamaSekolah,
+// 			Npsn:        sekolahModel.NPSN,
+// 		},
+// 	}, nil
+// }
+
+func (s *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	username := req.GetUsername()
 	email := req.GetEmail()
-	password := req.Password
-	var resp *models.User
+	password := req.GetPassword()
+
+	if password == "" || (username == "" && email == "") {
+		return nil, status.Error(codes.InvalidArgument, "username/email dan password harus diisi")
+	}
+
+	var user *models.User
 	var err error
+
 	if email != "" {
-		resp, err = s.authService.Login(email, password)
-		if err != nil {
-			return nil, err
-		}
+		user, err = s.authService.Login(email, password)
+	} else {
+		user, err = s.authService.Login(username, password)
 	}
-	if username != "" {
-		resp, err = s.authService.Login(username, password)
-		if err != nil {
-			log.Printf("Error username/password salah : %v", err)
-			return nil, err
-		}
-	}
-	// Generate JWT
-	token, err := utils.GenerateJWT(resp)
+
 	if err != nil {
-		return nil, errors.New("failed to generate token")
+		log.Printf("Login error: %v", err)
+		return nil, status.Error(codes.Unauthenticated, "Username/email atau password salah")
 	}
 
-	user := &pb.User{
-		Id:              resp.ID,
-		Username:        resp.Username,
-		Email:           resp.Email,
-		Role:            resp.Role,
-		SekolahTenantId: resp.SekolahTenantID,
+	// Generate access & refresh tokens
+	accessToken, err := utils.GenerateJWT(user, 15*time.Minute)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Gagal membuat access token")
 	}
 
+	refreshToken, err := utils.GenerateJWT(user, 7*24*time.Hour)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Gagal membuat refresh token")
+	}
+
+	// Simpan token di metadata untuk disetel nanti di http response
+	var cek runtime.ServerTransportStream
+	cek.SetHeader(metadata.Pairs(
+		"Set-Cookie", buildCookieHeader("access_token", accessToken, 15*60),
+		"Set-Cookie", buildCookieHeader("refresh_token", refreshToken, 7*24*60*60),
+	))
+	// )); err != nil {
+	// 	log.Printf("Failed to set cookies via metadata: %v", err)
+	// }
 	// Ambil data sekolah
-	sekolahModel, err := s.repoSekolah.GetSekolahByTenantId(resp.SekolahTenantID)
+	sekolahModel, err := s.repoSekolah.GetSekolahByTenantId(user.SekolahTenantID)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, "Gagal ambil data sekolah")
 	}
+
 	return &pb.LoginResponse{
-		Token: token,
-		Ok:    true,
-		User:  user,
+		Ok: true,
+		User: &pb.User{
+			Id:              user.ID,
+			Username:        user.Username,
+			Email:           user.Email,
+			Role:            user.Role,
+			SekolahTenantId: user.SekolahTenantID,
+		},
 		SekolahTenant: &pb.SekolahTenant{
 			NamaSekolah: sekolahModel.NamaSekolah,
 			Npsn:        sekolahModel.NPSN,
 		},
 	}, nil
 }
+
+func buildCookieHeader(name, value string, maxAge int) string {
+	return (&http.Cookie{
+		Name:     name,
+		Value:    value,
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true, // Aktifkan untuk production
+		MaxAge:   maxAge,
+		SameSite: http.SameSiteStrictMode,
+	}).String()
+}
+
+// 1. Endpoint HTTP-only Cookie untuk Web
+// func (s *AuthServiceServer) LoginWeb(w http.ResponseWriter, r *http.Request) {
+// 	var req LoginRequest
+// 	_ = json.NewDecoder(r.Body).Decode(&req)
+
+// 	token, err := s.authService.Login(req.Username, req.Password)
+// 	if err != nil {
+// 		http.Error(w, "unauthorized", http.StatusUnauthorized)
+// 		return
+// 	}
+
+// 	// Generate access & refresh tokens
+// 	accessToken, err := utils.GenerateJWT(user, 15*time.Minute)
+// 	if err != nil {
+// 		return nil, status.Error(codes.Internal, "Gagal membuat access token")
+// 	}
+
+// 	refreshToken, err := utils.GenerateJWT(user, 7*24*time.Hour)
+// 	if err != nil {
+// 		return nil, status.Error(codes.Internal, "Gagal membuat refresh token")
+// 	}
+
+// 	http.SetCookie(w, &http.Cookie{
+// 		Name:     "access_token",
+// 		Value:    token,
+// 		HttpOnly: true,
+// 		Secure:   true,
+// 		SameSite: http.SameSiteStrictMode,
+// 		Path:     "/",
+// 		MaxAge:   3600,
+// 	})
+
+// 	w.WriteHeader(http.StatusOK)
+// }
 
 func (s *AuthServiceServer) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	// Debugging: Cek nilai request yang diterima
@@ -158,7 +284,8 @@ func (s *AuthServiceServer) Register(ctx context.Context, req *pb.RegisterReques
 	}
 
 	// Cek jika role user adalah admin dan apakah sudah ada admin
-	if userModel.Role == "admin" {
+	switch userModel.Role {
+	case "admin":
 		adminExists, err := s.authService.IsAdminExists(sekolahModel.ID)
 		if err != nil {
 			log.Printf("Error mengecek admin: %v", err)
@@ -208,7 +335,7 @@ func (s *AuthServiceServer) Register(ctx context.Context, req *pb.RegisterReques
 			return nil, fmt.Errorf("gagal enqueue initSCService: %w", err)
 		}
 
-	} else if userModel.Role == "siswa" {
+	case "siswa":
 		// Registrasi siswa
 		if err := s.authService.Register(userModel); err != nil {
 			log.Printf("Error registrasi siswa: %v", err)
@@ -228,7 +355,7 @@ func (s *AuthServiceServer) Register(ctx context.Context, req *pb.RegisterReques
 
 	var response *pb.RegisterResponse
 	if userModel.Role == "admin" {
-		token, err := utils.GenerateJWT(userModel)
+		token, err := utils.GenerateJWT(userModel, 25*time.Minute)
 		if err != nil {
 			return nil, errors.New("failed to generate token")
 		}
@@ -244,6 +371,7 @@ func (s *AuthServiceServer) Register(ctx context.Context, req *pb.RegisterReques
 			},
 			SekolahTenant: &pb.SekolahTenant{
 				NamaSekolah: sekolahModel.NamaSekolah,
+				// EnkripId: &sekolahModel.EnkripID,
 			},
 		}
 	} else {
@@ -399,3 +527,35 @@ func (s *AuthServiceServer) GetSekolah(ctx context.Context, req *pb.GetSekolahRe
 		},
 	}, nil
 }
+
+// func (s *AuthService) Refresh(ctx context.Context, _ *authpb.RefreshRequest) (*authpb.RefreshResponse, error) {
+// 	var refreshToken string
+// 	if md, ok := runtime.ServerMetadataFromContext(ctx); ok {
+// 		if vals := md.HeaderMD.Get("grpc-gateway-ctx-http-request"); len(vals) > 0 {
+// 			if r, ok := vals[0].(*http.Request); ok {
+// 				cookie, err := r.Cookie("refresh_token")
+// 				if err == nil {
+// 					refreshToken = cookie.Value
+// 				}
+// 			}
+// 		}
+// 	}
+
+// 	userID, err := ValidateJWT(refreshToken)
+// 	if err != nil {
+// 		return nil, status.Errorf(codes.Unauthenticated, "invalid refresh token")
+// 	}
+
+// 	accessToken, _ := GenerateJWT(userID, 15*time.Minute)
+// 	newRefreshToken, _ := GenerateJWT(userID, 7*24*time.Hour)
+
+// 	if md, ok := runtime.ServerMetadataFromContext(ctx); ok {
+// 		if vals := md.HeaderMD.Get("grpc-gateway-ctx-http-response"); len(vals) > 0 {
+// 			if w, ok := vals[0].(http.ResponseWriter); ok {
+// 				SetAuthCookies(w, accessToken, newRefreshToken)
+// 			}
+// 		}
+// 	}
+
+// 	return &authpb.RefreshResponse{Message: "refreshed"}, nil
+// }

@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS ref.mata_pelajaran (
 	last_update TIMESTAMP NOT NULL DEFAULT '2019-09-10 14:29:57.296154',
 	expired_date TIMESTAMP NULL DEFAULT NULL,
 	last_sync TIMESTAMP NOT NULL DEFAULT '1901-01-01 00:00:00',
+	nm_singkatan varchar(10) DEFAULT NULL::character varying NULL,
 	PRIMARY KEY (mata_pelajaran_id)
 );
 

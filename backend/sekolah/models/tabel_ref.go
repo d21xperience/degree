@@ -139,6 +139,7 @@ type MataPelajaran struct {
 	PilihanKepengawasan int32   `gorm:"column:pilihan_kepengawasan"`         // Urutan di Rapor
 	PilihanEvaluasi     int32   `gorm:"column:pilihan_evaluasi"`             // Nama Lokal
 	JurusanID           *string `gorm:"column:jurusan_id"`                   // Foreign key ke tabel jurusan
+	NmSingkatan         *string `gorm:"column:nm_singkatan"`
 	// Jurusan             Jurusan `gorm:"foreignKey:JurusanID;references:JurusanID"` // Relasi ke tabel jurusan
 }
 

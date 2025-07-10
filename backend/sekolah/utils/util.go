@@ -339,6 +339,20 @@ func SliceToPointer[T any](input []T) []*T {
 	return output
 }
 
+// DerefSlice mengubah slice pointer []*T menjadi slice nilai []T.
+// Jika elemen nil, akan dilewati (tidak dimasukkan ke hasil).
+func DerefSlice[T any](input []*T) []T {
+	var output []T
+	for _, ptr := range input {
+		if ptr != nil {
+			output = append(output, *ptr)
+		}
+	}
+	return output
+}
+
+
+
 // GenerateNomorIjazah generates a random ijazah number based on NPSN and year
 func GenerateNomorIjazah(npsn string, tahun int) string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))

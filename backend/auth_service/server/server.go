@@ -1,6 +1,9 @@
 package server
 
 import (
+	"auth_service/handler"
+	"auth_service/middleware"
+	"auth_service/utils"
 	"context"
 	"fmt"
 	"log"
@@ -31,6 +34,12 @@ func StartGRPCServer() {
 	if httpPort == "" {
 		httpPort = "8081"
 	}
+
+	frontend := os.Getenv("FRONTEND")
+	if frontend == "" {
+		frontend = "http://localhost:5173"
+	}
+
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -49,9 +58,36 @@ func StartGRPCServer() {
 	// HTTP Gateway
 	// =========================================
 	// Inisialisasi mux untuk HTTP Gateway
+	// cookieCfg := utils.CookieCfg{
+	// 	Domain: os.Getenv("COOKIE_DOMAIN"), // ".myapp.com" atau ""
+	// 	Secure: os.Getenv("ENV") == "production",
+	// }
+
+	handlerHTTP := handler.NewHandlerHttp()
+	loginHandler := handlerHTTP.HandlerLoginHTTP() // ambil handler
+	refreshHandler := handlerHTTP.HandlerRefreshToken()
+	logoutHandler := handlerHTTP.HandlerLogout()
 	mux := runtime.NewServeMux()
-	// Middleware CORS
-	corsHandler := corsMiddleware(mux)
+	method, pattern := utils.CreatePattern("POST", "api", "v1", "auth", "web", "login")
+	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		loginHandler(w, r)
+	})
+	method, pattern = utils.CreatePattern("POST", "api", "v1", "auth", "web", "logout")
+	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		logoutHandler(w, r)
+	})
+	method, pattern = utils.CreatePattern("POST", "api", "v1", "auth", "web", "refresh")
+	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		refreshHandler(w, r)
+	})
+	combinedHandler := middleware.Chain(
+		mux,                      // handler paling dalam
+		middleware.SecureHeaders, // ↓ urutan eksekusi
+		middleware.Logging,
+		middleware.RateLimit(5, 10),  // 5 req/detik, burst 10
+		middleware.JWTAuthMiddleware, // cek token
+		middleware.CORS(frontend),    // harus paling luar
+	)
 	grpcServerEndpoint := fmt.Sprintf("%s:%s", grpcHost, gRPCPort)
 	RunHTTPGateway(ctx, mux, grpcServerEndpoint, httpPort) // HTTP gateway di port 8080
 	// HTTP Listener
@@ -78,7 +114,7 @@ func StartGRPCServer() {
 	go func() {
 		defer wg.Done()
 		log.Printf("HTTP gateway berjalan di :%s", httpPort)
-		if err := http.Serve(httpListener, corsHandler); err != nil {
+		if err := http.Serve(httpListener, combinedHandler); err != nil {
 			log.Fatalf("Failed to serve HTTP Gateway: %v", err)
 		}
 	}()
@@ -111,23 +147,38 @@ func StartGRPCServer() {
 	fmt.Println("Server shutdown complete")
 }
 
-func corsMiddleware(h http.Handler) http.Handler {
-	frontend := os.Getenv("FRONTEND")
-	if frontend == "" {
-		frontend = "http://localhost:5173"
-	}
+// func corsMiddleware(h http.Handler) http.Handler {
+// 	frontend := os.Getenv("FRONTEND")
+// 	if frontend == "" {
+// 		frontend = "http://localhost:5173"
+// 	}
 
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", frontend)
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		w.Header().Set("Access-Control-Allow-Origin", frontend)
+// 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+// 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+// 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
-		if r.Method == "OPTIONS" {
-			w.WriteHeader(http.StatusOK)
-			return
-		}
+// 		if r.Method == "OPTIONS" {
+// 			w.WriteHeader(http.StatusOK)
+// 			return
+// 		}
 
-		h.ServeHTTP(w, r)
-	})
-}
+// 		h.ServeHTTP(w, r)
+// 	})
+// }
+
+// // secureHeaders menambahkan header keamanan standar
+// func SecureHeaders(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		// HTTP security headers
+// 		w.Header().Set("Content-Security-Policy", "default-src 'self'")
+// 		w.Header().Set("X-Frame-Options", "DENY")
+// 		w.Header().Set("X-Content-Type-Options", "nosniff")
+// 		w.Header().Set("X-XSS-Protection", "1; mode=block")
+// 		w.Header().Set("Referrer-Policy", "no-referrer")
+// 		w.Header().Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
+
+// 		next.ServeHTTP(w, r)
+// 	})
+// }

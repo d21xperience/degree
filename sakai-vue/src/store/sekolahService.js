@@ -729,6 +729,23 @@ const actions = {
             return null;
         }
     },
+    async filterMapel({ commit }, payload) {
+        try {
+            // console.log("filterMapel",payload)
+            const response = await api.get(`/ss/ref/mapel/filter`, {
+                params: {
+                    query: payload.query
+                }
+            });
+            // console.log('response.data.mapel', response);
+            // commit('SET_TABELMAPEL', response.data.mapel);
+            return response.data.mapel;
+        } catch (error) {
+            // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
+            console.error('Gagal memuat mata pelajaran:', error);
+            return null;
+        }
+    },
     async fetchMapelKurikulum({ commit }, payload) {
         try {
             const response = await api.get(`/ss/ref/mapel-kurikulum`, {
@@ -1084,7 +1101,7 @@ const actions = {
     async updateDns({ commit }, payload) {
         try {
             const response = await api.put(`ss/ijazah/data-nominasi_sementara/update`, payload);
-            
+
             return response.data;
         } catch (error) {
             throw error;

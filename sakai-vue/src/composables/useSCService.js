@@ -1,12 +1,15 @@
 import { useToast } from 'primevue/usetoast';
+import { computed } from 'vue';
 import { useStore } from 'vuex';
-
+import { useSekolahService } from './useSekolahService';
 export function useSCService() {
     const store = useStore();
     const toast = useToast();
+    const sekolahService = useSekolahService();
     const createMetamaskConnected = (payload) => {
         store.commit('scService/SET_METAMASKCONNECTED', payload);
     };
+    const schemaname = computed(() => sekolahService.schemaname.value);
     const getMetamaskConnected = () => {
         try {
             const response = store.getters['scService/getMetamaskConnected'];
@@ -69,11 +72,68 @@ export function useSCService() {
         }
     };
 
+    const getBCTransaction = async () => {
+        const payload = {
+            schemaname: schemaname.value
+        };
+
+        // console.log(payload);
+        // return;
+        let response = await store.dispatch('scService/fetchBCTransaction', payload);
+        if (response.status) {
+            return response.bcTransaction;
+        }
+    };
+
+    const createWalletInfo = async (payload) => {
+        try {
+            if (payload) {
+                console.log(payload);
+                await store.dispatch('scService/createWalletInfo', payload);
+            }
+            // return;
+        } catch (error) {}
+    };
+    const getWalletInfo = async () => {
+        try {
+            const response = store.getters['scService/getWalletInfo'];
+            if (response) {
+                return response;
+            }
+        } catch (error) {}
+    };
+
+    const fetchBCNetworks = async () => {
+        try {
+            let response = store.getters['scService/getBCNETWORK'];
+            if (!response || !Array.isArray(response) || response.length === 0) {
+                {
+                    // const { network } = await store.dispatch('scService/fetchBlockchainNetworks'); // Destructuring response
+                }
+                // console.log(network);
+                // // BCNetworks.value = data.filter(item => !item.activate)
+                // BCNetworks.value = network;
+
+                // let obj ={...data}
+                // console.log(obj)
+                // BCNetwork.value = obj
+            }
+        } catch (error) {
+            if (error.response) {
+                console.error(`Error ${error.response.status}: ${error.response.data}`);
+            } else {
+                console.error('Error:', error.message);
+            }
+        }
+    };
     return {
         createMetamaskConnected,
         getMetamaskConnected,
         createSCIjazah,
         getContract,
-        getSCIjazah
+        getSCIjazah,
+        getBCTransaction,
+        createWalletInfo,
+        getWalletInfo
     };
 }

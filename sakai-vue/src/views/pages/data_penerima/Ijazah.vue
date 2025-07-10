@@ -77,6 +77,8 @@
         </Dialog>  -->
         <DialogConfirmDelete message="Apakah data ini akan dihapus?" v-model:visible="visible" @confirm="deleteData" @closeDialog="closeDialog" />
         <!-- <DialogImport :visible="dialogImport" /> -->
+
+        <UploadIjazah />
     </div>
 </template>
 
@@ -119,6 +121,7 @@ const scData = ref({
 });
 // const selectedJurusan = ref();
 import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
+import UploadIjazah from '@/components/UploadIjazah.vue';
 import router from '@/router';
 // Dummy data (bisa kamu ambil dari API atau input form)
 // const degreeData = ref({

@@ -1,0 +1,35 @@
+package template
+
+func GetNilaiColumns() []TemplateColumn {
+	return []TemplateColumn{
+		{Name: "Nama", Example: ""},
+		{Name: "Nama Kelas", Example: "", ColumnWidth: 10},
+		// {Name: "Tingkat Pendidikan", Example: "10", ColumnWidth: 8},
+		{Name: "Semester", Example: "", ColumnWidth: 10},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+		{Name: "", Example: "", ColumnWidth: 16},
+	}
+}

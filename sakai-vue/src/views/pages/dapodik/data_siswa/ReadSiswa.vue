@@ -5,11 +5,13 @@
                 <div class="mb-2">
                     <Toolbar>
                         <template #start>
-                            <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="openNew" v-tooltip.bottom="'Tambah Siswa'" :loading="isOpenNew" />
-                            <Button icon="pi pi-pencil" severity="warn" @click="openNew" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 2" class="mr-2" v-tooltip.bottom="'Edit siswa'" />
-                            <Button icon="pi pi-trash" severity="danger" class="mr-2 text-lg" @click="deleteSiswaDialog = true" :disabled="!selectedSiswa || !selectedSiswa.length" v-tooltip.bottom="'Hapus siswa'" />
+                            <div v-show="siswa.length > 0">
+                                <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="openNew" v-tooltip.bottom="'Tambah Siswa'" :loading="isOpenNew" />
+                                <Button icon="pi pi-pencil" severity="warn" @click="editSiswa" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 2" class="mr-2" v-tooltip.bottom="'Edit siswa'" :loading="loadingEdit" />
+                                <Button icon="pi pi-trash" severity="danger" class="mr-2 text-lg" @click="deleteSiswaDialog = true" :disabled="!selectedSiswa || !selectedSiswa.length" v-tooltip.bottom="'Hapus siswa'" />
+                                <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download siswa'" />
+                            </div>
                             <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Upload siswa'" v-show="selectedSemester.semester == 1" />
-                            <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download siswa'" />
                         </template>
                         <template #end>
                             <div class="flex">
@@ -70,10 +72,11 @@
 </template>
 
 <script setup>
+import router from '@/router';
 import { debounce } from 'lodash-es';
 
 import { useSekolahService } from '@/composables/useSekolahService';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 const store = useStore();
 // import FileUpload from 'primevue/fileupload';
@@ -84,7 +87,7 @@ import DataTable from 'primevue/datatable';
 import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
 import DialogImport from '@/components/DialogImport.vue';
 import { useUtils } from '@/composables/useUtils';
-import router from '@/router';
+
 import { FilterMatchMode } from '@primevue/core/api';
 import Button from 'primevue/button';
 import IconField from 'primevue/iconfield';
@@ -156,4 +159,13 @@ const cancelImport = () => {
 
 const { formatterDateID } = useUtils();
 const tingkatPendidikanOptions = ref([]);
+const loadingEdit = ref(false);
+const editSiswa = async () => {
+    await nextTick();
+    loadingEdit.value = true;
+    router.push({
+        name: 'editSiswa',
+        query: { pesertaDidikId: selectedSiswa.value[0]?.pesertaDidikId.toString() }
+    });
+};
 </script>

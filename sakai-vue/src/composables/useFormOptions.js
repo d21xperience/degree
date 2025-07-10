@@ -2,7 +2,7 @@
 
 import { debounce } from 'lodash-es';
 import { useToast } from 'primevue';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import { useSekolahService } from './useSekolahService';
 
@@ -36,7 +36,8 @@ export function useFormOptions() {
     const gelarAkademikOptions = ref();
     const gelarAkademikDepanOptions = ref();
     const gelarAkademikBelakangOptions = ref();
-    const kurikulumList = store.getters['sekolahService/getKurikulum'];
+    const kurikulumList = computed(() => store.getters['sekolahService/getKurikulum'] || []);
+
     const kurikulumOptions = ref();
     const kurikulumLoading = ref(false);
     const jurusanOptions = ref();
@@ -160,7 +161,7 @@ export function useFormOptions() {
         } finally {
             ptkLoading.value = false;
         }
-    }, 250); 
+    }, 250);
 
     return {
         selectedJenisKelamin,

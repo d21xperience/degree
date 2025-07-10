@@ -15,9 +15,10 @@ import (
 
 type TransaksiService struct {
 	pb.UnimplementedTransaksiServiceServer
-	repoIjazahBc   repositories.GenericRepository[models.IjazahBc]
-	repoDegreeData repositories.GenericRepository[models.DegreeData]
-	repoContract   repositories.GenericRepository[models.ContractData]
+	repoIjazahBc      repositories.GenericRepository[models.IjazahBc]
+	repoDegreeData    repositories.GenericRepository[models.DegreeData]
+	repoContract      repositories.GenericRepository[models.ContractData]
+	repoBCTransaction repositories.GenericRepository[models.BCTransaction]
 	// repoTransaksiTenant repositories.GenericRepository[models.TransaksiTabelTenant]
 }
 
@@ -25,10 +26,12 @@ func NewTransaksiService() *TransaksiService {
 	repoIjazahBc := repositories.NewIjazahBcRepository(config.DB)
 	repoDegreeData := repositories.NewDegreeDataRepository(config.DB)
 	repoContract := repositories.NewContractDataRepository(config.DB)
+	repoBCTransaction := repositories.NewContractBCTransactionRepository(config.DB)
 	return &TransaksiService{
-		repoIjazahBc:   *repoIjazahBc,
-		repoDegreeData: *repoDegreeData,
-		repoContract:   *repoContract,
+		repoIjazahBc:      *repoIjazahBc,
+		repoDegreeData:    *repoDegreeData,
+		repoContract:      *repoContract,
+		repoBCTransaction: *repoBCTransaction,
 	}
 }
 
@@ -38,7 +41,7 @@ func NewTransaksiService() *TransaksiService {
 func (s *TransaksiService) CreateIjazahBlockchain(ctx context.Context, req *pb.CreateIjazahBlockchainRequest) (*pb.CreateIjazahBlockchainResponse, error) {
 	log.Printf("Received Sekolah data request: %+v\n", req)
 	// Daftar field yang wajib diisi
-	requiredFields := []string{"DegreeData"}
+	requiredFields := []string{"Schemaname", "DegreeData"}
 	// Validasi request
 	err := utils.ValidateFields(req, requiredFields)
 	if err != nil {
@@ -77,6 +80,19 @@ func (s *TransaksiService) CreateIjazahBlockchain(ctx context.Context, req *pb.C
 		TahunAjaranId:  degreeData.TahunAjaranId,
 		SekolahId:      utils.UUIDToPointer(utils.StringToUUID(degreeData.SekolahId)),
 	}
+	bcTransactionModels := &models.BCTransaction{
+		FromAddress: degreeData.BcTransaction.FromAddress,
+		ToAddress:   degreeData.BcTransaction.ToAddress,
+		Value:       degreeData.BcTransaction.Value,
+		GasLimit:    degreeData.BcTransaction.GasLimit,
+		GasPrice:    degreeData.BcTransaction.GasPrice,
+		Nonce:       degreeData.BcTransaction.Nonce,
+		Data:        degreeData.BcTransaction.Data,
+		ChainId:     degreeData.BcTransaction.ChainId,
+		BlockNumber: degreeData.BcTransaction.BlockNumber,
+		Status:      degreeData.BcTransaction.Status,
+	}
+
 	ijazahBc := s.repoIjazahBc.Save(ctx, ijazahBcModels, "public")
 	if ijazahBc != nil {
 		return &pb.CreateIjazahBlockchainResponse{
@@ -91,10 +107,17 @@ func (s *TransaksiService) CreateIjazahBlockchain(ctx context.Context, req *pb.C
 			Message: "Gagal menyimpan Hash",
 		}, nil
 	}
+	bcTransaction := s.repoBCTransaction.Save(ctx, bcTransactionModels, req.GetSchemaname())
+	if bcTransaction != nil {
+		return &pb.CreateIjazahBlockchainResponse{
+			Status:  false,
+			Message: "Gagal menyimpan Transaksi blockchain!",
+		}, nil
+	}
 
 	return &pb.CreateIjazahBlockchainResponse{
 		Status:  true,
-		Message: "Berhasil",
+		Message: "Berhasil menyimpan seluluruh data",
 	}, nil
 }
 
@@ -208,42 +231,116 @@ func (s *TransaksiService) SearchIjazahBlockchain(ctx context.Context, req *pb.S
 	}, nil
 }
 
-func (s *TransaksiService) SaveContractAddress(ctx context.Context, req *pb.SaveContractAddressRequest) (*pb.SaveContractAddressResponse, error) {
+// func (s *TransaksiService) SaveContractAddress(ctx context.Context, req *pb.SaveContractAddressRequest) (*pb.SaveContractAddressResponse, error) {
 
-	pbContract := models.ContractData{
-		ContractAddres: &req.Contract.ContractAddress,
-		ContractOwner:  &req.Contract.Owner,
+// 	pbContract := models.ContractData{
+// 		ContractAddres: &req.Contract.ContractAddress,
+// 		ContractOwner:  &req.Contract.Owner,
+// 	}
+// 	err := s.repoContract.Save(ctx, &pbContract, "public")
+// 	if err != nil {
+// 		return &pb.SaveContractAddressResponse{
+// 			Status:  false,
+// 			Message: "Gagal menyimpan kontrak",
+// 		}, nil
+// 	}
+
+// 	return &pb.SaveContractAddressResponse{
+// 		Status:  true,
+// 		Message: "Berhasil menyimpan kontrak",
+// 	}, nil
+// }
+// func (s *TransaksiService) GetContractAddress(ctx context.Context, req *pb.GetContractAddressRequest) (*pb.GetContractAddressResponse, error) {
+// 	modelContract, err := s.repoContract.FindAll(ctx, "public", 100, 0)
+// 	if err != nil {
+// 		return &pb.GetContractAddressResponse{
+// 			Status:   true,
+// 			Message:  "Gagal mengambil data",
+// 			Contract: nil,
+// 		}, nil
+// 	}
+// 	if err == nil {
+// 		return nil, err
+// 	}
+// 	pbModelContract := &pb.Contract{
+// 		ContractAddress: utils.SafeString(modelContract[0].ContractAddres),
+// 		Owner:           utils.SafeString(modelContract[0].ContractOwner),
+// 	}
+
+// 	return &pb.GetContractAddressResponse{
+// 		Status:   true,
+// 		Message:  "Berhasil mengambil data",
+// 		Contract: pbModelContract,
+// 	}, nil
+// }
+
+func (s *TransaksiService) GetBCTransaction(ctx context.Context, req *pb.GetBCTransactionRequest) (*pb.GetBCTransactionResponse, error) {
+	log.Printf("transaksi/GetBCTransactionRequest received data from request: %+v\n", req)
+	// Daftar field yang wajib diisi
+	requiredFields := []string{"Schemaname"}
+	// Validasi request
+	requiredFieldsResponse := utils.ValidateFields(req, requiredFields)
+	if requiredFieldsResponse != nil {
+		return nil, requiredFieldsResponse
 	}
-	err := s.repoContract.Save(ctx, &pbContract, "public")
+	schemaname := req.Schemaname
+	// conditions := map[string]any{"conditions"}
+	bcTransactionsModel, err := s.repoBCTransaction.FindAllByConditions(ctx, schemaname, nil, 100, 0)
 	if err != nil {
-		return &pb.SaveContractAddressResponse{
-			Status:  false,
-			Message: "Gagal menyimpan kontrak",
+		return &pb.GetBCTransactionResponse{
+			Status:        true,
+			Message:       "Gagal mendapatkan transaksi",
+			BcTransaction: nil,
 		}, nil
 	}
+	pbBCTransactions := utils.ConvertModelsToPB(bcTransactionsModel, func(item *models.BCTransaction) *pb.BCTransactions {
+		return &pb.BCTransactions{
+			FromAddress: item.FromAddress,
+			ToAddress:   item.ToAddress,
+			Value:       item.Value,
+			GasLimit:    item.GasLimit,
+			GasPrice:    item.GasPrice,
+			Nonce:       item.Nonce,
+			Data:        item.Data,
+			ChainId:     item.ChainId,
+			BlockNumber: item.BlockNumber,
+			Status:      item.Status,
+		}
+	})
+	return &pb.GetBCTransactionResponse{
+		Status:        true,
+		Message:       "Berhasil mendapatkan transaksi",
+		BcTransaction: pbBCTransactions,
+	}, nil
 
-	return &pb.SaveContractAddressResponse{
+}
+
+func (s *TransaksiService) DeployContract(ctx context.Context, req *pb.DeployContractRequest) (*pb.DeployContractResponse, error) {
+	log.Printf("transaksi/DeployContract received data from request: %+v\n", req)
+	// Daftar field yang wajib diisi
+	requiredFields := []string{""}
+	// Validasi request
+	requiredFieldsResponse := utils.ValidateFields(req, requiredFields)
+	if requiredFieldsResponse != nil {
+		return nil, requiredFieldsResponse
+	}
+
+	return &pb.DeployContractResponse{
 		Status:  true,
-		Message: "Berhasil menyimpan kontrak",
+		Message: "Behasil membuat smartcontract",
 	}, nil
 }
-func (s *TransaksiService) GetContractAddress(ctx context.Context, req *pb.GetContractAddressRequest) (*pb.GetContractAddressResponse, error) {
-	modelContract, err := s.repoContract.FindAll(ctx, "public", 100, 0)
-	if err != nil {
-		return &pb.GetContractAddressResponse{
-			Status:   true,
-			Message:  "Gagal mengambil data",
-			Contract: nil,
-		}, nil
-	}
-	pbModelContract := &pb.Contract{
-		ContractAddress: utils.SafeString(modelContract[0].ContractAddres),
-		Owner:           utils.SafeString(modelContract[0].ContractOwner),
-	}
 
-	return &pb.GetContractAddressResponse{
-		Status:   true,
-		Message:  "Berhasil mengambil data",
-		Contract: pbModelContract,
-	}, nil
-}
+// func (s *TransaksiService) GetSolcVersion(ctx context.Context, req *pb.GetSolcVersionRequest) (*pb.GetSolcVersionResponse, error) {
+// 	cek, err := utils.GetSolcVersion()
+// 	if err != nil {
+// 		return &pb.GetSolcVersionResponse{
+// 			Status:  true,
+// 			Message: fmt.Sprintf("versi solc:%v", err),
+// 		}, nil
+// 	}
+// 	return &pb.GetSolcVersionResponse{
+// 		Status:  true,
+// 		Message: fmt.Sprintf("versi solc:%s", cek),
+// 	}, nil
+// }

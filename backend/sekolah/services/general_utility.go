@@ -17,6 +17,7 @@ type ParamTemplate struct {
 	schemaname   string
 	filePath     string
 	semesterId   string
+	rombelId     string
 }
 
 // Fungsi untuk membaca file Excel dan memproses data berdasarkan jenis
@@ -245,21 +246,115 @@ func GenerateTemplate(param ParamTemplate, db *gorm.DB) error {
 
 	return nil
 }
-func GenerateTemplateV2(param ParamTemplate, db *gorm.DB) error {
+
+// func GenerateTemplateV2(param ParamTemplate, db *gorm.DB) error {
+// 	f := excelize.NewFile()
+// 	sheetName := "Template"
+// 	f.SetSheetName("Sheet1", sheetName)
+
+// 	dataTemplate := &template.DataTemplate{
+// 		TemplateType:  param.templateType,
+// 		Schemaname:    param.schemaname,
+// 		TahunAjaranId: param.semesterId,
+// 	}
+
+// 	columns, exists := template.GetTemplateColumns(dataTemplate)
+// 	if !exists {
+// 		return fmt.Errorf("template type %s tidak ditemukan", param.templateType)
+// 	}
+// 	headerStyle, _ := f.NewStyle(&excelize.Style{
+// 		Fill: excelize.Fill{
+// 			Type:    "pattern",
+// 			Color:   []string{"#4F81BD"},
+// 			Pattern: 1,
+// 		},
+// 		Font: &excelize.Font{
+// 			Bold:  true,
+// 			Color: "#FFFFFF",
+// 		},
+// 		Alignment: &excelize.Alignment{
+// 			Horizontal: "center",
+// 			Vertical:   "center",
+// 			WrapText:   true,
+// 		},
+// 	})
+// 	err1 := f.SetRowHeight(sheetName, 1, 50)
+// 	if err1 != nil {
+// 		return err1
+// 	}
+// 	// Buat kolom header dan contoh input
+// 	for i, col := range columns {
+// 		colLetter, _ := excelize.ColumnNumberToName(i + 1)
+// 		cellHeader := fmt.Sprintf("%s1", colLetter)
+// 		cellExample := fmt.Sprintf("%s2", colLetter)
+
+// 		// Header
+// 		f.SetCellValue(sheetName, cellHeader, col.Name)
+// 		f.SetCellStyle(sheetName, cellHeader, cellHeader, headerStyle)
+
+// 		// Contoh isi baris kedua
+// 		f.SetCellValue(sheetName, cellExample, col.Example)
+
+// 		// Validasi (jika ada)
+// 		if col.Validation != nil {
+// 			f.AddDataValidation(sheetName, col.Validation)
+// 		}
+
+// 		// Format tanggal (jika ada)
+// 		if col.FormatStyle != nil {
+// 			styleID, _ := f.NewStyle(col.FormatStyle)
+// 			f.SetCellStyle(sheetName, cellExample, fmt.Sprintf("%s100", colLetter), styleID)
+// 		}
+// 		if col.ColumnWidth != 0 {
+// 			f.SetColWidth(sheetName, colLetter, colLetter, col.ColumnWidth)
+// 		}
+// 	}
+
+// 	// Freeze baris header
+// 	f.SetPanes(sheetName, &excelize.Panes{Freeze: true, Split: true, XSplit: 0, YSplit: 1})
+
+// 	// Tambahkas sheet baru untuk petunjuk pengisian
+// 	err2 := template.GetPetunjukSheet(f, dataTemplate, db)
+// 	if err2 != nil {
+// 		return err2
+// 	}
+// 	// Set properties dokumen
+// 	err := f.SetDocProps(&excelize.DocProperties{
+// 		ContentStatus: param.templateType,
+// 		Category:      param.semesterId,
+// 		Keywords:      param.schemaname,
+// 	})
+// 	if err != nil {
+// 		return fmt.Errorf("gagal membuat properties %s: %w", param.templateType, err)
+// 	}
+
+// 	// Simpan ke file
+// 	if err := f.SaveAs(param.filePath); err != nil {
+// 		return fmt.Errorf("gagal menyimpan template %s: %w", param.templateType, err)
+// 	}
+
+//		return nil
+//	}
+//
+// ==================versi 2
+func GenerateTemplateV2(param ParamTemplate, db *gorm.DB) (*excelize.File, error) {
 	f := excelize.NewFile()
 	sheetName := "Template"
 	f.SetSheetName("Sheet1", sheetName)
 
 	dataTemplate := &template.DataTemplate{
-		TemplateType:  param.templateType,
-		Schemaname:    param.schemaname,
-		TahunAjaranId: param.semesterId,
+		TemplateType:       param.templateType,
+		Schemaname:         param.schemaname,
+		TahunAjaranId:      param.semesterId,
+		RombonganBelajarId: param.rombelId,
+		SemesterId:         param.semesterId,
 	}
-	
+
 	columns, exists := template.GetTemplateColumns(dataTemplate)
 	if !exists {
-		return fmt.Errorf("template type %s tidak ditemukan", param.templateType)
+		return nil, fmt.Errorf("template type %s tidak ditemukan", param.templateType)
 	}
+
 	headerStyle, _ := f.NewStyle(&excelize.Style{
 		Fill: excelize.Fill{
 			Type:    "pattern",
@@ -276,62 +371,55 @@ func GenerateTemplateV2(param ParamTemplate, db *gorm.DB) error {
 			WrapText:   true,
 		},
 	})
-	err1 := f.SetRowHeight(sheetName, 1, 50)
-	if err1 != nil {
-		return err1
+
+	if err := f.SetRowHeight(sheetName, 1, 50); err != nil {
+		return nil, err
 	}
-	// Buat kolom header dan contoh input
+
 	for i, col := range columns {
 		colLetter, _ := excelize.ColumnNumberToName(i + 1)
 		cellHeader := fmt.Sprintf("%s1", colLetter)
 		cellExample := fmt.Sprintf("%s2", colLetter)
 
-		// Header
 		f.SetCellValue(sheetName, cellHeader, col.Name)
 		f.SetCellStyle(sheetName, cellHeader, cellHeader, headerStyle)
-
-		// Contoh isi baris kedua
 		f.SetCellValue(sheetName, cellExample, col.Example)
 
-		// Validasi (jika ada)
 		if col.Validation != nil {
 			f.AddDataValidation(sheetName, col.Validation)
 		}
 
-		// Format tanggal (jika ada)
 		if col.FormatStyle != nil {
 			styleID, _ := f.NewStyle(col.FormatStyle)
 			f.SetCellStyle(sheetName, cellExample, fmt.Sprintf("%s100", colLetter), styleID)
 		}
+
 		if col.ColumnWidth != 0 {
 			f.SetColWidth(sheetName, colLetter, colLetter, col.ColumnWidth)
 		}
 	}
 
-	// Freeze baris header
 	f.SetPanes(sheetName, &excelize.Panes{Freeze: true, Split: true, XSplit: 0, YSplit: 1})
 
-	// Tambahkas sheet baru untuk petunjuk pengisian
-	err2 := template.GetPetunjukSheet(f, dataTemplate, db)
-	if err2 != nil {
-		return err2
+	// ❗️Pastikan db diarahkan ke schema
+	tx := db.Session(&gorm.Session{NewDB: true})
+	if err := tx.Exec(fmt.Sprintf("SET search_path TO %s", param.schemaname)).Error; err != nil {
+		return nil, err
 	}
-	// Set properties dokumen
-	err := f.SetDocProps(&excelize.DocProperties{
+
+	if err := template.GetPetunjukSheet(f, dataTemplate, tx); err != nil {
+		return nil, err
+	}
+
+	if err := f.SetDocProps(&excelize.DocProperties{
 		ContentStatus: param.templateType,
 		Category:      param.semesterId,
 		Keywords:      param.schemaname,
-	})
-	if err != nil {
-		return fmt.Errorf("gagal membuat properties %s: %w", param.templateType, err)
+	}); err != nil {
+		return nil, fmt.Errorf("gagal membuat properties %s: %w", param.templateType, err)
 	}
 
-	// Simpan ke file
-	if err := f.SaveAs(param.filePath); err != nil {
-		return fmt.Errorf("gagal menyimpan template %s: %w", param.templateType, err)
-	}
-
-	return nil
+	return f, nil // ← tidak menyimpan ke file, tapi mengembalikan objek
 }
 
 func templateNilaiAkhir(ctx context.Context, db *gorm.DB, f *excelize.File, param ParamTemplate, sheetName string) error {

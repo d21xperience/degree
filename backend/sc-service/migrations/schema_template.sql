@@ -32,26 +32,6 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.contracts (
 
 CREATE INDEX idx_contracts_network_id ON {{schema_name}}.contracts (network_id);
 
-CREATE TABLE IF NOT EXISTS {{schema_name}}.transactions (
-    id BIGSERIAL PRIMARY KEY,
-    account_id BIGINT NOT NULL,
-    tx_hash TEXT NOT NULL,
-    contract_id BIGINT,
-    network_id BIGINT NOT NULL,
-    method VARCHAR(100),
-    input_data TEXT,
-    gas_used BIGINT,
-    status VARCHAR(20),
-    timestamp TIMESTAMPTZ,
-    UNIQUE (tx_hash)
-);
-
-CREATE TABLE IF NOT EXISTS {{schema_name}}.contracts (
-	id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	contract_address VARCHAR NULL DEFAULT NULL,
-	contract_owner VARCHAR NULL DEFAULT NULL
-);
-
 CREATE TABLE {{schema_name}}.transaksi_blockchain (
     id SERIAL PRIMARY KEY,
     tx_hash VARCHAR(66) NOT NULL UNIQUE,           -- 66 karakter: "0x" + 64 karakter hash

@@ -1,0 +1,170 @@
+# services:
+#   sc_service_cont:
+#     build: .
+#     ports:
+#       - "8184:8184"         # HTTP port
+#     env_file:
+#       - .env
+#     environment:
+#       SC_HOST: sc_db_cont           # mengacu pada service postgres
+#       # SCREDIS_HOST: redis   # mengacu pada service redis
+#     depends_on:
+#       - sc_db_cont
+#       # - redis
+#     restart: unless-stopped
+#   sc_db_cont:
+#     image: postgres:15-alpine
+#     container_name: sc_db_cont_container
+#     restart: always
+#     environment:
+#       POSTGRES_USER: ${SC_USER}
+#       POSTGRES_PASSWORD: ${SC_PASSWORD}
+#       POSTGRES_DB: ${sc_db_cont}
+#     ports:
+#       - "${SC_PORT}:5432"
+#     volumes:
+#       - sc_db_cont_data:/var/lib/postgresql/data
+#       - ./db-init:/docker-entrypoint-initdb.d
+
+#   # sc_redis:
+#   #   image: redis:alpine
+#   #   container_name: sc_redis_container
+#   #   restart: always
+#   #   ports:
+#   #     - "${SCREDIS_PORT}:6379"
+
+# volumes:
+#   sc_db_cont_data:
+
+
+
+# # networks:
+# #   fabric_network:
+
+# # services:
+# #   orderer.example.com:
+# #     image: hyperledger/fabric-orderer:2.4
+# #     container_name: orderer.example.com
+# #     environment:
+# #       - FABRIC_LOGGING_SPEC=INFO
+# #       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+# #       - ORDERER_GENERAL_LISTENPORT=7050
+# #       - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+# #       - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+# #     volumes:
+# #       - ./configtx/ordererGenesis.block:/var/hyperledger/orderer/orderer.block
+# #       - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
+# #       - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls:/var/hyperledger/orderer/tls
+# #     ports:
+# #       - 7050:7050
+# #     networks:
+# #       - fabric_network
+
+# #   peer0.org1.example.com:
+# #     image: hyperledger/fabric-peer:2.4
+# #     container_name: peer0.org1.example.com
+# #     environment:
+# #       - CORE_PEER_ID=peer0.org1.example.com
+# #       - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+# #       - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+# #       - CORE_PEER_CHAINCODEADDRESS=peer0.org1.example.com:7052
+# #       - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+# #       - CORE_PEER_LOCALMSPID=Org1MSP
+# #       - CORE_PEER_MSPCONFIGPATH=/var/hyperledger/peer/msp
+# #     volumes:
+# #       - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/var/hyperledger/peer/msp
+# #       - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/var/hyperledger/peer/tls
+# #     ports:
+# #       - 7051:7051
+# #     depends_on:
+# #       - orderer.example.com
+# #     networks:
+# #       - fabric_network
+
+# #   ca.org1.example.com:
+# #     image: hyperledger/fabric-ca:1.5
+# #     container_name: ca.org1.example.com
+# #     environment:
+# #       - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+# #       - FABRIC_CA_SERVER_CA_NAME=ca-org1
+# #       - FABRIC_CA_SERVER_TLS_ENABLED=true
+# #       - FABRIC_CA_SERVER_TLS_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
+# #       - FABRIC_CA_SERVER_TLS_KEYFILE=/etc/hyperledger/fabric-ca-server-config/priv_sk
+# #     ports:
+# #       - 7054:7054
+# #     volumes:
+# #       - ./crypto-config/peerOrganizations/org1.example.com/ca:/etc/hyperledger/fabric-ca-server-config
+# #     networks:
+# #       - fabric_network
+
+
+services:
+  scservice:
+    # DEVELOPMENT MODE (uncomment below)
+    build:
+      context: .
+      dockerfile: Dockerfile  # Gunakan Dockerfile khusus development
+    # volumes:
+    #   - .:/app  # Mount seluruh folder untuk live reload
+    # command: ["air"]  # Hot reload dengan air
+    # PRODUCTION MODE (uncomment below)
+    # build: .
+    volumes:
+    - ./contracts:/app/contracts
+    - ./build:/app/build
+    # command: ["/app/sc-service"]  # Jalankan binary yang sudah dicompile
+    container_name: ${GRPC_HOST}
+    ports:
+      - "${HTTP_PORT}:8184"
+      - "${GRPC_PORT}:50054"
+    environment:
+      SCDB_HOST: postgres
+      SCDB_PORT: "5432"
+      SCDB_USER: ${SCDB_USER}
+      SCDB_PASSWORD: ${SCDB_PASSWORD}
+      SCDB_DB: ${SCDB_DB}
+      GRPC_HOST: ${GRPC_HOST}
+      GRPC_PORT: ${GRPC_PORT}
+      HTTP_PORT: ${HTTP_PORT}
+      FRONTEND: ${FRONTEND}
+    # SCREDIS_HOST: redis
+    depends_on:
+      - postgres 
+    # - ganache-cli
+    # - ipfs-node
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: ${SCDB_HOST}
+    restart: always
+    environment:
+      POSTGRES_USER: ${SCDB_USER}
+      POSTGRES_PASSWORD: ${SCDB_PASSWORD}
+      POSTGRES_DB: ${SCDB_DB}
+    ports:
+      - "5444:5432"
+    volumes:
+      - sc_db_cont_data:/var/lib/postgresql/data
+      - ./db-init:/docker-entrypoint-initdb.d
+  # compile-service:
+  #   build:
+  #     context: ./compile-service
+  #   ports:
+  #     - "8089:8089"
+  #   volumes:
+  #     - ./compile-service/sources:/app/sources
+    
+# Optional Services (Uncomment jika dibutuhkan)
+# ipfs-node:
+#   image: ipfs/kubo:latest
+#   ports:
+#     - "5001:5001"
+#   volumes:
+#     - ipfs_data:/data/ipfs
+#   command: ["sh", "-c", "ipfs config --json Addresses.API '[\"/ip4/0.0.0.0/tcp/5001\"]' && ipfs daemon"]
+
+volumes:
+  sc_db_cont_data:
+    # - jika pakai IPFS
+    # ipfs_data:

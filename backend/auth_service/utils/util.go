@@ -1,16 +1,19 @@
 package utils
 
 import (
+	"auth_service/models"
 	"errors"
 	"fmt"
 	"log"
 	"math/rand"
+	"os"
 	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -301,4 +304,52 @@ func IsEmail(input string) bool {
 	// Regex sederhana untuk validasi email
 	re := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
 	return re.MatchString(input)
+}
+
+// customClaims bisa kamu tambah field lain (role, tenant‑id, dsb.)
+type customClaims struct {
+	UserID uint64 //`json:"uid"`
+	Role   string `json:"role,omitempty"`
+	jwt.RegisteredClaims
+}
+
+// GenerateJWT membuat token dengan durasi tertentu.
+func GenerateJWT(user *models.User, ttl time.Duration) (string, error) {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		return "", errors.New("JWT_SECRET not set")
+	}
+
+	now := time.Now().UTC()
+	claims := customClaims{
+		UserID: user.ID,
+		Role:   user.Role,
+		RegisteredClaims: jwt.RegisteredClaims{
+			Subject:   strconv.FormatUint(user.ID, 10),
+			IssuedAt:  jwt.NewNumericDate(now),
+			ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),
+			Issuer:    "auth_service",
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(secret))
+}
+
+// ValidateJWT mem‑parse dan mem‑verifikasi token, mengembalikan claims.
+func ValidateJWT(tokenStr string) (*customClaims, error) {
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		return nil, errors.New("JWT_SECRET not set")
+	}
+
+	var claims customClaims
+	token, err := jwt.ParseWithClaims(tokenStr, &claims,
+		func(t *jwt.Token) (interface{}, error) {
+			return []byte(secret), nil
+		})
+	if err != nil || !token.Valid {
+		return nil, errors.New("invalid or expired token")
+	}
+	return &claims, nil
 }

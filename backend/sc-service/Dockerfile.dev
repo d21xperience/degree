@@ -1,0 +1,18 @@
+FROM golang:1.23
+
+WORKDIR /app
+
+# Install air untuk hot reload
+RUN go install github.com/cosmtrek/air@v1.49.0
+
+# Copy dependency files terlebih dahulu
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy seluruh source code
+COPY . .
+
+# Port yang digunakan (sesuaikan dengan aplikasi Anda)
+EXPOSE 8184 50054
+
+CMD ["air"]

@@ -12,8 +12,16 @@ const { onLogout, currentUser } = useAuth();
 const cek = () => {
     router.push({ name: 'userProfile' });
 };
-const { getMetamaskConnected } = useSCService();
-const isMetamask = computed(() => getMetamaskConnected());
+const scService = useSCService();
+const isMetamask = computed(() => scService.getMetamaskConnected());
+const isSignerDialog = ref(false);
+
+const walletInfo = ref();
+const signerDialog = async () => {
+    isSignerDialog.value = true;
+    walletInfo.value = await scService.getWalletInfo();
+    // console.log(walletInfo.value);
+};
 </script>
 
 <template>
@@ -49,12 +57,16 @@ const isMetamask = computed(() => getMetamaskConnected());
                 <button type="button" class="layout-topbar-action" @click="toggleDarkMode">
                     <i :class="['pi', { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme }]"></i>
                 </button>
+                
+                <button type="button" class="layout-topbar-action" @click="toggleDarkMode"  v-show="!isMetamask">
+                    <i class="pi pi-wallet"></i>
+                </button>
 
-                <Button class="!rounded-full !border-none layout-topbar-action !bg-transparent !w-6" v-show="isMetamask">
-                    <template #icon>
-                        <MetamaskIcon class="" />
-                    </template>
-                </Button>
+                <!-- <Button type="button" icon="pi pi-wallet" rounded class="layout-topbar-action !bg-transparent !text-black !border-none" /> -->
+                <button type="button" class="!rounded-full !border-none layout-topbar-action !bg-transparent !w-6" v-show="isMetamask" @click="signerDialog">
+                    <MetamaskIcon class="" />
+                </button>
+
                 <!-- <div class="relative">
                     <button
                         v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
@@ -76,7 +88,7 @@ const isMetamask = computed(() => getMetamaskConnected());
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <h4><span class="font-normal">Helo</span>, {{ currentUser?.username }} !</h4>
+                    <h4 class="sm:block  hidden"><span class="font-normal">Helo</span>, {{ currentUser?.username }} !</h4>
                     <!-- <button type="button" class="layout-topbar-action">
                         <i class="pi pi-calendar"></i>
                         <span>Calendar</span>
@@ -116,6 +128,13 @@ const isMetamask = computed(() => getMetamaskConnected());
         </div>
 
         <DialogSignOut v-model:visible="isDialogSignOut" @confirm="onLogout" />
+        <Dialog v-model:visible="isSignerDialog" header="Metamask coneected" position="top">
+            <div>
+                <h6>Metamask</h6>
+                <p>Address</p>
+                <p>{{ walletInfo?.address }}</p>
+            </div>
+        </Dialog>
     </div>
 </template>
 

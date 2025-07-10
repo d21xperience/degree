@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"sc-service/services"
+	handlers "sc-service/handler"
 	"sync"
 	"syscall"
 	"time"
@@ -49,16 +49,17 @@ func StartServer() {
 	// HTTP Gateway
 	// =========================================
 	// Inisialisasi mux untuk HTTP Gateway
-	// Inisialisasi UploadServiceServer sebelum dipakai
-	UploadService := services.NewUploadServiceServer()
+	// solUploadHandler := handlers.HandlerCompileContractHTTP()
+	ipfsUploadHandler := handlers.HandlerIPFSHTTP()
+
 	mux := runtime.NewServeMux()
-	method, pattern := createPattern("POST", "api", "v1", "ss", "upload", "rest")
+	// method, pattern := createPattern("POST", "api", "v1", "scs", "contract", "compile-contract")
+	// mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+	// 	solUploadHandler(w, r)
+	// })
+	method, pattern := createPattern("POST", "api", "v1", "scs", "ipfs", "upload")
 	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-		UploadService.UploadFileHTTP(w, r)
-	})
-	method, pattern = createPattern("GET", "api", "v1", "ss", "download", "template")
-	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-		UploadService.DownloadTemplateHTTP(w, r)
+		ipfsUploadHandler(w, r)
 	})
 	// Middleware CORS
 	corsHandler := corsMiddleware(mux)

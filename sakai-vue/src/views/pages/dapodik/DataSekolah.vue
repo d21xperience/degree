@@ -141,18 +141,12 @@ const sekolah = ref({
 });
 
 const initFirst = async () => {
-    // fetchSemester;
-    sekolah.value = await fetchSekolah();
-    // initKategoriSekolah();
-    // console.log(kategoriSekolahList.value);
+    sekolah.value = await fetchSekolah(); 
 };
 const tingkat = ref();
 onMounted(async () => {
-    console.log('loading start');
     initFirst();
     tingkat.value = await fetchTingkat();
-    console.log('loading End');
-
     // console.log(tingkat.value);
     // const data = await fetchSekolah();
     // Object.assign(sekolah, data);

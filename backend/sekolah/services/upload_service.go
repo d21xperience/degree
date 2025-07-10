@@ -1,6 +1,7 @@
 package services
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -47,9 +48,7 @@ func NewUploadServiceServer() *UploadServiceServer {
 	repoGuruPelengkap := repositories.NewPTKPelengkapRepository(config.DB)
 	repoKategoriSekolah := repositories.NewKategoriSekolahRepository(config.DB)
 	repoKategoriSekolahLog := repositories.NewKategoriSekolahLogRepository(config.DB)
-	// if repoSiswa == nil {
-	// 	log.Fatal("❌ ERROR: Gagal menginisialisasi repoSiswa") // Debugging
-	// }
+
 	return &UploadServiceServer{
 		uploadDir:              "uploads",
 		repoSiswa:              *repoSiswa,
@@ -170,6 +169,12 @@ func (s *UploadServiceServer) UploadFileHTTP(w http.ResponseWriter, r *http.Requ
 				BacaDataExcel,
 			)
 		},
+		"nilai": func() error {
+			return s.processUploadTranskrip(
+				context.Background(), param,
+				BacaDataExcel,
+			)
+		},
 		// Tambahkan tipe lain di sini...
 	}
 
@@ -182,30 +187,7 @@ func (s *UploadServiceServer) UploadFileHTTP(w http.ResponseWriter, r *http.Requ
 		fmt.Println("Upload sukses!")
 	} else {
 		http.Error(w, "Tipe upload tidak dikenali", http.StatusBadRequest)
-	}
-	// var data []interface{}
-	// if uploadType == "siswa" {
-	// 	data, err = UploadDataSekolah[models.PesertaDidik](filePath, uploadType)
-	// 	if err != nil {
-	// 		http.Error(w, fmt.Sprintf("Gagal memproses file: %v", err), http.StatusInternalServerError)
-	// 		return
-	// 	}
-	// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	// 	defer cancel()
-	// 	for i := range data {
-	// 		utils.HandleNilPointers(&data[i])
-	// 		// pesertaDidikPointers = append(pesertaDidikPointers, &data[i])
-	// 		if s == nil {
-	// 			log.Fatal("❌ ERROR: s is nil! Periksa inisialisasi UploadServiceServer")
-	// 		}
-	// 		err = s.repoSiswa.Save(ctx, &data[i], schemaname)
-	// 		if err != nil {
-	// 			fmt.Println(err.Error())
-	// 		}
-	// 		fmt.Println("sukses")
-	// 	}
-	// }
-
+	} 
 	// Berikan respon
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
@@ -213,105 +195,58 @@ func (s *UploadServiceServer) UploadFileHTTP(w http.ResponseWriter, r *http.Requ
 		// "data":    data,
 	})
 }
+ 
 
-// GetTemplate menyediakan template Excel berdasarkan jenis data
-// func (s *UploadServiceServer) DownloadDataSekolah(ctx context.Context, req *pb.DownloadDataSekolahRequest) (*pb.DownloadDataSekolahResponse, error) {
-// 	// Daftar field yang wajib diisi
-// 	requiredFields := []string{"TemplateType"}
-// 	// Validasi request
-// 	err := utils.ValidateFields(req, requiredFields)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	templateType := req.GetDownloadType()
-// 	templatePath := fmt.Sprintf("templates/template_%s.xlsx", templateType)
-// 	var param = ParamTemplate{
-// 		schemaname:   "",
-// 		filePath:     "",
-// 		semesterId:   "",
-// 		templateType: templateType,
-// 	}
-
-// 	// Buat file template jika belum ada
-// 	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
-// 		err := GenerateTemplateV2(param, config.DB)
-// 		if err != nil {
-// 			return nil, fmt.Errorf("gagal membuat template %s: %w", templateType, err)
-// 		}
-// 	}
-
-// 	// Baca file template
-// 	data, err := os.ReadFile(templatePath)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("gagal membaca template %s: %w", templateType, err)
-// 	}
-
-// 	return &pb.DownloadDataSekolahResponse{
-// 		Filename: fmt.Sprintf("template_%s.xlsx", templateType),
-// 		File:     data,
-// 	}, nil
-// }
-
-// HandleDownloadTemplate adalah handler untuk mengunduh file template .xlsx.
+// ===============versi 2
 func (h *UploadServiceServer) DownloadTemplateHTTP(w http.ResponseWriter, r *http.Request) {
-	// Ambil nama file dari query parameter
 	templateType := r.URL.Query().Get("template_type")
-	if templateType == "" {
-		http.Error(w, "template-type is required", http.StatusBadRequest)
+	if templateType == "" || r.URL.Query().Get("schemaname") == "" {
+		http.Error(w, "template-type or schemaname is required", http.StatusBadRequest)
 		return
 	}
-	// Lokasi direktori template
-	var param = ParamTemplate{
-		schemaname:   r.FormValue("schemaname"),
-		semesterId:   r.FormValue("semesterId"),
-		templateType: templateType,
-	}
-	templatePath := fmt.Sprintf("templates/template_%s_%s_%s.xlsx", templateType, param.schemaname, param.semesterId)
-	param.filePath = templatePath
-	// Hapus file setelah berhasil dikirim
-	if err := os.Remove(templatePath); err != nil {
-		log.Printf("Gagal menghapus file sementara: %v", err)
-	}
-	// Buat file template jika belum ada
-	if _, err := os.Stat(templatePath); os.IsNotExist(err) {
-		err := GenerateTemplateV2(param, config.DB)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("Gagal membuat template: %v", err), http.StatusInternalServerError)
+
+	if templateType == "nilai" {
+		if r.URL.Query().Get("rombongan_belajar_id") == "" {
+			http.Error(w, "rombongan_belajar_id is required", http.StatusBadRequest)
 			return
 		}
 	}
-
-	// Buka file template
-	file, err := os.Open(templatePath)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Gagal membuka file template: %v", err), http.StatusInternalServerError)
-		return
-	}
-	defer file.Close()
-
-	// Mendapatkan informasi file untuk header
-	fileInfo, err := file.Stat()
-	if err != nil {
-		http.Error(w, fmt.Sprintf("Gagal mendapatkan informasi file: %v", err), http.StatusInternalServerError)
-		return
+	param := ParamTemplate{
+		schemaname:   r.FormValue("schemaname"),
+		semesterId:   r.FormValue("semesterId"),
+		rombelId:     r.FormValue("rombongan_belajar_id"),
+		templateType: templateType,
 	}
 
-	// w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"; filename*=UTF-8''%s", fileInfo.Name(), url.QueryEscape(fileInfo.Name())))
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", fileInfo.Name()))
+	// Generate template langsung ke memori (tidak simpan ke file)
+	f, err := GenerateTemplateV2(param, config.DB)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Gagal membuat template: %v", err), http.StatusInternalServerError)
+		return
+	}
 
-	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") // MIME type untuk Excel
-	w.Header().Set("Content-Transfer-Encoding", "binary")
+	// Tulis file ke buffer memory
+	var buf bytes.Buffer
+	if err := f.Write(&buf); err != nil {
+		http.Error(w, fmt.Sprintf("Gagal menulis template ke buffer: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Header respons
+	filename := fmt.Sprintf("template_%s_%s_%s.xlsx", templateType, param.schemaname, param.semesterId)
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	w.Header().Set("Content-Length", fmt.Sprintf("%d", buf.Len()))
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Pragma", "no-cache")
 
-	// Kirim file
-	if _, err := io.Copy(w, file); err != nil {
+	// Kirim file langsung dari buffer
+	if _, err := io.Copy(w, &buf); err != nil {
 		http.Error(w, fmt.Sprintf("Gagal mengirim file: %v", err), http.StatusInternalServerError)
 		return
 	}
-
 }
- 
+
 func (s *UploadServiceServer) processUploadSiswa(
 	ctx context.Context,
 	param ParamTemplate,
@@ -332,17 +267,17 @@ func (s *UploadServiceServer) processUploadSiswa(
 		}
 
 		var tglLahir, tglDiterima *time.Time
-		if len(row[6]) != 0 {
-			cek, err := utils.StringToTime(data[i][6], "02/01/2006")
+		if len(row[7]) != 0 {
+			cek, err := utils.StringToTime(data[i][7], "02/01/2006")
 			if err != nil {
-				log.Printf("gagal parsing tanggal lahir %s", row[6])
+				log.Printf("gagal parsing tanggal lahir %s", row[7])
 			}
 			tglLahir = utils.TimeToPointer(cek.Format("2006-01-02"))
 		}
-		if len(row[10]) != 0 {
-			cek, err := utils.StringToTime(data[i][10], "02/01/2006")
+		if len(row[11]) != 0 {
+			cek, err := utils.StringToTime(data[i][11], "02/01/2006")
 			if err != nil {
-				log.Printf("gagal parsing tanggal mendaftar %s", row[10])
+				log.Printf("gagal parsing tanggal mendaftar %s", row[11])
 				return nil
 			}
 			tglDiterima = utils.TimeToPointer(cek.Format("2006-01-02"))
@@ -351,32 +286,32 @@ func (s *UploadServiceServer) processUploadSiswa(
 		// Simpan ke tabel peserta didik (siswa)
 		err = s.repoSiswa.Save(ctx, &models.PesertaDidik{
 			PesertaDidikId:  pesertaDidikId,
-			Nis:             safeGet(row, 1),
-			Nisn:            safeGet(row, 2),
-			NmSiswa:         row[3],
-			JenisKelamin:    safeGet(row, 4),
-			TempatLahir:     safeGet(row, 5),
+			Nis:             safeGet(row, 2),
+			Nisn:            safeGet(row, 3),
+			NmSiswa:         row[4],
+			JenisKelamin:    safeGet(row, 5),
+			TempatLahir:     safeGet(row, 6),
 			TanggalLahir:    tglLahir,
-			Agama:           safeGet(row, 7),
-			AlamatSiswa:     safeGet(row, 8),
-			TeleponSiswa:    safeGet(row, 9),
+			Agama:           safeGet(row, 8),
+			AlamatSiswa:     safeGet(row, 9),
+			TeleponSiswa:    safeGet(row, 10),
 			DiterimaTanggal: tglDiterima,
-			NmAyah:          safeGet(row, 11),
-			NmIbu:           safeGet(row, 12),
-			PekerjaanAyah:   safeGet(row, 13),
-			PekerjaanIbu:    safeGet(row, 14),
-			NmWali:          safeGet(row, 15),
-			PekerjaanWali:   safeGet(row, 16),
-			Nik:             safeGet(row, 17),
+			NmAyah:          safeGet(row, 12),
+			NmIbu:           safeGet(row, 13),
+			PekerjaanAyah:   safeGet(row, 14),
+			PekerjaanIbu:    safeGet(row, 15),
+			NmWali:          safeGet(row, 16),
+			PekerjaanWali:   safeGet(row, 17),
+			Nik:             safeGet(row, 18),
 		}, param.schemaname)
 
 		if err != nil {
 			// Jika duplikat NISN, ambil pesertaDidikId dari database
 			if strings.Contains(err.Error(), "failed to save record") {
-				log.Printf("Duplikat NISN ditemukan baris %d: %s — mengambil ID dari DB", i+1, row[2])
+				log.Printf("Duplikat NISN ditemukan baris %d: %s — mengambil ID dari DB", i+1, row[3])
 
 				// Ambil ID dari database berdasarkan NISN
-				pd, getErr := s.repoSiswa.FindByID(ctx, row[2], param.schemaname, "nisn")
+				pd, getErr := s.repoSiswa.FindByID(ctx, row[3], param.schemaname, "nisn")
 				if getErr != nil {
 					return fmt.Errorf("duplikat NISN, tetapi gagal ambil ID: %v", getErr)
 				}
@@ -389,20 +324,20 @@ func (s *UploadServiceServer) processUploadSiswa(
 			err = s.repoSiswaPelengkap.Save(ctx, &models.PesertaDidikPelengkap{
 				PelengkapSiswaId: uuid.New(),
 				PesertaDidikId:   pesertaDidikId,
-				StatusDalamKel:   safeGet(row, 18),
-				AnakKe:           safeGet(row, 19),
-				SekolahAsal:      safeGet(row, 20),
-				DiterimaKelas:    safeGet(row, 21),
-				AlamatOrtu:       safeGet(row, 22),
-				TeleponOrtu:      safeGet(row, 23),
-				AlamatWali:       safeGet(row, 24),
-				TeleponWali:      safeGet(row, 25),
+				StatusDalamKel:   safeGet(row, 19),
+				AnakKe:           safeGet(row, 20),
+				SekolahAsal:      safeGet(row, 21),
+				DiterimaKelas:    safeGet(row, 22),
+				AlamatOrtu:       safeGet(row, 23),
+				TeleponOrtu:      safeGet(row, 24),
+				AlamatWali:       safeGet(row, 25),
+				TeleponWali:      safeGet(row, 26),
 			}, param.schemaname)
 
 			if err != nil {
 				// Jika duplikat NISN, ambil pesertaDidikId dari database
 				if strings.Contains(err.Error(), "failed to save record") {
-					log.Printf("Duplikat peserta_didik_id ditemukan baris %d: %s — mengambil ID dari DB", i+1, row[2])
+					log.Printf("Duplikat peserta_didik_id ditemukan baris %d: %s — mengambil ID dari DB", i+1, row[3])
 				} else {
 					return fmt.Errorf("gagal menyimpan peserta didik: %v", err)
 				}
@@ -413,7 +348,7 @@ func (s *UploadServiceServer) processUploadSiswa(
 		for j := 1; j <= 2; j++ {
 			// rombonganBelajarId := utils.StringToUUID(row[27])
 			conditions := map[string]any{
-				"tabel_kelas.nm_kelas":    row[26],
+				"tabel_kelas.nm_kelas":    row[1],
 				"tabel_kelas.semester_id": fmt.Sprintf("%s%d", param.semesterId, j),
 			}
 			rombonganBelajarId, err1 := s.repoKelas.FindWithPreloadAndJoinsOrigin(ctx, param.schemaname, nil, nil, conditions, nil) //utils.StringToUUID(row[27])

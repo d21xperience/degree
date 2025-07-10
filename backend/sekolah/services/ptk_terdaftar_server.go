@@ -11,8 +11,6 @@ import (
 	"sekolah/utils"
 
 	"github.com/google/uuid"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 )
 
 type PTKTerdaftarServiceServer struct {
@@ -46,97 +44,78 @@ func (s *PTKTerdaftarServiceServer) CreatePTKTerdaftar(ctx context.Context, req 
 	}
 	schemaName := req.GetSchemaname()
 	PTKTerdaftar := req.GetPtkTerdaftar()
-	if req.PtkTerdaftar[0].Ptk.Nama == "" || req.PtkTerdaftar[0].Ptk.Nama == "\"\"" {
+
+	// var ptkTerdaftarId uuid.UUID
+	ptkId := uuid.New()
+
+	pbPTK := models.TabelPTK{
+		PtkID:             ptkId,
+		Nama:              PTKTerdaftar.Ptk.Nama,
+		JenisPtkID:        PTKTerdaftar.Ptk.JenisPtkId,
+		JenisKelamin:      &PTKTerdaftar.Ptk.JenisKelamin,
+		TempatLahir:       &PTKTerdaftar.Ptk.TempatLahir,
+		TanggalLahir:      utils.TimeToPointer(PTKTerdaftar.Ptk.TanggalLahir),
+		StatusKeaktifanID: PTKTerdaftar.Ptk.StatusKeaktifanId,
+		Agama:             &PTKTerdaftar.Ptk.Agama,
+		IsDapodik:         false,
+	}
+	pbPTKTerdaftar := models.PTKTerdaftar{
+		PtkTerdaftarId: uuid.New(),
+		TahunAjaranId:  PTKTerdaftar.TahunAjaranId,
+		PtkID:          ptkId,
+		JenisKeluarId:  &PTKTerdaftar.JenisKeluarId,
+		IsDapodik:      false,
+	}
+
+	pbPTKPelengkap := models.PtkPelengkap{
+		PtkPelengkapId: uuid.New(),
+		PtkId:          ptkId,
+		GelarDepan:     &PTKTerdaftar.PtkPelengkap.GelarDepan,
+		GelarBelakang:  &PTKTerdaftar.PtkPelengkap.GelarBelakang,
+		Nik:            &PTKTerdaftar.PtkPelengkap.Nik,
+		NoKk:           &PTKTerdaftar.PtkPelengkap.No_KK,
+		Nuptk:          &PTKTerdaftar.PtkPelengkap.Nuptk,
+		Niy:            &PTKTerdaftar.PtkPelengkap.Niy,
+		Nip:            &PTKTerdaftar.PtkPelengkap.Nip,
+		AlamatJalan:    &PTKTerdaftar.PtkPelengkap.AlamatJalan,
+		Rt:             &PTKTerdaftar.PtkPelengkap.Rt,
+		Rw:             &PTKTerdaftar.PtkPelengkap.Rw,
+		DesaKelurahan:  &PTKTerdaftar.PtkPelengkap.DesaKelurahan,
+		Kec:            &PTKTerdaftar.PtkPelengkap.Kec,
+		KabKota:        &PTKTerdaftar.PtkPelengkap.KabKota,
+		Propinsi:       &PTKTerdaftar.PtkPelengkap.Propinsi,
+		KodePos:        &PTKTerdaftar.PtkPelengkap.KodePos,
+		NoTeleponRumah: &PTKTerdaftar.PtkPelengkap.NoTeleponRumah,
+		NoHp:           &PTKTerdaftar.PtkPelengkap.NoHp,
+		Email:          &PTKTerdaftar.PtkPelengkap.Email,
+	}
+
+	// simpan tabel_ptk
+	ptk := s.repoPTK.Save(ctx, &pbPTK, schemaName)
+	if ptk != nil {
 		return &pb.CreatePTKTerdaftarResponse{
-			Message: "Data yang diinputkan tidak boleh kosong!",
+			Message: "Berhasil menyimpan ptk",
 			Status:  false,
-		}, nil
+		}, ptk
 	}
-
-	var ptkTerdaftarId uuid.UUID
-	var ptkId uuid.UUID
-	PTKTerdaftarModel := utils.ConvertPBToModels(PTKTerdaftar, func(item *pb.PTKTerdaftar) *models.PTKTerdaftar {
-		// cek apakah data dari dapodik atau bukan
-		if !item.Ptk.IsDapodik {
-			ptkTerdaftarId = uuid.New()
-			ptkId = uuid.New()
-		} else {
-			ptkTerdaftarId = utils.StringToUUID(item.PtkTerdaftarId)
-			ptkId = utils.StringToUUID(item.PtkId)
-		}
-
-		return &models.PTKTerdaftar{
-			PtkTerdaftarId: ptkTerdaftarId,
-			TahunAjaranId:  item.TahunAjaranId,
-			PtkID:          ptkId,
-			JenisKeluarId:  &item.JenisKeluarId,
-			IsDapodik:      item.IsDapodik,
-			// PtkTerdaftarIdDapodik: ,
-			PTK: models.TabelPTK{
-				PtkID:             utils.StringToUUID(item.PtkId),
-				Nama:              item.Ptk.Nama,
-				JenisPtkID:        item.Ptk.JenisPtkId,
-				JenisKelamin:      &item.Ptk.JenisKelamin,
-				TempatLahir:       &item.Ptk.TempatLahir,
-				TanggalLahir:      utils.TimeToPointer(item.Ptk.TanggalLahir),
-				StatusKeaktifanID: item.Ptk.StatusKeaktifanId,
-				Agama:             &item.Ptk.Agama,
-				IsDapodik:         item.Ptk.IsDapodik,
-			},
-			PTKPelengkap: models.PtkPelengkap{
-				PtkPelengkapId: uuid.New(),
-				PtkId:          ptkId,
-				GelarDepan:     &item.PtkPelengkap.GelarDepan,
-				GelarBelakang:  &item.PtkPelengkap.GelarBelakang,
-				Nik:            &item.PtkPelengkap.Nik,
-				NoKk:           &item.PtkPelengkap.No_KK,
-				Nuptk:          &item.PtkPelengkap.Nuptk,
-				Niy:            &item.PtkPelengkap.Niy,
-				Nip:            &item.PtkPelengkap.Nip,
-				AlamatJalan:    &item.PtkPelengkap.AlamatJalan,
-				Rt:             &item.PtkPelengkap.Rt,
-				Rw:             &item.PtkPelengkap.Rw,
-				DesaKelurahan:  &item.PtkPelengkap.DesaKelurahan,
-				Kec:            &item.PtkPelengkap.Kec,
-				KabKota:        &item.PtkPelengkap.KabKota,
-				Propinsi:       &item.PtkPelengkap.Propinsi,
-				KodePos:        &item.PtkPelengkap.KodePos,
-				NoTeleponRumah: &item.PtkPelengkap.NoTeleponRumah,
-				NoHp:           &item.PtkPelengkap.NoHp,
-				Email:          &item.PtkPelengkap.Email,
-			},
-		}
-	})
-
-	// var daftarPTK []models.TabelPTK
-	// for _, v := range PTKTerdaftarModel {
-	// 	daftarPTK = append(daftarPTK, v.PTK)
-	// }
-	// conflicts, err := s.repoPTK.SaveManyWithConflictCheck(ctx, schemaName, utils.SliceToPointer(daftarPTK), "PtkID", "ptk_id", 100)
-	// if err != nil {
-	// 	return nil, status.Errorf(codes.Internal, "insert failed: %v", err)
-	// }
-
-	// conflictProto := repositories.ConvertConflictsToProto(conflicts, "PtkID", "Nama")
-
-	// simpan ke tabel_ptk_terdaftar
-	conflicts1, err := s.repo.SaveManyWithConflictCheck(ctx, schemaName, PTKTerdaftarModel, "PtkTerdaftarId", "ptk_terdaftar_id", 100, nil)
-	if err != nil {
-		return nil, status.Errorf(codes.Internal, "insert failed: %v", err)
+	ptkPelengkap := s.repoPTKPelengkap.Save(ctx, &pbPTKPelengkap, schemaName)
+	if ptkPelengkap != nil {
+		return &pb.CreatePTKTerdaftarResponse{
+			Message: "Gagal menyimpan ptk pelengkap",
+			Status:  false,
+		}, ptkPelengkap
 	}
-
-	conflictProto2 := repositories.ConvertConflictsToProto(conflicts1, "PtkTerdaftarId", "PtkID")
-	// conflictProto2 = append(conflictProto2, conflictProto...)
-	fmt.Print(conflictProto2)
+	ptkTerdaftar := s.repo.Save(ctx, &pbPTKTerdaftar, schemaName)
+	if ptkTerdaftar != nil {
+		return &pb.CreatePTKTerdaftarResponse{
+			Message: "Gagal menyimpan ptk terdaftar",
+			Status:  false,
+		}, ptkTerdaftar
+	}
 	return &pb.CreatePTKTerdaftarResponse{
-		Message: "PTKTerdaftar berhasil ditambahkan",
-		Status:  true,
-		Conflicts: &pb.ConflictResponse{
-			Message:       "Sebagian data berhasil disimpan",
-			Conflicts:     conflictProto2,
-			TotalConflict: int32(len(conflictProto2)),
-		},
-	}, nil
+		Message: "Berhasil menyimpan guru",
+		Status:  false,
+	}, err
 }
 
 // func (s *PTKTerdaftarServiceServer) CreateBanyakPTKTerdaftar(ctx context.Context, req *pb.CreateBanyakPTKTerdaftarRequest) (*pb.CreateBanyakPTKTerdaftarResponse, error) {

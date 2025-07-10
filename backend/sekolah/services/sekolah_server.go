@@ -582,7 +582,8 @@ func (s *SekolahService) GetKategoriMapel(ctx context.Context, req *pb.GetKatego
 		"tabel_kategori_mapel.tingkat_pendidikan": tingkatPendidikan,
 		"tabel_kategori_mapel.kurikulum_id":       kurikulumId,
 	}
-	modelKategoriMapel, err := s.repoKategoriMapel.FindAllByConditions(ctx, Schemaname, conditions, 100, 0, nil)
+	orderBy := []string{"tabel_kategori_mapel.nm_mapel ASC"}
+	modelKategoriMapel, err := s.repoKategoriMapel.FindAllByConditions(ctx, Schemaname, conditions, 100, 0, orderBy)
 	if err != nil {
 		return nil, err
 	}
@@ -617,14 +618,16 @@ func (s *SekolahService) DeleteKategoriMapel(ctx context.Context, req *pb.Delete
 	}
 	Schemaname := req.GetSchemaname()
 	kategoriMapelId := strconv.Itoa(int(req.GetId()))
-	modelKategoriMapel, err := s.repoKategoriMapel.FindByID(ctx, kategoriMapelId, Schemaname, "id")
-	if err != nil {
-		return &pb.DeleteKategoriMapelResponse{
-			Message: fmt.Sprintf("Gagal menghapus data kategori mapel: %s", err),
-			Status:  false,
-		}, nil
-	}
-	err = s.repoKategoriMapel.SoftDelete(ctx, Schemaname, modelKategoriMapel, kategoriMapelId, "id")
+	// modelKategoriMapel, err := s.repoKategoriMapel.FindByID(ctx, kategoriMapelId, Schemaname, "id")
+	// if err != nil {
+	// 	return &pb.DeleteKategoriMapelResponse{
+	// 		Message: fmt.Sprintf("Gagal menghapus data kategori mapel: %s", err),
+	// 		Status:  false,
+	// 	}, nil
+	// }
+	// err = s.repoKategoriMapel.SoftDelete(ctx, Schemaname, modelKategoriMapel, kategoriMapelId, "id")
+	err = s.repoKategoriMapel.DeleteV1(ctx, Schemaname, kategoriMapelId, "id", "int")
+
 	if err != nil {
 		return &pb.DeleteKategoriMapelResponse{
 			Message: fmt.Sprintf("Gagal menghapus data kategori mapel: %s", err),
@@ -655,21 +658,7 @@ func (s *SekolahService) BatchDeleteKategoriMapel(ctx context.Context, req *pb.B
 			ids = append(ids, v)
 		}
 	}
-	conditions := []struct {
-		Query string
-		Args  []any
-	}{
-		{"tabel_kategori_mapel.id IN ?", []any{ids}},
-	}
-
-	modelKategoriMapel, err := s.repoKategoriMapel.FindWithRelations(ctx, Schemaname, nil, nil, nil, conditions, nil, nil)
-	if err != nil {
-		return &pb.BatchDeleteKategoriMapelResponse{
-			Message: fmt.Sprintf("Gagal menghapus data kategori mapel: %s", err),
-			Status:  false,
-		}, nil
-	}
-	err = s.repoKategoriMapel.SoftDeleteBatch(ctx, Schemaname, utils.SliceToPointer(modelKategoriMapel), ids, "id")
+	err = s.repoKategoriMapel.DeleteBatchV1(ctx, ids, Schemaname, "id", "int")
 	if err != nil {
 		return &pb.BatchDeleteKategoriMapelResponse{
 			Message: fmt.Sprintf("Gagal menghapus data kategori mapel: %s", err),

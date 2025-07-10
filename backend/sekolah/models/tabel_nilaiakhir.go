@@ -20,26 +20,13 @@ type NilaiAkhir struct {
 	PesertaDidikId  uuid.UUID `gorm:"column:peserta_didik_id"`          // Foreign key ke tabel peserta_didik
 	IDMinat         string    `gorm:"column:id_minat"`                  // ID Minat
 	Semester        *uint32   `gorm:"column:semester"`                  // Semester
+	
 	// Relasi
-	PesertaDidik  PesertaDidik  `gorm:"foreignKey:PesertaDidikId;references:PesertaDidikId"`
-	MataPelajaran MataPelajaran `gorm:"foreignKey:MataPelajaranId;references:MataPelajaranID"`
+	// PesertaDidik     PesertaDidik //`gorm:"foreignKey:PesertaDidikId;references:PesertaDidikId"`
+	// RombonganBelajar RombonganBelajar
+	MataPelajaran MataPelajaran //`gorm:"foreignKey:MataPelajaranId;references:MataPelajaranID"`
 	// AnggotaRombel RombelAnggota `gorm:"foreignKey:AnggotaRombelId;references:AnggotaRombelId"`
 }
-
-type NilaiSiswa struct {
-	PesertaDidikId     uuid.UUID
-	NmSiswa            string
-	RombonganBelajarId uuid.UUID
-	NmKelas            string
-	SemesterId         string
-	NilaiAkhir         []NilaiAkhir
-}
-
-// type NIlaiRerataAkhir struct {
-// 	NilaiRerataAkhirID uuid.UUID `gorm:"column:nilai_rerata_akhir_id"`
-// 	IDNilaiAkhir       uuid.UUID `gorm:"column:id_nilai_akhir;foreignKey:id_nilai_akhir"` // Foreign key ke tabel nilai_akhir
-// 	NilaiAkhir         []NilaiAkhir
-// }
 
 func (NilaiAkhir) TableName() string {
 	return "tabel_nilaiakhir"

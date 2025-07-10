@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: nginx
     ports:
-      - "80:80"  # Akses API Gateway melalui http://localhost
+      - "8080:80"  # Akses API Gateway melalui http://localhost
     networks:
       - backend_network
 

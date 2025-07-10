@@ -45,7 +45,7 @@ import (
 // 	return nil
 // }
 
-func ValidateFields(req interface{}, fieldNames []string) error {
+func ValidateFields(req any, fieldNames []string) error {
 	// Cek apakah req kosong
 	if req == nil {
 		log.Println("Request is nil")

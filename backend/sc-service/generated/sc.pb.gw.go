@@ -955,27 +955,185 @@ func local_request_TransaksiService_SearchIjazahBlockchain_0(ctx context.Context
 	return msg, metadata, err
 }
 
-func request_TransaksiService_SaveContractAddress_0(ctx context.Context, marshaler runtime.Marshaler, client TransaksiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+var filter_TransaksiService_GetSolcVersion_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+
+func request_TransaksiService_GetSolcVersion_0(ctx context.Context, marshaler runtime.Marshaler, client TransaksiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq SaveContractAddressRequest
+		protoReq GetSolcVersionRequest
 		metadata runtime.ServerMetadata
 	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := client.SaveContractAddress(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_TransaksiService_GetSolcVersion_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.GetSolcVersion(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
 
-func local_request_TransaksiService_SaveContractAddress_0(ctx context.Context, marshaler runtime.Marshaler, server TransaksiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_TransaksiService_GetSolcVersion_0(ctx context.Context, marshaler runtime.Marshaler, server TransaksiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq SaveContractAddressRequest
+		protoReq GetSolcVersionRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_TransaksiService_GetSolcVersion_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.GetSolcVersion(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_TransaksiService_DeployContract_0(ctx context.Context, marshaler runtime.Marshaler, client TransaksiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq DeployContractRequest
 		metadata runtime.ServerMetadata
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := server.SaveContractAddress(ctx, &protoReq)
+	msg, err := client.DeployContract(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_TransaksiService_DeployContract_0(ctx context.Context, marshaler runtime.Marshaler, server TransaksiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq DeployContractRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.DeployContract(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_TransaksiService_Deploy_0(ctx context.Context, marshaler runtime.Marshaler, client TransaksiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq DeployRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.Deploy(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_TransaksiService_Deploy_0(ctx context.Context, marshaler runtime.Marshaler, server TransaksiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq DeployRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.Deploy(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_TransaksiService_FundWalet_0(ctx context.Context, marshaler runtime.Marshaler, client TransaksiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq FundWaletRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.FundWalet(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_TransaksiService_FundWalet_0(ctx context.Context, marshaler runtime.Marshaler, server TransaksiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq FundWaletRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.FundWalet(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_TransaksiService_DaftarSekolah_0(ctx context.Context, marshaler runtime.Marshaler, client TransaksiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq DaftarSekolahRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.DaftarSekolah(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_TransaksiService_DaftarSekolah_0(ctx context.Context, marshaler runtime.Marshaler, server TransaksiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq DaftarSekolahRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.DaftarSekolah(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_TransaksiService_ContractList_0(ctx context.Context, marshaler runtime.Marshaler, client TransaksiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq ContractListRequest
+		metadata runtime.ServerMetadata
+	)
+	msg, err := client.ContractList(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_TransaksiService_ContractList_0(ctx context.Context, marshaler runtime.Marshaler, server TransaksiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq ContractListRequest
+		metadata runtime.ServerMetadata
+	)
+	msg, err := server.ContractList(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_TransaksiService_Contract_0(ctx context.Context, marshaler runtime.Marshaler, client TransaksiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq ContractRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	val, ok := pathParams["contract_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "contract_id")
+	}
+	protoReq.ContractId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "contract_id", err)
+	}
+	msg, err := client.Contract(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_TransaksiService_Contract_0(ctx context.Context, marshaler runtime.Marshaler, server TransaksiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq ContractRequest
+		metadata runtime.ServerMetadata
+		err      error
+	)
+	val, ok := pathParams["contract_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "contract_id")
+	}
+	protoReq.ContractId, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "contract_id", err)
+	}
+	msg, err := server.Contract(ctx, &protoReq)
 	return msg, metadata, err
 }
 
@@ -994,6 +1152,38 @@ func local_request_TransaksiService_GetContractAddress_0(ctx context.Context, ma
 		metadata runtime.ServerMetadata
 	)
 	msg, err := server.GetContractAddress(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+var filter_TransaksiService_GetBCTransaction_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+
+func request_TransaksiService_GetBCTransaction_0(ctx context.Context, marshaler runtime.Marshaler, client TransaksiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetBCTransactionRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_TransaksiService_GetBCTransaction_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.GetBCTransaction(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_TransaksiService_GetBCTransaction_0(ctx context.Context, marshaler runtime.Marshaler, server TransaksiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetBCTransactionRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_TransaksiService_GetBCTransaction_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.GetBCTransaction(ctx, &protoReq)
 	return msg, metadata, err
 }
 
@@ -1065,7 +1255,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/SetConfig", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/config"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/SetConfig", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/config"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1085,7 +1275,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetNetworkID", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/network_id"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetNetworkID", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/network_id"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1105,7 +1295,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/SendETH", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/send_eth"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/SendETH", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/send_eth"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1125,7 +1315,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetTokenBalance", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/token_balance"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetTokenBalance", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/token_balance"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1145,7 +1335,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/TransferToken", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/transfer_token"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/TransferToken", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/transfer_token"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1165,7 +1355,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/ApproveToken", runtime.WithHTTPPathPattern("/api/v1/sc/token/approve"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/ApproveToken", runtime.WithHTTPPathPattern("/api/v1/scs/token/approve"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1185,7 +1375,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetTokenAllowance", runtime.WithHTTPPathPattern("/api/v1/sc/token/allowance"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetTokenAllowance", runtime.WithHTTPPathPattern("/api/v1/scs/token/allowance"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1205,7 +1395,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/DeployIjazahContract", runtime.WithHTTPPathPattern("/api/v1/sc/contract/deploy"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/DeployIjazahContract", runtime.WithHTTPPathPattern("/api/v1/scs/contract/deploy"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1225,7 +1415,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetContract", runtime.WithHTTPPathPattern("/api/v1/sc/contract"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetContract", runtime.WithHTTPPathPattern("/api/v1/scs/contract"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1245,7 +1435,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/CallContractMethod", runtime.WithHTTPPathPattern("/api/v1/sc/contract/call"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/CallContractMethod", runtime.WithHTTPPathPattern("/api/v1/scs/contract/call"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1265,7 +1455,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/SendTransactionToContract", runtime.WithHTTPPathPattern("/api/v1/sc/contract/send"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/SendTransactionToContract", runtime.WithHTTPPathPattern("/api/v1/scs/contract/send"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1285,7 +1475,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetContractOwner", runtime.WithHTTPPathPattern("/api/v1/sc/contract/{contract_address}/owner"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetContractOwner", runtime.WithHTTPPathPattern("/api/v1/scs/contract/{contract_address}/owner"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1305,7 +1495,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetContractEvents", runtime.WithHTTPPathPattern("/api/v1/sc/contract/{contract_address}/events"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetContractEvents", runtime.WithHTTPPathPattern("/api/v1/scs/contract/{contract_address}/events"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1325,7 +1515,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetGasPrice", runtime.WithHTTPPathPattern("/api/v1/sc/gas/price"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetGasPrice", runtime.WithHTTPPathPattern("/api/v1/scs/gas/price"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1345,7 +1535,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetNonce", runtime.WithHTTPPathPattern("/api/v1/sc/nonce/{address}"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetNonce", runtime.WithHTTPPathPattern("/api/v1/scs/nonce/{address}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1365,7 +1555,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetTransactionStatus", runtime.WithHTTPPathPattern("/api/v1/sc/transaction/{tx_hash}/status"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetTransactionStatus", runtime.WithHTTPPathPattern("/api/v1/scs/transaction/{tx_hash}/status"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1395,7 +1585,7 @@ func RegisterBlockchainAccountServiceHandlerServer(ctx context.Context, mux *run
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainAccountService/CreateBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/sc/blockchainaccount/create"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainAccountService/CreateBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1415,7 +1605,7 @@ func RegisterBlockchainAccountServiceHandlerServer(ctx context.Context, mux *run
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainAccountService/ImportBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/sc/blockchainaccount/import"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainAccountService/ImportBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/import"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1435,7 +1625,7 @@ func RegisterBlockchainAccountServiceHandlerServer(ctx context.Context, mux *run
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainAccountService/GetBlockchainAccounts", runtime.WithHTTPPathPattern("/api/v1/sc/blockchainaccount/list"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainAccountService/GetBlockchainAccounts", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1455,7 +1645,7 @@ func RegisterBlockchainAccountServiceHandlerServer(ctx context.Context, mux *run
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainAccountService/UpdateBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/sc/blockchainaccount/update"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainAccountService/UpdateBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/update"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1475,7 +1665,7 @@ func RegisterBlockchainAccountServiceHandlerServer(ctx context.Context, mux *run
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainAccountService/DeleteBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/sc/blockchainaccount/delete"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainAccountService/DeleteBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1505,7 +1695,7 @@ func RegisterBlockchainNetworkServiceHandlerServer(ctx context.Context, mux *run
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/CreateBCNetwork", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/create"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/CreateBCNetwork", runtime.WithHTTPPathPattern("/api/v1/scs/bc-networks"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1525,7 +1715,7 @@ func RegisterBlockchainNetworkServiceHandlerServer(ctx context.Context, mux *run
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/GetBCNetwork", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/list"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/GetBCNetwork", runtime.WithHTTPPathPattern("/api/v1/scs/bc-networks"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1545,7 +1735,7 @@ func RegisterBlockchainNetworkServiceHandlerServer(ctx context.Context, mux *run
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/UpdateBCNetwork", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/network"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/UpdateBCNetwork", runtime.WithHTTPPathPattern("/api/v1/scs/bc-network"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1565,7 +1755,7 @@ func RegisterBlockchainNetworkServiceHandlerServer(ctx context.Context, mux *run
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/DeleteBCNetwork", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/network"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/DeleteBCNetwork", runtime.WithHTTPPathPattern("/api/v1/scs/bc-network"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1595,7 +1785,7 @@ func RegisterTenantServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TenantService/RegistrasiSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/sc/t/registrasi-sekolah"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TenantService/RegistrasiSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/scs/t/registrasi-sekolah"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1615,7 +1805,7 @@ func RegisterTenantServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TenantService/GetSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/sc/t/sekolah-terdaftar"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TenantService/GetSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/scs/t/sekolah-terdaftar"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1645,7 +1835,7 @@ func RegisterBCPlatformServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BCPlatformService/GetBCPlatform", runtime.WithHTTPPathPattern("/api/v1/sc/platform"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BCPlatformService/GetBCPlatform", runtime.WithHTTPPathPattern("/api/v1/scs/platform"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1665,7 +1855,7 @@ func RegisterBCPlatformServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BCPlatformService/SetBCPlatform", runtime.WithHTTPPathPattern("/api/v1/sc/platform"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BCPlatformService/SetBCPlatform", runtime.WithHTTPPathPattern("/api/v1/scs/platform"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1695,7 +1885,7 @@ func RegisterTransaksiServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/CreateIjazahBlockchain", runtime.WithHTTPPathPattern("/api/v1/sc/ijazah-bc/create"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/CreateIjazahBlockchain", runtime.WithHTTPPathPattern("/api/v1/scs/ijazah-bc/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1715,7 +1905,7 @@ func RegisterTransaksiServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/GetIjazahBlockchain", runtime.WithHTTPPathPattern("/api/v1/sc/ijazah-bc"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/GetIjazahBlockchain", runtime.WithHTTPPathPattern("/api/v1/scs/ijazah-bc"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1735,7 +1925,7 @@ func RegisterTransaksiServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/SearchIjazahBlockchain", runtime.WithHTTPPathPattern("/api/v1/sc/ijazah-bc/search"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/SearchIjazahBlockchain", runtime.WithHTTPPathPattern("/api/v1/scs/ijazah-bc/search"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1749,25 +1939,145 @@ func RegisterTransaksiServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 		}
 		forward_TransaksiService_SearchIjazahBlockchain_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_TransaksiService_SaveContractAddress_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodGet, pattern_TransaksiService_GetSolcVersion_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/SaveContractAddress", runtime.WithHTTPPathPattern("/api/v1/sc/contract-address"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/GetSolcVersion", runtime.WithHTTPPathPattern("/api/v1/scs/contract/deploy/solc-version"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_TransaksiService_SaveContractAddress_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_TransaksiService_GetSolcVersion_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_TransaksiService_SaveContractAddress_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_TransaksiService_GetSolcVersion_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPost, pattern_TransaksiService_DeployContract_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/DeployContract", runtime.WithHTTPPathPattern("/api/v1/scs/contract/deploy-contract"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_TransaksiService_DeployContract_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_DeployContract_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPost, pattern_TransaksiService_Deploy_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/Deploy", runtime.WithHTTPPathPattern("/api/v1/scs/contract/deploy"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_TransaksiService_Deploy_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_Deploy_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPost, pattern_TransaksiService_FundWalet_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/FundWalet", runtime.WithHTTPPathPattern("/api/v1/scs/contract/fund-wallet"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_TransaksiService_FundWalet_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_FundWalet_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPost, pattern_TransaksiService_DaftarSekolah_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/DaftarSekolah", runtime.WithHTTPPathPattern("/api/v1/scs/contract/daftar-sekolah"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_TransaksiService_DaftarSekolah_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_DaftarSekolah_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodGet, pattern_TransaksiService_ContractList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/ContractList", runtime.WithHTTPPathPattern("/api/v1/scs/contract/list"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_TransaksiService_ContractList_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_ContractList_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodGet, pattern_TransaksiService_Contract_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/Contract", runtime.WithHTTPPathPattern("/api/v1/scs/contracts/{contract_id}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_TransaksiService_Contract_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_Contract_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	mux.Handle(http.MethodGet, pattern_TransaksiService_GetContractAddress_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -1775,7 +2085,7 @@ func RegisterTransaksiServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/GetContractAddress", runtime.WithHTTPPathPattern("/api/v1/sc/contract-address"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/GetContractAddress", runtime.WithHTTPPathPattern("/api/v1/scs/contract-address"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1788,6 +2098,26 @@ func RegisterTransaksiServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		forward_TransaksiService_GetContractAddress_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodGet, pattern_TransaksiService_GetBCTransaction_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.TransaksiService/GetBCTransaction", runtime.WithHTTPPathPattern("/api/v1/scs/bc-transaction"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_TransaksiService_GetBCTransaction_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_GetBCTransaction_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 
 	return nil
@@ -1883,7 +2213,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/SetConfig", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/config"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/SetConfig", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/config"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1900,7 +2230,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetNetworkID", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/network_id"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetNetworkID", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/network_id"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1917,7 +2247,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/SendETH", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/send_eth"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/SendETH", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/send_eth"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1934,7 +2264,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetTokenBalance", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/token_balance"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetTokenBalance", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/token_balance"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1951,7 +2281,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/TransferToken", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/transfer_token"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/TransferToken", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/transfer_token"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1968,7 +2298,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/ApproveToken", runtime.WithHTTPPathPattern("/api/v1/sc/token/approve"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/ApproveToken", runtime.WithHTTPPathPattern("/api/v1/scs/token/approve"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1985,7 +2315,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetTokenAllowance", runtime.WithHTTPPathPattern("/api/v1/sc/token/allowance"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetTokenAllowance", runtime.WithHTTPPathPattern("/api/v1/scs/token/allowance"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2002,7 +2332,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/DeployIjazahContract", runtime.WithHTTPPathPattern("/api/v1/sc/contract/deploy"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/DeployIjazahContract", runtime.WithHTTPPathPattern("/api/v1/scs/contract/deploy"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2019,7 +2349,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetContract", runtime.WithHTTPPathPattern("/api/v1/sc/contract"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetContract", runtime.WithHTTPPathPattern("/api/v1/scs/contract"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2036,7 +2366,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/CallContractMethod", runtime.WithHTTPPathPattern("/api/v1/sc/contract/call"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/CallContractMethod", runtime.WithHTTPPathPattern("/api/v1/scs/contract/call"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2053,7 +2383,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/SendTransactionToContract", runtime.WithHTTPPathPattern("/api/v1/sc/contract/send"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/SendTransactionToContract", runtime.WithHTTPPathPattern("/api/v1/scs/contract/send"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2070,7 +2400,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetContractOwner", runtime.WithHTTPPathPattern("/api/v1/sc/contract/{contract_address}/owner"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetContractOwner", runtime.WithHTTPPathPattern("/api/v1/scs/contract/{contract_address}/owner"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2087,7 +2417,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetContractEvents", runtime.WithHTTPPathPattern("/api/v1/sc/contract/{contract_address}/events"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetContractEvents", runtime.WithHTTPPathPattern("/api/v1/scs/contract/{contract_address}/events"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2104,7 +2434,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetGasPrice", runtime.WithHTTPPathPattern("/api/v1/sc/gas/price"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetGasPrice", runtime.WithHTTPPathPattern("/api/v1/scs/gas/price"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2121,7 +2451,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetNonce", runtime.WithHTTPPathPattern("/api/v1/sc/nonce/{address}"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetNonce", runtime.WithHTTPPathPattern("/api/v1/scs/nonce/{address}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2138,7 +2468,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetTransactionStatus", runtime.WithHTTPPathPattern("/api/v1/sc/transaction/{tx_hash}/status"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetTransactionStatus", runtime.WithHTTPPathPattern("/api/v1/scs/transaction/{tx_hash}/status"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2155,22 +2485,22 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 }
 
 var (
-	pattern_BlockchainService_SetConfig_0                 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "blockchain", "config"}, ""))
-	pattern_BlockchainService_GetNetworkID_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "blockchain", "network_id"}, ""))
-	pattern_BlockchainService_SendETH_0                   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "blockchain", "send_eth"}, ""))
-	pattern_BlockchainService_GetTokenBalance_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "blockchain", "token_balance"}, ""))
-	pattern_BlockchainService_TransferToken_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "blockchain", "transfer_token"}, ""))
-	pattern_BlockchainService_ApproveToken_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "token", "approve"}, ""))
-	pattern_BlockchainService_GetTokenAllowance_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "token", "allowance"}, ""))
-	pattern_BlockchainService_DeployIjazahContract_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "contract", "deploy"}, ""))
-	pattern_BlockchainService_GetContract_0               = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "sc", "contract"}, ""))
-	pattern_BlockchainService_CallContractMethod_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "contract", "call"}, ""))
-	pattern_BlockchainService_SendTransactionToContract_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "contract", "send"}, ""))
-	pattern_BlockchainService_GetContractOwner_0          = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "sc", "contract", "contract_address", "owner"}, ""))
-	pattern_BlockchainService_GetContractEvents_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "sc", "contract", "contract_address", "events"}, ""))
-	pattern_BlockchainService_GetGasPrice_0               = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "gas", "price"}, ""))
-	pattern_BlockchainService_GetNonce_0                  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "sc", "nonce", "address"}, ""))
-	pattern_BlockchainService_GetTransactionStatus_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "sc", "transaction", "tx_hash", "status"}, ""))
+	pattern_BlockchainService_SetConfig_0                 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchain", "config"}, ""))
+	pattern_BlockchainService_GetNetworkID_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchain", "network_id"}, ""))
+	pattern_BlockchainService_SendETH_0                   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchain", "send_eth"}, ""))
+	pattern_BlockchainService_GetTokenBalance_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchain", "token_balance"}, ""))
+	pattern_BlockchainService_TransferToken_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchain", "transfer_token"}, ""))
+	pattern_BlockchainService_ApproveToken_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "token", "approve"}, ""))
+	pattern_BlockchainService_GetTokenAllowance_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "token", "allowance"}, ""))
+	pattern_BlockchainService_DeployIjazahContract_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "contract", "deploy"}, ""))
+	pattern_BlockchainService_GetContract_0               = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "scs", "contract"}, ""))
+	pattern_BlockchainService_CallContractMethod_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "contract", "call"}, ""))
+	pattern_BlockchainService_SendTransactionToContract_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "contract", "send"}, ""))
+	pattern_BlockchainService_GetContractOwner_0          = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "scs", "contract", "contract_address", "owner"}, ""))
+	pattern_BlockchainService_GetContractEvents_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "scs", "contract", "contract_address", "events"}, ""))
+	pattern_BlockchainService_GetGasPrice_0               = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "gas", "price"}, ""))
+	pattern_BlockchainService_GetNonce_0                  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "scs", "nonce", "address"}, ""))
+	pattern_BlockchainService_GetTransactionStatus_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "scs", "transaction", "tx_hash", "status"}, ""))
 )
 
 var (
@@ -2232,7 +2562,7 @@ func RegisterBlockchainAccountServiceHandlerClient(ctx context.Context, mux *run
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainAccountService/CreateBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/sc/blockchainaccount/create"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainAccountService/CreateBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2249,7 +2579,7 @@ func RegisterBlockchainAccountServiceHandlerClient(ctx context.Context, mux *run
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainAccountService/ImportBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/sc/blockchainaccount/import"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainAccountService/ImportBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/import"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2266,7 +2596,7 @@ func RegisterBlockchainAccountServiceHandlerClient(ctx context.Context, mux *run
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainAccountService/GetBlockchainAccounts", runtime.WithHTTPPathPattern("/api/v1/sc/blockchainaccount/list"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainAccountService/GetBlockchainAccounts", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/list"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2283,7 +2613,7 @@ func RegisterBlockchainAccountServiceHandlerClient(ctx context.Context, mux *run
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainAccountService/UpdateBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/sc/blockchainaccount/update"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainAccountService/UpdateBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/update"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2300,7 +2630,7 @@ func RegisterBlockchainAccountServiceHandlerClient(ctx context.Context, mux *run
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainAccountService/DeleteBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/sc/blockchainaccount/delete"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainAccountService/DeleteBlockchainAccount", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/delete"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2317,11 +2647,11 @@ func RegisterBlockchainAccountServiceHandlerClient(ctx context.Context, mux *run
 }
 
 var (
-	pattern_BlockchainAccountService_CreateBlockchainAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "blockchainaccount", "create"}, ""))
-	pattern_BlockchainAccountService_ImportBlockchainAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "blockchainaccount", "import"}, ""))
-	pattern_BlockchainAccountService_GetBlockchainAccounts_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "blockchainaccount", "list"}, ""))
-	pattern_BlockchainAccountService_UpdateBlockchainAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "blockchainaccount", "update"}, ""))
-	pattern_BlockchainAccountService_DeleteBlockchainAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "blockchainaccount", "delete"}, ""))
+	pattern_BlockchainAccountService_CreateBlockchainAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchainaccount", "create"}, ""))
+	pattern_BlockchainAccountService_ImportBlockchainAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchainaccount", "import"}, ""))
+	pattern_BlockchainAccountService_GetBlockchainAccounts_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchainaccount", "list"}, ""))
+	pattern_BlockchainAccountService_UpdateBlockchainAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchainaccount", "update"}, ""))
+	pattern_BlockchainAccountService_DeleteBlockchainAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchainaccount", "delete"}, ""))
 )
 
 var (
@@ -2372,7 +2702,7 @@ func RegisterBlockchainNetworkServiceHandlerClient(ctx context.Context, mux *run
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/CreateBCNetwork", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/create"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/CreateBCNetwork", runtime.WithHTTPPathPattern("/api/v1/scs/bc-networks"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2389,7 +2719,7 @@ func RegisterBlockchainNetworkServiceHandlerClient(ctx context.Context, mux *run
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/GetBCNetwork", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/list"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/GetBCNetwork", runtime.WithHTTPPathPattern("/api/v1/scs/bc-networks"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2406,7 +2736,7 @@ func RegisterBlockchainNetworkServiceHandlerClient(ctx context.Context, mux *run
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/UpdateBCNetwork", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/network"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/UpdateBCNetwork", runtime.WithHTTPPathPattern("/api/v1/scs/bc-network"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2423,7 +2753,7 @@ func RegisterBlockchainNetworkServiceHandlerClient(ctx context.Context, mux *run
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/DeleteBCNetwork", runtime.WithHTTPPathPattern("/api/v1/sc/blockchain/network"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainNetworkService/DeleteBCNetwork", runtime.WithHTTPPathPattern("/api/v1/scs/bc-network"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2440,10 +2770,10 @@ func RegisterBlockchainNetworkServiceHandlerClient(ctx context.Context, mux *run
 }
 
 var (
-	pattern_BlockchainNetworkService_CreateBCNetwork_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "blockchain", "create"}, ""))
-	pattern_BlockchainNetworkService_GetBCNetwork_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "blockchain", "list"}, ""))
-	pattern_BlockchainNetworkService_UpdateBCNetwork_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "blockchain", "network"}, ""))
-	pattern_BlockchainNetworkService_DeleteBCNetwork_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "blockchain", "network"}, ""))
+	pattern_BlockchainNetworkService_CreateBCNetwork_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "scs", "bc-networks"}, ""))
+	pattern_BlockchainNetworkService_GetBCNetwork_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "scs", "bc-networks"}, ""))
+	pattern_BlockchainNetworkService_UpdateBCNetwork_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "scs", "bc-network"}, ""))
+	pattern_BlockchainNetworkService_DeleteBCNetwork_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "scs", "bc-network"}, ""))
 )
 
 var (
@@ -2493,7 +2823,7 @@ func RegisterTenantServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TenantService/RegistrasiSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/sc/t/registrasi-sekolah"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TenantService/RegistrasiSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/scs/t/registrasi-sekolah"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2510,7 +2840,7 @@ func RegisterTenantServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TenantService/GetSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/sc/t/sekolah-terdaftar"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TenantService/GetSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/scs/t/sekolah-terdaftar"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2527,8 +2857,8 @@ func RegisterTenantServiceHandlerClient(ctx context.Context, mux *runtime.ServeM
 }
 
 var (
-	pattern_TenantService_RegistrasiSekolahTenant_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "t", "registrasi-sekolah"}, ""))
-	pattern_TenantService_GetSekolahTenant_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "t", "sekolah-terdaftar"}, ""))
+	pattern_TenantService_RegistrasiSekolahTenant_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "t", "registrasi-sekolah"}, ""))
+	pattern_TenantService_GetSekolahTenant_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "t", "sekolah-terdaftar"}, ""))
 )
 
 var (
@@ -2576,7 +2906,7 @@ func RegisterBCPlatformServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BCPlatformService/GetBCPlatform", runtime.WithHTTPPathPattern("/api/v1/sc/platform"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BCPlatformService/GetBCPlatform", runtime.WithHTTPPathPattern("/api/v1/scs/platform"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2593,7 +2923,7 @@ func RegisterBCPlatformServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BCPlatformService/SetBCPlatform", runtime.WithHTTPPathPattern("/api/v1/sc/platform"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BCPlatformService/SetBCPlatform", runtime.WithHTTPPathPattern("/api/v1/scs/platform"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2610,8 +2940,8 @@ func RegisterBCPlatformServiceHandlerClient(ctx context.Context, mux *runtime.Se
 }
 
 var (
-	pattern_BCPlatformService_GetBCPlatform_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "sc", "platform"}, ""))
-	pattern_BCPlatformService_SetBCPlatform_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "sc", "platform"}, ""))
+	pattern_BCPlatformService_GetBCPlatform_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "scs", "platform"}, ""))
+	pattern_BCPlatformService_SetBCPlatform_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "scs", "platform"}, ""))
 )
 
 var (
@@ -2659,7 +2989,7 @@ func RegisterTransaksiServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/CreateIjazahBlockchain", runtime.WithHTTPPathPattern("/api/v1/sc/ijazah-bc/create"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/CreateIjazahBlockchain", runtime.WithHTTPPathPattern("/api/v1/scs/ijazah-bc/create"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2676,7 +3006,7 @@ func RegisterTransaksiServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/GetIjazahBlockchain", runtime.WithHTTPPathPattern("/api/v1/sc/ijazah-bc"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/GetIjazahBlockchain", runtime.WithHTTPPathPattern("/api/v1/scs/ijazah-bc"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2693,7 +3023,7 @@ func RegisterTransaksiServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/SearchIjazahBlockchain", runtime.WithHTTPPathPattern("/api/v1/sc/ijazah-bc/search"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/SearchIjazahBlockchain", runtime.WithHTTPPathPattern("/api/v1/scs/ijazah-bc/search"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2706,28 +3036,130 @@ func RegisterTransaksiServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 		}
 		forward_TransaksiService_SearchIjazahBlockchain_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodPost, pattern_TransaksiService_SaveContractAddress_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodGet, pattern_TransaksiService_GetSolcVersion_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/SaveContractAddress", runtime.WithHTTPPathPattern("/api/v1/sc/contract-address"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/GetSolcVersion", runtime.WithHTTPPathPattern("/api/v1/scs/contract/deploy/solc-version"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_TransaksiService_SaveContractAddress_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_TransaksiService_GetSolcVersion_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_TransaksiService_SaveContractAddress_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_TransaksiService_GetSolcVersion_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPost, pattern_TransaksiService_DeployContract_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/DeployContract", runtime.WithHTTPPathPattern("/api/v1/scs/contract/deploy-contract"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_TransaksiService_DeployContract_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_DeployContract_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPost, pattern_TransaksiService_Deploy_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/Deploy", runtime.WithHTTPPathPattern("/api/v1/scs/contract/deploy"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_TransaksiService_Deploy_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_Deploy_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPost, pattern_TransaksiService_FundWalet_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/FundWalet", runtime.WithHTTPPathPattern("/api/v1/scs/contract/fund-wallet"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_TransaksiService_FundWalet_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_FundWalet_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPost, pattern_TransaksiService_DaftarSekolah_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/DaftarSekolah", runtime.WithHTTPPathPattern("/api/v1/scs/contract/daftar-sekolah"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_TransaksiService_DaftarSekolah_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_DaftarSekolah_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodGet, pattern_TransaksiService_ContractList_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/ContractList", runtime.WithHTTPPathPattern("/api/v1/scs/contract/list"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_TransaksiService_ContractList_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_ContractList_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodGet, pattern_TransaksiService_Contract_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/Contract", runtime.WithHTTPPathPattern("/api/v1/scs/contracts/{contract_id}"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_TransaksiService_Contract_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_Contract_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	mux.Handle(http.MethodGet, pattern_TransaksiService_GetContractAddress_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/GetContractAddress", runtime.WithHTTPPathPattern("/api/v1/sc/contract-address"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/GetContractAddress", runtime.WithHTTPPathPattern("/api/v1/scs/contract-address"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2740,23 +3172,54 @@ func RegisterTransaksiServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 		}
 		forward_TransaksiService_GetContractAddress_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodGet, pattern_TransaksiService_GetBCTransaction_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.TransaksiService/GetBCTransaction", runtime.WithHTTPPathPattern("/api/v1/scs/bc-transaction"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_TransaksiService_GetBCTransaction_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TransaksiService_GetBCTransaction_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	return nil
 }
 
 var (
-	pattern_TransaksiService_CreateIjazahBlockchain_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "ijazah-bc", "create"}, ""))
-	pattern_TransaksiService_GetIjazahBlockchain_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "sc", "ijazah-bc"}, ""))
-	pattern_TransaksiService_SearchIjazahBlockchain_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "sc", "ijazah-bc", "search"}, ""))
-	pattern_TransaksiService_SaveContractAddress_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "sc", "contract-address"}, ""))
-	pattern_TransaksiService_GetContractAddress_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "sc", "contract-address"}, ""))
+	pattern_TransaksiService_CreateIjazahBlockchain_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "ijazah-bc", "create"}, ""))
+	pattern_TransaksiService_GetIjazahBlockchain_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "scs", "ijazah-bc"}, ""))
+	pattern_TransaksiService_SearchIjazahBlockchain_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "ijazah-bc", "search"}, ""))
+	pattern_TransaksiService_GetSolcVersion_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"api", "v1", "scs", "contract", "deploy", "solc-version"}, ""))
+	pattern_TransaksiService_DeployContract_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "contract", "deploy-contract"}, ""))
+	pattern_TransaksiService_Deploy_0                 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "contract", "deploy"}, ""))
+	pattern_TransaksiService_FundWalet_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "contract", "fund-wallet"}, ""))
+	pattern_TransaksiService_DaftarSekolah_0          = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "contract", "daftar-sekolah"}, ""))
+	pattern_TransaksiService_ContractList_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "contract", "list"}, ""))
+	pattern_TransaksiService_Contract_0               = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "scs", "contracts", "contract_id"}, ""))
+	pattern_TransaksiService_GetContractAddress_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "scs", "contract-address"}, ""))
+	pattern_TransaksiService_GetBCTransaction_0       = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "scs", "bc-transaction"}, ""))
 )
 
 var (
 	forward_TransaksiService_CreateIjazahBlockchain_0 = runtime.ForwardResponseMessage
 	forward_TransaksiService_GetIjazahBlockchain_0    = runtime.ForwardResponseMessage
 	forward_TransaksiService_SearchIjazahBlockchain_0 = runtime.ForwardResponseMessage
-	forward_TransaksiService_SaveContractAddress_0    = runtime.ForwardResponseMessage
+	forward_TransaksiService_GetSolcVersion_0         = runtime.ForwardResponseMessage
+	forward_TransaksiService_DeployContract_0         = runtime.ForwardResponseMessage
+	forward_TransaksiService_Deploy_0                 = runtime.ForwardResponseMessage
+	forward_TransaksiService_FundWalet_0              = runtime.ForwardResponseMessage
+	forward_TransaksiService_DaftarSekolah_0          = runtime.ForwardResponseMessage
+	forward_TransaksiService_ContractList_0           = runtime.ForwardResponseMessage
+	forward_TransaksiService_Contract_0               = runtime.ForwardResponseMessage
 	forward_TransaksiService_GetContractAddress_0     = runtime.ForwardResponseMessage
+	forward_TransaksiService_GetBCTransaction_0       = runtime.ForwardResponseMessage
 )
 
 // RegisterUploadDataSekolahServiceHandlerFromEndpoint is same as RegisterUploadDataSekolahServiceHandler but

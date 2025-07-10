@@ -349,6 +349,36 @@ func (s *ReferensiServiceServer) GetMapel(ctx context.Context, req *pb.GetMapelR
 		Mapel: res,
 	}, nil
 }
+func (s *ReferensiServiceServer) FilterMapel(ctx context.Context, req *pb.FilterMapelRequest) (*pb.FilterMapelResponse, error) {
+	// // Daftar field yang wajib diisi
+	requiredFields := []string{"Query"}
+	// Validasi request
+	err := utils.ValidateFields(req, requiredFields)
+	if err != nil {
+		return nil, err
+	}
+	query := req.GetQuery()
+	mod, err := s.repoMapel.FindWithStringMatch1(ctx, "ref", query, "nama")
+	if err != nil {
+		return nil, err
+	}
+	res := utils.ConvertModelsToPB(*mod, func(item models.MataPelajaran) *pb.Mapel {
+		return &pb.Mapel{
+			MataPelajaranId:     item.MataPelajaranID,
+			Nama:                item.Nama,
+			PilihanSekolah:      item.PilihanSekolah,
+			PilihanBuku:         item.PilihanBuku,
+			PilihanKepengawasan: item.PilihanKepengawasan,
+			PilihanEvaluasi:     item.PilihanEvaluasi,
+			JurusanId:           utils.SafeString(item.JurusanID),
+		}
+	})
+	return &pb.FilterMapelResponse{
+		Status:  true,
+		Message: "Sukses mengambil data mapel",
+		Mapel:   res,
+	}, nil
+}
 
 func (s *ReferensiServiceServer) GetGelarAkademik(ctx context.Context, req *pb.GetGelarAkademikRequest) (*pb.GetGelarAkademikResponse, error) {
 	gelarAkademikModel, err := s.repoGelarAkademik.FindAll(ctx, "ref", 1000, 0)

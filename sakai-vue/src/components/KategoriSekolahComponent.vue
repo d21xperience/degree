@@ -190,7 +190,7 @@ watch(
         // console.log('currentKategori.jurusan', newVal);
         if (newVal) {
             // console.log(kurikulumList);
-            formState.selectedKurikulum = kurikulumList.find((item) => newVal.jurusanId.includes(item.jurusanId));
+            formState.selectedKurikulum = kurikulumList.value.find((item) => newVal.jurusanId.includes(item.jurusanId));
             // console.log(formState.selectedKurikulum)
             formState.isSubmitDisabled = false;
         }

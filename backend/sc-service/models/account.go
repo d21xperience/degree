@@ -73,6 +73,10 @@ type Network struct {
 	Architecture string `gorm:"size:100;not null"` // Nama jaringan (Ethereum, Polygon, BSC)
 }
 
+func (Network) TableName() string {
+	return "ref.networks"
+}
+
 // Account menyimpan alamat Ethereum pengguna
 type Account struct {
 	ID                uint        `gorm:"primaryKey"`

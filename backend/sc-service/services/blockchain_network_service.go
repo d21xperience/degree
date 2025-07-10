@@ -14,7 +14,7 @@ import (
 
 type BlockchainNetworkService struct {
 	pb.UnimplementedBlockchainNetworkServiceServer
-	config *Config // Konfigurasi runtime
+	// config *Config // Konfigurasi runtime
 	repo *repositories.GenericRepository[models.Network]
 }
 
@@ -22,8 +22,8 @@ type BlockchainNetworkService struct {
 func NewBlockchainNetworkService() *BlockchainNetworkService {
 	repoNetwork := repositories.NewNetworkRepository(config.DB)
 	return &BlockchainNetworkService{
-		config: &Config{},
-		repo:   repoNetwork,
+		// config: &Config{},
+		repo: repoNetwork,
 	}
 }
 
