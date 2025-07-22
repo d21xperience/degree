@@ -107,9 +107,8 @@ export function useSCService() {
         try {
             let response = store.getters['scService/getBCNETWORK'];
             if (!response || !Array.isArray(response) || response.length === 0) {
-                {
-                    // const { network } = await store.dispatch('scService/fetchBlockchainNetworks'); // Destructuring response
-                }
+                response = await store.dispatch('scService/fetchBlockchainNetworks');
+                return response.network;
                 // console.log(network);
                 // // BCNetworks.value = data.filter(item => !item.activate)
                 // BCNetworks.value = network;
@@ -118,6 +117,7 @@ export function useSCService() {
                 // console.log(obj)
                 // BCNetwork.value = obj
             }
+            return response;
         } catch (error) {
             if (error.response) {
                 console.error(`Error ${error.response.status}: ${error.response.data}`);
@@ -125,6 +125,24 @@ export function useSCService() {
                 console.error('Error:', error.message);
             }
         }
+    };
+
+    const getSolVersion = async () => {
+        const { data } = await store.dispatch('scService/getsolVersion');
+        if (data.status) {
+            return data.message;
+        }
+        return '';
+    };
+    const deployContract = async (formData) => {
+        const response = await store.dispatch('scService/deployContract', formData);
+        console.log(response);
+        // if (response.status){
+        //     return `Kontrak berhasil dideploy! Address:` //${data.contractAddress}` //data.message
+        //     //     status.value = `Kontrak berhasil dideploy! Address: ${result.contractAddress}`;
+        // } else {
+        //     return  `Gagal: ${result.error || 'Terjadi kesalahan'}`;
+        // }
     };
     return {
         createMetamaskConnected,
@@ -134,6 +152,9 @@ export function useSCService() {
         getSCIjazah,
         getBCTransaction,
         createWalletInfo,
-        getWalletInfo
+        getWalletInfo,
+        getSolVersion,
+        deployContract,
+        fetchBCNetworks
     };
 }

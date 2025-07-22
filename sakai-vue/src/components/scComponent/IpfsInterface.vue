@@ -142,7 +142,7 @@ async function viewFile(cid) {
 button {
     margin: 10px 0;
     padding: 8px 16px;
-    background-color: #42b983;
+    /* background-color: #42b983; */
     color: white;
     border: none;
     border-radius: 4px;

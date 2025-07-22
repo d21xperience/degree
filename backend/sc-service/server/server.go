@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	handlers "sc-service/handler"
+	"sc-service/utils"
 	"sync"
 	"syscall"
 	"time"
@@ -17,20 +18,11 @@ import (
 )
 
 func StartServer() {
-	grpcHost := os.Getenv("GRPC_HOST")
-	if grpcHost == "" {
-		grpcHost = "localhost"
-	}
+	grpcHost := utils.GetEnv("GRPC_HOST", "localhost")
+	gRPCPort := utils.GetEnv("GRPC_PORT", "50053")
 
-	gRPCPort := os.Getenv("GRPC_PORT")
-	if gRPCPort == "" {
-		gRPCPort = "50053"
-	}
+	httpPort := utils.GetEnv("HTTP_PORT", "8184")
 
-	httpPort := os.Getenv("HTTP_PORT")
-	if httpPort == "" {
-		httpPort = "8083"
-	}
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -49,15 +41,15 @@ func StartServer() {
 	// HTTP Gateway
 	// =========================================
 	// Inisialisasi mux untuk HTTP Gateway
-	// solUploadHandler := handlers.HandlerCompileContractHTTP()
+	solUploadHandler := handlers.HandlerCompileContractHTTP()
 	ipfsUploadHandler := handlers.HandlerIPFSHTTP()
 
 	mux := runtime.NewServeMux()
-	// method, pattern := createPattern("POST", "api", "v1", "scs", "contract", "compile-contract")
-	// mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-	// 	solUploadHandler(w, r)
-	// })
-	method, pattern := createPattern("POST", "api", "v1", "scs", "ipfs", "upload")
+	method, pattern := createPattern("POST", "api", "v1", "scs", "contract", "compile-contract")
+	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		solUploadHandler(w, r)
+	})
+	method, pattern = createPattern("POST", "api", "v1", "scs", "ipfs", "upload")
 	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		ipfsUploadHandler(w, r)
 	})

@@ -974,10 +974,11 @@ var BlockchainAccountService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	BlockchainNetworkService_CreateBCNetwork_FullMethodName = "/sc_service.BlockchainNetworkService/CreateBCNetwork"
-	BlockchainNetworkService_GetBCNetwork_FullMethodName    = "/sc_service.BlockchainNetworkService/GetBCNetwork"
-	BlockchainNetworkService_UpdateBCNetwork_FullMethodName = "/sc_service.BlockchainNetworkService/UpdateBCNetwork"
-	BlockchainNetworkService_DeleteBCNetwork_FullMethodName = "/sc_service.BlockchainNetworkService/DeleteBCNetwork"
+	BlockchainNetworkService_CreateBCNetwork_FullMethodName      = "/sc_service.BlockchainNetworkService/CreateBCNetwork"
+	BlockchainNetworkService_GetBCNetwork_FullMethodName         = "/sc_service.BlockchainNetworkService/GetBCNetwork"
+	BlockchainNetworkService_CheckEthereumNetwork_FullMethodName = "/sc_service.BlockchainNetworkService/CheckEthereumNetwork"
+	BlockchainNetworkService_UpdateBCNetwork_FullMethodName      = "/sc_service.BlockchainNetworkService/UpdateBCNetwork"
+	BlockchainNetworkService_DeleteBCNetwork_FullMethodName      = "/sc_service.BlockchainNetworkService/DeleteBCNetwork"
 )
 
 // BlockchainNetworkServiceClient is the client API for BlockchainNetworkService service.
@@ -987,6 +988,7 @@ type BlockchainNetworkServiceClient interface {
 	// Konfigurasi Blockchain
 	CreateBCNetwork(ctx context.Context, in *CreateBCNetworkRequest, opts ...grpc.CallOption) (*CreateBCNetworkResponse, error)
 	GetBCNetwork(ctx context.Context, in *GetBCNetworkRequest, opts ...grpc.CallOption) (*GetBCNetworkResponse, error)
+	CheckEthereumNetwork(ctx context.Context, in *CheckEthereumNetworkRequest, opts ...grpc.CallOption) (*CheckEthereumNetworkResponse, error)
 	UpdateBCNetwork(ctx context.Context, in *UpdateBCNetworkRequest, opts ...grpc.CallOption) (*UpdateBCNetworkResponse, error)
 	DeleteBCNetwork(ctx context.Context, in *DeleteNetworkRequest, opts ...grpc.CallOption) (*DeleteNetworkResponse, error)
 }
@@ -1013,6 +1015,16 @@ func (c *blockchainNetworkServiceClient) GetBCNetwork(ctx context.Context, in *G
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetBCNetworkResponse)
 	err := c.cc.Invoke(ctx, BlockchainNetworkService_GetBCNetwork_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *blockchainNetworkServiceClient) CheckEthereumNetwork(ctx context.Context, in *CheckEthereumNetworkRequest, opts ...grpc.CallOption) (*CheckEthereumNetworkResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CheckEthereumNetworkResponse)
+	err := c.cc.Invoke(ctx, BlockchainNetworkService_CheckEthereumNetwork_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1046,6 +1058,7 @@ type BlockchainNetworkServiceServer interface {
 	// Konfigurasi Blockchain
 	CreateBCNetwork(context.Context, *CreateBCNetworkRequest) (*CreateBCNetworkResponse, error)
 	GetBCNetwork(context.Context, *GetBCNetworkRequest) (*GetBCNetworkResponse, error)
+	CheckEthereumNetwork(context.Context, *CheckEthereumNetworkRequest) (*CheckEthereumNetworkResponse, error)
 	UpdateBCNetwork(context.Context, *UpdateBCNetworkRequest) (*UpdateBCNetworkResponse, error)
 	DeleteBCNetwork(context.Context, *DeleteNetworkRequest) (*DeleteNetworkResponse, error)
 	mustEmbedUnimplementedBlockchainNetworkServiceServer()
@@ -1063,6 +1076,9 @@ func (UnimplementedBlockchainNetworkServiceServer) CreateBCNetwork(context.Conte
 }
 func (UnimplementedBlockchainNetworkServiceServer) GetBCNetwork(context.Context, *GetBCNetworkRequest) (*GetBCNetworkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBCNetwork not implemented")
+}
+func (UnimplementedBlockchainNetworkServiceServer) CheckEthereumNetwork(context.Context, *CheckEthereumNetworkRequest) (*CheckEthereumNetworkResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckEthereumNetwork not implemented")
 }
 func (UnimplementedBlockchainNetworkServiceServer) UpdateBCNetwork(context.Context, *UpdateBCNetworkRequest) (*UpdateBCNetworkResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateBCNetwork not implemented")
@@ -1128,6 +1144,24 @@ func _BlockchainNetworkService_GetBCNetwork_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BlockchainNetworkService_CheckEthereumNetwork_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckEthereumNetworkRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BlockchainNetworkServiceServer).CheckEthereumNetwork(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BlockchainNetworkService_CheckEthereumNetwork_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BlockchainNetworkServiceServer).CheckEthereumNetwork(ctx, req.(*CheckEthereumNetworkRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _BlockchainNetworkService_UpdateBCNetwork_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdateBCNetworkRequest)
 	if err := dec(in); err != nil {
@@ -1178,6 +1212,10 @@ var BlockchainNetworkService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetBCNetwork",
 			Handler:    _BlockchainNetworkService_GetBCNetwork_Handler,
+		},
+		{
+			MethodName: "CheckEthereumNetwork",
+			Handler:    _BlockchainNetworkService_CheckEthereumNetwork_Handler,
 		},
 		{
 			MethodName: "UpdateBCNetwork",
@@ -1514,7 +1552,7 @@ type TransaksiServiceClient interface {
 	GetIjazahBlockchain(ctx context.Context, in *GetIjazahBlockchainRequest, opts ...grpc.CallOption) (*GetIjazahBlockchainResponse, error)
 	SearchIjazahBlockchain(ctx context.Context, in *SearchIjazahBlockchainRequest, opts ...grpc.CallOption) (*SearchIjazahBlockchainResponse, error)
 	// Contract
-	GetSolcVersion(ctx context.Context, in *GetSolcVersionRequest, opts ...grpc.CallOption) (*GetSolcVersionResponse, error)
+	GetSolcVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetSolcVersionResponse, error)
 	DeployContract(ctx context.Context, in *DeployContractRequest, opts ...grpc.CallOption) (*DeployContractResponse, error)
 	Deploy(ctx context.Context, in *DeployRequest, opts ...grpc.CallOption) (*DeployResponse, error)
 	FundWalet(ctx context.Context, in *FundWaletRequest, opts ...grpc.CallOption) (*FundWaletResponse, error)
@@ -1563,7 +1601,7 @@ func (c *transaksiServiceClient) SearchIjazahBlockchain(ctx context.Context, in 
 	return out, nil
 }
 
-func (c *transaksiServiceClient) GetSolcVersion(ctx context.Context, in *GetSolcVersionRequest, opts ...grpc.CallOption) (*GetSolcVersionResponse, error) {
+func (c *transaksiServiceClient) GetSolcVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetSolcVersionResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetSolcVersionResponse)
 	err := c.cc.Invoke(ctx, TransaksiService_GetSolcVersion_FullMethodName, in, out, cOpts...)
@@ -1664,7 +1702,7 @@ type TransaksiServiceServer interface {
 	GetIjazahBlockchain(context.Context, *GetIjazahBlockchainRequest) (*GetIjazahBlockchainResponse, error)
 	SearchIjazahBlockchain(context.Context, *SearchIjazahBlockchainRequest) (*SearchIjazahBlockchainResponse, error)
 	// Contract
-	GetSolcVersion(context.Context, *GetSolcVersionRequest) (*GetSolcVersionResponse, error)
+	GetSolcVersion(context.Context, *Empty) (*GetSolcVersionResponse, error)
 	DeployContract(context.Context, *DeployContractRequest) (*DeployContractResponse, error)
 	Deploy(context.Context, *DeployRequest) (*DeployResponse, error)
 	FundWalet(context.Context, *FundWaletRequest) (*FundWaletResponse, error)
@@ -1692,7 +1730,7 @@ func (UnimplementedTransaksiServiceServer) GetIjazahBlockchain(context.Context, 
 func (UnimplementedTransaksiServiceServer) SearchIjazahBlockchain(context.Context, *SearchIjazahBlockchainRequest) (*SearchIjazahBlockchainResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchIjazahBlockchain not implemented")
 }
-func (UnimplementedTransaksiServiceServer) GetSolcVersion(context.Context, *GetSolcVersionRequest) (*GetSolcVersionResponse, error) {
+func (UnimplementedTransaksiServiceServer) GetSolcVersion(context.Context, *Empty) (*GetSolcVersionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSolcVersion not implemented")
 }
 func (UnimplementedTransaksiServiceServer) DeployContract(context.Context, *DeployContractRequest) (*DeployContractResponse, error) {
@@ -1795,7 +1833,7 @@ func _TransaksiService_SearchIjazahBlockchain_Handler(srv interface{}, ctx conte
 }
 
 func _TransaksiService_GetSolcVersion_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetSolcVersionRequest)
+	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -1807,7 +1845,7 @@ func _TransaksiService_GetSolcVersion_Handler(srv interface{}, ctx context.Conte
 		FullMethod: TransaksiService_GetSolcVersion_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransaksiServiceServer).GetSolcVersion(ctx, req.(*GetSolcVersionRequest))
+		return srv.(TransaksiServiceServer).GetSolcVersion(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }

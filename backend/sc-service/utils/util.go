@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -322,4 +323,46 @@ func SliceToPointer[T any](input []T) []*T {
 		output[i] = &val
 	}
 	return output
+}
+
+// Helper function dengan default value
+func GetEnv(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	return value
+}
+
+func GetEnvAsInt(key string, defaultValue int) int {
+	strValue := GetEnv(key, "")
+	if value, err := strconv.Atoi(strValue); err == nil {
+		return value
+	}
+	return defaultValue
+}
+
+func readSecretFile(filePath string) string {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return ""
+	}
+	return strings.TrimSpace(string(data))
+}
+
+func GetEnvWithSecretFallback(key, defaultValue string) string {
+	// Coba baca dari env var biasa
+	if value := GetEnv(key, ""); value != "" {
+		return value
+	}
+
+	// Coba baca dari _FILE reference
+	filePath := GetEnv(key+"_FILE", "")
+	if filePath != "" {
+		if secretValue := readSecretFile(filePath); secretValue != "" {
+			return secretValue
+		}
+	}
+
+	return defaultValue
 }

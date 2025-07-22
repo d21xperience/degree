@@ -32,7 +32,7 @@ func StartGRPCServer() {
 
 	httpPort := os.Getenv("HTTP_PORT")
 	if httpPort == "" {
-		httpPort = "8081"
+		httpPort = "8182"
 	}
 
 	frontend := os.Getenv("FRONTEND")
@@ -67,16 +67,23 @@ func StartGRPCServer() {
 	loginHandler := handlerHTTP.HandlerLoginHTTP() // ambil handler
 	refreshHandler := handlerHTTP.HandlerRefreshToken()
 	logoutHandler := handlerHTTP.HandlerLogout()
+	authMeHandler := handlerHTTP.HandlerAuthMe()
 	mux := runtime.NewServeMux()
-	method, pattern := utils.CreatePattern("POST", "api", "v1", "auth", "web", "login")
+	method, pattern := utils.CreatePattern("POST", "api", "v1", "as", "auth", "web", "login")
 	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		loginHandler(w, r)
 	})
-	method, pattern = utils.CreatePattern("POST", "api", "v1", "auth", "web", "logout")
+
+	method, pattern = utils.CreatePattern("POST", "api", "v1", "as", "auth", "web", "logout")
 	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		logoutHandler(w, r)
 	})
-	method, pattern = utils.CreatePattern("POST", "api", "v1", "auth", "web", "refresh")
+
+	method, pattern = utils.CreatePattern("GET", "api", "v1", "as", "auth", "web", "me")
+	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		authMeHandler(w, r)
+	})
+	method, pattern = utils.CreatePattern("POST", "api", "v1", "as", "auth", "web", "refresh")
 	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		refreshHandler(w, r)
 	})

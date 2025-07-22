@@ -3897,7 +3897,7 @@ func RegisterSekolahServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.SekolahService/RegistrasiSekolah", runtime.WithHTTPPathPattern("/api/v1/sekolah/registrasi-sekolah"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.SekolahService/RegistrasiSekolah", runtime.WithHTTPPathPattern("/api/v1/ss/sekolah/registrasi-sekolah"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3917,7 +3917,7 @@ func RegisterSekolahServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.SekolahService/GetSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/sekolah/sekolah-terdaftar"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.SekolahService/GetSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/ss/sekolah/sekolah-terdaftar"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -6236,7 +6236,7 @@ func RegisterSekolahServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.SekolahService/RegistrasiSekolah", runtime.WithHTTPPathPattern("/api/v1/sekolah/registrasi-sekolah"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.SekolahService/RegistrasiSekolah", runtime.WithHTTPPathPattern("/api/v1/ss/sekolah/registrasi-sekolah"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -6253,7 +6253,7 @@ func RegisterSekolahServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.SekolahService/GetSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/sekolah/sekolah-terdaftar"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.SekolahService/GetSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/ss/sekolah/sekolah-terdaftar"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -6491,8 +6491,8 @@ func RegisterSekolahServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 var (
-	pattern_SekolahService_RegistrasiSekolah_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "sekolah", "registrasi-sekolah"}, ""))
-	pattern_SekolahService_GetSekolahTenant_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "sekolah", "sekolah-terdaftar"}, ""))
+	pattern_SekolahService_RegistrasiSekolah_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ss", "sekolah", "registrasi-sekolah"}, ""))
+	pattern_SekolahService_GetSekolahTenant_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ss", "sekolah", "sekolah-terdaftar"}, ""))
 	pattern_SekolahService_CreateSekolah_0                 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "ss", "schemaname", "create"}, ""))
 	pattern_SekolahService_GetSekolah_0                    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "ss", "schemaname", "sekolah"}, ""))
 	pattern_SekolahService_UpdateSekolah_0                 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "ss", "schemaname", "update"}, ""))

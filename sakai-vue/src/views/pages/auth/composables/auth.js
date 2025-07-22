@@ -19,7 +19,7 @@ export function useAuth() {
     const user = store.getters['authService/userRole'];
 
     const onLogin = async ({ values }) => {
-        const { username, password } = values;
+        const { username, password, rememberMe } = values;
         // cek apakah username merupakan username atau email
         let loginIdentifier = 'username';
 
@@ -32,21 +32,19 @@ export function useAuth() {
         try {
             const response = await store.dispatch('authService/login', {
                 [loginIdentifier]: username,
-                password
+                password,
+                remember_me: rememberMe
             });
 
             if (response.status) {
-                console.log(response);
-
                 if (response.userRole != 'superadmin') {
-                    // await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
-                    // await fetchSekolah();
-                    // // Ambil tahun ajaran
-                    // await store.dispatch('sekolahService/fetchTahunAjaran');
-                    // await store.dispatch('sekolahService/fetchSemester');
+                    await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
+                    await fetchSekolah();
+                    // Ambil tahun ajaran
+                    await store.dispatch('sekolahService/fetchTahunAjaran');
+                    await store.dispatch('sekolahService/fetchSemester');
 
                     const namaSekolah = response?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
-                    console.log(namaSekolah);
                     await router.push({ name: 'dashboard', params: { sekolah: namaSekolah } });
                 } else {
                     await router.push({ name: 'suDashboard' });
@@ -57,13 +55,17 @@ export function useAuth() {
             alert('Login gagal. Silakan periksa kembali informasi Anda.');
             store.dispatch('authService/logout');
             return; // pastikan keluar supaya finally tidak berjalan seolah login sukses
+        } finally {
         }
     };
 
     const onLogout = async () => {
-        await store.dispatch('authService/logout');
-        await store.dispatch('sekolahService/resetState');
-        router.push({ name: 'landing' });
+        try {
+            await store.dispatch('authService/logout');
+            await store.dispatch('sekolahService/resetState');
+        } finally {
+            router.push({ name: 'landing' });
+        }
     };
     return {
         onLogin,

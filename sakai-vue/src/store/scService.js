@@ -1,13 +1,13 @@
-import axios from 'axios';
-const api = axios.create({
-    baseURL: import.meta.env.VITE_API_SC_BASE_URL, //'http://localhost:8184/api/v1',
-    withCredentials: true, // Untuk mengirim cookie atau credensial
-    headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer your_token'
-    }
-});
-
+// import axios from 'axios';
+// const api = axios.create({
+//     baseURL: import.meta.env.VITE_API_BASE_URL, //'http://localhost:8184/api/v1',
+//     withCredentials: true, // Untuk mengirim cookie atau credensial
+//     headers: {
+//         'Content-Type': 'application/json',
+//         Authorization: 'Bearer your_token'
+//     }
+// });
+import api from './api';
 const state = {
     BCPlatformSelected: JSON.parse(localStorage.getItem('BCPlatformSelected')) || null,
     BCAccountActivate: null,
@@ -54,7 +54,7 @@ const actions = {
     async fetchBCPlatform({ commit }, payload) {
         try {
             // console.log(payload);
-            const response = await api.get(`/sc/platform`, {
+            const response = await api.get(`/scs/platform`, {
                 params: {
                     schemaname: payload.schemaname
                 }
@@ -85,7 +85,7 @@ const actions = {
 
         // console.log(py);
         try {
-            const response = await api.put('/sc/platform', py);
+            const response = await api.put('/scs/platform', py);
             return response.data;
         } catch (error) {
             console.error('Gagal set BC platform:', error);
@@ -102,7 +102,7 @@ const actions = {
         // console.log(sekolahId);
 
         try {
-            const response = await api.get(`sc/bc-networks`);
+            const response = await api.get(`scs/bc-networks`);
             commit('SET_BCNETWORK', response.data.network);
             return response.data; // Mengembalikan data sekolah
         } catch (error) {
@@ -190,27 +190,12 @@ const actions = {
     },
 
     // ================================
-    // ======== SMART CONTRACT =======
-    async deployIjazahContract({ commit }, payload) {
-        console.log('Payload yang dikirim:', JSON.stringify(payload, null, 2));
 
-        try {
-            const response = await api.post(`/contract/deploy`, JSON.stringify(payload, null, 2), {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-            // commit("SET_BCNETWORK", response.data);
-            return response.data; // Mengembalikan data sekolah
-        } catch (error) {
-            throw error;
-        }
-    },
     async createIjazahBC({ commit }, payload) {
         try {
             // console.log(JSON.stringify(payload));
             // return;
-            const response = await api.post(`/sc/ijazah-bc/create`, JSON.stringify(payload));
+            const response = await api.post(`/scs/ijazah-bc/create`, JSON.stringify(payload));
             return response.data;
         } catch (error) {
             throw error;
@@ -218,7 +203,7 @@ const actions = {
     },
     async fetchIjazahBC({ commit }, payload) {
         try {
-            const response = await api.get(`/sc/ijazah-bc`, {
+            const response = await api.get(`/scs/ijazah-bc`, {
                 params: {
                     sekolah_id: payload.sekolah_id,
                     tahun_ajaran_id: payload.tahun_ajaran_id
@@ -231,7 +216,7 @@ const actions = {
     },
     async searchIjazahBC({ commit }, payload) {
         try {
-            const response = await api.get(`/sc/ijazah-bc/search`, {
+            const response = await api.get(`/scs/ijazah-bc/search`, {
                 params: {
                     nisn: payload.nisn
                 }
@@ -258,7 +243,7 @@ const actions = {
 
     async fetchContract({ commit }, payload) {
         try {
-            const response = await api.get(`sc/contract-address`);
+            const response = await api.get(`/scs/contract-address`);
             if (response) {
                 commit('SET_CONTRACT', response.data.contract);
                 return response.data;
@@ -274,7 +259,7 @@ const actions = {
     async fetchSCIjazah({ commit }, payload) {
         try {
             // console.log(payload);
-            const response = await api.get(`sc/ijazah-bc`, {
+            const response = await api.get(`/scs/ijazah-bc`, {
                 params: {
                     sekolah_id: payload.sekolah_id,
                     tahun_ajaran_id: `${payload.tahun_ajaran_id}`
@@ -291,7 +276,7 @@ const actions = {
     },
     async fetchBCTransaction({ commit }, payload) {
         try {
-            const response = await api.get('sc/bc-transaction', {
+            const response = await api.get('/scs/bc-transaction', {
                 params: {
                     schemaname: payload.schemaname
                 }
@@ -308,6 +293,25 @@ const actions = {
         try {
             commit('SET_WALLETINFO', payload);
         } catch (error) {}
+    },
+
+    // ======== SMART CONTRACT =======
+
+    async getsolVersion({ commit }) {
+        try {
+            return await api.get('/scs/contract/deploy/solc-version');
+        } catch (error) {
+            console.log(error);
+        }
+    },
+    async deployContract({ commit }, formData) {
+        const response = await fetch('/scs/contract/compile-contract', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        console.log(result);
     }
 };
 

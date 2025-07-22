@@ -7,6 +7,7 @@ import (
 	"auth_service/services"
 	"auth_service/utils"
 	"encoding/json"
+	"log"
 	"net/http"
 	"time"
 )
@@ -52,7 +53,7 @@ func NewHandlerHttp() *handlerHTTP {
 		repoSekolah: repoSekolah,
 	}
 }
- 
+
 func (h handlerHTTP) HandlerLoginHTTP() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req LoginRequest
@@ -96,10 +97,13 @@ func (h handlerHTTP) HandlerLoginHTTP() http.HandlerFunc {
 			SekolahTenant.Npsn = sekolahModel.NPSN
 			SekolahTenant.EnkripID = sekolahModel.EnkripID
 		}
-
+		rememberMe := r.FormValue("remember_me") == "true"
+		// 2. Generate tokens
 		access, _ := utils.GenerateJWT(user, 15*time.Minute)
 		refresh, _ := utils.GenerateJWT(user, 7*24*time.Hour)
-		utils.SetAuthCookies(w, access, refresh)
+
+		// 3. Set cookies
+		utils.SetAuthCookies(w, access, refresh, rememberMe)
 
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(LoginResponse{
@@ -137,7 +141,8 @@ func (h handlerHTTP) HandlerRefreshToken() http.HandlerFunc {
 		access, _ := utils.GenerateJWT(user, 15*time.Minute)
 		refresh, _ := utils.GenerateJWT(user, 7*24*time.Hour)
 
-		utils.SetAuthCookies(w, access, refresh)
+		rememberMe := r.FormValue("remember_me") == "true"
+		utils.SetAuthCookies(w, access, refresh, rememberMe)
 
 		json.NewEncoder(w).Encode(map[string]any{
 			"status":  true,
@@ -148,10 +153,69 @@ func (h handlerHTTP) HandlerRefreshToken() http.HandlerFunc {
 
 func (h handlerHTTP) HandlerLogout() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		utils.ClearAuthCookies(w)
+		// ClearAuthCookies(w)
+		log.Println("🚪 Logout initiated") // Debug log
+		utils.ClearAuthCookies(w)         // Penting!
+
+		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(map[string]any{
 			"status":  true,
 			"message": "logged out",
+		})
+	}
+}
+
+func (h *handlerHTTP) HandlerAuthMe() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// 1. Ambil token dari cookie
+		cookie, err := r.Cookie("access_token")
+		if err != nil || cookie.Value == "" {
+			http.Error(w, "unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		// 2. Verifikasi JWT
+		claims, err := utils.ValidateJWT(cookie.Value) // sesuaikan dengan fungsi JWT Anda
+		if err != nil {
+			http.Error(w, "invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		// 3. Ambil user dari database
+		user, err := h.Auth.GetUserByID(claims.UserID)
+		if err != nil {
+			http.Error(w, "user not found", http.StatusInternalServerError)
+			return
+		}
+		userLoggedin := UserLoggedIn{
+			ID:              user.ID,
+			Username:        user.Username,
+			Email:           user.Email,
+			Role:            user.Role,
+			SekolahTenantID: user.SekolahTenantID,
+		}
+		// 4. Ambil sekolah (opsional)
+		var sekolahModel *models.SekolahTenant
+		var SekolahTenant SekolahTenant
+		if user.Role != "superadmin" {
+			sekolahModel, err = h.repoSekolah.GetSekolahByTenantId(user.SekolahTenantID)
+			if err != nil {
+				http.Error(w, "Gagal ambil data sekolah", http.StatusUnauthorized)
+				return
+			}
+
+			SekolahTenant.NamaSekolah = sekolahModel.NamaSekolah
+			SekolahTenant.Npsn = sekolahModel.NPSN
+			SekolahTenant.EnkripID = sekolahModel.EnkripID
+		}
+
+		// 5. Kirim response JSON
+		w.Header().Set("Content-Type", "application/json")
+		_ = json.NewEncoder(w).Encode(LoginResponse{
+			Status:        true,
+			Message:       "Login berhasil",
+			User:          userLoggedin,
+			SekolahTenant: &SekolahTenant,
 		})
 	}
 }

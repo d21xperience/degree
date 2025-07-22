@@ -14,6 +14,8 @@ CREATE TABLE sekolah_tenant (
 	alamat_jalan VARCHAR(50) NULL,
 	created_at TIMESTAMPTZ NULL,
 	updated_at TIMESTAMPTZ NULL,
+	logo_url VARCHAR(255) NULL DEFAULT NULL,
+	is_verified BOOLEAN NULL DEFAULT NULL,
 	PRIMARY KEY (id)
 );
 CREATE UNIQUE INDEX uni_sekolah_tenant_sekolah_id_enkrip ON sekolah_tenant (enkrip_id);
@@ -61,3 +63,18 @@ CREATE TABLE user_profiles (
 );
 
 CREATE INDEX idx_user_profiles_deleted_at ON user_profiles (deleted_at);
+
+CREATE TABLE about_us (
+    id SERIAL PRIMARY KEY,
+    vision TEXT NOT NULL,
+    mission TEXT NOT NULL,
+    stats JSONB  
+);
+
+CREATE TABLE testimonials (
+    id SERIAL PRIMARY KEY,
+    author_name VARCHAR(50) NOT NULL,
+    author_role VARCHAR(50) NOT NULL,  
+    avatar_url VARCHAR(255),
+    content TEXT NOT NULL
+);

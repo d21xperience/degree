@@ -16,7 +16,6 @@ function smoothScroll(id) {
 const isAuthenticated = ref(false);
 onMounted(async () => {
     isAuthenticated.value = await store.getters['authService/isAuthenticated'];
-    console.log(isAuthenticated.value);
 });
 
 const toDashboard = async () => {
@@ -60,18 +59,18 @@ const toDashboard = async () => {
                 </a>
             </li>
             <li>
-                <a @click="smoothScroll('features')" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
-                    <span>Features</span>
+                <a @click="smoothScroll('how-it-works')" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
+                    <span>Cara kerja</span>
                 </a>
             </li>
             <li>
-                <a @click="smoothScroll('highlights')" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
-                    <span>Contact</span>
+                <a @click="smoothScroll('about')" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
+                    <span>Tentang</span>
                 </a>
             </li>
             <li>
-                <a @click="smoothScroll('pricing')" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
-                    <span>About</span>
+                <a @click="smoothScroll('contact')" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
+                    <span>Kontak</span>
                 </a>
             </li>
         </ul>

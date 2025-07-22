@@ -16,7 +16,8 @@ const handleSubmit = async () => {
         await onLogin({
             values: {
                 username: username.value,
-                password: password.value
+                password: password.value,
+                rememberMe: checked.value
             }
         });
     } catch (error) {
@@ -48,7 +49,7 @@ const handleSubmit = async () => {
 
                         <div class="flex items-center justify-between mt-2 mb-8 gap-8">
                             <div class="flex items-center">
-                                <Checkbox v-model="checked" id="rememberme1" binary class="mr-2"></Checkbox>
+                                <Checkbox v-model="checked" id="rememberme1" binary class="mr-2" name="rememberme1"></Checkbox>
                                 <label for="rememberme1">Remember me</label>
                             </div>
                             <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>

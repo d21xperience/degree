@@ -124,6 +124,7 @@ const store = useStore();
 
 import KategoriSekolahComponent from '@/components/KategoriSekolahComponent.vue';
 import { useSekolahService } from '@/composables/useSekolahService';
+import sekolahService from '@/store/sekolahService';
 const { fetchSekolah, initSelectedSemester, updateSekolah, fetchTingkat } = useSekolahService();
 
 const fetchRefTable = async () => {
@@ -145,6 +146,8 @@ const initFirst = async () => {
 };
 const tingkat = ref();
 onMounted(async () => {
+    
+    
     initFirst();
     tingkat.value = await fetchTingkat();
     // console.log(tingkat.value);

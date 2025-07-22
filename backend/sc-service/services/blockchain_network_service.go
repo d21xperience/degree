@@ -10,6 +10,8 @@ import (
 	"sc-service/models"
 	"sc-service/repositories"
 	"sc-service/utils"
+
+	"github.com/ethereum/go-ethereum/ethclient"
 )
 
 type BlockchainNetworkService struct {
@@ -169,6 +171,70 @@ func (s *BlockchainNetworkService) DeleteBCNetwork(ctx context.Context, req *pb.
 		Status:  true,
 		Message: "suskes",
 	}, nil
+}
+
+func (s *BlockchainNetworkService) CheckEthereumNetwork(ctx context.Context, req *pb.CheckEthereumNetworkRequest) (*pb.CheckEthereumNetworkResponse, error) {
+	log.Printf("blockchain_network_service/CheckEthereumNetwork received data from request: %+v\n", req)
+	// Daftar field yang wajib diisi
+	requiredFields := []string{"RpcUrl"}
+	// Validasi request
+	requiredFieldsResponse := utils.ValidateFields(req, requiredFields)
+	if requiredFieldsResponse != nil {
+		return nil, requiredFieldsResponse
+	}
+	rpcURL := req.GetRpcUrl()
+
+	// Membuka koneksi ke node Ethereum
+	client, err := ethclient.Dial(rpcURL)
+	if err != nil {
+		log.Fatalf("Gagal terhubung ke node: %v", err)
+	}
+	defer client.Close()
+
+	fmt.Println("✅ Terhubung ke node Ethereum")
+
+	// Dapatkan chain ID
+	chainID, err := client.NetworkID(context.Background())
+	if err != nil {
+		log.Fatalf("Gagal mendapatkan chain ID: %v", err)
+	}
+
+	// Deteksi apakah ini Ganache (default Ganache chain ID = 1337)
+	fmt.Printf("Chain ID: %d\n", chainID)
+	if chainID.Int64() == 1337 {
+		fmt.Println("🔍 Jaringan terdeteksi: Ganache (Local Ethereum Testnet)")
+	} else {
+		fmt.Printf("ℹ️  Jaringan dengan Chain ID: %d (bukan Ganache standar)\n", chainID)
+	}
+
+	// === Ambil Client Version menggunakan RPC langsung ===
+	// rpcClient, err := rpc.DialHTTP(rpcURL)
+	// if err != nil {
+	// 	log.Printf("Gagal terhubung ke RPC via HTTP: %v", err)
+	// 	return
+	// }
+	// defer rpcClient.Close()
+
+	// var version string
+	// err = rpcClient.Call(&version, "web3_clientVersion")
+	// if err != nil {
+	// 	log.Printf("Gagal memanggil web3_clientVersion: %v", err)
+	// } else {
+	// 	fmt.Printf("Client Version: %s\n", version)
+	// 	if contains(version, "EthereumJS") || contains(version, "TestRPC") {
+	// 		fmt.Println("🎯 Kemungkinan besar ini Ganache!")
+	// 	}
+	// }
+
+	return &pb.CheckEthereumNetworkResponse{
+		Status:  true,
+		Message: "Berhasil mengambil data jaringan",
+	}, nil
+}
+
+// Fungsi helper sederhana untuk cek substring
+func contains(s, substr string) bool {
+	return len(s) >= len(substr) && s[:len(substr)] == substr
 }
 
 // Konversi dari Protobuf ENUM ke Golang ENUM

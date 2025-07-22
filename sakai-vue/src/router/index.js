@@ -1,7 +1,8 @@
 import AppLayout from '@/layout/AppLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
-import authGuard from './guards/authGuard';
-let kondisi = false;
+
+import { authGuard, redirectIfAuthenticated } from './guards/authGuard';
+
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
@@ -13,15 +14,16 @@ const router = createRouter({
         {
             path: '/auth/login',
             name: 'login',
-            component: () => import('@/views/pages/auth/Login.vue')
+            meta: { title: 'Login' },
+            component: () => import('@/views/pages/auth/Login.vue'),
+            beforeEnter: redirectIfAuthenticated
         },
         {
             path: '/auth/register',
             name: 'register',
             component: () => import('@/views/pages/auth/Register.vue'),
-            meta: {
-                title: 'Register'
-            }
+            meta: { title: 'Register' },
+            beforeEnter: redirectIfAuthenticated
         },
         {
             path: '/auth/access',
@@ -185,16 +187,17 @@ const router = createRouter({
                             path: 'blockchain',
                             component: () => import('@/views/pages/sc_ijazah/settings/BlockchainSetting.vue')
                         },
-                        {
-                            path: 'ipfs',
-                            component: () => import('@/views/pages/sc_ijazah/settings/Client_IPFS.vue')
-                        },
+                        // {
+                        //     path: 'ipfs',
+                        //     component: () => import('@/views/pages/sc_ijazah/settings/Client_IPFS.vue')
+                        // },
                         {
                             path: 'ijazah',
                             component: () => import('@/views/pages/sc_ijazah/settings/Ijazah_Setting.vue')
                         }
                     ]
                 },
+
                 {
                     path: 'data-penerima',
                     component: () => import('@/views/pages/data_penerima/Main.vue'),
@@ -272,16 +275,19 @@ const router = createRouter({
                         {
                             path: 'networks',
                             name: 'networks',
-
                             component: () => import('@/views/pages/super_admin/blockchain/ListBCNetwork.vue')
-                        },
-                        {
-                            path: 'ipfs',
-                            name: 'ipfs'
-
-                            // component: () => import('@views/pages/super_admin/smart_contract/ListBCNetworks')
                         }
                     ]
+                },
+                {
+                    path: 'ipfs',
+                    name: 'ipfs',
+                    component: () => import('@/views/pages/super_admin/blockchain/ipfs.vue')
+                },
+                {
+                    path: 'transaksi',
+                    name: 'transaksi',
+                    component: () => import('@/views/pages/super_admin/blockchain/Transaksi.vue')
                 }
             ]
         }

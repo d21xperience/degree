@@ -318,7 +318,7 @@ func (s *TransaksiService) GetBCTransaction(ctx context.Context, req *pb.GetBCTr
 func (s *TransaksiService) DeployContract(ctx context.Context, req *pb.DeployContractRequest) (*pb.DeployContractResponse, error) {
 	log.Printf("transaksi/DeployContract received data from request: %+v\n", req)
 	// Daftar field yang wajib diisi
-	requiredFields := []string{""}
+	requiredFields := []string{"ContractAddress"}
 	// Validasi request
 	requiredFieldsResponse := utils.ValidateFields(req, requiredFields)
 	if requiredFieldsResponse != nil {
@@ -331,16 +331,16 @@ func (s *TransaksiService) DeployContract(ctx context.Context, req *pb.DeployCon
 	}, nil
 }
 
-// func (s *TransaksiService) GetSolcVersion(ctx context.Context, req *pb.GetSolcVersionRequest) (*pb.GetSolcVersionResponse, error) {
-// 	cek, err := utils.GetSolcVersion()
-// 	if err != nil {
-// 		return &pb.GetSolcVersionResponse{
-// 			Status:  true,
-// 			Message: fmt.Sprintf("versi solc:%v", err),
-// 		}, nil
-// 	}
-// 	return &pb.GetSolcVersionResponse{
-// 		Status:  true,
-// 		Message: fmt.Sprintf("versi solc:%s", cek),
-// 	}, nil
-// }
+func (s *TransaksiService) GetSolcVersion(ctx context.Context, req *pb.Empty) (*pb.GetSolcVersionResponse, error) {
+	cek, err := utils.GetSolcVersion()
+	if err != nil {
+		return &pb.GetSolcVersionResponse{
+			Status:  false,
+			Message: fmt.Sprintf("error get version:%v", err),
+		}, nil
+	}
+	return &pb.GetSolcVersionResponse{
+		Status:  true,
+		Message: cek,
+	}, nil
+}

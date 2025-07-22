@@ -2,65 +2,52 @@ package middleware
 
 import (
 	"auth_service/utils"
+	"context"
 	"net/http"
+	"strings"
 )
 
-// func JWTAuth(secret string) func(http.Handler) http.Handler {
-// 	return func(next http.Handler) http.Handler {
-// 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 			var tokenStr string
+type contextKey string
 
-// 			// 1) Cek header Authorization: Bearer <token>
-// 			if h := r.Header.Get("Authorization"); strings.HasPrefix(h, "Bearer ") {
-// 				tokenStr = strings.TrimPrefix(h, "Bearer ")
-// 			}
-
-// 			// 2) Jika kosong, cek cookie "access_token"
-// 			if tokenStr == "" {
-// 				if c, err := r.Cookie("access_token"); err == nil {
-// 					tokenStr = c.Value
-// 				}
-// 			}
-
-// 			if tokenStr == "" {
-// 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
-// 				return
-// 			}
-
-// 			_, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-// 				return []byte(secret), nil
-// 			})
-// 			if err != nil {
-// 				http.Error(w, "Invalid token", http.StatusUnauthorized)
-// 				return
-// 			}
-
-// 			next.ServeHTTP(w, r)
-// 		})
-// 	}
-// }
+const userClaimsKey contextKey = "userClaims"
 
 func JWTAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Allow unauthenticated routes
-		if r.URL.Path == "/api/v1/auth/web/login" || r.URL.Path == "/api/v1/auth/web/refresh" || r.URL.Path == "/api/v1/auth/web/logout" || r.URL.Path == "/api/v1/sekolah" {
+		allowedPaths := []string{
+			"/api/v1/as/auth/web/me",
+			"/api/v1/as/auth/web/refresh",
+			"/api/v1/as/auth/web/login",
+			"/api/v1/as/auth/web/logout",
+			"/api/v1/as/sekolah",
+		}
+
+		if containsPathPrefix(allowedPaths, r.URL.Path) {
 			next.ServeHTTP(w, r)
 			return
 		}
 
-		// Validasi token
 		cookie, err := r.Cookie("access_token")
 		if err != nil || cookie.Value == "" {
 			http.Error(w, "Unauthorized: no token", http.StatusUnauthorized)
 			return
 		}
 
-		_, err = utils.ValidateJWT(cookie.Value)
+		claims, err := utils.ValidateJWT(cookie.Value)
 		if err != nil {
 			http.Error(w, "Unauthorized: invalid token", http.StatusUnauthorized)
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		ctx := context.WithValue(r.Context(), userClaimsKey, claims)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func containsPathPrefix(paths []string, target string) bool {
+	for _, path := range paths {
+		if strings.HasPrefix(target, path) {
+			return true
+		}
+	}
+	return false
 }

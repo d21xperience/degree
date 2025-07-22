@@ -134,7 +134,7 @@
 </template>
 
 <script setup>
-import IpfsInterface from '@/components/IpfsInterface.vue';
+import IpfsInterface from '@/components/scComponent/IpfsInterface.vue';
 import { useSekolahService } from '@/composables/useSekolahService';
 import router from '@/router';
 import InputText from 'primevue/inputtext';

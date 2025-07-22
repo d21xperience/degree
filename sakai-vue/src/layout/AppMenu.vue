@@ -161,22 +161,28 @@ const model = computed(() => {
                     to: '/su/daftar-sekolah'
                 },
                 {
-                    label: 'Blockchain',
+                    label: 'Smart Contract',
                     icon: 'pi pi-fw pi-box',
                     items: [
                         {
-                            label: 'Networks',
+                            label: 'Environment',
                             to: '/su/blockchain/networks'
                         },
                         {
-                            label: 'Smartcontract',
+                            label: 'Deploy',
                             to: '/su/blockchain/smart-contract'
-                        },
-                        {
-                            label: 'IPFS',
-                            to: '/su/blockchain/ipfs'
                         }
                     ]
+                },
+                {
+                    label: 'IPFS',
+                    icon: 'pi pi-fw pi-globe',
+                    to: '/su/ipfs'
+                },
+                {
+                    label: 'Transaksi',
+                    icon: 'pi pi-fw pi-chart-bar',
+                    to: '/su/transaksi'
                 },
                 {
                     label: 'CMS',
@@ -190,6 +196,13 @@ const model = computed(() => {
     // Menu: Sign Out (selalu ditampilkan)
     menu.push({
         items: [
+            {
+                label: 'Profile',
+                icon: 'pi pi-fw pi-user',
+                command: () => {
+                    isDialogSignOut.value = true;
+                }
+            },
             {
                 label: 'Sign Out',
                 icon: 'pi pi-fw pi-sign-out',

@@ -1,19 +1,29 @@
 <script setup lang="ts">
-import FeaturesWidget from '@/components/landing/FeaturesWidget.vue';
+import AboutUsWidget from '@/components/AboutUsWidget.vue';
+import CallToActionWidget from '@/components/landing/CallToActionWidget.vue';
+import ContactUsWidget from '@/components/landing/ContactUsWidget.vue';
 import FooterWidget from '@/components/landing/FooterWidget.vue';
-import HeroWidget from '@/components/landing/HeroWidget.vue';
-import HighlightsWidget from '@/components/landing/HighlightsWidget.vue';
-import PricingWidget from '@/components/landing/PricingWidget.vue';
+import HeroSection from '@/components/landing/HeroSection.vue';
+import HowItWorksWidget from '@/components/landing/HowItWorksWidget.vue';
+import MemberHaveJoined from '@/components/landing/MemberHaveJoined.vue';
+import TestimonialsWidget from '@/components/landing/TestimonialsWidget.vue';
+import WhyTrustUsWidget from '@/components/landing/WhyTrustUsWidget.vue';
 </script>
 
 <template>
     <div class="bg-surface-0 dark:bg-surface-900">
         <div id="home" class="landing-wrapper overflow-hidden">
+            <HeroSection />
+            <!-- <HerosWidget /> -->
+            <!-- <FeaturesWidget class="z-50" /> -->
+            <HowItWorksWidget />
+            <AboutUsWidget />
+            <WhyTrustUsWidget />
+            <MemberHaveJoined />
+            <TestimonialsWidget />
+            <ContactUsWidget />
+            <CallToActionWidget />
 
-            <HeroWidget />
-            <FeaturesWidget class="z-50"/>
-            <HighlightsWidget />
-            <PricingWidget />
             <FooterWidget />
         </div>
     </div>

@@ -1,14 +1,14 @@
-import axios from 'axios';
-const api = axios.create({
-    baseURL: import.meta.env.VITE_API_SEKOLAH_BASE_URL, // 'http://localhost:8183/api/v1',
-    withCredentials: true, // Untuk mengirim cookie atau credensial
-    headers: {
-        'Content-Type': 'application/json',
-        Authorization: 'Bearer your_token'
-    },
-    timeout: 10000 // 20 detik
-});
-
+// import axios from 'axios';
+// const api = axios.create({
+//     baseURL: import.meta.env.VITE_API_BASE_URL, // 'http://localhost:8183/api/v1',
+//     withCredentials: true, // Untuk mengirim cookie atau credensial
+//     headers: {
+//         'Content-Type': 'application/json',
+//         Authorization: 'Bearer your_token'
+//     },
+//     timeout: 10000 // 20 detik
+// });
+import api from './api';
 const state = {
     tabelKelas: JSON.parse(localStorage.getItem('tabelKelas')) || null,
     tabelTenant: JSON.parse(localStorage.getItem('tabelTenant')) || null,
@@ -585,7 +585,7 @@ const actions = {
     // =======================================
     async fetchTabeltenant({ commit }, sekolahTenantId) {
         try {
-            const response = await api.get('/sekolah/sekolah-terdaftar', {
+            const response = await api.get('/ss/sekolah/sekolah-terdaftar', {
                 params: {
                     sekolah_tenant_id: sekolahTenantId
                 }
@@ -603,7 +603,7 @@ const actions = {
             sekolah: sekolah.sekolahData
         };
         try {
-            const response = await api.post('/sekolah/registrasi-sekolah', payload);
+            const response = await api.post('/ss/sekolah/registrasi-sekolah', payload);
             console.log(response.data);
             commit('SET_TABELTENANT', response.data);
             return response.data;

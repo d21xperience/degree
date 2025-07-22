@@ -1,5 +1,5 @@
 <script setup>
-import ContractDeployer from '@/components/ContractDeployer.vue';
+import ContractDeployer from '@/components/scComponent/ContractDeployer.vue';
 
 // import EthereumSetting from './Client_Ethereum.vue';
 // ContractDeployer
@@ -13,16 +13,7 @@ import ContractDeployer from '@/components/ContractDeployer.vue';
     <div class="mt-4">
         <!-- <EthereumSetting/> -->
         <!-- <h3>Deploy smartcontract</h3> -->
-        <div class="grid grid-cols-1 md:grid-cols-2 md:gap-4 mb-4">
-           <div>
-               <label for="" class="block">Private Key</label>
-               <input-text />
-           </div>
-           <div>
-            
-           </div>
-            
-        </div>
+
         <!-- <EthereumSetting/> -->
          <contract-deployer/>
          
