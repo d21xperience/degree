@@ -1,8 +1,8 @@
 package middleware
 
 import (
-	"auth_service/utils"
 	"net/http"
+	"sekolah/utils"
 )
 
 // func JWTAuth(secret string) func(http.Handler) http.Handler {

@@ -183,11 +183,16 @@ func (s *BlockchainNetworkService) CheckEthereumNetwork(ctx context.Context, req
 		return nil, requiredFieldsResponse
 	}
 	rpcURL := req.GetRpcUrl()
-
+	var message string
 	// Membuka koneksi ke node Ethereum
 	client, err := ethclient.Dial(rpcURL)
 	if err != nil {
-		log.Fatalf("Gagal terhubung ke node: %v", err)
+		log.Printf("Gagal terhubung ke node: %v", err)
+		message = fmt.Sprintf("Gagal terhubung ke node: %v", err)
+		return &pb.CheckEthereumNetworkResponse{
+			Status:  false,
+			Message: message,
+		}, nil
 	}
 	defer client.Close()
 
@@ -196,15 +201,22 @@ func (s *BlockchainNetworkService) CheckEthereumNetwork(ctx context.Context, req
 	// Dapatkan chain ID
 	chainID, err := client.NetworkID(context.Background())
 	if err != nil {
-		log.Fatalf("Gagal mendapatkan chain ID: %v", err)
+		log.Printf("Gagal mendapatkan chain ID: %v", err)
+		message = fmt.Sprintf("Gagal mendapatkan chain ID: %v", err)
+		return &pb.CheckEthereumNetworkResponse{
+			Status:  false,
+			Message: message,
+		}, nil
 	}
 
 	// Deteksi apakah ini Ganache (default Ganache chain ID = 1337)
 	fmt.Printf("Chain ID: %d\n", chainID)
 	if chainID.Int64() == 1337 {
+		message = "🔍 Jaringan terdeteksi: Ganache (Local Ethereum Testnet)"
 		fmt.Println("🔍 Jaringan terdeteksi: Ganache (Local Ethereum Testnet)")
 	} else {
 		fmt.Printf("ℹ️  Jaringan dengan Chain ID: %d (bukan Ganache standar)\n", chainID)
+		message = fmt.Sprintf("ℹ️  Jaringan dengan Chain ID: %d (bukan Ganache standar)\n", chainID)
 	}
 
 	// === Ambil Client Version menggunakan RPC langsung ===
@@ -228,7 +240,7 @@ func (s *BlockchainNetworkService) CheckEthereumNetwork(ctx context.Context, req
 
 	return &pb.CheckEthereumNetworkResponse{
 		Status:  true,
-		Message: "Berhasil mengambil data jaringan",
+		Message: message,
 	}, nil
 }
 
