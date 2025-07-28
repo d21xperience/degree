@@ -1,7 +1,8 @@
 <script setup>
 import { useSCService } from '@/composables/useSCService';
+import { useUtils } from '@/composables/useUtils';
 import { InputText } from 'primevue';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 const file = ref(null);
 const status = ref('');
@@ -15,7 +16,7 @@ const scService = useSCService();
 const solcVersion = ref('');
 onMounted(async () => {
     solcVersion.value = await scService.getSolVersion();
-    console.log(solcVersion.value);
+    unitSelected.value = unitOptions.value[0].nama;
 });
 const deployContract = async () => {
     if (!file.value) {
@@ -35,27 +36,58 @@ const deployContract = async () => {
             body: formData
         });
 
+        console.log(response)
         const result = await response.json();
-
-        if (response.ok) {
-            status.value = `Kontrak berhasil dideploy! Address: ${result.contractAddress}`;
-            deployStatus.value = true;
-        } else {
-            status.value = `Gagal: ${result.error || 'Terjadi kesalahan'}`;
-        }
+        console.log(result)
+        // if (response.ok) {
+        //     status.value = `Kontrak berhasil dideploy! Address: ${result.contractAddress}`;
+        //     deployStatus.value = true;
+        // } else {
+        //     status.value = `Gagal: ${result.error || 'Terjadi kesalahan'}`;
+        // }
     } catch (err) {
         status.value = `Error jaringan: ${err.message}`;
     } finally {
         isProcessing.value = false;
     }
 };
-const deployStatus = ref(true);
+const deployStatus = ref(false);
 const showDialog = ref(false);
 const batalBuildContract = () => {
     deployStatus.value = false;
 };
 const buildContract = () => {
     showDialog.value = true;
+};
+
+const isConected = ref(true);
+const unitOptions = ref([
+    {
+        id: 1,
+        nama: 'WEI'
+    },
+    {
+        id: 2,
+        nama: 'GWEI'
+    },
+    {
+        id: 3,
+        nama: 'ETH'
+    }
+]);
+const unitSelected = ref();
+const defaultValue = computed(() => {
+    const defVal = 3000000;
+    return defVal.toLocaleString('id-ID');
+});
+const { formatBalance } = useUtils();
+const walletInfo = ref();
+const getWallet = (e) => {
+    console.log(e);
+    walletInfo.value = e;
+    if (walletInfo.value) {
+        isConected.value = false;
+    }
 };
 </script>
 
@@ -72,24 +104,48 @@ const buildContract = () => {
             <p>Build contract</p>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                    Environment:
-                    <EnvironmentComponent />
+                    Wallet addres:
+                    <AccountComponent @wallet-info="getWallet" />
+                    <div class="my-2 text-gray-500">
+                        <span class="text-base text-green-600">Wallet detail:</span>
+                        <div class="flex justify-between my-2">
+                            <span class="text-gray-400">Balance</span>
+                            <span class="font-bold">{{ formatBalance(walletInfo?.Balance.Wei) }} ETH</span>
+                        </div>
+                        <!-- <div class="flex justify-between my-2">
+                            <span class="text-gray-400">Transaction</span>
+                            <span class="font-bold">{{walletInfo}}</span>
+                        </div> -->
+                        <div class="flex justify-between my-2">
+                            <span class="text-gray-400">Contract</span>
+                            <span class="font-bold">{{ walletInfo?.isContract }}</span>
+                        </div>
+                        <div class="flex justify-between my-2">
+                            <span class="text-gray-400">Created at</span>
+                            <span class="font-bold">{{ walletInfo?.createdAt }}</span>
+                        </div>
+                    </div>
                 </div>
                 <div>
-                    Account:
-                    <AccountComponent />
-                </div>
-                <div>
-                    Gas limit:
-                    <InputText fluid />
-                </div>
-                <div>
-                    Value:
-                    <InputText fluid />
-                </div>
-                <div>
-                    Contract address:
-                    <InputText fluid />
+                    <div class="mb-2">
+                        Gas limit:
+                        <InputText fluid :default-value="defaultValue" />
+                    </div>
+                    <!-- <div class="mb-2">
+                        Gas price:
+                        <InputText fluid/>
+                    </div> -->
+                    <div class="mb-2">
+                        Value:
+                        <div class="flex space-x-1">
+                            <InputText fluid default-value="0" />
+                            <Select :options="unitOptions" option-label="nama" option-value="nama" v-model="unitSelected" />
+                        </div>
+                    </div>
+                    <div>
+                        Contract address:
+                        <InputText fluid />
+                    </div>
                 </div>
             </div>
             <div class="flex space-x-1 justify-end">
@@ -97,13 +153,18 @@ const buildContract = () => {
                     <Button label="Batal" @click="batalBuildContract" class="w-32" />
                 </div>
                 <div>
-                    <Button label="Build" @click="buildContract" class="w-32" severity="danger" />
+                    <Button label="Build" @click="buildContract" class="w-32" severity="warn" :disabled="isConected" />
+                    <!-- <Button v-else label="Build" @click="buildContract" class="w-32" severity="warn" /> -->
                 </div>
             </div>
         </div>
 
-        <Dialog v-model:visible="showDialog">
+        <Dialog v-model:visible="showDialog" position="top">
             <h3>Apakah akan dibatalkan</h3>
+
+            <template #footer>
+                <Button label="Simpan" icon="pi pi-save" severity="info" />
+            </template>
         </Dialog>
     </div>
 </template>

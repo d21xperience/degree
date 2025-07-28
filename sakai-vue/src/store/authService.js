@@ -2,7 +2,7 @@ import api from './api';
 const state = {
     user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null,
     sekolah: JSON.parse(localStorage.getItem('sekolah')) || null,
-    userRole: localStorage.getItem('userRole') || null,
+    userRole: localStorage.getItem('userRole') ? JSON.parse(localStorage.getItem('userRole')) : null,
     userProfile: JSON.parse(localStorage.getItem('userProfile')) || null // Ambil dari localStorage
 };
 
@@ -13,7 +13,7 @@ const mutations = {
     },
     SET_USER_ROLE(state, value) {
         state.userRole = value;
-        localStorage.setItem('userRole', value);
+        localStorage.setItem('userRole', JSON.stringify(value));
     },
     SET_USER_PROFILE(state, userProfile) {
         state.userProfile = userProfile;
@@ -63,7 +63,7 @@ const actions = {
     async refreshToken({ commit }) {
         try {
             const { data } = await api.post('/as/auth/web/refresh');
-            console.log(data);
+            // console.log(data);
         } catch (err) {
             console.warn('Refresh token invalid/expired. Logging out...');
             await actions.logout(); // fallback logout
@@ -73,20 +73,26 @@ const actions = {
     async me() {
         try {
             const response = await api.get('/as/auth/web/me');
+            console.log(response);
+
             return response.data;
         } catch (err) {
-            throw err.response?.data //|| { message: 'Unauthorized' };
+            throw err.response?.data; //|| { message: 'Unauthorized' };
         }
     },
     /*—— BOOTSTRAP di App.vue created() ——*/
     async bootstrap({ commit }) {
         try {
             const data = await actions.me();
-            console.log('me', data);
-            commit('SET_USER', data.user);
-            commit('SET_SEKOLAH', data.sekolahTenant);
+            if (data.status) {
+                commit('SET_USER', data.user);
+                commit('SET_USER_ROLE', data.user.role);
+                commit('SET_SEKOLAH', data.sekolahTenant);
+            }
+            return true;
         } catch (_) {
             commit('RESET'); // clear user if not logged in
+            return false;
         }
     },
     async logout({ commit }) {

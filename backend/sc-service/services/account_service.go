@@ -134,25 +134,3 @@ package services
 // 	// return "", "",nil
 // }
 
-// func (c *Account) GetAccounts(ctx context.Context, userId string) ([]*models.WalletTable, error) {
-// 	var modelTableWallet []*models.WalletTable
-// 	var err error
-// 	if userId == "" {
-// 		modelTableWallet, err = c.repo.FindAll(ctx, "public", 100, 0)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 		return modelTableWallet, nil
-// 	}
-
-// 	var condition = map[string]interface{}{
-// 		"user_id": userId,
-// 	}
-// 	modelTableWallet, err = c.repo.FindAllByConditions(ctx, "public", condition, 100, 0)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return modelTableWallet, nil
-// }
-
-// // =============================

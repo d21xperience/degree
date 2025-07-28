@@ -23,7 +23,7 @@ const networkTypeOptions = ref([
     {
         Id: 4,
         Type: 'private'
-    },
+    }
 ]);
 watch(internalValue, (newVal) => {
     emit('update:modelValue', newVal);
@@ -32,7 +32,6 @@ watch(internalValue, (newVal) => {
 watch(
     () => props.initialValue,
     async (newVal) => {
-        // console.log(newVal);
         if (newVal) {
             // networkTypeOptions.value = await fetchTingkat();
             internalValue.value = networkTypeOptions.value.find((item) => item.Type.includes(newVal)).Type;

@@ -21,7 +21,16 @@ contract Ijazah {
         require(owner == msg.sender, "Hanya pemilik yang bisa melakukan ini.");
         _;
     }
+    mapping(address => bool) public sekolahTerdaftar;
 
+    function daftarSekolah(address sekolah) public isOwner {
+        sekolahTerdaftar[sekolah] = true;
+    }
+
+    modifier onlySekolahTerdaftar() {
+        require(sekolahTerdaftar[msg.sender], "Sekolah belum terdaftar.");
+        _;
+    }
     constructor() {
         owner = msg.sender;
     }
@@ -44,7 +53,7 @@ contract Ijazah {
         bytes32 _ipfsUrl,
         bytes32[] calldata _mataPelajaran,
         uint8[] calldata _nilai
-    ) public isOwner {
+    ) public onlySekolahTerdaftar {
         require(!degrees[_degreeHash].exists, "Ijazah sudah terdaftar.");
         require(
             _mataPelajaran.length == _nilai.length,

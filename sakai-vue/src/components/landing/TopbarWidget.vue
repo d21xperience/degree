@@ -73,6 +73,16 @@ const toDashboard = async () => {
                     <span>Kontak</span>
                 </a>
             </li>
+            <li>
+                <a @click="router.push({ name: 'faq' })" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
+                    <span>FAQ</span>
+                </a>
+            </li>
+            <li>
+                <a @click="router.push({ name: 'blog' })" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
+                    <span>Blog</span>
+                </a>
+            </li>
         </ul>
         <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
             <div v-if="!isAuthenticated">

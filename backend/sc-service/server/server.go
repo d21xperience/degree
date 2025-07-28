@@ -41,9 +41,10 @@ func StartServer() {
 	// HTTP Gateway
 	// =========================================
 	// Inisialisasi mux untuk HTTP Gateway
+	// Initialize WebSocket handler
 	solUploadHandler := handlers.HandlerCompileContractHTTP()
 	ipfsUploadHandler := handlers.HandlerIPFSHTTP()
-
+	// wsHandler := handlers.NewWebSocketHandler()
 	mux := runtime.NewServeMux()
 	method, pattern := createPattern("POST", "api", "v1", "scs", "contract", "compile-contract")
 	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
@@ -53,6 +54,10 @@ func StartServer() {
 	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		ipfsUploadHandler(w, r)
 	})
+	// method, pattern = createPattern("GET", "api", "v1", "scs", "ws")
+	// mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+	// 	wsHandler.HandleWebSocket(w, r)
+	// })
 	// Middleware CORS
 	corsHandler := corsMiddleware(mux)
 	// HTTP Server dengan Timeout

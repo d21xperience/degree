@@ -3,11 +3,9 @@ import { useStore } from 'vuex';
 
 export function useAuthService() {
     const store = useStore();
-    // const siswaList = ref([]);
-    const kelasList = ref([]);
     const schemaname = computed(() => store.getters['sekolahService/getTabeltenant']?.schemaname);
-    const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
     const fetchTabeltenant = async () => {};
+    const currentUser = computed(()=> store.getters['authService/currentUser'])
     const fetchUser = async () => {
         try {
             const payload = {

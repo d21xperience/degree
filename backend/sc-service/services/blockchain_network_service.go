@@ -41,7 +41,7 @@ func (s *BlockchainNetworkService) CreateBCNetwork(ctx context.Context, req *pb.
 	bcNetwork := req.GetNetwork()
 	modelNetwork := utils.ConvertPBToModels(bcNetwork, func(entity *pb.BCNetwork) *models.Network {
 		// Konversi ENUM dari Protobuf ke GORM
-		networkType, err := ConvertProtoToNetworkType(entity.Type)
+		networkType, err := convertProtoToNetworkType(entity.Type)
 		if err != nil {
 			log.Printf("invalid network type: %v", err)
 		}
@@ -69,13 +69,13 @@ func (s *BlockchainNetworkService) GetBCNetwork(ctx context.Context, req *pb.Get
 	var message string
 	var status bool
 	// Daftar field yang wajib diisi
-	requiredFields := []string{"NetworkName"}
+	requiredFields := []string{"NetworkArchitecture"}
 	// Validasi request
 	err := utils.ValidateFields(req, requiredFields)
 	if err == nil {
 		// return nil, err
-		condition := map[string]interface{}{
-			"name": req.GetNetworkName(),
+		condition := map[string]any{
+			"architecture": req.GetNetworkArchitecture(),
 		}
 		modelNetwork, err = s.repo.FindAllByConditions(ctx, "ref", condition, 100, 0)
 		if err != nil {
@@ -104,15 +104,16 @@ func (s *BlockchainNetworkService) GetBCNetwork(ctx context.Context, req *pb.Get
 	}
 	networks := utils.ConvertModelsToPB(modelNetwork, func(model *models.Network) *pb.BCNetwork {
 		return &pb.BCNetwork{
-			Name:        model.Name,
-			ChainId:     model.ChainID,
-			RPCURL:      model.RPCURL,
-			ExplorerURL: model.ExplorerURL,
-			Symbol:      model.Symbol,
-			Type:        ConvertNetworkTypeToProto(model.Type),
-			Activate:    model.Activate,
-			Available:   model.Available,
-			Id:          model.ID,
+			Name:         model.Name,
+			ChainId:      model.ChainID,
+			RPCURL:       model.RPCURL,
+			ExplorerURL:  model.ExplorerURL,
+			Symbol:       model.Symbol,
+			Type:         convertNetworkTypeToProto(model.Type),
+			Activate:     model.Activate,
+			Available:    model.Available,
+			Id:           model.ID,
+			Architecture: model.Architecture,
 		}
 	})
 
@@ -124,7 +125,7 @@ func (s *BlockchainNetworkService) GetBCNetwork(ctx context.Context, req *pb.Get
 }
 func (s *BlockchainNetworkService) UpdateBCNetwork(ctx context.Context, req *pb.UpdateBCNetworkRequest) (*pb.UpdateBCNetworkResponse, error) {
 	// Daftar field yang wajib diisi
-	requiredFields := []string{"network"}
+	requiredFields := []string{"Network"}
 	// Validasi request
 	err := utils.ValidateFields(req, requiredFields)
 	if err != nil {
@@ -133,12 +134,15 @@ func (s *BlockchainNetworkService) UpdateBCNetwork(ctx context.Context, req *pb.
 	coba := req.GetNetwork()
 	modelAkun := utils.ConvertModelToPB(coba, func(model *pb.BCNetwork) *models.Network {
 		return &models.Network{
-			Name:        model.Name,
-			RPCURL:      model.RPCURL,
-			ExplorerURL: model.ExplorerURL,
-			Activate:    model.Activate,
-			Available:   model.Available,
-			Symbol:      model.Symbol,
+			Name:         model.Name,
+			RPCURL:       model.RPCURL,
+			ExplorerURL:  model.ExplorerURL,
+			Activate:     model.Activate,
+			Available:    model.Available,
+			Symbol:       model.Symbol,
+			ChainID:      model.ChainId,
+			Type:         models.NetworkType(model.Type.String()),
+			Architecture: model.Architecture,
 		}
 	})
 
@@ -155,21 +159,25 @@ func (s *BlockchainNetworkService) UpdateBCNetwork(ctx context.Context, req *pb.
 
 func (s *BlockchainNetworkService) DeleteBCNetwork(ctx context.Context, req *pb.DeleteNetworkRequest) (*pb.DeleteNetworkResponse, error) {
 	// Daftar field yang wajib diisi
-	requiredFields := []string{"NetworkId"}
+	requiredFields := []string{"NetworkIds"}
 	// Validasi request
 	err := utils.ValidateFields(req, requiredFields)
 	if err != nil {
 		return nil, err
 	}
-	id_network := utils.ConvertUintToString(req.NetworkId)
+	var idNetworks []string
+	for _, v := range req.NetworkIds {
+		idNetwork := utils.ConvertUintToString(v)
+		idNetworks = append(idNetworks, idNetwork)
+	}
 
-	err = s.repo.Delete(ctx, id_network, "ref", "id")
+	err = s.repo.DeleteBatch(ctx, idNetworks, "ref", "id", "string")
 	if err != nil {
 		return nil, err
 	}
 	return &pb.DeleteNetworkResponse{
 		Status:  true,
-		Message: "suskes",
+		Message: "Berhasil menghapus BC Network",
 	}, nil
 }
 
@@ -215,32 +223,48 @@ func (s *BlockchainNetworkService) CheckEthereumNetwork(ctx context.Context, req
 		message = "🔍 Jaringan terdeteksi: Ganache (Local Ethereum Testnet)"
 		fmt.Println("🔍 Jaringan terdeteksi: Ganache (Local Ethereum Testnet)")
 	} else {
-		fmt.Printf("ℹ️  Jaringan dengan Chain ID: %d (bukan Ganache standar)\n", chainID)
-		message = fmt.Sprintf("ℹ️  Jaringan dengan Chain ID: %d (bukan Ganache standar)\n", chainID)
+		fmt.Printf("Jaringan dengan Chain ID: %d (bukan Ganache standar)\n", chainID)
+		message = fmt.Sprintf("Jaringan dengan Chain ID: %d (bukan Ganache standar)\n", chainID)
 	}
 
-	// === Ambil Client Version menggunakan RPC langsung ===
-	// rpcClient, err := rpc.DialHTTP(rpcURL)
-	// if err != nil {
-	// 	log.Printf("Gagal terhubung ke RPC via HTTP: %v", err)
-	// 	return
-	// }
-	// defer rpcClient.Close()
+	// Gas Price
+	gasPrice, err := client.SuggestGasPrice(ctx)
+	if err != nil {
+		// tangani error
+	}
 
-	// var version string
-	// err = rpcClient.Call(&version, "web3_clientVersion")
-	// if err != nil {
-	// 	log.Printf("Gagal memanggil web3_clientVersion: %v", err)
-	// } else {
-	// 	fmt.Printf("Client Version: %s\n", version)
-	// 	if contains(version, "EthereumJS") || contains(version, "TestRPC") {
-	// 		fmt.Println("🎯 Kemungkinan besar ini Ganache!")
-	// 	}
-	// }
+	// Latest Block Number
+	fmt.Printf("Gas Price: %s\n", gasPrice.String())
+	header, err := client.HeaderByNumber(ctx, nil)
+	if err == nil {
+		fmt.Printf("Block Number: %d\n", header.Number.Uint64())
+	}
+	// Node Sync Status
+	syncProgress, err := client.SyncProgress(ctx)
+	if err == nil && syncProgress != nil {
+		fmt.Printf("Node sedang syncing: %+v\n", syncProgress)
+	} else {
+		fmt.Println("Node fully synced")
+	}
+
+	// Client Version
+	// clientVersion, err := client.Web3ClientVersion(ctx)
+
+	// Node Peers Count
+	// peerCount, err := client.PeerCount(ctx)
 
 	return &pb.CheckEthereumNetworkResponse{
 		Status:  true,
 		Message: message,
+		NetworkDetail: &pb.BCNetwork{
+			ChainId:       chainID.Int64(),
+			LatestBlock:   header.Number.Int64(),
+			GasPrice:      gasPrice.Int64(),
+			BlockGasLimit: int64(header.GasLimit),
+			// ClientVersion: clientVersion,
+
+			Syncing: syncProgress != nil,
+		},
 	}, nil
 }
 
@@ -250,7 +274,7 @@ func contains(s, substr string) bool {
 }
 
 // Konversi dari Protobuf ENUM ke Golang ENUM
-func ConvertProtoToNetworkType(protoType pb.NetworkType) (models.NetworkType, error) {
+func convertProtoToNetworkType(protoType pb.NetworkType) (models.NetworkType, error) {
 	switch protoType {
 	case pb.NetworkType_mainnet:
 		return models.Mainnet, nil
@@ -263,8 +287,8 @@ func ConvertProtoToNetworkType(protoType pb.NetworkType) (models.NetworkType, er
 	}
 }
 
-// ConvertNetworkTypeToProto mengonversi dari GORM `NetworkType` ke Protobuf `NetworkType`
-func ConvertNetworkTypeToProto(networkType models.NetworkType) pb.NetworkType {
+// convertNetworkTypeToProto mengonversi dari GORM `NetworkType` ke Protobuf `NetworkType`
+func convertNetworkTypeToProto(networkType models.NetworkType) pb.NetworkType {
 	switch networkType {
 	case models.Mainnet:
 		return pb.NetworkType_mainnet
@@ -272,6 +296,8 @@ func ConvertNetworkTypeToProto(networkType models.NetworkType) pb.NetworkType {
 		return pb.NetworkType_testnet
 	case models.Private:
 		return pb.NetworkType_private
+	case models.Local:
+		return pb.NetworkType_local
 	default:
 		return pb.NetworkType_mainnet // Default fallback ke MAINNET jika tidak valid
 	}

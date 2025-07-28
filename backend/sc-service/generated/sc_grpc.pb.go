@@ -21,6 +21,8 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	BlockchainService_SetConfig_FullMethodName                 = "/sc_service.BlockchainService/SetConfig"
 	BlockchainService_GetNetworkID_FullMethodName              = "/sc_service.BlockchainService/GetNetworkID"
+	BlockchainService_GetEVMNetworkInfo_FullMethodName         = "/sc_service.BlockchainService/GetEVMNetworkInfo"
+	BlockchainService_GetWalletInfo_FullMethodName             = "/sc_service.BlockchainService/GetWalletInfo"
 	BlockchainService_SendETH_FullMethodName                   = "/sc_service.BlockchainService/SendETH"
 	BlockchainService_GetTokenBalance_FullMethodName           = "/sc_service.BlockchainService/GetTokenBalance"
 	BlockchainService_TransferToken_FullMethodName             = "/sc_service.BlockchainService/TransferToken"
@@ -45,19 +47,24 @@ const (
 type BlockchainServiceClient interface {
 	// Konfigurasi Blockchain
 	SetConfig(ctx context.Context, in *SetConfigRequest, opts ...grpc.CallOption) (*SetConfigResponse, error)
+	// ==========================================================
+	// ==========================================================
+	// EVM Machine
 	GetNetworkID(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*NetworkIDResponse, error)
+	GetEVMNetworkInfo(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetEVMNetworkInfoResponse, error)
 	// Transaksi ETH & Token
+	GetWalletInfo(ctx context.Context, in *GetWalletInfoRequest, opts ...grpc.CallOption) (*GetWalletInfoResponse, error)
 	SendETH(ctx context.Context, in *SendETHRequest, opts ...grpc.CallOption) (*SendETHResponse, error)
 	// Tidak berlaku di Ganache
 	GetTokenBalance(ctx context.Context, in *GetTokenBalanceRequest, opts ...grpc.CallOption) (*GetTokenBalanceResponse, error)
 	TransferToken(ctx context.Context, in *TransferTokenRequest, opts ...grpc.CallOption) (*TransferTokenResponse, error)
-	// // Informasi Jaringan
-	// rpc GetGasPrice(Empty) returns (GetGasPriceResponse);
-	// rpc GetNonce(GetNonceRequest) returns (GetNonceResponse);
 	ApproveToken(ctx context.Context, in *ApproveTokenRequest, opts ...grpc.CallOption) (*ApproveTokenResponse, error)
 	GetTokenAllowance(ctx context.Context, in *GetTokenAllowanceRequest, opts ...grpc.CallOption) (*GetTokenAllowanceResponse, error)
 	// Interaksi Smart Contract
 	DeployIjazahContract(ctx context.Context, in *DeployIjazahContractRequest, opts ...grpc.CallOption) (*DeployIjazahContractResponse, error)
+	// ====================================================
+	// ================CONTRACT MANAGEMENT================
+	// CRUD CONTRACT
 	GetContract(ctx context.Context, in *GetContractRequest, opts ...grpc.CallOption) (*GetContractResponse, error)
 	CallContractMethod(ctx context.Context, in *CallContractMethodRequest, opts ...grpc.CallOption) (*CallContractMethodResponse, error)
 	SendTransactionToContract(ctx context.Context, in *SendTransactionToContractRequest, opts ...grpc.CallOption) (*SendTransactionToContractResponse, error)
@@ -92,6 +99,26 @@ func (c *blockchainServiceClient) GetNetworkID(ctx context.Context, in *Empty, o
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(NetworkIDResponse)
 	err := c.cc.Invoke(ctx, BlockchainService_GetNetworkID_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *blockchainServiceClient) GetEVMNetworkInfo(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetEVMNetworkInfoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetEVMNetworkInfoResponse)
+	err := c.cc.Invoke(ctx, BlockchainService_GetEVMNetworkInfo_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *blockchainServiceClient) GetWalletInfo(ctx context.Context, in *GetWalletInfoRequest, opts ...grpc.CallOption) (*GetWalletInfoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetWalletInfoResponse)
+	err := c.cc.Invoke(ctx, BlockchainService_GetWalletInfo_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -246,19 +273,24 @@ func (c *blockchainServiceClient) GetTransactionStatus(ctx context.Context, in *
 type BlockchainServiceServer interface {
 	// Konfigurasi Blockchain
 	SetConfig(context.Context, *SetConfigRequest) (*SetConfigResponse, error)
+	// ==========================================================
+	// ==========================================================
+	// EVM Machine
 	GetNetworkID(context.Context, *Empty) (*NetworkIDResponse, error)
+	GetEVMNetworkInfo(context.Context, *Empty) (*GetEVMNetworkInfoResponse, error)
 	// Transaksi ETH & Token
+	GetWalletInfo(context.Context, *GetWalletInfoRequest) (*GetWalletInfoResponse, error)
 	SendETH(context.Context, *SendETHRequest) (*SendETHResponse, error)
 	// Tidak berlaku di Ganache
 	GetTokenBalance(context.Context, *GetTokenBalanceRequest) (*GetTokenBalanceResponse, error)
 	TransferToken(context.Context, *TransferTokenRequest) (*TransferTokenResponse, error)
-	// // Informasi Jaringan
-	// rpc GetGasPrice(Empty) returns (GetGasPriceResponse);
-	// rpc GetNonce(GetNonceRequest) returns (GetNonceResponse);
 	ApproveToken(context.Context, *ApproveTokenRequest) (*ApproveTokenResponse, error)
 	GetTokenAllowance(context.Context, *GetTokenAllowanceRequest) (*GetTokenAllowanceResponse, error)
 	// Interaksi Smart Contract
 	DeployIjazahContract(context.Context, *DeployIjazahContractRequest) (*DeployIjazahContractResponse, error)
+	// ====================================================
+	// ================CONTRACT MANAGEMENT================
+	// CRUD CONTRACT
 	GetContract(context.Context, *GetContractRequest) (*GetContractResponse, error)
 	CallContractMethod(context.Context, *CallContractMethodRequest) (*CallContractMethodResponse, error)
 	SendTransactionToContract(context.Context, *SendTransactionToContractRequest) (*SendTransactionToContractResponse, error)
@@ -284,6 +316,12 @@ func (UnimplementedBlockchainServiceServer) SetConfig(context.Context, *SetConfi
 }
 func (UnimplementedBlockchainServiceServer) GetNetworkID(context.Context, *Empty) (*NetworkIDResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetNetworkID not implemented")
+}
+func (UnimplementedBlockchainServiceServer) GetEVMNetworkInfo(context.Context, *Empty) (*GetEVMNetworkInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetEVMNetworkInfo not implemented")
+}
+func (UnimplementedBlockchainServiceServer) GetWalletInfo(context.Context, *GetWalletInfoRequest) (*GetWalletInfoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWalletInfo not implemented")
 }
 func (UnimplementedBlockchainServiceServer) SendETH(context.Context, *SendETHRequest) (*SendETHResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SendETH not implemented")
@@ -380,6 +418,42 @@ func _BlockchainService_GetNetworkID_Handler(srv interface{}, ctx context.Contex
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BlockchainServiceServer).GetNetworkID(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BlockchainService_GetEVMNetworkInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BlockchainServiceServer).GetEVMNetworkInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BlockchainService_GetEVMNetworkInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BlockchainServiceServer).GetEVMNetworkInfo(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BlockchainService_GetWalletInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWalletInfoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BlockchainServiceServer).GetWalletInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BlockchainService_GetWalletInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BlockchainServiceServer).GetWalletInfo(ctx, req.(*GetWalletInfoRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -652,6 +726,14 @@ var BlockchainService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _BlockchainService_GetNetworkID_Handler,
 		},
 		{
+			MethodName: "GetEVMNetworkInfo",
+			Handler:    _BlockchainService_GetEVMNetworkInfo_Handler,
+		},
+		{
+			MethodName: "GetWalletInfo",
+			Handler:    _BlockchainService_GetWalletInfo_Handler,
+		},
+		{
 			MethodName: "SendETH",
 			Handler:    _BlockchainService_SendETH_Handler,
 		},
@@ -718,6 +800,9 @@ const (
 	BlockchainAccountService_GetBlockchainAccounts_FullMethodName   = "/sc_service.BlockchainAccountService/GetBlockchainAccounts"
 	BlockchainAccountService_UpdateBlockchainAccount_FullMethodName = "/sc_service.BlockchainAccountService/UpdateBlockchainAccount"
 	BlockchainAccountService_DeleteBlockchainAccount_FullMethodName = "/sc_service.BlockchainAccountService/DeleteBlockchainAccount"
+	BlockchainAccountService_CreateWhiteListAccount_FullMethodName  = "/sc_service.BlockchainAccountService/CreateWhiteListAccount"
+	BlockchainAccountService_GetWhiteListAccount_FullMethodName     = "/sc_service.BlockchainAccountService/GetWhiteListAccount"
+	BlockchainAccountService_DeleteWhiteListAccount_FullMethodName  = "/sc_service.BlockchainAccountService/DeleteWhiteListAccount"
 )
 
 // BlockchainAccountServiceClient is the client API for BlockchainAccountService service.
@@ -732,6 +817,11 @@ type BlockchainAccountServiceClient interface {
 	GetBlockchainAccounts(ctx context.Context, in *GetBlockchainAccountsRequest, opts ...grpc.CallOption) (*GetBlockchainAccountsResponse, error)
 	UpdateBlockchainAccount(ctx context.Context, in *UpdateBlockchainAccountRequest, opts ...grpc.CallOption) (*UpdateBlockchainAccountResponse, error)
 	DeleteBlockchainAccount(ctx context.Context, in *DeleteBlockchainAccountRequest, opts ...grpc.CallOption) (*DeleteBlockchainAccountResponse, error)
+	// ====================================================
+	// White list akun
+	CreateWhiteListAccount(ctx context.Context, in *CreateWhiteListAccountRequest, opts ...grpc.CallOption) (*CreateWhiteListAccountResponse, error)
+	GetWhiteListAccount(ctx context.Context, in *GetWhiteListAccountRequest, opts ...grpc.CallOption) (*GetWhiteListAccountResponse, error)
+	DeleteWhiteListAccount(ctx context.Context, in *DeleteWhiteListAccountRequest, opts ...grpc.CallOption) (*DeleteWhiteListAccountResponse, error)
 }
 
 type blockchainAccountServiceClient struct {
@@ -792,6 +882,36 @@ func (c *blockchainAccountServiceClient) DeleteBlockchainAccount(ctx context.Con
 	return out, nil
 }
 
+func (c *blockchainAccountServiceClient) CreateWhiteListAccount(ctx context.Context, in *CreateWhiteListAccountRequest, opts ...grpc.CallOption) (*CreateWhiteListAccountResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateWhiteListAccountResponse)
+	err := c.cc.Invoke(ctx, BlockchainAccountService_CreateWhiteListAccount_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *blockchainAccountServiceClient) GetWhiteListAccount(ctx context.Context, in *GetWhiteListAccountRequest, opts ...grpc.CallOption) (*GetWhiteListAccountResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetWhiteListAccountResponse)
+	err := c.cc.Invoke(ctx, BlockchainAccountService_GetWhiteListAccount_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *blockchainAccountServiceClient) DeleteWhiteListAccount(ctx context.Context, in *DeleteWhiteListAccountRequest, opts ...grpc.CallOption) (*DeleteWhiteListAccountResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteWhiteListAccountResponse)
+	err := c.cc.Invoke(ctx, BlockchainAccountService_DeleteWhiteListAccount_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // BlockchainAccountServiceServer is the server API for BlockchainAccountService service.
 // All implementations must embed UnimplementedBlockchainAccountServiceServer
 // for forward compatibility.
@@ -804,6 +924,11 @@ type BlockchainAccountServiceServer interface {
 	GetBlockchainAccounts(context.Context, *GetBlockchainAccountsRequest) (*GetBlockchainAccountsResponse, error)
 	UpdateBlockchainAccount(context.Context, *UpdateBlockchainAccountRequest) (*UpdateBlockchainAccountResponse, error)
 	DeleteBlockchainAccount(context.Context, *DeleteBlockchainAccountRequest) (*DeleteBlockchainAccountResponse, error)
+	// ====================================================
+	// White list akun
+	CreateWhiteListAccount(context.Context, *CreateWhiteListAccountRequest) (*CreateWhiteListAccountResponse, error)
+	GetWhiteListAccount(context.Context, *GetWhiteListAccountRequest) (*GetWhiteListAccountResponse, error)
+	DeleteWhiteListAccount(context.Context, *DeleteWhiteListAccountRequest) (*DeleteWhiteListAccountResponse, error)
 	mustEmbedUnimplementedBlockchainAccountServiceServer()
 }
 
@@ -828,6 +953,15 @@ func (UnimplementedBlockchainAccountServiceServer) UpdateBlockchainAccount(conte
 }
 func (UnimplementedBlockchainAccountServiceServer) DeleteBlockchainAccount(context.Context, *DeleteBlockchainAccountRequest) (*DeleteBlockchainAccountResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteBlockchainAccount not implemented")
+}
+func (UnimplementedBlockchainAccountServiceServer) CreateWhiteListAccount(context.Context, *CreateWhiteListAccountRequest) (*CreateWhiteListAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateWhiteListAccount not implemented")
+}
+func (UnimplementedBlockchainAccountServiceServer) GetWhiteListAccount(context.Context, *GetWhiteListAccountRequest) (*GetWhiteListAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetWhiteListAccount not implemented")
+}
+func (UnimplementedBlockchainAccountServiceServer) DeleteWhiteListAccount(context.Context, *DeleteWhiteListAccountRequest) (*DeleteWhiteListAccountResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteWhiteListAccount not implemented")
 }
 func (UnimplementedBlockchainAccountServiceServer) mustEmbedUnimplementedBlockchainAccountServiceServer() {
 }
@@ -941,6 +1075,60 @@ func _BlockchainAccountService_DeleteBlockchainAccount_Handler(srv interface{}, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _BlockchainAccountService_CreateWhiteListAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateWhiteListAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BlockchainAccountServiceServer).CreateWhiteListAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BlockchainAccountService_CreateWhiteListAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BlockchainAccountServiceServer).CreateWhiteListAccount(ctx, req.(*CreateWhiteListAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BlockchainAccountService_GetWhiteListAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetWhiteListAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BlockchainAccountServiceServer).GetWhiteListAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BlockchainAccountService_GetWhiteListAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BlockchainAccountServiceServer).GetWhiteListAccount(ctx, req.(*GetWhiteListAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BlockchainAccountService_DeleteWhiteListAccount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteWhiteListAccountRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BlockchainAccountServiceServer).DeleteWhiteListAccount(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BlockchainAccountService_DeleteWhiteListAccount_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BlockchainAccountServiceServer).DeleteWhiteListAccount(ctx, req.(*DeleteWhiteListAccountRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // BlockchainAccountService_ServiceDesc is the grpc.ServiceDesc for BlockchainAccountService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -967,6 +1155,18 @@ var BlockchainAccountService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DeleteBlockchainAccount",
 			Handler:    _BlockchainAccountService_DeleteBlockchainAccount_Handler,
+		},
+		{
+			MethodName: "CreateWhiteListAccount",
+			Handler:    _BlockchainAccountService_CreateWhiteListAccount_Handler,
+		},
+		{
+			MethodName: "GetWhiteListAccount",
+			Handler:    _BlockchainAccountService_GetWhiteListAccount_Handler,
+		},
+		{
+			MethodName: "DeleteWhiteListAccount",
+			Handler:    _BlockchainAccountService_DeleteWhiteListAccount_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

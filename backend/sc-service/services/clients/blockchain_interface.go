@@ -5,27 +5,32 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"sc-service/config"
+	"sc-service/models"
 )
 
 // BlockchainClient interface umum untuk semua blockchain
 type BlockchainClient interface {
 	Connect() error
 	NetworkID(ctx context.Context) (*big.Int, error)
-	// GenerateNewAccount(ctx context.Context, userId uint32, password string) (map[string]interface{}, error)
+	GetEVMNetworkInfo() (*NetworkInfo, error)
+	GetBalance(address string) (*models.BalanceInfo, error)
+	GetChainInfo(rpcURL string) (*models.ChainInfo, error)
+	GetGasInfo() (*models.GasInfo, error)
 }
 
 // BlockchainClientFactory mendefinisikan factory function
-type BlockchainClientFactory func(cfg *Config) (BlockchainClient, error)
+type BlockchainClientFactory func(cfg *config.BCConfig) (BlockchainClient, error)
 
 // Peta blockchain factories
 var blockchainFactories = map[string]BlockchainClientFactory{
 	"ethereum": NewEthereumClient,
-	// // "quorum":   NewQuorumClient,
+	// "quorum":      NewQuorumClient,
 	// "hyperledger": NewHyperledgerFabricClient,
 }
 
 // CreateClientFactory memilih blockchain berdasarkan runtime config
-func CreateClientFactory(cfg *Config) (BlockchainClient, error) {
+func CreateClientFactory(cfg *config.BCConfig) (BlockchainClient, error) {
 	if cfg == nil {
 		return nil, errors.New("config tidak boleh nil")
 	}

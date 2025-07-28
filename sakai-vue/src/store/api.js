@@ -21,7 +21,6 @@ api.interceptors.response.use(
                     refreshPromise = null;
                 });
             }
-
             try {
                 await refreshPromise;
                 return api(cfg); // retry original request

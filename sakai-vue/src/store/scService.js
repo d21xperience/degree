@@ -9,12 +9,15 @@
 // });
 import api from './api';
 const state = {
+    BCNetwork: JSON.parse(localStorage.getItem('BCNETWORK')) || null,
+    BCNetworkSelected: JSON.parse(localStorage.getItem('BCNetworkSelected')) || null,
     BCPlatformSelected: JSON.parse(localStorage.getItem('BCPlatformSelected')) || null,
     BCAccountActivate: null,
     MetamasConnected: JSON.parse(localStorage.getItem('METAMASK_CONNECTED')) || null,
     contract: JSON.parse(localStorage.getItem('CONTRACT')) || null,
     SCIjazah: JSON.parse(localStorage.getItem('SCIjazah')) || null,
-    walletInfo: JSON.parse(localStorage.getItem('WALLET_INFO')) || null
+    walletInfo: JSON.parse(localStorage.getItem('WALLET_INFO')) || null,
+    bcConnected: null
 };
 
 const mutations = {
@@ -22,12 +25,17 @@ const mutations = {
         state.BCNETWORK = value;
         localStorage.setItem('BCNETWORK', JSON.stringify(value));
     },
+    SET_BCNetworkSelected(state, value) {
+        state.BCNetworkSelected = value;
+        localStorage.setItem('BCNetworkSelected', JSON.stringify(value));
+    },
     SET_BCACCOUNT(state, value) {
         state.BCACCOUNT = value;
         localStorage.setItem('BCACCOUNT', JSON.stringify(value));
     },
     setBCPlatformSelected(state, value) {
         state.BCPlatformSelected = value;
+        localStorage.setItem('BCPlatformSelected', JSON.stringify(value));
     },
     setBCAccountActivate(state, value) {
         state.BCAccountActivate = value;
@@ -47,28 +55,25 @@ const mutations = {
     SET_WALLETINFO(state, value) {
         state.walletInfo = value;
         localStorage.setItem('WALLETINFO', JSON.stringify(value));
+    },
+    SET_BcConected(state, value) {
+        state.bcConnected = value;
+        // localStorage.setItem('SET_BcConected', JSON.stringify(value));
     }
 };
 
 const actions = {
     async fetchBCPlatform({ commit }, payload) {
         try {
-            // console.log(payload);
-            const response = await api.get(`/scs/platform`, {
-                params: {
-                    schemaname: payload.schemaname
-                }
-            });
-            // console.log(response.data.bcPlatform);
-            response.data.bcPlatform.find((platform) => {
+            const { data } = await api.get('/scs/platform');
+            data.bcPlatform.find((platform) => {
                 if (platform.active) {
                     commit('setBCPlatformSelected', platform);
                 }
             });
-            return response.data; // Mengembalikan data sekolah
+            return data;
         } catch (error) {
-            console.error('Gagal memuat network:', error);
-            return null;
+            throw error;
         }
     },
 
@@ -93,42 +98,72 @@ const actions = {
         }
         // console.log(response);
     },
-    // ================================
     async updateBCPlatformSelected({ commit }, value) {
         commit('setBCPlatformSelected', value);
     },
 
-    async fetchBlockchainNetworks({ commit }) {
-        // console.log(sekolahId);
-
+    // ================================
+    async fetchBlockchainNetworks({ commit }, networkArchitecture) {
         try {
-            const response = await api.get(`scs/bc-networks`);
+            const response = await api.get(`scs/bc-networks`, {
+                params: {
+                    network_architecture: networkArchitecture
+                }
+            });
             commit('SET_BCNETWORK', response.data.network);
             return response.data; // Mengembalikan data sekolah
         } catch (error) {
             console.error('Gagal memuat network:', error);
-            return null;
+            throw error;
         }
     },
 
+    async updateBlockchainNetwork({ commit }, payload) {
+        try {
+            // console.log(payload)
+            const { data } = await api.put('scs/bc-network', payload);
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async deleteBlockchainNetwork({ commit }, payload) {
+        try {
+            const networkIds = payload.map((item) => Number(item.Id)).filter((id) => Number.isInteger(id) && id >= 0 && id <= 4294967295); // validasi uint32
+
+            const params = new URLSearchParams();
+            networkIds.forEach((id) => {
+                params.append('network_ids', id);
+            });
+
+            const { data } = await api.delete(`scs/bc-network?${params.toString()}`);
+            return data;
+        } catch (error) {
+            console.error('deleteBlockchainNetwork error:', error.response?.data || error.message);
+            throw error;
+        }
+    },
+    async setBlockchainNetwork({ commit }, value) {
+        commit('SET_BCNetworkSelected', value);
+    },
     // ==========================akun=========================
     // ===================================================
-    async fetchBCAccount({ commit }, payload) {
-        // return;
+    async fetchBCAccount({ commit }, username) {
         try {
-            const response = await api.get('/blockchainaccount/list', {
+            const { data } = await api.get('scs/blockchainaccount/list', {
                 params: {
-                    schemaname: payload.schemaname,
-                    user_id: payload.user_id,
-                    network_id: payload.network_id
+                    username: username
                 }
             });
+            // console.log('scService/fetchBCAccount', data);
+            return data;
             // console.log(response.data);
-            commit('SET_BCACCOUNT', response.data.blockchainaccounts);
-            return response.data; // Mengembalikan data sekolah
+            // commit('SET_BCACCOUNT', response.data.blockchainaccounts);
+            // return response.data; // Mengembalikan data sekolah
         } catch (error) {
-            // console.error("Gagal mengambil akun blockchain:", error);
-            return error.response?.data;
+            console.error('Gagal mengambil akun blockchain:', error);
+            throw error;
         }
     },
     async createBCAccount({ commit }, payload) {
@@ -289,12 +324,41 @@ const actions = {
             throw error;
         }
     },
+
+    // ==================================
+    // EVM OR NONEVM
+    // ==================================
+    async getNetworkChainId({ commit }, payload) {
+        try {
+            const { data } = await api.get('scs/bc-networks/ethereum-network', {
+                params: {
+                    rpc_url: payload
+                }
+            });
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
     async createWalletInfo({ commit }, payload) {
         try {
             commit('SET_WALLETINFO', payload);
         } catch (error) {}
     },
 
+    async fetchWalletInfo({ commit }, payload) {
+        try {
+            const { data } = await api.post('scs/blockchainaccount/wallet', payload);
+            if (data.status) {
+                commit('SET_WALLETINFO', data.walletData);
+                return data;
+            }
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    },
     // ======== SMART CONTRACT =======
 
     async getsolVersion({ commit }) {
@@ -312,20 +376,45 @@ const actions = {
 
         const result = await response.json();
         console.log(result);
+    },
+
+    // ==========================================
+    // Blockhain Service
+    // ==========================================
+    async setBCConfig({ commit }, payload) {
+        try {
+            const { data } = await api.post('scs/blockchain/config', payload);
+            console.log(data);
+            if (data.status) {
+                return data;
+            }
+        } catch (error) {
+            throw error;
+        }
     }
 };
 
 // ==========================================
-// ===============GETTERS=================
+// GETTERS
+// ==========================================
 const getters = {
-    getBCNETWORK: (state) => state.BCNETWORK,
+    getBCNETWORK:
+        (state) =>
+        (filter = {}) => {
+            const list = state.BCNetwork;
+            if (Object.keys(filter).length === 0) return list;
+
+            return list.filter((item) => Object.entries(filter).every(([key, value]) => item[key] === value));
+        },
     getBCPlatformSelected: (state) => state.BCPlatformSelected,
+    getBCNetworkSelected: (state) => state.BCNetworkSelected,
     getBCAccount: (state) => state.BCACCOUNT,
     getBCAccountActivate: (state) => state.BCAccountActivate,
     getMetamaskConnected: (state) => state.MetamasConnected,
     getContract: (state) => state.contract,
     getSCIjazah: (state) => state.SCIjazah,
-    getWalletInfo: (state) => state.walletInfo
+    getWalletInfo: (state) => state.walletInfo,
+    getBcConnected: (state) => state.bcConnected
 };
 
 export default {

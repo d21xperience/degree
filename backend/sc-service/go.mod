@@ -6,6 +6,7 @@ require (
 	github.com/ethereum/go-ethereum v1.14.13
 	github.com/gin-gonic/gin v1.10.0
 	github.com/google/uuid v1.6.0
+	github.com/gorilla/websocket v1.4.2
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.0
 	github.com/hyperledger/fabric-sdk-go v1.0.0
 	github.com/ipfs/go-ipfs-api v0.7.0
@@ -57,7 +58,6 @@ require (
 	github.com/golang/mock v1.6.0 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/certificate-transparency-go v1.0.21 // indirect
-	github.com/gorilla/websocket v1.4.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/holiman/uint256 v1.3.1 // indirect
 	github.com/hyperledger/fabric-config v0.0.5 // indirect

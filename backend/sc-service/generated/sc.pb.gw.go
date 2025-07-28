@@ -77,6 +77,48 @@ func local_request_BlockchainService_GetNetworkID_0(ctx context.Context, marshal
 	return msg, metadata, err
 }
 
+func request_BlockchainService_GetEVMNetworkInfo_0(ctx context.Context, marshaler runtime.Marshaler, client BlockchainServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq Empty
+		metadata runtime.ServerMetadata
+	)
+	msg, err := client.GetEVMNetworkInfo(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_BlockchainService_GetEVMNetworkInfo_0(ctx context.Context, marshaler runtime.Marshaler, server BlockchainServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq Empty
+		metadata runtime.ServerMetadata
+	)
+	msg, err := server.GetEVMNetworkInfo(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_BlockchainService_GetWalletInfo_0(ctx context.Context, marshaler runtime.Marshaler, client BlockchainServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetWalletInfoRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.GetWalletInfo(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_BlockchainService_GetWalletInfo_0(ctx context.Context, marshaler runtime.Marshaler, server BlockchainServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetWalletInfoRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.GetWalletInfo(ctx, &protoReq)
+	return msg, metadata, err
+}
+
 func request_BlockchainService_SendETH_0(ctx context.Context, marshaler runtime.Marshaler, client BlockchainServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq SendETHRequest
@@ -643,6 +685,80 @@ func local_request_BlockchainAccountService_DeleteBlockchainAccount_0(ctx contex
 	return msg, metadata, err
 }
 
+func request_BlockchainAccountService_CreateWhiteListAccount_0(ctx context.Context, marshaler runtime.Marshaler, client BlockchainAccountServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq CreateWhiteListAccountRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.CreateWhiteListAccount(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_BlockchainAccountService_CreateWhiteListAccount_0(ctx context.Context, marshaler runtime.Marshaler, server BlockchainAccountServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq CreateWhiteListAccountRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.CreateWhiteListAccount(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_BlockchainAccountService_GetWhiteListAccount_0(ctx context.Context, marshaler runtime.Marshaler, client BlockchainAccountServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetWhiteListAccountRequest
+		metadata runtime.ServerMetadata
+	)
+	msg, err := client.GetWhiteListAccount(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_BlockchainAccountService_GetWhiteListAccount_0(ctx context.Context, marshaler runtime.Marshaler, server BlockchainAccountServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetWhiteListAccountRequest
+		metadata runtime.ServerMetadata
+	)
+	msg, err := server.GetWhiteListAccount(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+var filter_BlockchainAccountService_DeleteWhiteListAccount_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+
+func request_BlockchainAccountService_DeleteWhiteListAccount_0(ctx context.Context, marshaler runtime.Marshaler, client BlockchainAccountServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq DeleteWhiteListAccountRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_BlockchainAccountService_DeleteWhiteListAccount_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.DeleteWhiteListAccount(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_BlockchainAccountService_DeleteWhiteListAccount_0(ctx context.Context, marshaler runtime.Marshaler, server BlockchainAccountServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq DeleteWhiteListAccountRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_BlockchainAccountService_DeleteWhiteListAccount_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.DeleteWhiteListAccount(ctx, &protoReq)
+	return msg, metadata, err
+}
+
 func request_BlockchainNetworkService_CreateBCNetwork_0(ctx context.Context, marshaler runtime.Marshaler, client BlockchainNetworkServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq CreateBCNetworkRequest
@@ -843,19 +959,11 @@ func local_request_TenantService_GetSekolahTenant_0(ctx context.Context, marshal
 	return msg, metadata, err
 }
 
-var filter_BCPlatformService_GetBCPlatform_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-
 func request_BCPlatformService_GetBCPlatform_0(ctx context.Context, marshaler runtime.Marshaler, client BCPlatformServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq GetBCPlatformRequest
 		metadata runtime.ServerMetadata
 	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_BCPlatformService_GetBCPlatform_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 	msg, err := client.GetBCPlatform(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
@@ -865,12 +973,6 @@ func local_request_BCPlatformService_GetBCPlatform_0(ctx context.Context, marsha
 		protoReq GetBCPlatformRequest
 		metadata runtime.ServerMetadata
 	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_BCPlatformService_GetBCPlatform_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 	msg, err := server.GetBCPlatform(ctx, &protoReq)
 	return msg, metadata, err
 }
@@ -1293,7 +1395,7 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetNetworkID", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/network_id"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetNetworkID", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/evm/network-id"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1307,13 +1409,53 @@ func RegisterBlockchainServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		}
 		forward_BlockchainService_GetNetworkID_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodGet, pattern_BlockchainService_GetEVMNetworkInfo_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetEVMNetworkInfo", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/evm/network-info"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_BlockchainService_GetEVMNetworkInfo_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_BlockchainService_GetEVMNetworkInfo_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPost, pattern_BlockchainService_GetWalletInfo_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/GetWalletInfo", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/wallet"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_BlockchainService_GetWalletInfo_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_BlockchainService_GetWalletInfo_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	mux.Handle(http.MethodPost, pattern_BlockchainService_SendETH_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/SendETH", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/send_eth"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainService/SendETH", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/evm/send-token"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1696,6 +1838,66 @@ func RegisterBlockchainAccountServiceHandlerServer(ctx context.Context, mux *run
 			return
 		}
 		forward_BlockchainAccountService_DeleteBlockchainAccount_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPost, pattern_BlockchainAccountService_CreateWhiteListAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainAccountService/CreateWhiteListAccount", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/white-list/create"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_BlockchainAccountService_CreateWhiteListAccount_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_BlockchainAccountService_CreateWhiteListAccount_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodGet, pattern_BlockchainAccountService_GetWhiteListAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainAccountService/GetWhiteListAccount", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/white-list/create"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_BlockchainAccountService_GetWhiteListAccount_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_BlockchainAccountService_GetWhiteListAccount_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodDelete, pattern_BlockchainAccountService_DeleteWhiteListAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sc_service.BlockchainAccountService/DeleteWhiteListAccount", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/white-list/delete"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_BlockchainAccountService_DeleteWhiteListAccount_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_BlockchainAccountService_DeleteWhiteListAccount_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 
 	return nil
@@ -2268,7 +2470,7 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetNetworkID", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/network_id"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetNetworkID", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/evm/network-id"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2281,11 +2483,45 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		}
 		forward_BlockchainService_GetNetworkID_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodGet, pattern_BlockchainService_GetEVMNetworkInfo_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetEVMNetworkInfo", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/evm/network-info"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_BlockchainService_GetEVMNetworkInfo_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_BlockchainService_GetEVMNetworkInfo_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPost, pattern_BlockchainService_GetWalletInfo_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/GetWalletInfo", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/wallet"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_BlockchainService_GetWalletInfo_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_BlockchainService_GetWalletInfo_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	mux.Handle(http.MethodPost, pattern_BlockchainService_SendETH_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/SendETH", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/send_eth"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainService/SendETH", runtime.WithHTTPPathPattern("/api/v1/scs/blockchain/evm/send-token"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -2524,8 +2760,10 @@ func RegisterBlockchainServiceHandlerClient(ctx context.Context, mux *runtime.Se
 
 var (
 	pattern_BlockchainService_SetConfig_0                 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchain", "config"}, ""))
-	pattern_BlockchainService_GetNetworkID_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchain", "network_id"}, ""))
-	pattern_BlockchainService_SendETH_0                   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchain", "send_eth"}, ""))
+	pattern_BlockchainService_GetNetworkID_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"api", "v1", "scs", "blockchain", "evm", "network-id"}, ""))
+	pattern_BlockchainService_GetEVMNetworkInfo_0         = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"api", "v1", "scs", "blockchain", "evm", "network-info"}, ""))
+	pattern_BlockchainService_GetWalletInfo_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchainaccount", "wallet"}, ""))
+	pattern_BlockchainService_SendETH_0                   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"api", "v1", "scs", "blockchain", "evm", "send-token"}, ""))
 	pattern_BlockchainService_GetTokenBalance_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchain", "token_balance"}, ""))
 	pattern_BlockchainService_TransferToken_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchain", "transfer_token"}, ""))
 	pattern_BlockchainService_ApproveToken_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "token", "approve"}, ""))
@@ -2544,6 +2782,8 @@ var (
 var (
 	forward_BlockchainService_SetConfig_0                 = runtime.ForwardResponseMessage
 	forward_BlockchainService_GetNetworkID_0              = runtime.ForwardResponseMessage
+	forward_BlockchainService_GetEVMNetworkInfo_0         = runtime.ForwardResponseMessage
+	forward_BlockchainService_GetWalletInfo_0             = runtime.ForwardResponseMessage
 	forward_BlockchainService_SendETH_0                   = runtime.ForwardResponseMessage
 	forward_BlockchainService_GetTokenBalance_0           = runtime.ForwardResponseMessage
 	forward_BlockchainService_TransferToken_0             = runtime.ForwardResponseMessage
@@ -2681,6 +2921,57 @@ func RegisterBlockchainAccountServiceHandlerClient(ctx context.Context, mux *run
 		}
 		forward_BlockchainAccountService_DeleteBlockchainAccount_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodPost, pattern_BlockchainAccountService_CreateWhiteListAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainAccountService/CreateWhiteListAccount", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/white-list/create"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_BlockchainAccountService_CreateWhiteListAccount_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_BlockchainAccountService_CreateWhiteListAccount_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodGet, pattern_BlockchainAccountService_GetWhiteListAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainAccountService/GetWhiteListAccount", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/white-list/create"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_BlockchainAccountService_GetWhiteListAccount_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_BlockchainAccountService_GetWhiteListAccount_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodDelete, pattern_BlockchainAccountService_DeleteWhiteListAccount_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sc_service.BlockchainAccountService/DeleteWhiteListAccount", runtime.WithHTTPPathPattern("/api/v1/scs/blockchainaccount/white-list/delete"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_BlockchainAccountService_DeleteWhiteListAccount_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_BlockchainAccountService_DeleteWhiteListAccount_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	return nil
 }
 
@@ -2690,6 +2981,9 @@ var (
 	pattern_BlockchainAccountService_GetBlockchainAccounts_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchainaccount", "list"}, ""))
 	pattern_BlockchainAccountService_UpdateBlockchainAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchainaccount", "update"}, ""))
 	pattern_BlockchainAccountService_DeleteBlockchainAccount_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "scs", "blockchainaccount", "delete"}, ""))
+	pattern_BlockchainAccountService_CreateWhiteListAccount_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"api", "v1", "scs", "blockchainaccount", "white-list", "create"}, ""))
+	pattern_BlockchainAccountService_GetWhiteListAccount_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"api", "v1", "scs", "blockchainaccount", "white-list", "create"}, ""))
+	pattern_BlockchainAccountService_DeleteWhiteListAccount_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"api", "v1", "scs", "blockchainaccount", "white-list", "delete"}, ""))
 )
 
 var (
@@ -2698,6 +2992,9 @@ var (
 	forward_BlockchainAccountService_GetBlockchainAccounts_0   = runtime.ForwardResponseMessage
 	forward_BlockchainAccountService_UpdateBlockchainAccount_0 = runtime.ForwardResponseMessage
 	forward_BlockchainAccountService_DeleteBlockchainAccount_0 = runtime.ForwardResponseMessage
+	forward_BlockchainAccountService_CreateWhiteListAccount_0  = runtime.ForwardResponseMessage
+	forward_BlockchainAccountService_GetWhiteListAccount_0     = runtime.ForwardResponseMessage
+	forward_BlockchainAccountService_DeleteWhiteListAccount_0  = runtime.ForwardResponseMessage
 )
 
 // RegisterBlockchainNetworkServiceHandlerFromEndpoint is same as RegisterBlockchainNetworkServiceHandler but

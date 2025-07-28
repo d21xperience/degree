@@ -12,6 +12,29 @@ const router = createRouter({
             component: () => import('@/views/pages/Landing.vue')
         },
         {
+            path: '/faq',
+            name: 'faq',
+            component: () => import('@/views/pages/faq/Faq.vue')
+        },
+        {
+            path: '/blog',
+            name: 'blog',
+            component: () => import('@/views/pages/blog/Main.vue'),
+            children: [
+                // {
+                //     path: '',
+                //     name:'',
+                //     // component:'',
+                //     // component: () => import('@/views/pages/blog/artikel/Cek.vue')
+                // },
+                {
+                    path: '',
+                    name: 'cek',
+                    component: () => import('@/views/pages/blog/artikel/Cek.vue')
+                }
+            ]
+        },
+        {
             path: '/auth/login',
             name: 'login',
             meta: { title: 'Login' },
@@ -276,6 +299,18 @@ const router = createRouter({
                             path: 'networks',
                             name: 'networks',
                             component: () => import('@/views/pages/super_admin/blockchain/ListBCNetwork.vue')
+                        },
+                        {
+                            path: 'wallet',
+                            name: 'wallet',
+                            meta: { title: 'Wallet Account' },
+                            component: () => import('@/views/pages/super_admin/blockchain/ListWallet.vue')
+                        },
+                        {
+                            path: 'bc-network',
+                            name: 'bcNetwork',
+                            meta: { title: 'Blockhain Network' },
+                            component: () => import('@/views/pages/super_admin/blockchain/BCNetworkConfig.vue')
                         }
                     ]
                 },
@@ -288,6 +323,11 @@ const router = createRouter({
                     path: 'transaksi',
                     name: 'transaksi',
                     component: () => import('@/views/pages/super_admin/blockchain/Transaksi.vue')
+                },
+                {
+                    path: 'own-profile',
+                    name: 'ownProfile',
+                    component: () => import('@/views/pages/super_admin/blockchain/OwnProfile.vue')
                 }
             ]
         }

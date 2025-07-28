@@ -88,7 +88,7 @@ export function useSekolahService() {
                 ptk_terdaftar_id: ptkTerdaftarId
             };
             const response = await store.dispatch('sekolahService/searchPTKTerdaftar', payload);
-            console.log(response);
+            // console.log(response);
             if (response.status) {
                 toast.add({ severity: 'success', summary: 'Success', detail: `Sukses: ${response.message}`, life: 3000 });
             }
@@ -141,7 +141,7 @@ export function useSekolahService() {
             toast.add({ severity: 'success', summary: 'Success', detail: 'Berhasil update data guru', life: 3000 });
             return response;
         } catch (error) {
-            console.error('Gagal update data guru:', error);
+            // console.error('Gagal update data guru:', error);
             toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal update data guru: ${error}`, life: 3000 });
         }
     };
@@ -153,7 +153,7 @@ export function useSekolahService() {
                 schemaname: schemaname.value,
                 ptk_terdaftar: ptkTerdaftar._rawValue
             };
-            console.log(payload);
+            // console.log(payload);
             const response = await store.dispatch('sekolahService/addPTKTerdaftar', payload);
             if (!response.status) {
                 toast.add({ severity: 'success', summary: 'Success', detail: 'Berhasil menambah data guru', life: 3000 });
@@ -426,7 +426,7 @@ export function useSekolahService() {
                 tingkat_pendidikan_id: tingkatPendidikanId
             };
             const res = await store.dispatch('sekolahService/fetchBanyakSiswaByTingkatId', payload);
-            console.log(res);
+            // console.log(res);
 
             return res;
         } catch (error) {
@@ -476,15 +476,10 @@ export function useSekolahService() {
             const response = await store.dispatch('sekolahService/updateDns', payload);
             if (response.status) {
                 const dnsTabel = store.getters['sekolahService/getDns'];
-                // console.log(dnsTabel)
                 const dns = dnsTabel.dataNominasiSementara.find((item) => item.pesertaDidikId == payload.data_nominasi_sementara.pesertaDidikId);
-
-                // console.log("sebelum",dns)
                 if (dns) {
                     Object.assign(dns, payload.data_nominasi_sementara);
                 }
-                // console.log("sesudah",dnsTabel)
-                // return
                 store.commit('sekolahService/SET_TABELDNS', dnsTabel);
                 toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
                 return true;

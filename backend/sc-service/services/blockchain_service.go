@@ -5,69 +5,119 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strings"
+	"time"
 
+	"sc-service/config"
 	pb "sc-service/generated"
 	"sc-service/services/clients"
 
 	"sc-service/utils"
+	"sc-service/websocket"
 )
 
 type BlockchainService struct {
 	pb.UnimplementedBlockchainServiceServer
-	config *clients.Config // Konfigurasi runtime
-	client clients.BlockchainClient
+	config   *config.BCConfig // Konfigurasi runtime
+	client   clients.BlockchainClient
+	wsServer *websocket.WebSocketServer
 }
 
 // Constructor untuk BlockchainService
 func NewBlockchainService() *BlockchainService {
 	return &BlockchainService{
-		config: &clients.Config{},
-		client: nil,
+		config:   &config.BCConfig{},
+		client:   nil,
+		wsServer: nil,
 	}
 }
 
+var networkConected bool
+
 // SetConfig: Mengatur konfigurasi blockchain
 func (s *BlockchainService) SetConfig(ctx context.Context, req *pb.SetConfigRequest) (*pb.SetConfigResponse, error) {
+	if networkConected {
+		return nil, nil
+	}
 	// Daftar field yang wajib diisi
-	requiredFields := []string{"Network"}
+	requiredFields := []string{"BcConfig"}
 	// Validasi request
 	err := utils.ValidateFields(req, requiredFields)
 	if err != nil {
 		return nil, err
 	}
+	environment := req.BcConfig.Environment
+	platform := req.BcConfig.Platform
+	bcConfig := &config.BCConfig{
+		NetworkId:      uint32(environment.ChainId),
+		BlockchainType: strings.ToLower(platform.Name),
+		RPCURL:         environment.RPCURL,
+	}
 	// Load konfigurasi dari environment variables
-	cfg, err := clients.LoadConfig()
+	cfg, err := config.LoadBCConfig(bcConfig)
 	if err != nil {
 		log.Fatalf("Gagal memuat konfigurasi: %v", err)
-	}
-	// Overwrite dengan nilai dari request
-	network := req.Network
-	// if network.Architecture == "EVM" {
-	// 	cfg.BlockchainType = "ethereum"
-	// } else if network.Architecture == "NONEVM" {
-	// 	cfg.BlockchainType = "hyperledger"
-	// } else {
-	// 	return nil, errors.New("blockchain_type harus 'ethereum' atau 'quorum'")
-	// }
-	// Overwrite RPCURL jika ada dalam request
-	if network.RPCURL != "" {
-		cfg.RPCURL = network.RPCURL
+		return &pb.SetConfigResponse{
+			Message: fmt.Sprintf("gagal memuat konfigurasi: %s ", err),
+			Status:  false,
+		}, nil
 	}
 
 	// Buat blockchain client sesuai config
 	client, err := clients.CreateClientFactory(cfg)
 	if err != nil {
 		log.Fatalf("Gagal membuat klien: %v", err)
+		return &pb.SetConfigResponse{
+			Message: fmt.Sprintf("gagal membuat klien: %s ", err),
+			Status:  false,
+		}, nil
 	}
 	// Connect ke blockchain
 	if err := client.Connect(); err != nil {
-		return nil, errors.New("gagal terhubung ke blockhain")
-		// log.Fatalf("Gagal terhubung ke blockchain: %v", err)
+		// return nil, errors.New("gagal terhubung ke blockhain")
+		return &pb.SetConfigResponse{
+			Message: fmt.Sprintf("gagal terhubung ke blockchain: %s ", err),
+			Status:  false,
+		}, nil
 	}
 	s.client = client
+	// Inisialisasi dan start WebSocket server jika belum ada
+	if s.wsServer == nil {
+		s.wsServer = websocket.NewWebSocketServer()
+
+		// Start WebSocket server di port 8080 (bisa disesuaikan)
+		go func() {
+			if err := s.wsServer.Start("8080"); err != nil {
+				log.Printf("Failed to start WebSocket server: %v", err)
+			} else {
+				log.Println("WebSocket server started successfully")
+			}
+		}()
+
+		// Tunggu sebentar untuk memastikan server sudah start
+		time.Sleep(100 * time.Millisecond)
+	}
+	networkConected = true
+	// Kirim notifikasi bahwa koneksi berhasil
+	if s.wsServer != nil && s.wsServer.IsRunning() {
+		s.wsServer.BroadcastMessage(map[string]any{
+			"type": "blockchain_connected",
+			"data": map[string]any{
+				"blockchain_type": cfg.BlockchainType,
+				"rpc_url":         cfg.RPCURL,
+				"network_id":      cfg.NetworkId,
+				"timestamp":       time.Now().Unix(),
+				"status":          "success",
+			},
+		})
+	}
+
+	// Mulai monitoring blockchain jika diperlukan
+	go s.startBlockchainMonitoring()
+
 	return &pb.SetConfigResponse{
-		Message: fmt.Sprintf("berhasil terhubung ke blockchain:%s ", cfg.BlockchainType),
-		// Message: "Konfigurasi blockchain berhasil diperbarui",
+		Message: fmt.Sprintf("berhasil terhubung ke blockchain: %s ", cfg.BlockchainType),
+		Status:  true,
 	}, nil
 }
 
@@ -76,15 +126,151 @@ func (s *BlockchainService) GetNetworkID(ctx context.Context, _ *pb.Empty) (*pb.
 	if s.client == nil {
 		return nil, errors.New("client belum dikonfigurasi")
 	}
-
 	networkID, err := s.client.NetworkID(ctx)
 	if err != nil {
 		return nil, err
 	}
-
 	return &pb.NetworkIDResponse{
 		NetworkId: uint32(networkID.Uint64()),
 	}, nil
+}
+
+func (s *BlockchainService) GetWalletInfo(ctx context.Context, req *pb.GetWalletInfoRequest) (*pb.GetWalletInfoResponse, error) {
+	log.Printf("bc_account_service/GetWalletInfo received data from request: %+v\n", req)
+	// Daftar field yang wajib diisi
+	requiredFields := []string{"PublicAddress"}
+	// Validasi request
+	requiredFieldsResponse := utils.ValidateFields(req, requiredFields)
+	if requiredFieldsResponse != nil {
+		return nil, requiredFieldsResponse
+	}
+
+	if s.client == nil {
+		return &pb.GetWalletInfoResponse{
+			Status:     false,
+			Message:    "klien belum dikonfigurasi",
+			WalletData: nil,
+		}, nil
+	}
+
+	// Dapatkan informasi chain
+	chainInfo, err := s.client.GetChainInfo(s.config.RPCURL)
+	if err != nil {
+		return nil, err
+	}
+
+	// Dapatkan informasi gas
+	gasInfo, err := s.client.GetGasInfo()
+	if err != nil {
+		return nil, err
+	}
+	// Dapatkan balance ETH
+	balance, err := s.client.GetBalance(req.PublicAddress)
+	if err != nil {
+		return &pb.GetWalletInfoResponse{
+			Status:     false,
+			Message:    fmt.Sprintf("Gagal mendapatkan balance: %v", err),
+			WalletData: nil,
+		}, nil
+	}
+
+	results := &pb.WalletData{
+		Address: req.PublicAddress,
+		Balance: &pb.BalanceInfo{
+			Wei:       balance.Wei,
+			Formatted: balance.Formatted,
+		},
+		Gas: &pb.GasInfo{
+			GasPrice:             gasInfo.GasPrice,
+			MaxFeePerGas:         gasInfo.MaxFeePerGas,
+			MaxPriorityFeePerGas: gasInfo.MaxPriorityFeePerGas,
+		},
+		Chain: &pb.ChainInfo{
+			ChainId:  chainInfo.ChainId,
+			Name:     chainInfo.Name,
+			RPC:      chainInfo.RPC,
+			Explorer: chainInfo.Explorer,
+			// NativeCurrency: &pb.CurrencyInfo{
+			// 	Symbol: ,
+			// },
+		},
+		// Meta: &pb.MetaInfo{
+		// 	CreatedAt: ,
+		// },
+	}
+	return &pb.GetWalletInfoResponse{
+		Status:     true,
+		Message:    "Sukses mengakses wallet",
+		WalletData: results,
+	}, nil
+}
+
+// Fungsi untuk monitoring blockchain secara real-time
+func (s *BlockchainService) startBlockchainMonitoring() {
+	// Tunggu sebentar sebelum mulai monitoring
+	time.Sleep(2 * time.Second)
+
+	ticker := time.NewTicker(10 * time.Second) // Update setiap 10 detik
+	defer ticker.Stop()
+
+	// Gunakan for range pada ticker.C
+	for range ticker.C {
+		if s.client != nil && s.wsServer != nil && s.wsServer.IsRunning() {
+			// Kirim informasi status koneksi
+			networkInfo := s.getBlockchainNetworkInfo()
+			s.wsServer.BroadcastMessage(map[string]any{
+				"type": "network_info",
+				"data": networkInfo,
+			})
+		}
+	}
+}
+
+// Fungsi helper untuk mendapatkan informasi network
+func (s *BlockchainService) getBlockchainNetworkInfo() map[string]any {
+
+	info := map[string]any{
+		"timestamp":    time.Now().Unix(),
+		"client_count": 0,
+	}
+
+	if s.wsServer != nil {
+		info["client_count"] = s.wsServer.GetClientCount()
+	}
+
+	// Tambahkan informasi spesifik blockchain jika tersedia
+	if s.client != nil {
+		networkInfo, err := s.client.GetEVMNetworkInfo()
+		if err != nil {
+			return nil
+		}
+		info["blockchain_status"] = "connected"
+		info["network_id"] = networkInfo.NetworkID
+		info["latest_block"] = networkInfo.LatestBlock
+		info["block_time"] = networkInfo.BlockTime
+		info["gas_price"] = networkInfo.GasPrice
+		info["client_version"] = networkInfo.ClientVersion
+		info["is_syncing"] = networkInfo.IsSyncing
+		info["peer_count"] = networkInfo.PeerCount
+		info["status"] = networkInfo.Status
+		// info["status"] = networkInfo.Status
+	}
+
+	return info
+}
+
+// Tambahkan method untuk menghentikan WebSocket
+func (s *BlockchainService) StopWebSocket() {
+	if s.wsServer != nil {
+		// Implement stop logic jika diperlukan
+		s.wsServer.BroadcastMessage(map[string]interface{}{
+			"type": "server_shutdown",
+			"data": map[string]interface{}{
+				"message":   "Server is shutting down",
+				"timestamp": time.Now().Unix(),
+			},
+		})
+	}
 }
 
 // GetContractEvents: Mendapatkan daftar event dari smart contract
@@ -387,3 +573,36 @@ func (s *BlockchainService) GetNetworkID(ctx context.Context, _ *pb.Empty) (*pb.
 //		return nil
 //	}
 //
+
+// func (s *BlockchainService) GetEVMNetworkInfo(ctx context.Context, _ *pb.Empty) (*pb.GetEVMNetworkInfoResponse, error) {
+// 	if s.client == nil {
+// 		// return nil, errors.New("client belum dikonfigurasi")
+// 		return &pb.GetEVMNetworkInfoResponse{
+// 			Status:      true,
+// 			Message:     "client belum dikonfigurasi",
+// 			NetworkInfo: nil,
+// 		}, nil
+// 	}
+
+// 	networkInfo, err := s.client.GetEVMNetworkInfo()
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return &pb.GetEVMNetworkInfoResponse{
+// 		Status:  true,
+// 		Message: "Berhasi mendapatkan informasi jaringan",
+// 		NetworkInfo: &pb.NetworkInfo{
+// 			ChainID:       networkInfo.ChainID.Int64(),
+// 			NetworkID:     networkInfo.NetworkID.Int64(),
+// 			LatestBlock:   networkInfo.LatestBlock,
+// 			BlockTime:     networkInfo.BlockTime,
+// 			GasPrice:      networkInfo.GasPrice.Int64(),
+// 			ClientVersion: networkInfo.ClientVersion,
+// 			IsSyncing:     networkInfo.IsSyncing,
+// 			PeerCount:     networkInfo.PeerCount,
+// 			Status:        networkInfo.Status,
+// 			Timestamp:     networkInfo.Timestamp,
+// 		},
+// 	}, nil
+
+// }

@@ -13,6 +13,7 @@ const (
 	Mainnet NetworkType = "mainnet"
 	Testnet NetworkType = "testnet"
 	Private NetworkType = "private"
+	Local   NetworkType = "local"
 )
 
 type AccountType string
@@ -44,16 +45,17 @@ type WalletTransaction struct {
 	Timestamp   time.Time // Waktu transaksi
 }
 
-// type WalletTable struct {
-// 	gorm.Model
-// 	UserId         string `gorm:"unique;not null"`
-// 	Password       string
-// 	Address        string
-// 	Name           string //Nama wallet
-// 	WalletFilename string
-// 	// PrivateKey string
-// 	// PublicKey string
-// }
+// Wallet model untuk database
+type Wallet struct {
+	ID         uint      `gorm:"primaryKey" json:"id"`
+	Address    string    `gorm:"uniqueIndex;not null" json:"address"`
+	PrivateKey string    `gorm:"not null" json:"privateKey"`
+	Keystore   string    `gorm:"type:text" json:"keystore"`
+	Filename   string    `json:"filename"`
+	Password   string    `gorm:"-" json:"-"` // tidak disimpan di database
+	CreatedAt  time.Time `json:"createdAt"`
+	UpdatedAt  time.Time `json:"updatedAt"`
+}
 
 // Network menyimpan informasi jaringan blockchain
 type Network struct {
@@ -79,19 +81,21 @@ func (Network) TableName() string {
 
 // Account menyimpan alamat Ethereum pengguna
 type Account struct {
-	ID                uint        `gorm:"primaryKey"`
-	Address           string      `gorm:"uniqueIndex;not null"` // Alamat Ethereum unik
-	Username          string      `gorm:"uniqueIndex;not null"` // Nama pengguna opsional
-	Type              AccountType `gorm:"type:account_type;default:'IMPORTED'"`
-	UserID            uint32      // data dari admin sekolah
-	Password          string      `gorm:"size:100"` // digunakan untuk keystore file
-	KeystrokeFilename string      // digunakan untuk keystore file
-	NetworkID         uint32      `gorm:"not null;index"` // Relasi ke jaringan blockchain
-	Network           Network     `gorm:"foreignKey:NetworkID"`
-	Organization      string      `json:"organization,omitempty"` // Untuk Hyperledger Fabric
-	IsActive          bool        `json:"isActive,omitempty"`
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
+	Id         uint32 `gorm:"primaryKey"`
+	Address    string `gorm:"column:address"`     // Alamat Ethereum unik
+	Username   string `gorm:"column:username"`    // Nama pengguna opsional
+	PrivateKey string `gorm:"column:private_key"` // Nama pengguna opsional
+	Keystroke  string `gorm:"column:keystroke"`
+	Filename   string `gorm:"column:filename"`
+	CreatedAt  time.Time
+	UpdatedAt  time.Time
+	// NetworkID    uint32  `gorm:"not null;index"` // Relasi ke jaringan blockchain
+	// Network      Network `gorm:"foreignKey:NetworkID"`
+	// Organization string  `json:"organization,omitempty"` // Untuk Hyperledger Fabric
+	// IsActive     bool    `json:"isActive,omitempty"`
+	// Password     string `gorm:"size:100"`             // digunakan untuk keystore file
+	// Type         AccountType `gorm:"type:account_type;default:'IMPORTED'"`
+	// UserID       uint32 // data dari admin sekolah
 }
 
 // Contract menyimpan informasi smart contract

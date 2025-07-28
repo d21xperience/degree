@@ -7,6 +7,7 @@ import HeroSection from '@/components/landing/HeroSection.vue';
 import HowItWorksWidget from '@/components/landing/HowItWorksWidget.vue';
 import MemberHaveJoined from '@/components/landing/MemberHaveJoined.vue';
 import TestimonialsWidget from '@/components/landing/TestimonialsWidget.vue';
+import WhatsAppFloat from '@/components/landing/WhatsAppFloat.vue';
 import WhyTrustUsWidget from '@/components/landing/WhyTrustUsWidget.vue';
 </script>
 
@@ -23,7 +24,7 @@ import WhyTrustUsWidget from '@/components/landing/WhyTrustUsWidget.vue';
             <TestimonialsWidget />
             <ContactUsWidget />
             <CallToActionWidget />
-
+            <WhatsAppFloat phone="6289602897265"/>
             <FooterWidget />
         </div>
     </div>

@@ -1,4 +1,4 @@
-package services
+package utils
 
 import (
 	"context"
@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -23,6 +24,22 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
+
+// Helper function untuk parsing hex string ke uint64
+func ParseHexUint64(s string) (uint64, error) {
+	// Remove 0x prefix if exists
+	if len(s) >= 2 && s[0:2] == "0x" {
+		s = s[2:]
+	}
+
+	// Parse hex to uint64
+	result, err := strconv.ParseUint(s, 16, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return result, nil
+}
 
 // Struktur untuk menyimpan respons ABI dari Etherscan
 type EtherscanABIResponse struct {

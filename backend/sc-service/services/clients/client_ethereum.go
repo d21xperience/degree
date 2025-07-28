@@ -2,25 +2,47 @@ package clients
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
+	"math"
 	"math/big"
 	"sc-service/config"
 	"sc-service/models"
 	"sc-service/repositories"
+	"sc-service/utils"
+	"time"
 
+	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 )
+
+type NetworkInfo struct {
+	ChainID       *big.Int `json:"chain_id"`
+	NetworkID     *big.Int `json:"network_id"`
+	LatestBlock   uint64   `json:"latest_block"`
+	BlockTime     uint64   `json:"block_time"`
+	GasPrice      *big.Int `json:"gas_price"`
+	ClientVersion string   `json:"client_version"`
+	IsSyncing     bool     `json:"is_syncing"`
+	PeerCount     uint64   `json:"peer_count"`
+	Status        string   `json:"status"`
+	Timestamp     int64    `json:"timestamp"`
+}
 
 // Default implementasi EthClient menggunakan go-ethereum dan RPC
 type EthereumClient struct {
 	rpcClient *rpc.Client
 	client    *ethclient.Client
 	repo      *repositories.GenericRepository[models.Account]
+	// wsURL     string
 }
 
-func NewEthereumClient(cfg *Config) (BlockchainClient, error) {
+func NewEthereumClient(cfg *config.BCConfig) (BlockchainClient, error) {
 	if cfg.RPCURL == "" {
 		return nil, fmt.Errorf("ethereum RPC URL tidak boleh kosong")
 	}
@@ -72,125 +94,311 @@ func (c *EthereumClient) NetworkID(ctx context.Context) (*big.Int, error) {
 	return id, nil
 }
 
-// // Implementasi SuggestGasPrice
-// func (c *EthereumClient) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
-// 	var result big.Int
-// 	err := c.rpcClient.CallContext(ctx, &result, "eth_gasPrice")
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &result, nil
-// }
+func (e *EthereumClient) GetEVMNetworkInfo() (*NetworkInfo, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	// Get chain ID
+	chainID, err := e.client.ChainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	// Get network ID
+	networkID, err := e.client.NetworkID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	// Get latest block number
+	latestBlock, err := e.client.BlockNumber(ctx)
+	if err != nil {
+		return nil, err
+	}
+	// Get gas price
+	gasPrice, err := e.client.SuggestGasPrice(ctx)
+	if err != nil {
+		return nil, err
+	}
+	// Get client version
+	var clientVersion string
+	cekVersion := e.rpcClient.CallContext(ctx, &clientVersion, "web3_clientVersion")
+	if cekVersion != nil {
+		log.Fatalf("Failed to get client version: %v", err)
+		return nil, err
+	}
 
-// func (c *EthereumClient) GetBalance(address string) (*big.Float, error) {
-// 	account := common.HexToAddress(address)
-// 	balance, err := c.client.BalanceAt(context.Background(), account, nil)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	// Konversi saldo dari wei ke ETH
-// 	ethBalance := new(big.Float).Quo(new(big.Float).SetInt(balance), big.NewFloat(math.Pow10(18)))
-// 	return ethBalance, nil
-// }
-// func (c *EthereumClient) GetLatestBlock() (*big.Int, error) {
-// 	block, err := c.client.BlockByNumber(context.Background(), nil) // `nil` untuk blok terbaru
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return block.Number(), nil
-// }
-// func (c *EthereumClient) SendETH(ctx context.Context, privateKeyHex, toAddress string, amount *big.Int) (string, error) {
-// 	privateKey, err := GetECDSAPrivateKey(privateKeyHex)
-// 	// privateKey, err := crypto.HexToECDSA(privateKeyHex)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	fromAddress := crypto.PubkeyToAddress(privateKey.PublicKey)
-// 	nonce, err := c.client.PendingNonceAt(context.Background(), fromAddress)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	gasPrice, err := c.client.SuggestGasPrice(context.Background())
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	tx := types.NewTransaction(nonce, common.HexToAddress(toAddress), amount, uint64(21000), gasPrice, nil)
-// 	chainID, err := c.client.NetworkID(context.Background())
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	err = c.client.SendTransaction(context.Background(), signedTx)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	return signedTx.Hash().Hex(), nil
-// }
+	// Get sync status
+	progress, err := e.client.SyncProgress(ctx)
+	if err != nil {
+		return nil, err
+	}
+	isSyncing := progress != nil
 
-// func (c *EthereumClient) SubscribeToEvents(contractAddress string) {
-// 	query := ethereum.FilterQuery{
-// 		Addresses: []common.Address{common.HexToAddress(contractAddress)},
-// 	}
-// 	logs := make(chan types.Log)
-// 	sub, err := c.client.SubscribeFilterLogs(context.Background(), query, logs)
-// 	if err != nil {
-// 		log.Fatalf("Failed to subscribe: %v", err)
-// 	}
-// 	defer sub.Unsubscribe()
+	// Get latest block for timestamp
+	var blockTime uint64
+	block, err := e.client.BlockByNumber(ctx, nil)
+	if err == nil {
+		blockTime = block.Time()
+	}
 
-// 	for {
-// 		select {
-// 		case err := <-sub.Err():
-// 			log.Printf("Subscription error: %v", err)
-// 		case vLog := <-logs:
-// 			log.Printf("New log: %+v", vLog)
-// 		}
-// 	}
-// }
+	// Get peer count (via RPC call)
+	var peerCountResult string
+	err = e.rpcClient.CallContext(ctx, &peerCountResult, "net_peerCount")
+	var peerCount uint64 = 0
+	if err == nil && peerCountResult != "" {
+		if val, err := utils.ParseHexUint64(peerCountResult); err == nil {
+			peerCount = val
+		}
+	}
 
-// func (c *EthereumClient) DeployContract(ctx context.Context, bytecode string, privateKey string, gasLimit uint64) (string, string, error) {
-// 	if c.client == nil {
-// 		return "", "", errors.New("ethereum client tidak dikonfigurasi")
-// 	}
+	return &NetworkInfo{
+		ChainID:       chainID,
+		NetworkID:     networkID,
+		LatestBlock:   latestBlock,
+		BlockTime:     blockTime,
+		GasPrice:      gasPrice,
+		ClientVersion: clientVersion,
+		IsSyncing:     isSyncing,
+		PeerCount:     uint64(peerCount),
+		Status:        "connected",
+		Timestamp:     time.Now().Unix(),
+	}, nil
+}
 
-// 	// Konversi bytecode dari string ke format bytes
-// 	contractBytecode := common.FromHex(bytecode)
+func (e *EthereumClient) SubscribeNewHeads(ch chan *types.Header) (func(), error) {
+	sub, err := e.client.SubscribeNewHead(context.Background(), ch)
+	if err != nil {
+		return nil, err
+	}
 
-// 	// Dapatkan nonce untuk transaksi
-// 	fromAddress, _ := GetAddressFromPrivateKey(privateKey) // Buat fungsi ini jika belum ada
-// 	nonce, err := c.client.PendingNonceAt(ctx, fromAddress)
-// 	if err != nil {
-// 		return "", "", err
-// 	}
+	return func() {
+		sub.Unsubscribe()
+	}, nil
+}
 
-// 	// Dapatkan harga gas saat ini
-// 	gasPrice, err := c.client.SuggestGasPrice(ctx)
-// 	if err != nil {
-// 		return "", "", err
-// 	}
+// Implementasi SuggestGasPrice
+func (c *EthereumClient) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
+	var result big.Int
+	err := c.rpcClient.CallContext(ctx, &result, "eth_gasPrice")
+	if err != nil {
+		return nil, err
+	}
+	return &result, nil
+}
 
-// 	// Buat transaksi untuk deploy contract
-// 	tx := types.NewContractCreation(nonce, big.NewInt(0), gasLimit, gasPrice, contractBytecode)
+func (c *EthereumClient) GetBalance(address string) (*models.BalanceInfo, error) {
+	account := common.HexToAddress(address)
+	balance, err := c.client.BalanceAt(context.Background(), account, nil)
+	if err != nil {
+		return nil, err
+	}
+	// Konversi saldo dari wei ke ETH
+	ethValue := new(big.Float).Quo(new(big.Float).SetInt(balance), big.NewFloat(math.Pow10(18)))
+	return &models.BalanceInfo{
+		Wei:       balance.String(),
+		Formatted: ethValue.Text('f', 18),
+	}, nil
+}
 
-// 	// Tanda tangani transaksi dengan private key
-// 	signedTx, err := SignTransaction(privateKey, tx) // Buat fungsi SignTransaction jika belum ada
-// 	if err != nil {
-// 		return "", "", err
-// 	}
+func (c *EthereumClient) GetLatestBlock() (*big.Int, error) {
+	block, err := c.client.BlockByNumber(context.Background(), nil) // `nil` untuk blok terbaru
+	if err != nil {
+		return nil, err
+	}
+	return block.Number(), nil
+}
 
-// 	// Kirim transaksi
-// 	err = c.client.SendTransaction(ctx, signedTx)
-// 	if err != nil {
-// 		return "", "", err
-// 	}
+func (c *EthereumClient) SendETH(ctx context.Context, privateKeyHex, toAddress string, amount *big.Int) (string, error) {
+	privateKey, err := utils.GetECDSAPrivateKey(privateKeyHex)
+	// privateKey, err := crypto.HexToECDSA(privateKeyHex)
+	if err != nil {
+		return "", err
+	}
+	fromAddress := crypto.PubkeyToAddress(privateKey.PublicKey)
+	nonce, err := c.client.PendingNonceAt(context.Background(), fromAddress)
+	if err != nil {
+		return "", err
+	}
+	gasPrice, err := c.client.SuggestGasPrice(context.Background())
+	if err != nil {
+		return "", err
+	}
+	tx := types.NewTransaction(nonce, common.HexToAddress(toAddress), amount, uint64(21000), gasPrice, nil)
+	chainID, err := c.client.NetworkID(context.Background())
+	if err != nil {
+		return "", err
+	}
+	signedTx, err := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
+	if err != nil {
+		return "", err
+	}
+	err = c.client.SendTransaction(context.Background(), signedTx)
+	if err != nil {
+		return "", err
+	}
+	return signedTx.Hash().Hex(), nil
+}
 
-// 	// Kembalikan alamat contract & tx hash
-// 	contractAddress := crypto.CreateAddress(fromAddress, nonce) // Buat alamat contract dari nonce
-// 	return contractAddress.Hex(), signedTx.Hash().Hex(), nil
-// }
+func (c *EthereumClient) SubscribeToEvents(contractAddress string) {
+	query := ethereum.FilterQuery{
+		Addresses: []common.Address{common.HexToAddress(contractAddress)},
+	}
+	logs := make(chan types.Log)
+	sub, err := c.client.SubscribeFilterLogs(context.Background(), query, logs)
+	if err != nil {
+		log.Fatalf("Failed to subscribe: %v", err)
+	}
+	defer sub.Unsubscribe()
+
+	for {
+		select {
+		case err := <-sub.Err():
+			log.Printf("Subscription error: %v", err)
+		case vLog := <-logs:
+			log.Printf("New log: %+v", vLog)
+		}
+	}
+}
+
+func (c *EthereumClient) DeployContract(ctx context.Context, bytecode string, privateKey string, gasLimit uint64) (string, string, error) {
+	if c.client == nil {
+		return "", "", errors.New("ethereum client tidak dikonfigurasi")
+	}
+
+	// Konversi bytecode dari string ke format bytes
+	contractBytecode := common.FromHex(bytecode)
+
+	// Dapatkan nonce untuk transaksi
+	fromAddress, _ := utils.GetAddressFromPrivateKey(privateKey) // Buat fungsi ini jika belum ada
+	nonce, err := c.client.PendingNonceAt(ctx, fromAddress)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Dapatkan harga gas saat ini
+	gasPrice, err := c.client.SuggestGasPrice(ctx)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Buat transaksi untuk deploy contract
+	tx := types.NewContractCreation(nonce, big.NewInt(0), gasLimit, gasPrice, contractBytecode)
+
+	// Tanda tangani transaksi dengan private key
+	signedTx, err := utils.SignTransaction(privateKey, tx) // Buat fungsi SignTransaction jika belum ada
+	if err != nil {
+		return "", "", err
+	}
+
+	// Kirim transaksi
+	err = c.client.SendTransaction(ctx, signedTx)
+	if err != nil {
+		return "", "", err
+	}
+
+	// Kembalikan alamat contract & tx hash
+	contractAddress := crypto.CreateAddress(fromAddress, nonce) // Buat alamat contract dari nonce
+	return contractAddress.Hex(), signedTx.Hash().Hex(), nil
+}
+
+// getGasInfo mendapatkan informasi gas
+func (c *EthereumClient) GetGasInfo() (*models.GasInfo, error) {
+	ctx := context.Background()
+
+	// Dapatkan gas price saat ini
+	gasPrice, err := c.client.SuggestGasPrice(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	gasInfo := &models.GasInfo{
+		GasPrice: gasPrice.String(),
+	}
+
+	// Try to get EIP-1559 gas data
+	tipCap, err := c.client.SuggestGasTipCap(ctx)
+	if err != nil {
+		// Network might not support EIP-1559, return legacy gas price
+		return gasInfo, nil
+	}
+
+	header, err := c.client.HeaderByNumber(ctx, nil)
+	if err != nil {
+		// If we can't get header, just use tip cap as both values
+		gasInfo.MaxFeePerGas = tipCap.String()
+		gasInfo.MaxPriorityFeePerGas = tipCap.String()
+		return gasInfo, nil
+	}
+
+	// Calculate max fee using more conservative multiplier (1.25x)
+	baseFee := header.BaseFee
+	if baseFee == nil {
+		baseFee = big.NewInt(0)
+	}
+
+	// maxFee = (baseFee * 5 / 4) + maxPriorityFee
+	baseFeeMultiplied := new(big.Int).Mul(baseFee, big.NewInt(5))
+	baseFeeMultiplied.Div(baseFeeMultiplied, big.NewInt(4))
+	maxFeePerGas := new(big.Int).Add(baseFeeMultiplied, tipCap)
+
+	gasInfo.MaxFeePerGas = maxFeePerGas.String()
+	gasInfo.MaxPriorityFeePerGas = tipCap.String()
+
+	return gasInfo, nil
+}
+
+// getChainInfo mendapatkan informasi chain berdasarkan client
+func (c *EthereumClient) GetChainInfo(rpcURL string) (*models.ChainInfo, error) {
+	ctx := context.Background()
+
+	// Dapatkan chain ID
+	chainID, err := c.client.ChainID(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Tentukan nama chain berdasarkan chain ID
+	chainDetail := c.getChainDetails(chainID.Uint64())
+
+	return &models.ChainInfo{
+		ChainId:  chainID.Uint64(),
+		Name:     chainDetail.Name,
+		RPC:      rpcURL,
+		Explorer: chainDetail.ExplorerURL,
+		NativeCurrency: models.CurrencyInfo{
+			Symbol:   "ETH",
+			Decimals: 18,
+		},
+	}, nil
+}
+
+// getChainDetails retrieves chain details based on chain ID following best practices
+func (c *EthereumClient) getChainDetails(chainID uint64) models.ChainDetails {
+	// Using a map for better maintainability and easier additions
+	chains := map[uint64]models.ChainDetails{
+		1:        {Name: "Ethereum Mainnet", ExplorerURL: "https://etherscan.io", IsTestnet: false},
+		5:        {Name: "Goerli Testnet", ExplorerURL: "https://goerli.etherscan.io", IsTestnet: true},
+		11155111: {Name: "Sepolia Testnet", ExplorerURL: "https://sepolia.etherscan.io", IsTestnet: true},
+		137:      {Name: "Polygon Mainnet", ExplorerURL: "https://polygonscan.com", IsTestnet: false},
+		80001:    {Name: "Mumbai Testnet", ExplorerURL: "https://mumbai.polygonscan.com", IsTestnet: true},
+		42161:    {Name: "Arbitrum One", ExplorerURL: "https://arbiscan.io", IsTestnet: false},
+		421613:   {Name: "Arbitrum Goerli", ExplorerURL: "https://goerli.arbiscan.io", IsTestnet: true},
+		56:       {Name: "BNB Smart Chain", ExplorerURL: "https://bscscan.com", IsTestnet: false},
+		97:       {Name: "BNB Smart Chain Testnet", ExplorerURL: "https://testnet.bscscan.com", IsTestnet: true},
+		10:       {Name: "Optimism", ExplorerURL: "https://optimistic.etherscan.io", IsTestnet: false},
+		420:      {Name: "Optimism Goerli", ExplorerURL: "https://goerli-optimism.etherscan.io", IsTestnet: true},
+		43114:    {Name: "Avalanche C-Chain", ExplorerURL: "https://snowtrace.io", IsTestnet: false},
+		43113:    {Name: "Avalanche Fuji Testnet", ExplorerURL: "https://testnet.snowtrace.io", IsTestnet: true},
+	}
+
+	if details, exists := chains[chainID]; exists {
+		return details
+	}
+
+	return models.ChainDetails{
+		Name:        fmt.Sprintf("Unknown Network (ChainID: %d)", chainID),
+		ExplorerURL: "https://etherscan.io",
+		IsTestnet:   false,
+	}
+}
 
 // // SendTransactionToContract mengirim transaksi ke smart contract
 // func (c *EthereumClient) SendTransactionToContract(ctx context.Context, contractAddress, abiJSON, method string, params []string, privateKeyHex string, gasLimit uint64) (string, error) {
@@ -698,3 +906,124 @@ func (c *EthereumClient) NetworkID(ctx context.Context) (*big.Int, error) {
 
 //     return txHash, nil
 // }
+// ContractService adalah service untuk interaksi dengan smart contract
+// type ContractService struct {
+// 	client EthClient
+// }
+
+// type SenderInfo struct {
+// }
+
+// // Constructor untuk ContractService
+// func NewContractService(client EthClient) *ContractService {
+// 	return &ContractService{client: client}
+// }
+
+// Fungsi untuk menambahkan transkrip nilai
+// func (s *ContractService) AddTranscript(degreeHash [32]byte, mataPelajaran []string, nilai []uint8) {
+// 	parsedABI, err := abi.JSON(strings.NewReader(abiJSON))
+// 	if err != nil {
+// 		log.Fatalf("Error parsing ABI: %v", err)
+// 	}
+
+// 	data, err := parsedABI.Pack("addTranscript", degreeHash, mataPelajaran, nilai)
+// 	if err != nil {
+// 		log.Fatalf("Error packing data: %v", err)
+// 	}
+
+// 	txHash, err := sendTransaction(s.client, data)
+// 	if err != nil {
+// 		log.Fatalf("Transaction failed: %v", err)
+// 	}
+
+// 	fmt.Printf("Transkrip berhasil ditambahkan! TxHash: %s\n", txHash.Hex())
+// }
+
+// func DeployContract(auth *bind.TransactOpts, client EthClient) (common.Address, string, error) {
+// 	contractAddress, tx, _, err := verval_ijazah.DeployVervalIjazah(auth, client)
+// 	if err != nil {
+// 		return common.Address{}, "", err
+// 	}
+// 	return contractAddress, tx.Hash().Hex(), nil
+// }
+
+// func DeploySmartContract(client EthClient, privateKeyHex string, chainID *big.Int) (common.Address, string, error) {
+// 	// Buat transactor
+// 	auth, err := CreateTransactor(privateKeyHex, chainID)
+// 	if err != nil {
+// 		return common.Address{}, "", err
+// 	}
+
+// 	// Deploy smart contract
+// 	contractAddress, txHash, err := DeployContract(auth, client)
+// 	if err != nil {
+// 		return common.Address{}, "", err
+// 	}
+
+// 	return contractAddress, txHash, nil
+// }
+
+// Fungsi untuk membuat transaksi dan menandatangani
+// func sendTransaction(client EthClient, data []byte) (common.Hash, error) {
+// 	// privateKeyHex := client.
+// 	privateKey, err := crypto.HexToECDSA(privateKeyHex)
+// 	if err != nil {
+// 		return common.Hash{}, err
+// 	}
+
+// 	publicKey := privateKey.Public().(*ecdsa.PublicKey)
+// 	fromAddress := crypto.PubkeyToAddress(*publicKey)
+
+// 	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
+// 	if err != nil {
+// 		return common.Hash{}, err
+// 	}
+
+// 	gasPrice, err := client.SuggestGasPrice(context.Background())
+// 	if err != nil {
+// 		return common.Hash{}, err
+// 	}
+
+// 	tx := types.NewTransaction(nonce, common.HexToAddress(contractAddress), big.NewInt(0), 3000000, gasPrice, data)
+// 	chainID, _ := client.NetworkID(context.Background())
+// 	signedTx, _ := types.SignTx(tx, types.NewEIP155Signer(chainID), privateKey)
+
+// 	err = client.SendTransaction(context.Background(), signedTx)
+// 	if err != nil {
+// 		return common.Hash{}, err
+// 	}
+
+// 	return signedTx.Hash(), nil
+// }
+
+// func DeploySmartContract(client *ethclient.Client, privateKeyHex string) (common.Address, string, error) {
+// 	privateKey, err := crypto.HexToECDSA(privateKeyHex)
+// 	if err != nil {
+// 		return common.Address{}, "", err
+// 	}
+// 	auth, err := bind.NewKeyedTransactorWithChainID(privateKey, big.NewInt(1337)) // Ganti Chain ID sesuai kebutuhan
+// 	if err != nil {
+// 		return common.Address{}, "", err
+// 	}
+// 	contractAddress, tx, _, err := verval_ijazah.DeployVervalIjazah(auth, client)
+// 	if err != nil {
+// 		return common.Address{}, "", err
+// 	}
+// 	return contractAddress, tx.Hash().Hex(), nil
+// }
+
+//	func CallSmartContract(client *ethclient.Client, contractAddress, dataID string) (string, error) {
+//		contractAddr := common.HexToAddress(contractAddress)
+//		// Replace with your contract binding
+//		instance, err := verval_ijazah.NewVervalIjazah(contractAddr, client)
+//		if err != nil {
+//			return "", err
+//		}
+//		result, err := instance.Get(&bind.CallOpts{
+//			From: contractAddr,
+//		}, dataID)
+//		if err != nil {
+//			return "", err
+//		}
+//		return result, nil
+//	}

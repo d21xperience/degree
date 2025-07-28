@@ -243,7 +243,7 @@ const luluskan = async () => {
             sekolah_id: await store.getters['sekolahService/getSekolah']?.sekolah_id
         };
         const res = await store.dispatch('sekolahService/createProsesIjazah', payload);
-        console.log(res);
+        // console.log(res);
         if (res) {
             toast.add({ severity: 'success', summary: 'Successful', detail: 'Data Ijazah berhasil ditambahkan', life: 3000 });
             selectedKelas.value = [];

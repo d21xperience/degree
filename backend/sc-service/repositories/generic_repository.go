@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgconn"
 	"gorm.io/gorm"
 )
@@ -1188,3 +1190,45 @@ func getReferenceFieldValue[T any](entity *T, fieldName string) interface{} {
 // 	}
 // 	return result
 // }
+
+func (r *GenericRepository[T]) DeleteBatch(ctx context.Context, rawIDs []string, schemaName, columnName, idType string) error {
+	var ids []any
+
+	for _, id := range rawIDs {
+		id = strings.TrimSpace(id)
+		switch idType {
+		case "uuid":
+			if u, err := uuid.Parse(id); err == nil {
+				ids = append(ids, u)
+			}
+		case "int":
+			if i, err := strconv.Atoi(id); err == nil {
+				ids = append(ids, i)
+			}
+		case "int64":
+			if i, err := strconv.ParseInt(id, 10, 64); err == nil {
+				ids = append(ids, i)
+			}
+		default:
+			ids = append(ids, id) // fallback: string
+		}
+	}
+
+	if len(ids) == 0 {
+		return fmt.Errorf("tidak ada ID valid untuk dihapus")
+	}
+
+	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec(fmt.Sprintf("SET search_path TO %s", strings.ToLower(schemaName))).Error; err != nil {
+			return fmt.Errorf("gagal mengatur schema: %w", err)
+		}
+
+		if err := tx.Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)).
+			Where(fmt.Sprintf("%s IN ?", columnName), ids).
+			Delete(nil).Error; err != nil {
+			return fmt.Errorf("gagal menghapus record pada schema %s: %w", schemaName, err)
+		}
+
+		return nil
+	})
+}

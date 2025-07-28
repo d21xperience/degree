@@ -6,12 +6,17 @@ import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import AppMenuItem from './AppMenuItem.vue';
 
+import { Network as NetworkText } from 'lucide-vue-next';
+import { shallowRef } from 'vue';
+const icons = shallowRef({
+    NetworkText
+});
 const route = useRoute();
 const sekolah = computed(() => route.params.sekolah);
 const { user, onLogout } = useAuth(); // pastikan 'user' ada dan reactive
 const isDialogSignOut = ref(false);
 
-const role = computed(() => user || 'guest');
+const role = computed(() => user); //|| 'guest');
 
 const model = computed(() => {
     const sekolahPath = sekolah.value;
@@ -161,16 +166,26 @@ const model = computed(() => {
                     to: '/su/daftar-sekolah'
                 },
                 {
-                    label: 'Smart Contract',
+                    label: 'Blockchain',
                     icon: 'pi pi-fw pi-box',
                     items: [
                         {
-                            label: 'Environment',
-                            to: '/su/blockchain/networks'
+                            label: 'Network',
+                            icon: 'pi pi-network',
+                            to: '/su/blockchain/bc-network'
+                        },
+
+                        {
+                            label: 'Wallet',
+                            to: '/su/blockchain/wallet'
                         },
                         {
                             label: 'Deploy',
                             to: '/su/blockchain/smart-contract'
+                        },
+                        {
+                            label: 'Environment',
+                            to: '/su/blockchain/networks'
                         }
                     ]
                 },
@@ -193,15 +208,28 @@ const model = computed(() => {
         });
     }
 
+    // Menu untuk Siswa
+    if (role.value === 'siswa') {
+        menu.push({
+            label: 'Siswa',
+            item: [
+                {
+                    label: 'Ijazah',
+                    icon: 'pi pi-fw pi-file',
+                    command: () => {
+                        isDialogSignOut.value = true;
+                    }
+                }
+            ]
+        });
+    }
     // Menu: Sign Out (selalu ditampilkan)
     menu.push({
         items: [
             {
                 label: 'Profile',
                 icon: 'pi pi-fw pi-user',
-                command: () => {
-                    isDialogSignOut.value = true;
-                }
+                command: () => getProfile(role.value)
             },
             {
                 label: 'Sign Out',
@@ -215,6 +243,22 @@ const model = computed(() => {
 
     return menu;
 });
+
+const getProfile = (newValue) => {
+    console.log(newValue);
+    switch (newValue) {
+        case 'superadmin':
+            router.push({ name: 'ownProfile' });
+            break;
+
+        default:
+            break;
+    }
+};
+
+// onMounted(() => {
+//     console.log(role.value);
+// });
 </script>
 
 <template>

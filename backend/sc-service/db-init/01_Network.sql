@@ -4,24 +4,25 @@ CREATE SCHEMA IF NOT EXISTS ref;
 DO $$ 
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'network_type') THEN
-        CREATE TYPE network_type AS ENUM ('mainnet', 'testnet', 'private');
+        CREATE TYPE network_type AS ENUM ('mainnet', 'testnet', 'private', 'local');
     END IF;
 END $$ LANGUAGE plpgsql;
 
-
+CREATE TYPE bc_architecture AS ENUM ('EVM', 'NONEVM') 
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE IF NOT EXISTS ref.blockchain_platform (
-	"id" UUID NOT NULL,
+	"id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 	"nm_blockchain" VARCHAR(50) NOT NULL,
 	"active" BOOLEAN NULL DEFAULT 'false',
+	"architecture" bc_architecture NULL DEFAULT 'EVM',
 	"created_at" TIMESTAMP NULL DEFAULT 'now()',
-	"updated_at" TIMESTAMP NULL DEFAULT 'now()',
-	PRIMARY KEY ("id")
+	"updated_at" TIMESTAMP NULL DEFAULT 'now()'
 );
 
-INSERT INTO ref.blockchain_platform ("id", "nm_blockchain", "active", "created_at", "updated_at") VALUES ('f45865b2-9dd9-4085-942c-89a8d1847674', 'Ethereum', 'false', '2025-04-09 16:09:11.383076', '2025-04-09 16:09:11.383076');
-INSERT INTO ref.blockchain_platform ("id", "nm_blockchain", "active", "created_at", "updated_at") VALUES ('dd0614c8-84ef-4a49-90c6-91540f1ed4aa', 'Quorum', 'false', '2025-04-09 16:09:11.383076', '2025-04-09 16:09:11.383076');
-INSERT INTO ref.blockchain_platform ("id", "nm_blockchain", "active", "created_at", "updated_at") VALUES ('1947d865-0a2a-4903-a3c7-42ce59cecb39', 'Hyperledger Fabric', 'false', '2025-04-09 16:09:11.383076', '2025-04-09 16:09:11.383076');
+INSERT INTO ref.blockchain_platform ("id", "nm_blockchain", "active", "architecture","created_at", "updated_at") VALUES ('f45865b2-9dd9-4085-942c-89a8d1847674', 'Ethereum', 'false',"EVM", '2025-04-09 16:09:11.383076', '2025-04-09 16:09:11.383076');
+INSERT INTO ref.blockchain_platform ("id", "nm_blockchain", "active", "architecture","created_at", "updated_at") VALUES ('dd0614c8-84ef-4a49-90c6-91540f1ed4aa', 'Quorum', 'false',"EVM", '2025-04-09 16:09:11.383076', '2025-04-09 16:09:11.383076');
+INSERT INTO ref.blockchain_platform ("id", "nm_blockchain", "active", "architecture","created_at", "updated_at") VALUES ('1947d865-0a2a-4903-a3c7-42ce59cecb39', 'Hyperledger Fabric', 'false',"NONEVM", '2025-04-09 16:09:11.383076', '2025-04-09 16:09:11.383076');
 
 
 CREATE TABLE IF NOT EXISTS ref.networks (
@@ -35,8 +36,8 @@ CREATE TABLE IF NOT EXISTS ref.networks (
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW(),
     activate BOOLEAN NULL DEFAULT false,
-	 available BOOLEAN NULL DEFAULT false,
-    architecture VARCHAR(100) NULL DEFAULT 'EVM'
+	available BOOLEAN NULL DEFAULT false,
+    architecture bc_architecture NULL DEFAULT 'EVM'
 );
 
 -- Insert data jaringan blockchain utama & PRIVATE
@@ -70,3 +71,28 @@ VALUES
     ('Avalanche Subnet PRIVATE', -6, 'http://127.0.0.1:9650/ext/bc/C/rpc', NULL, 'AVAX', 'private', false,false,'EVM')
 ON CONFLICT (chain_id) DO NOTHING;
 
+CREATE TABLE IF NOT EXISTS ref.accounts ( 
+    id BIGSERIAL PRIMARY KEY,
+    address TEXT NOT NULL,
+    username VARCHAR(100) NULL DEFAULT NULL,
+    private_key TEXT NULL DEFAULT NULL,
+    keystroke TEXT NULL DEFAULT NULL,
+    filename TEXT NULL DEFAULT NULL,
+    created_at TIMESTAMPTZ NULL DEFAULT NULL,
+    updated_at TIMESTAMPTZ NULL DEFAULT NULL,
+    UNIQUE (address)
+);
+
+CREATE TABLE IF NOT EXISTS ref.contracts (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    contract_address TEXT NOT NULL,
+    abi TEXT NOT NULL,
+    bytecode TEXT,
+    network_id BIGINT NOT NULL,
+    created_at TIMESTAMPTZ,
+    updated_at TIMESTAMPTZ,
+    UNIQUE (contract_address)
+);
+
+CREATE INDEX idx_contracts_network_id ON ref.contracts (network_id);

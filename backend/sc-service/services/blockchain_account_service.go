@@ -1,205 +1,207 @@
 package services
 
-// import (
-// 	"context"
-// 	"errors"
-// 	"fmt"
-// 	"log"
+import (
+	"context"
+	"fmt"
+	"log"
+	"path/filepath"
+	"time"
 
-// 	"sc-service/config"
-// 	pb "sc-service/generated"
-// 	"sc-service/models"
-// 	"sc-service/repositories"
-// 	"sc-service/utils"
-// )
+	"sc-service/config"
+	pb "sc-service/generated"
+	"sc-service/models"
+	"sc-service/repositories"
+	"sc-service/utils"
 
-// type BlockchainAccountService struct {
-// 	pb.UnimplementedBlockchainAccountServiceServer
-// 	config   *Config          // Konfigurasi runtime
-// 	client   BlockchainClient // Client yang digunakan (Ethereum/Quorum)
-// 	schema   SchemaService
-// 	repoAkun *repositories.GenericRepository[models.Account]
-// }
+	"github.com/ethereum/go-ethereum/accounts/keystore"
+)
 
-// // Constructor untuk BlockchainAccountService
-// func NewBlockchainAccountService() *BlockchainAccountService {
-// 	schemaRepository := repositories.NewSchemaRepository(config.DB)
-// 	sekolahTenantRepository := repositories.NewsekolahTenantRepository(config.DB)
-// 	schema := NewSchemaService(schemaRepository, sekolahTenantRepository)
-// 	akunRepository := repositories.NewAccountRepository(config.DB)
-// 	return &BlockchainAccountService{
-// 		config:   &Config{},
-// 		schema:   schema,
-// 		repoAkun: akunRepository,
-// 	}
-// }
+type BlockchainAccountService struct {
+	pb.UnimplementedBlockchainAccountServiceServer
+	// config   *Config          // Konfigurasi runtime
+	// client   BlockchainClient // Client yang digunakan (Ethereum/Quorum)
+	schema   SchemaService
+	repoAkun *repositories.GenericRepository[models.Account]
+}
 
-// // func (s *BlockchainAccountService) CreateBlockchainAccount(ctx context.Context, req *pb.CreateBlockchainAccountRequest) (*pb.CreateBlockchainAccountResponse, error) {
-// // 	if s.client == nil {
-// // 		return nil, errors.New("client belum dikonfigurasi")
-// // 	}
-// // 	// Daftar field yang wajib diisi
-// // 	requiredFields := []string{"AkunParam", "schemaname"}
-// // 	// Validasi request
-// // 	err := utils.ValidateFields(req, requiredFields)
-// // 	if err != nil {
-// // 		return nil, err
-// // 	}
-// // 	if req.GetSchemaname() == "\"\"" {
-// // 		return nil, errors.New("schemaname tidak boleh kosong")
-// // 	}
+// Constructor untuk BlockchainAccountService
+func NewBlockchainAccountService() *BlockchainAccountService {
+	schemaRepository := repositories.NewSchemaRepository(config.DB)
+	sekolahTenantRepository := repositories.NewsekolahTenantRepository(config.DB)
+	schema := NewSchemaService(schemaRepository, sekolahTenantRepository)
+	akunRepository := repositories.NewAccountRepository(config.DB)
+	return &BlockchainAccountService{
+		// config:   &Config{},
+		schema:   schema,
+		repoAkun: akunRepository,
+	}
+}
 
-// // 	var tenantSekolah = TenantSekolah{
-// // 		// SekolahId:       req.AkunParam.SekolahId,
-// // 		UserId:      req.AkunParam.UserId,
-// // 		Password:    req.AkunParam.Password,
-// // 		NamaSekolah: req.AkunParam.Organization,
-// // 		// SekolahIdEnkrip: req.AkunParam.SekolahIdEnkrip,
-// // 		Schemaname: req.GetSchemaname(),
-// // 	}
-// // 	schemaModel, schemaName, err := s.schema.GetOrCreateSchema(ctx, &tenantSekolah)
-// // 	if err != nil {
-// // 		return nil, err
-// // 	}
-// // 	contractAddress, err := s.client.GenerateNewAccount(ctx, tenantSekolah.UserId, tenantSekolah.Password)
-// // 	if err != nil {
-// // 		log.Printf("Gagal membuat akun: %v", err)
-// // 		return nil, fmt.Errorf("gagal membuat akun: %w", err)
-// // 	}
-// // 	//  type assertion (.(string))
-// // 	address, ok := contractAddress["Address"].(string)
-// // 	if !ok {
-// // 		log.Fatal("Error: Address is not a string")
-// // 	}
-// // 	pass, ok := contractAddress["Password"].(string)
-// // 	if !ok {
-// // 		log.Fatal("Error: Address is not a string")
-// // 	}
-// // 	key, ok := contractAddress["KeystrokeFilename"].(string)
-// // 	if !ok {
-// // 		log.Fatal("Error: Address is not a string")
-// // 	}
-// // 	// Load network
-// // 	// bcNetwork :=
-// // 	// Simpan ke database
-// // 	s.repoAkun.Save(ctx, &models.Account{
-// // 		Username:          "",
-// // 		UserID:            tenantSekolah.UserId,
-// // 		Type:              models.AccountType("KEYSTORE"),
-// // 		Address:           address,
-// // 		Password:          pass,
-// // 		KeystrokeFilename: key,
-// // 		NetworkID:         uint32(req.AkunParam.NetworkId),
-// // 		Organization:      schemaModel.NamaSekolah,
-// // 	}, schemaName)
-// // 	// txHash := ""
-// // 	return &pb.CreateBlockchainAccountResponse{
-// // 		Status:  true,
-// // 		Message: address,
-// // 	}, nil
-// // }
+func (s *BlockchainAccountService) CreateBlockchainAccount(ctx context.Context, req *pb.CreateBlockchainAccountRequest) (*pb.CreateBlockchainAccountResponse, error) {
+	log.Printf("blockchain_account_service/CreateBlockchainAccount received data from request: %+v\n", req)
+	// Daftar field yang wajib diisi
+	requiredFields := []string{"Password"}
+	// Validasi request
+	requiredFieldsResponse := utils.ValidateFields(req, requiredFields)
+	if requiredFieldsResponse != nil {
+		return nil, requiredFieldsResponse
+	}
 
-// func (s *BlockchainAccountService) GetBlockchainAccounts(ctx context.Context, req *pb.GetBlockchainAccountsRequest) (*pb.GetBlockchainAccountsResponse, error) {
+	address, err := createKeystore(s, req.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.CreateBlockchainAccountResponse{
+		Status:  true,
+		Message: "Berhasil membuat akun",
+		Account: &pb.BlockchainAccount{
+			Address: address,
+		},
+	}, nil
+}
+
+func (s *BlockchainAccountService) GetBlockchainAccounts(ctx context.Context, req *pb.GetBlockchainAccountsRequest) (*pb.GetBlockchainAccountsResponse, error) {
+	log.Printf("bc_account_service/GetBlochainAccounts received data from request: %+v\n", req)
+	// Daftar field yang wajib diisi
+	requiredFields := []string{"Username"}
+	// Validasi request
+	requiredFieldsResponse := utils.ValidateFields(req, requiredFields)
+	if requiredFieldsResponse != nil {
+		return nil, requiredFieldsResponse
+	}
+	conditions := map[string]any{
+		"username": req.Username,
+	}
+	accounts, err := s.repoAkun.FindAllByConditions(ctx, "ref", conditions, 50, 0)
+	if err != nil {
+		log.Printf("Gagal mendapatkan akun: %v", err)
+		return &pb.GetBlockchainAccountsResponse{
+			Status:   false,
+			Message:  fmt.Sprintf("gagal mendapatkan akun: %s", err),
+			Accounts: nil,
+		}, nil
+	}
+
+	results := utils.ConvertModelsToPB(accounts, func(item *models.Account) *pb.BlockchainAccount {
+		return &pb.BlockchainAccount{
+			Username:  item.Username,
+			Address:   item.Address,
+			Keystroke: item.Keystroke,
+			Filename:  item.Filename,
+			CreatedAt: item.CreatedAt.String(),
+		}
+	})
+
+	return &pb.GetBlockchainAccountsResponse{
+		Status:   true,
+		Message:  "Berhasil mendapatkan akun",
+		Accounts: results,
+	}, nil
+}
+
+func (s *BlockchainAccountService) DeleteBlockchainAccount(ctx context.Context, req *pb.DeleteBlockchainAccountRequest) (*pb.DeleteBlockchainAccountResponse, error) {
+
+	return &pb.DeleteBlockchainAccountResponse{
+		Status:  true,
+		Message: "Berhasil menghapus wallet",
+	}, nil
+}
+
+// func (s *BlockchainAccountService) CreateWhiteListAccount(ctx context.Context, req *pb.CreateWhiteListAccountRequest) (*pb.CreateWhiteListAccountResponse, error) {
+// 	log.Printf("bc_account_service/CreateWhiteListAccount received data from request: %+v\n", req)
 // 	// Daftar field yang wajib diisi
-// 	requiredFields := []string{"Schemaname"}
+// 	requiredFields := []string{"Username", "WalletAddress"}
 // 	// Validasi request
-// 	err := utils.ValidateFields(req, requiredFields)
+// 	requiredFieldsResponse := utils.ValidateFields(req, requiredFields)
+// 	if requiredFieldsResponse != nil {
+// 		return nil, requiredFieldsResponse
+// 	}
+
+// 	rpcUrl := "http://localhost:8545"
+// 	client, err := ethclient.Dial(rpcUrl)
 // 	if err != nil {
-// 		return nil, err
+// 		return &pb.CreateWhiteListAccountResponse{
+// 			Status:  false,
+// 			Message: fmt.Sprintf("Gagal koneksi ke jaringan. err: %w", err),
+// 		}, nil
 // 	}
-// 	if req.GetSchemaname() == "\"\"" {
-// 		return nil, errors.New("schemaname tidak boleh kosong")
-// 	}
-// 	// accounts, err := s.client.GetAccounts(ctx, req.GetUserId(), req.GetSchemaname())
-// 	var condition = map[string]interface{}{
-// 		"schemaname": req.GetSchemaname(),
-// 	}
-// 	accounts, err := s.repoAkun.FindAllByConditions(ctx, req.GetSchemaname(), condition, 100, 0)
+// 	privateKey, err := crypto.HexToECDSA(os.Getenv("SUPERADMIN_PRIVATE_KEY"))
 
+// 	publicKey := privateKey.Public().(*ecdsa.PublicKey)
+// 	from := crypto.PubkeyToAddress(*publicKey)
+
+// 	nonce, _ := client.PendingNonceAt(context.Background(), from)
+// 	gasPrice, _ := client.SuggestGasPrice(context.Background())
+// 	chainID, _ := client.NetworkID(context.Background())
+
+// 	auth, _ := bind.NewKeyedTransactorWithChainID(privateKey, chainID)
+// 	auth.Nonce = big.NewInt(int64(nonce))
+// 	auth.Value = big.NewInt(0)
+// 	auth.GasLimit = uint64(300000)
+// 	auth.GasPrice = gasPrice
+
+// 	// Ambil address dan binding kontrak
+// 	contractAddress := common.HexToAddress(os.Getenv("CONTRACT_ADDRESS"))
+// 	instance, err := abi.NewVerifikasiIjazah(contractAddress, client)
 // 	if err != nil {
-// 		log.Printf("Gagal mendapatkan akun: %v", err)
-// 		return nil, fmt.Errorf("gagal mendapatkan akun: %w", err)
+// 		return &pb.CreateWhiteListAccountResponse{
+// 			Status:  false,
+// 			Message: fmt.Sprintf("Gagal koneksi ke jaringan. err: %w", err),
+// 		}, nil
 // 	}
 
-// 	results := utils.ConvertModelsToPB(accounts, func(model *models.Account) *pb.BlockchainAccount {
-// 		return &pb.BlockchainAccount{
-// 			UserId:            model.UserID,
-// 			Address:           model.Address,
-// 			KeystrokeFilename: model.KeystrokeFilename,
-// 		}
-// 	})
-// 	status := false
-// 	if len(results) > 0 {
-// 		status = true
-// 	}
-// 	return &pb.GetBlockchainAccountsResponse{
-// 		Status:             status,
-// 		Blockchainaccounts: results,
-// 	}, nil
-// }
+//		// Panggil daftarSekolah
+//		sekolahAddr := common.HexToAddress(req.WalletAddress)
+//		tx, err := instance.DaftarSekolah(auth, sekolahAddr)
+//		if err != nil {
+//			return &pb.CreateWhiteListAccountResponse{
+//				Status:  false,
+//				Message: fmt.Sprintf("Gagal koneksi ke jaringan. err: %w", err),
+//			}, nil
+//		}
+//		log.Println("Whitelist berhasil:", tx.Hash().Hex())
+//		return &pb.CreateWhiteListAccountResponse{
+//			Status:  true,
+//			Message: fmt.Sprintf("Berhasil mendeploy smartcontract dengan tx_hash: %s", tx.Hash().Hex()),
+//		}, nil
+//	}
+func (s *BlockchainAccountService) GetWhiteListAccount(ctx context.Context, req *pb.GetWhiteListAccountRequest) (*pb.GetWhiteListAccountResponse, error) {
+	return &pb.GetWhiteListAccountResponse{
+		Status:  true,
+		Message: "Berhasil",
+	}, nil
+}
+func (s *BlockchainAccountService) DeleteWhiteListAccount(ctx context.Context, req *pb.DeleteWhiteListAccountRequest) (*pb.DeleteWhiteListAccountResponse, error) {
+	return &pb.DeleteWhiteListAccountResponse{
+		Status:  true,
+		Message: "Berhasil",
+	}, nil
+}
 
-// // func (s *BlockchainAccountService) ImportBlockchainAccount(ctx context.Context, req *pb.ImportBlockchainAccountRequest) (*pb.ImportBlockchainAccountResponse, error) {
-// // 	// Daftar field yang wajib diisi
-// // 	requiredFields := []string{"Admin", "Network"}
-// // 	// Validasi request
-// // 	err := utils.ValidateFields(req, requiredFields)
-// // 	if err != nil {
-// // 		return nil, err
-// // 	}
-// // 	// GetOrCreate(schemaname)
-// // 	var tenantSekolah = tenantSekolah{
-// // 		SekolahId:       req.Admin.SekolahId,
-// // 		UserId:          req.Admin.UserId,
-// // 		Password:        req.Admin.Password,
-// // 		NamaSekolah:     req.Admin.NamaSekolah,
-// // 		SekolahIdEnkrip: req.Admin.SekolahIdEnkrip,
-// // 		Schemaname:      req.GetSchemaname(),
-// // 	}
-// // 	schemaModel, schemaName, err := s.schema.GetOrCreateSchema(ctx, &tenantSekolah)
-// // 	if !errors.Is(err, ErrSchemaFound) {
-// // 		return nil, err
-// // 	}
-// // 	address, err := ImportPrivateKey(req.GetPrivateKey())
-// // 	if err != nil {
-// // 		log.Printf("Gagal membuat akun: %v", err)
-// // 		return nil, fmt.Errorf("gagal membuat akun: %w", err)
-// // 	}
-// // 	err = s.repoAkun.Save(ctx, &models.Account{
-// // 		Username:     "",
-// // 		UserID:       tenantSekolah.UserId,
-// // 		Type:         models.AccountType("import"),
-// // 		Address:      address.Hex(),
-// // 		NetworkID:    req.Network.Id,
-// // 		Organization: schemaModel.NamaSekolah,
-// // 	}, schemaName)
-// // 	if err != nil {
-// // 		return nil, err
-// // 	}
-// // 	return &pb.ImportBlockchainAccountResponse{
-// // 		Status:  true,
-// // 		Message: "Akun berhasi diimport dengan address " + address.Hex(),
-// // 	}, nil
-// // }
+func createKeystore(c *BlockchainAccountService, password string) (string, error) {
+	key := keystore.NewKeyStore("./wallet", keystore.StandardScryptN, keystore.StandardScryptP)
 
-// // IssueDegree mengeluarkan ijazah di Ethereum
-// // func (e *BlockchainAccountService) IssueDegree(ctx context.Context, contractAddress string, degreeHash [32]byte, sekolah string, issueDate uint64, privateKey string, gasLimit uint64) (string, error) {
-// // 	//  Load ABI
-// // 	parsedABI, err := abi.JSON(strings.NewReader(abiJSON))
-// // 	if err != nil {
-// // 		return "", fmt.Errorf("error parsing ABI: %v", err)
-// // 	}
+	a, err := key.NewAccount(password)
+	if err != nil {
+		return "", err
+	}
+	// simpan ke database
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	// pass, err := utils.EncryptPassword(password)
+	// if err != nil {
+	// 	return "", err
+	// }
+	simpan := c.repoAkun.Save(ctx, &models.Account{
+		Address: a.Address.Hex(),
+		// Password:          pass,
+		Filename: filepath.Base(a.URL.Path),
+	}, "ref")
+	if simpan != nil {
+		return "", simpan
+	}
 
-// // 	//  Encode data untuk fungsi `issueDegree`
-// // 	data, err := parsedABI.Pack("issueDegree", degreeHash, sekolah, big.NewInt(int64(issueDate)))
-// // 	if err != nil {
-// // 		return "", fmt.Errorf("error packing data: %v", err)
-// // 	}
+	return string(a.Address.Hex()), nil
 
-// // 	//  Kirim transaksi menggunakan SendTransactionToContract
-// // 	txHash, err := SendTransactionToContract(ctx, e.client, contractAddress, data, privateKey, gasLimit)
-// // 	if err != nil {
-// // 		return "", fmt.Errorf("transaction failed: %v", err)
-// // 	}
-
-// // 	return txHash, nil
-// // }
+}

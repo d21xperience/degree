@@ -29,16 +29,13 @@ func NewBCPlatformServiceServer() *BCPlatformServiceServer {
 
 // SetConfig: Mengatur konfigurasi blockchain
 func (s *BCPlatformServiceServer) GetBCPlatform(ctx context.Context, req *pb.GetBCPlatformRequest) (*pb.GetBCPlatformResponse, error) {
-	// Daftar field yang wajib diisi
-	// requiredFields := []string{"Schemaname"}
-	// // Validasi request
-	// err := utils.ValidateFields(req, requiredFields)
-	// if err != nil {
-	// 	return nil, err
-	// }
 	bcPlatformModels, err := s.repo.FindAll(ctx, "ref", 5, 0)
 	if err != nil {
-		return nil, err
+		return &pb.GetBCPlatformResponse{
+			Status:     false,
+			Message:    "Gagal mengambil bc platform",
+			BcPlatform: nil,
+		}, nil
 	}
 	results := utils.ConvertModelsToPB(bcPlatformModels, func(model *models.BCPlatform) *pb.BCPlatform {
 		return &pb.BCPlatform{
@@ -48,20 +45,13 @@ func (s *BCPlatformServiceServer) GetBCPlatform(ctx context.Context, req *pb.Get
 		}
 	})
 	return &pb.GetBCPlatformResponse{
+		Status:     true,
+		Message:    "Berhasil mengambil bc platform",
 		BcPlatform: results,
 	}, nil
 }
 func (s *BCPlatformServiceServer) SetBCPlatform(ctx context.Context, req *pb.SetBCPlatformRequest) (*pb.SetBCPlatformResponse, error) {
-	// // Daftar field yang wajib diisi
-	// requiredFields := []string{"BcPlatform", "Schemaname"}
-	// // Validasi request
-	// err := utils.ValidateFields(req, requiredFields)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// schemaname := req.GetSchemaname()
 	bcPlatform := req.GetBcPlatform()
-
 	bcPlatformModel := utils.ConvertModelToPB(bcPlatform, func(mod *pb.BCPlatform) *models.BCPlatform {
 		parsedUUID, err := uuid.Parse(mod.Id)
 		if err != nil {
