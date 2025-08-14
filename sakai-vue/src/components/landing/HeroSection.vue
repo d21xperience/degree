@@ -101,21 +101,23 @@
 
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue';
-import TopbarWidget from './TopbarWidget.vue';
+import { useI18n } from 'vue-i18n';
 import LazyImage from '../LazyImage.vue';
+import TopbarWidget from './TopbarWidget.vue';
+const { t } = useI18n();
 // Emits
 const emit = defineEmits(['verification-submit', 'dialog-open', 'dialog-close', 'background-load']);
 
 // Reactive data
-const heroData = reactive({
-    headline: 'Ijazah Terverifikasi, Masa Depan Terjamin',
-    subtitle: 'Pastikan keaslian ijazah Anda dengan teknologi blockchain yang aman dan transparan.',
-    ctaText: 'Verifikasi Sekarang',
+const heroData = computed(() => ({
+    headline: t('hero.headline'),
+    subtitle: t('hero.subtitle'),
+    ctaText: t('hero.ctaText'),
     backgroundImage: {
         src: 'https://localhost/static/landingpage/7.jpg',
         alt: 'Latar belakang teknologi blockchain dengan visualisasi keamanan data'
     }
-});
+}));
 
 const dialogData = reactive({
     title: 'Verifikasi Ijazah'

@@ -10,6 +10,8 @@ import (
 
 	"sc-service/config"
 	pb "sc-service/generated"
+	"sc-service/models"
+	"sc-service/repositories"
 	"sc-service/services/clients"
 
 	"sc-service/utils"
@@ -18,17 +20,20 @@ import (
 
 type BlockchainService struct {
 	pb.UnimplementedBlockchainServiceServer
-	config   *config.BCConfig // Konfigurasi runtime
-	client   clients.BlockchainClient
-	wsServer *websocket.WebSocketServer
+	config       *config.BCConfig // Konfigurasi runtime
+	client       clients.BlockchainClient
+	wsServer     *websocket.WebSocketServer
+	repoContract *repositories.GenericRepository[models.Contract]
 }
 
 // Constructor untuk BlockchainService
 func NewBlockchainService() *BlockchainService {
+	repoContract := repositories.NewContractDataRepository(config.DB)
 	return &BlockchainService{
-		config:   &config.BCConfig{},
-		client:   nil,
-		wsServer: nil,
+		config:       &config.BCConfig{},
+		client:       nil,
+		wsServer:     nil,
+		repoContract: repoContract,
 	}
 }
 
@@ -142,7 +147,12 @@ func (s *BlockchainService) GetWalletInfo(ctx context.Context, req *pb.GetWallet
 	// Validasi request
 	requiredFieldsResponse := utils.ValidateFields(req, requiredFields)
 	if requiredFieldsResponse != nil {
-		return nil, requiredFieldsResponse
+		// return nil, requiredFieldsResponse
+		return &pb.GetWalletInfoResponse{
+			Status:     false,
+			Message:    fmt.Sprintf("Error: %v", requiredFieldsResponse),
+			WalletData: nil,
+		}, nil
 	}
 
 	if s.client == nil {
@@ -188,7 +198,7 @@ func (s *BlockchainService) GetWalletInfo(ctx context.Context, req *pb.GetWallet
 		Chain: &pb.ChainInfo{
 			ChainId:  chainInfo.ChainId,
 			Name:     chainInfo.Name,
-			RPC:      chainInfo.RPC,
+			Rpc:      chainInfo.RPC,
 			Explorer: chainInfo.Explorer,
 			// NativeCurrency: &pb.CurrencyInfo{
 			// 	Symbol: ,
@@ -422,35 +432,116 @@ func (s *BlockchainService) StopWebSocket() {
 // 	}, nil
 // }
 
-// func (s *BlockchainService) DeployIjazahContract(ctx context.Context, req *pb.DeployIjazahContractRequest) (*pb.DeployIjazahContractResponse, error) {
-// 	if s.client.client == nil {
-// 		return nil, errors.New("client belum dikonfigurasi")
-// 	}
-// 	// Daftar field yang wajib diisi
-// 	requiredFields := []string{"AccountType", "PrivateKey"}
-// 	// Validasi request
-// 	err := utils.ValidateFields(req, requiredFields)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	// if req.AcountType == pb.AccountType_IMPORTED{
+func (s *BlockchainService) DeployContract(ctx context.Context, req *pb.DeployContractRequest) (*pb.DeployContractResponse, error) {
+	if s.client == nil {
+		return nil, errors.New("client belum dikonfigurasi")
+	}
+	// Daftar field yang wajib diisi
+	requiredFields := []string{"ContractRequest", "Password", "AbiName", "BinName"}
+	// Validasi request
+	err := utils.ValidateFields(req, requiredFields)
+	if err != nil {
+		return nil, err
+	}
+	bcAccount := models.Account{
+		Address:  req.ContractRequest.ContractAddress,
+		Username: req.Username,
+	}
 
-// 	// }
+	contractAddress, txHash, err := s.client.DeployContract(ctx, req.Password, req.AbiName, req.BinName, &bcAccount)
+	if err != nil {
+		return &pb.DeployContractResponse{
+			Status:  false,
+			Message: fmt.Sprintf("%v", err),
+		}, nil
+	}
+	// contractAddress := "0x700b6A60ce7EaaEA56F065753d8dcB9653dbAD35"
+	// txHash := "0x1ff08a7281ade814e914a333b22e0f682b7a1c94153c48a00a5b842198aa256f"
+	// Simpan ke DB
+	contractModel := models.Contract{
+		ContractName:    req.ContractRequest.ContractName,
+		ContractAddress: contractAddress,
+		TxHash:          txHash,
+		ContractOwner:   &req.ContractRequest.ContractOwner,
+		OwnerAddress:    bcAccount.Address,
+		NetworkID:       req.ContractRequest.Id,
+	}
+	simpan := s.repoContract.Save(ctx, &contractModel, "public")
+	if simpan != nil {
+		return &pb.DeployContractResponse{
+			Status:  false,
+			Message: fmt.Sprintf("%v", simpan),
+		}, nil
+	}
+	return &pb.DeployContractResponse{
+		ContractAddress: contractAddress,
+		TxHash:          txHash,
+		Status:          true,
+		Message:         "behasil membuat kontrak",
+	}, nil
 
-// 	// if req.GetUserId() == "\"\"" || req.GetPassword() == "\"\"" {
-// 	// 	return nil, errors.New("user dan password tidak boleh kosong")
-// 	// }
+}
 
-// 	contractAddress, txHash, err := s.client.DeployIjazahContract(ctx, req.PrivateKey)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &pb.DeployIjazahContractResponse{
-// 		ContractAddress: contractAddress,
-// 		TxHash:          txHash,
-// 	}, nil
+func (s *BlockchainService) GetContract(ctx context.Context, req *pb.GetContractRequest) (*pb.GetContractResponse, error) {
+	log.Printf("bc_service/GetContract received data from request: %+v\n", req)
+	// Daftar field yang wajib diisi
+	requiredFields := []string{"OwnerAddress"}
+	// Validasi request
+	requiredFieldsResponse := utils.ValidateFields(req, requiredFields)
+	if requiredFieldsResponse != nil {
+		return nil, requiredFieldsResponse
+	}
+	conditions := map[string]any{
+		"owner_address": req.OwnerAddress,
+	}
+	contracts, err := s.repoContract.FindAllByConditions(ctx, "public", conditions, 100, 0)
+	if err != nil {
+		return nil, err
+	}
+	results := utils.ConvertModelsToPB(contracts, func(item *models.Contract) *pb.Contract {
+		return &pb.Contract{
+			Id:              item.ID,
+			ContractName:    item.ContractName,
+			OwnerAddress:    item.OwnerAddress,
+			ContractAddress: item.ContractAddress,
+			TxHash:          item.TxHash,
+			NetworkId:       item.NetworkID,
+			ContractOwner:   utils.SafeString(item.ContractOwner),
+			IsActive:        item.IsActive,
+		}
+	})
+	return &pb.GetContractResponse{
+		Status:   true,
+		Message:  "Berhasil mengambil kontrak",
+		Contract: results,
+	}, nil
+}
 
-// }
+func (s *BlockchainService) ActiveContract(ctx context.Context, req *pb.Empty) (*pb.ActiveContractResponse, error) {
+
+	conditions := map[string]any{
+		"is_active": true,
+	}
+	contracts, err := s.repoContract.FindAllByConditions(ctx, "public", conditions, 1, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.ActiveContractResponse{
+		Status:  true,
+		Message: "Berhasil mendapatkan contract aktif",
+		Contract: &pb.Contract{
+			Id:              contracts[0].ID,
+			ContractName:    contracts[0].ContractName,
+			ContractAddress: contracts[0].ContractAddress,
+			ContractOwner:   utils.SafeString(contracts[0].ContractOwner),
+			OwnerAddress:    utils.SafeString(contracts[0].ContractOwner),
+			TxHash:          contracts[0].TxHash,
+			NetworkId:       contracts[0].NetworkID,
+			IsActive:        contracts[0].IsActive,
+		},
+	}, nil
+}
 
 // SendTransactionToContract: Mengirim data ke smart contract dengan memanggil fungsi tertentu
 // func (s *BlockchainService) SendTransactionToContract(ctx context.Context, req *pb.SendTransactionToContractRequest) (*pb.SendTransactionToContractResponse, error) {

@@ -180,7 +180,7 @@ const model = computed(() => {
                             to: '/su/blockchain/wallet'
                         },
                         {
-                            label: 'Deploy',
+                            label: 'Smart Contract',
                             to: '/su/blockchain/smart-contract'
                         },
                         {

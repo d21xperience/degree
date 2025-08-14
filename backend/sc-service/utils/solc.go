@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -9,22 +10,54 @@ import (
 	"strings"
 )
 
-func CompileSolidityFile(solPath string) (abiPath string, binPath string, err error) {
-	outputDir := filepath.Dir(solPath)
+func CompileSolidityFile(srcPath string) (string, string, error) {
+	dir := filepath.Dir(srcPath)
+	base := filepath.Base(srcPath)
+	solName := strings.TrimSuffix(base, filepath.Ext(base)) // misal: ijazah_v3
 
-	cmd := exec.Command("solc", "--abi", "--bin", solPath, "-o", outputDir)
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-
-	err = cmd.Run()
+	// Jalankan solc
+	cmd := exec.Command("solc", "--abi", "--bin", srcPath, "-o", dir, "--overwrite")
+	output, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", "", fmt.Errorf("compile error: %w", err)
+		return "", "", fmt.Errorf("kompilasi gagal: %v\nOutput: %s", err, string(output))
 	}
 
-	baseName := strings.TrimSuffix(filepath.Base(solPath), ".sol")
-	abiPath = filepath.Join(outputDir, baseName+".abi")
-	binPath = filepath.Join(outputDir, baseName+".bin")
-	return abiPath, binPath, nil
+	// Temukan file .abi dan .bin yang baru saja dihasilkan
+	files, err := os.ReadDir(dir)
+	if err != nil {
+		return "", "", fmt.Errorf("gagal membaca direktori: %w", err)
+	}
+
+	var abiFile, binFile string
+	for _, file := range files {
+		name := file.Name()
+		if strings.HasSuffix(name, ".abi") && abiFile == "" {
+			abiFile = name
+		}
+		if strings.HasSuffix(name, ".bin") && binFile == "" {
+			binFile = name
+		}
+	}
+
+	if abiFile == "" || binFile == "" {
+		return "", "", errors.New("file ABI atau BIN tidak ditemukan setelah kompilasi")
+	}
+
+	// Rename file menjadi nama file .sol
+	newAbiPath := filepath.Join(dir, solName+".abi")
+	newBinPath := filepath.Join(dir, solName+".bin")
+
+	err = os.Rename(filepath.Join(dir, abiFile), newAbiPath)
+	if err != nil {
+		return "", "", fmt.Errorf("gagal rename ABI: %w", err)
+	}
+
+	err = os.Rename(filepath.Join(dir, binFile), newBinPath)
+	if err != nil {
+		return "", "", fmt.Errorf("gagal rename BIN: %w", err)
+	}
+
+	return newAbiPath, newBinPath, nil
 }
 
 func GetSolcVersion() (string, error) {

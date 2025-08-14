@@ -1,10 +1,5 @@
 package middleware
 
-import (
-	"net/http"
-	"sekolah/utils"
-)
-
 // func JWTAuth(secret string) func(http.Handler) http.Handler {
 // 	return func(next http.Handler) http.Handler {
 // 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -40,27 +35,27 @@ import (
 // 	}
 // }
 
-func JWTAuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Allow unauthenticated routes
-		if r.URL.Path == "/api/v1/as/auth/web/login" || r.URL.Path == "/api/v1/as/auth/web/refresh" || r.URL.Path == "/api/v1/as/auth/web/logout" || r.URL.Path == "/api/v1/as/sekolah" {
-			next.ServeHTTP(w, r)
-			return
-		}
+// func JWTAuthMiddleware(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 		// Allow unauthenticated routes
+// 		if r.URL.Path == "/api/v1/as/auth/web/login" || r.URL.Path == "/api/v1/as/auth/web/refresh" || r.URL.Path == "/api/v1/as/auth/web/logout" || r.URL.Path == "/api/v1/as/sekolah" {
+// 			next.ServeHTTP(w, r)
+// 			return
+// 		}
 
-		// Validasi token
-		cookie, err := r.Cookie("access_token")
-		if err != nil || cookie.Value == "" {
-			http.Error(w, "Unauthorized: no token", http.StatusUnauthorized)
-			return
-		}
+// 		// Validasi token
+// 		cookie, err := r.Cookie("access_token")
+// 		if err != nil || cookie.Value == "" {
+// 			http.Error(w, "Unauthorized: no token", http.StatusUnauthorized)
+// 			return
+// 		}
 
-		_, err = utils.ValidateJWT(cookie.Value)
-		if err != nil {
-			http.Error(w, "Unauthorized: invalid token", http.StatusUnauthorized)
-			return
-		}
+// 		_, err = utils.ValidateJWT(cookie.Value)
+// 		if err != nil {
+// 			http.Error(w, "Unauthorized: invalid token", http.StatusUnauthorized)
+// 			return
+// 		}
 
-		next.ServeHTTP(w, r)
-	})
-}
+// 		next.ServeHTTP(w, r)
+// 	})
+// }

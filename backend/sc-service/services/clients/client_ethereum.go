@@ -2,18 +2,23 @@ package clients
 
 import (
 	"context"
+	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"log"
 	"math"
 	"math/big"
+	"os"
 	"sc-service/config"
 	"sc-service/models"
 	"sc-service/repositories"
 	"sc-service/utils"
+	"strings"
 	"time"
 
 	"github.com/ethereum/go-ethereum"
+	"github.com/ethereum/go-ethereum/accounts/abi"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
@@ -258,89 +263,186 @@ func (c *EthereumClient) SubscribeToEvents(contractAddress string) {
 	}
 }
 
-func (c *EthereumClient) DeployContract(ctx context.Context, bytecode string, privateKey string, gasLimit uint64) (string, string, error) {
+func (c *EthereumClient) DeployContract(ctx context.Context, password, abiName, binName string, bcAccount *models.Account) (string, string, error) {
 	if c.client == nil {
-		return "", "", errors.New("ethereum client tidak dikonfigurasi")
+		return "", "", errors.New("ethereum client belum dikonfigurasi")
 	}
-
-	// Konversi bytecode dari string ke format bytes
-	contractBytecode := common.FromHex(bytecode)
-
-	// Dapatkan nonce untuk transaksi
-	fromAddress, _ := utils.GetAddressFromPrivateKey(privateKey) // Buat fungsi ini jika belum ada
-	nonce, err := c.client.PendingNonceAt(ctx, fromAddress)
+	if c.repo == nil {
+		return "", "", errors.New("database client belum dikonfigurasi")
+	}
+	conditions := map[string]any{
+		"username": bcAccount.Username,
+	}
+	accountModel, err := c.repo.FindAllByConditions(ctx, "ref", conditions, 50, 0)
+	// keyStorePath, err := c.repo.FindWithJoins(ctx, "ref", nil, conditions)
 	if err != nil {
-		return "", "", err
+		return "", "", errors.New("address tidak ditemukan")
 	}
+	// currentAccount := models.Account{}
+	var privateKey *ecdsa.PrivateKey
+	var fromAddress common.Address
+	for _, v := range accountModel {
+		if v.Address == bcAccount.Address {
+			if v.Filename != "" {
+				key, err := utils.DecryptKeyStore(v.Filename, password)
+				if err != nil {
+					return "", "", err
+				}
 
-	// Dapatkan harga gas saat ini
-	gasPrice, err := c.client.SuggestGasPrice(ctx)
+				pVKey := crypto.FromECDSA(key.PrivateKey)
+				privateKey, err = crypto.ToECDSA(pVKey)
+				if err != nil {
+					return "", "", err
+				}
+				fromAddress = crypto.PubkeyToAddress(key.PrivateKey.PublicKey)
+			} else {
+				privateKey, err = utils.PvKeyHexToECDSA(v.PrivateKey)
+				if err != nil {
+					return "", "", err
+				}
+				publicKey := privateKey.Public().(*ecdsa.PublicKey)
+				fromAddress = crypto.PubkeyToAddress(*publicKey)
+			}
+		}
+
+	}
+	// 🔧 Persiapkan transaksi
+	// nonce, _ := c.client.PendingNonceAt(context.Background(), fromAddress)
+	nonce, err := c.client.NonceAt(context.Background(), fromAddress, nil) // nil = latest block
 	if err != nil {
-		return "", "", err
+		return "", "", fmt.Errorf("failed to get nonce: %v", err)
 	}
+	gasPrice, _ := c.client.SuggestGasPrice(context.Background())
 
-	// Buat transaksi untuk deploy contract
-	tx := types.NewContractCreation(nonce, big.NewInt(0), gasLimit, gasPrice, contractBytecode)
+	chainID, _ := c.client.NetworkID(context.Background())
+	auth, _ := bind.NewKeyedTransactorWithChainID(privateKey, chainID)
+	auth.Nonce = big.NewInt(int64(nonce))
+	auth.Value = big.NewInt(0) // tanpa ETH
 
-	// Tanda tangani transaksi dengan private key
-	signedTx, err := utils.SignTransaction(privateKey, tx) // Buat fungsi SignTransaction jika belum ada
+	// auth.GasLimit = uint64(5000000) // sesuaikan
+	auth.GasPrice = gasPrice
+
+	// 📦 Baca ABI & BIN
+	abiBytes, _ := os.ReadFile(utils.GetPath("contracts", abiName))
+	binBytes, _ := os.ReadFile(utils.GetPath("contracts", binName))
+
+	contractABI, err := abi.JSON(strings.NewReader(string(abiBytes)))
 	if err != nil {
-		return "", "", err
+		log.Fatal(err)
 	}
-
-	// Kirim transaksi
-	err = c.client.SendTransaction(ctx, signedTx)
+	bytecode := common.FromHex(string(binBytes))
+	// 🚀 Estimate Gas
+	estimatedGas, err := c.client.EstimateGas(context.Background(), ethereum.CallMsg{
+		From:     fromAddress,
+		To:       nil,
+		GasPrice: gasPrice,
+		Value:    big.NewInt(0),
+		Data:     bytecode,
+	})
 	if err != nil {
-		return "", "", err
+		return "", "", fmt.Errorf("gas estimation failed: %v", err)
 	}
 
-	// Kembalikan alamat contract & tx hash
-	contractAddress := crypto.CreateAddress(fromAddress, nonce) // Buat alamat contract dari nonce
-	return contractAddress.Hex(), signedTx.Hash().Hex(), nil
+	auth.GasLimit = estimatedGas * 2 // Add buffer
+	// 🚀 Deploy contract
+	address, tx, _, err := bind.DeployContract(auth, contractABI, bytecode, c.client)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("✅ Kontrak dideploy ke:", address.Hex())
+	fmt.Println("🧾 TX Hash:", tx.Hash().Hex())
+	return address.Hex(), tx.Hash().Hex(), nil
 }
 
 // getGasInfo mendapatkan informasi gas
+// func (c *EthereumClient) GetGasInfo() (*models.GasInfo, error) {
+// 	ctx := context.Background()
+
+// 	// Dapatkan gas price saat ini
+// 	gasPrice, err := c.client.SuggestGasPrice(ctx)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	gasInfo := &models.GasInfo{
+// 		GasPrice: gasPrice.String(),
+// 	}
+
+// 	// Try to get EIP-1559 gas data
+// 	tipCap, err := c.client.SuggestGasTipCap(ctx)
+// 	if err != nil {
+// 		// Network might not support EIP-1559, return legacy gas price
+// 		return gasInfo, nil
+// 	}
+
+// 	header, err := c.client.HeaderByNumber(ctx, nil)
+// 	if err != nil {
+// 		// If we can't get header, just use tip cap as both values
+// 		gasInfo.MaxFeePerGas = tipCap.String()
+// 		gasInfo.MaxPriorityFeePerGas = tipCap.String()
+// 		return gasInfo, nil
+// 	}
+
+// 	// Calculate max fee using more conservative multiplier (1.25x)
+// 	baseFee := header.BaseFee
+// 	if baseFee == nil {
+// 		baseFee = big.NewInt(0)
+// 	}
+
+// 	// maxFee = (baseFee * 5 / 4) + maxPriorityFee
+// 	baseFeeMultiplied := new(big.Int).Mul(baseFee, big.NewInt(5))
+// 	baseFeeMultiplied.Div(baseFeeMultiplied, big.NewInt(4))
+// 	maxFeePerGas := new(big.Int).Add(baseFeeMultiplied, tipCap)
+
+// 	gasInfo.MaxFeePerGas = maxFeePerGas.String()
+// 	gasInfo.MaxPriorityFeePerGas = tipCap.String()
+
+//		return gasInfo, nil
+//	}
 func (c *EthereumClient) GetGasInfo() (*models.GasInfo, error) {
 	ctx := context.Background()
 
-	// Dapatkan gas price saat ini
+	// Get current gas price (legacy fallback)
 	gasPrice, err := c.client.SuggestGasPrice(ctx)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get legacy gas price: %v", err)
 	}
 
 	gasInfo := &models.GasInfo{
-		GasPrice: gasPrice.String(),
+		GasPrice: gasPrice.String(), // Nilai dalam Wei
 	}
 
-	// Try to get EIP-1559 gas data
+	// Try EIP-1559 gas estimation
 	tipCap, err := c.client.SuggestGasTipCap(ctx)
 	if err != nil {
-		// Network might not support EIP-1559, return legacy gas price
+		// Network doesn't support EIP-1559, return legacy gas price
+		log.Printf("EIP-1559 not supported, using legacy gas price")
 		return gasInfo, nil
 	}
 
 	header, err := c.client.HeaderByNumber(ctx, nil)
 	if err != nil {
-		// If we can't get header, just use tip cap as both values
-		gasInfo.MaxFeePerGas = tipCap.String()
+		// If header fails, use SuggestGasPrice as MaxFeePerGas (more reliable)
+		log.Printf("failed to get header, using legacy gas price as MaxFeePerGas")
+		gasInfo.MaxFeePerGas = gasPrice.String() // Fallback to legacy gas price
 		gasInfo.MaxPriorityFeePerGas = tipCap.String()
 		return gasInfo, nil
 	}
 
-	// Calculate max fee using more conservative multiplier (1.25x)
+	// Calculate MaxFeePerGas: (baseFee * multiplier) + tipCap
 	baseFee := header.BaseFee
 	if baseFee == nil {
 		baseFee = big.NewInt(0)
 	}
 
-	// maxFee = (baseFee * 5 / 4) + maxPriorityFee
-	baseFeeMultiplied := new(big.Int).Mul(baseFee, big.NewInt(5))
-	baseFeeMultiplied.Div(baseFeeMultiplied, big.NewInt(4))
-	maxFeePerGas := new(big.Int).Add(baseFeeMultiplied, tipCap)
+	// Use 2x multiplier for safety (adjustable)
+	multiplier := big.NewInt(2)
+	maxFeePerGas := new(big.Int).Mul(baseFee, multiplier)
+	maxFeePerGas.Add(maxFeePerGas, tipCap)
 
-	gasInfo.MaxFeePerGas = maxFeePerGas.String()
-	gasInfo.MaxPriorityFeePerGas = tipCap.String()
+	gasInfo.MaxFeePerGas = maxFeePerGas.String()   // Dalam Wei
+	gasInfo.MaxPriorityFeePerGas = tipCap.String() // Dalam Wei
 
 	return gasInfo, nil
 }
@@ -713,96 +815,29 @@ func (c *EthereumClient) getChainDetails(chainID uint64) models.ChainDetails {
 // //		return result, nil
 // //	}
 // //
-// //	func (c *EthereumClient) DeploySmartContract(client *ethclient, privateKeyHex string) (common.Address, string, error) {
-// //		res, add, err := DeploySmartContract(client, privateKeyHex)
-// //		return res, add, err
-// //	}
+
 // //
 // // =============================
 // // =============Akun============
 // func (c *EthereumClient) GenerateNewAccount(ctx context.Context, userId int32, password string) (map[string]interface{}, error) {
 // 	key := keystore.NewKeyStore("./wallet", keystore.StandardScryptN, keystore.StandardScryptP)
 
-// 	a, err := key.NewAccount(password)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	// simpan ke database
-// 	pass, err := utils.EncryptPassword(password)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	var results = map[string]interface{}{
-// 		"Password":          pass,
-// 		"KeystrokeFilename": filepath.Base(a.URL.Path),
-// 		"Address":           a.Address.Hex(),
-// 	}
-// 	return results, nil
-// }
-// func (c *EthereumClient) DeployIjazahContract(ctx context.Context, privateKeyHex string) (contracAddress string, txHash string, err error) {
-
-// 	pvKey, pubKey, err := ConvertStringPrivateKey(privateKeyHex)
-// 	if err != nil {
-// 		return "", "", err
-// 	}
-
-// 	// akun, err := c.GetAccounts(ctx, userId)
-// 	// if err != nil {
-// 	// 	return "","", err
-// 	// }
-// 	// // baca file utc
-// 	// wd, err := os.Getwd()
-// 	// if err != nil {
-// 	// 	log.Fatalf("Failed to get working directory: %v", err)
-// 	// }
-
-// 	// // Menggunakan filepath.Join agar sesuai dengan OS
-// 	// path := filepath.Join(wd, "wallet", akun[0].WalletFilename)
-// 	// b, err := os.ReadFile(path)
-// 	// if err != nil {
-// 	// 	return "","", err
-// 	// }
-
-// 	// pas := utils.VerifyPassword(password, akun[0].Password)
-// 	// if pas {
-// 	// key, err := keystore.DecryptKey(b, password)
-// 	// if err != nil {
-// 	// 	return "","", err
-// 	// }
-// 	// add := crypto.PubkeyToAddress(key.PrivateKey.PublicKey)
-
-// 	nonce, err := c.client.PendingNonceAt(ctx, pubKey)
-// 	if err != nil {
-// 		return "", "", err
-// 	}
-// 	gasPrice, err := c.client.SuggestGasPrice(ctx)
-// 	if err != nil {
-// 		return "", "", err
-// 	}
-// 	chainId, err := c.client.ChainID(ctx)
-// 	if err != nil {
-// 		return "", "", err
-// 	}
-// 	gasLimit := uint64(3000000)
-// 	// auth := TransactOptsAuth(key, chainId, gasPrice, nonce, gasLimit)
-// 	auth, err := bind.NewKeyedTransactorWithChainID(pvKey, chainId)
-// 	if err != nil {
-// 		return "", "", err
-// 	}
-// 	auth.Nonce = big.NewInt(int64(nonce))
-// 	auth.Value = big.NewInt(0)
-// 	auth.GasLimit = gasLimit
-// 	auth.GasPrice = gasPrice
-// 	a, tx, _, err := verifikasiIjazah.DeployVerifikasiIjazah(auth, c.client)
-// 	if err != nil {
-// 		return "", "", err
-// 	}
-// 	fmt.Println(tx.Hash().Hex())
-// 	return a.Hex(), tx.Hash().Hex(), nil
-
-// 	// }
-// 	// return "", "",nil
-// }
+//		a, err := key.NewAccount(password)
+//		if err != nil {
+//			return nil, err
+//		}
+//		// simpan ke database
+//		pass, err := utils.EncryptPassword(password)
+//		if err != nil {
+//			return nil, err
+//		}
+//		var results = map[string]interface{}{
+//			"Password":          pass,
+//			"KeystrokeFilename": filepath.Base(a.URL.Path),
+//			"Address":           a.Address.Hex(),
+//		}
+//		return results, nil
+//	}
 
 // // func (c *EthereumClient) GetAccounts(ctx context.Context, userId int32, schemaname string) ([]*models.Account, error) {
 // // 	var modelAccount []*models.Account
@@ -826,25 +861,7 @@ func (c *EthereumClient) getChainDetails(chainID uint64) models.ChainDetails {
 // // 	return modelAccount, nil
 // // }
 // // // Fungsi untuk mengimpor akun dari private key
-// // func (c *EthereumClient) ImportEthereumAccount(ctx context.Context, privateKeyHex string) (common.Address, *ecdsa.PrivateKey, error) {
-// // 	// Hapus "0x" jika ada di awal
-// // 	privateKeyHex = common.HexToHash(privateKeyHex).Hex()[2:]
 
-// // 	// Konversi ke *ecdsa.PrivateKey
-// // 	privateKey, err := crypto.HexToECDSA(privateKeyHex)
-// // 	if err != nil {
-// // 		return common.Address{}, nil, fmt.Errorf("gagal mengonversi private key: %w", err)
-// // 	}
-
-// // 	// Ambil public key dari private key
-// // 	publicKey := privateKey.Public().(*ecdsa.PublicKey)
-
-// // 	// Dapatkan alamat Ethereum dari public key
-// // 	address := crypto.PubkeyToAddress(*publicKey)
-
-// //		return address, privateKey, nil
-// //	}
-// //
 // // =============================
 // // IssueDegree mengeluarkan ijazah di Ethereum
 // func (e *EthereumClient) IssueDegree(ctx context.Context, contractAddress string, degreeHash [32]byte, sekolah string, issueDate uint64, privateKey string, gasLimit uint64) (string, error) {
@@ -937,30 +954,6 @@ func (c *EthereumClient) getChainDetails(chainID uint64) models.ChainDetails {
 // 	}
 
 // 	fmt.Printf("Transkrip berhasil ditambahkan! TxHash: %s\n", txHash.Hex())
-// }
-
-// func DeployContract(auth *bind.TransactOpts, client EthClient) (common.Address, string, error) {
-// 	contractAddress, tx, _, err := verval_ijazah.DeployVervalIjazah(auth, client)
-// 	if err != nil {
-// 		return common.Address{}, "", err
-// 	}
-// 	return contractAddress, tx.Hash().Hex(), nil
-// }
-
-// func DeploySmartContract(client EthClient, privateKeyHex string, chainID *big.Int) (common.Address, string, error) {
-// 	// Buat transactor
-// 	auth, err := CreateTransactor(privateKeyHex, chainID)
-// 	if err != nil {
-// 		return common.Address{}, "", err
-// 	}
-
-// 	// Deploy smart contract
-// 	contractAddress, txHash, err := DeployContract(auth, client)
-// 	if err != nil {
-// 		return common.Address{}, "", err
-// 	}
-
-// 	return contractAddress, txHash, nil
 // }
 
 // Fungsi untuk membuat transaksi dan menandatangani

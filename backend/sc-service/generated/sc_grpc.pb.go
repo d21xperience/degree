@@ -28,8 +28,9 @@ const (
 	BlockchainService_TransferToken_FullMethodName             = "/sc_service.BlockchainService/TransferToken"
 	BlockchainService_ApproveToken_FullMethodName              = "/sc_service.BlockchainService/ApproveToken"
 	BlockchainService_GetTokenAllowance_FullMethodName         = "/sc_service.BlockchainService/GetTokenAllowance"
-	BlockchainService_DeployIjazahContract_FullMethodName      = "/sc_service.BlockchainService/DeployIjazahContract"
+	BlockchainService_DeployContract_FullMethodName            = "/sc_service.BlockchainService/DeployContract"
 	BlockchainService_GetContract_FullMethodName               = "/sc_service.BlockchainService/GetContract"
+	BlockchainService_ActiveContract_FullMethodName            = "/sc_service.BlockchainService/ActiveContract"
 	BlockchainService_CallContractMethod_FullMethodName        = "/sc_service.BlockchainService/CallContractMethod"
 	BlockchainService_SendTransactionToContract_FullMethodName = "/sc_service.BlockchainService/SendTransactionToContract"
 	BlockchainService_GetContractOwner_FullMethodName          = "/sc_service.BlockchainService/GetContractOwner"
@@ -60,12 +61,13 @@ type BlockchainServiceClient interface {
 	TransferToken(ctx context.Context, in *TransferTokenRequest, opts ...grpc.CallOption) (*TransferTokenResponse, error)
 	ApproveToken(ctx context.Context, in *ApproveTokenRequest, opts ...grpc.CallOption) (*ApproveTokenResponse, error)
 	GetTokenAllowance(ctx context.Context, in *GetTokenAllowanceRequest, opts ...grpc.CallOption) (*GetTokenAllowanceResponse, error)
-	// Interaksi Smart Contract
-	DeployIjazahContract(ctx context.Context, in *DeployIjazahContractRequest, opts ...grpc.CallOption) (*DeployIjazahContractResponse, error)
 	// ====================================================
 	// ================CONTRACT MANAGEMENT================
 	// CRUD CONTRACT
+	// Interaksi Smart Contract
+	DeployContract(ctx context.Context, in *DeployContractRequest, opts ...grpc.CallOption) (*DeployContractResponse, error)
 	GetContract(ctx context.Context, in *GetContractRequest, opts ...grpc.CallOption) (*GetContractResponse, error)
+	ActiveContract(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ActiveContractResponse, error)
 	CallContractMethod(ctx context.Context, in *CallContractMethodRequest, opts ...grpc.CallOption) (*CallContractMethodResponse, error)
 	SendTransactionToContract(ctx context.Context, in *SendTransactionToContractRequest, opts ...grpc.CallOption) (*SendTransactionToContractResponse, error)
 	GetContractOwner(ctx context.Context, in *GetContractOwnerRequest, opts ...grpc.CallOption) (*GetContractOwnerResponse, error)
@@ -175,10 +177,10 @@ func (c *blockchainServiceClient) GetTokenAllowance(ctx context.Context, in *Get
 	return out, nil
 }
 
-func (c *blockchainServiceClient) DeployIjazahContract(ctx context.Context, in *DeployIjazahContractRequest, opts ...grpc.CallOption) (*DeployIjazahContractResponse, error) {
+func (c *blockchainServiceClient) DeployContract(ctx context.Context, in *DeployContractRequest, opts ...grpc.CallOption) (*DeployContractResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeployIjazahContractResponse)
-	err := c.cc.Invoke(ctx, BlockchainService_DeployIjazahContract_FullMethodName, in, out, cOpts...)
+	out := new(DeployContractResponse)
+	err := c.cc.Invoke(ctx, BlockchainService_DeployContract_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -189,6 +191,16 @@ func (c *blockchainServiceClient) GetContract(ctx context.Context, in *GetContra
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetContractResponse)
 	err := c.cc.Invoke(ctx, BlockchainService_GetContract_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *blockchainServiceClient) ActiveContract(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ActiveContractResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ActiveContractResponse)
+	err := c.cc.Invoke(ctx, BlockchainService_ActiveContract_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -286,12 +298,13 @@ type BlockchainServiceServer interface {
 	TransferToken(context.Context, *TransferTokenRequest) (*TransferTokenResponse, error)
 	ApproveToken(context.Context, *ApproveTokenRequest) (*ApproveTokenResponse, error)
 	GetTokenAllowance(context.Context, *GetTokenAllowanceRequest) (*GetTokenAllowanceResponse, error)
-	// Interaksi Smart Contract
-	DeployIjazahContract(context.Context, *DeployIjazahContractRequest) (*DeployIjazahContractResponse, error)
 	// ====================================================
 	// ================CONTRACT MANAGEMENT================
 	// CRUD CONTRACT
+	// Interaksi Smart Contract
+	DeployContract(context.Context, *DeployContractRequest) (*DeployContractResponse, error)
 	GetContract(context.Context, *GetContractRequest) (*GetContractResponse, error)
+	ActiveContract(context.Context, *Empty) (*ActiveContractResponse, error)
 	CallContractMethod(context.Context, *CallContractMethodRequest) (*CallContractMethodResponse, error)
 	SendTransactionToContract(context.Context, *SendTransactionToContractRequest) (*SendTransactionToContractResponse, error)
 	GetContractOwner(context.Context, *GetContractOwnerRequest) (*GetContractOwnerResponse, error)
@@ -338,11 +351,14 @@ func (UnimplementedBlockchainServiceServer) ApproveToken(context.Context, *Appro
 func (UnimplementedBlockchainServiceServer) GetTokenAllowance(context.Context, *GetTokenAllowanceRequest) (*GetTokenAllowanceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetTokenAllowance not implemented")
 }
-func (UnimplementedBlockchainServiceServer) DeployIjazahContract(context.Context, *DeployIjazahContractRequest) (*DeployIjazahContractResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeployIjazahContract not implemented")
+func (UnimplementedBlockchainServiceServer) DeployContract(context.Context, *DeployContractRequest) (*DeployContractResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeployContract not implemented")
 }
 func (UnimplementedBlockchainServiceServer) GetContract(context.Context, *GetContractRequest) (*GetContractResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetContract not implemented")
+}
+func (UnimplementedBlockchainServiceServer) ActiveContract(context.Context, *Empty) (*ActiveContractResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ActiveContract not implemented")
 }
 func (UnimplementedBlockchainServiceServer) CallContractMethod(context.Context, *CallContractMethodRequest) (*CallContractMethodResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CallContractMethod not implemented")
@@ -548,20 +564,20 @@ func _BlockchainService_GetTokenAllowance_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
-func _BlockchainService_DeployIjazahContract_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeployIjazahContractRequest)
+func _BlockchainService_DeployContract_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeployContractRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(BlockchainServiceServer).DeployIjazahContract(ctx, in)
+		return srv.(BlockchainServiceServer).DeployContract(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: BlockchainService_DeployIjazahContract_FullMethodName,
+		FullMethod: BlockchainService_DeployContract_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BlockchainServiceServer).DeployIjazahContract(ctx, req.(*DeployIjazahContractRequest))
+		return srv.(BlockchainServiceServer).DeployContract(ctx, req.(*DeployContractRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -580,6 +596,24 @@ func _BlockchainService_GetContract_Handler(srv interface{}, ctx context.Context
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BlockchainServiceServer).GetContract(ctx, req.(*GetContractRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _BlockchainService_ActiveContract_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(BlockchainServiceServer).ActiveContract(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: BlockchainService_ActiveContract_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(BlockchainServiceServer).ActiveContract(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -754,12 +788,16 @@ var BlockchainService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _BlockchainService_GetTokenAllowance_Handler,
 		},
 		{
-			MethodName: "DeployIjazahContract",
-			Handler:    _BlockchainService_DeployIjazahContract_Handler,
+			MethodName: "DeployContract",
+			Handler:    _BlockchainService_DeployContract_Handler,
 		},
 		{
 			MethodName: "GetContract",
 			Handler:    _BlockchainService_GetContract_Handler,
+		},
+		{
+			MethodName: "ActiveContract",
+			Handler:    _BlockchainService_ActiveContract_Handler,
 		},
 		{
 			MethodName: "CallContractMethod",
@@ -1731,14 +1769,6 @@ const (
 	TransaksiService_GetIjazahBlockchain_FullMethodName    = "/sc_service.TransaksiService/GetIjazahBlockchain"
 	TransaksiService_SearchIjazahBlockchain_FullMethodName = "/sc_service.TransaksiService/SearchIjazahBlockchain"
 	TransaksiService_GetSolcVersion_FullMethodName         = "/sc_service.TransaksiService/GetSolcVersion"
-	TransaksiService_DeployContract_FullMethodName         = "/sc_service.TransaksiService/DeployContract"
-	TransaksiService_Deploy_FullMethodName                 = "/sc_service.TransaksiService/Deploy"
-	TransaksiService_FundWalet_FullMethodName              = "/sc_service.TransaksiService/FundWalet"
-	TransaksiService_DaftarSekolah_FullMethodName          = "/sc_service.TransaksiService/DaftarSekolah"
-	TransaksiService_ContractList_FullMethodName           = "/sc_service.TransaksiService/ContractList"
-	TransaksiService_Contract_FullMethodName               = "/sc_service.TransaksiService/Contract"
-	TransaksiService_GetContractAddress_FullMethodName     = "/sc_service.TransaksiService/GetContractAddress"
-	TransaksiService_GetBCTransaction_FullMethodName       = "/sc_service.TransaksiService/GetBCTransaction"
 )
 
 // TransaksiServiceClient is the client API for TransaksiService service.
@@ -1753,14 +1783,6 @@ type TransaksiServiceClient interface {
 	SearchIjazahBlockchain(ctx context.Context, in *SearchIjazahBlockchainRequest, opts ...grpc.CallOption) (*SearchIjazahBlockchainResponse, error)
 	// Contract
 	GetSolcVersion(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetSolcVersionResponse, error)
-	DeployContract(ctx context.Context, in *DeployContractRequest, opts ...grpc.CallOption) (*DeployContractResponse, error)
-	Deploy(ctx context.Context, in *DeployRequest, opts ...grpc.CallOption) (*DeployResponse, error)
-	FundWalet(ctx context.Context, in *FundWaletRequest, opts ...grpc.CallOption) (*FundWaletResponse, error)
-	DaftarSekolah(ctx context.Context, in *DaftarSekolahRequest, opts ...grpc.CallOption) (*DaftarSekolahResponse, error)
-	ContractList(ctx context.Context, in *ContractListRequest, opts ...grpc.CallOption) (*ContractListResponse, error)
-	Contract(ctx context.Context, in *ContractRequest, opts ...grpc.CallOption) (*ContractResponse, error)
-	GetContractAddress(ctx context.Context, in *GetContractAddressRequest, opts ...grpc.CallOption) (*GetContractAddressResponse, error)
-	GetBCTransaction(ctx context.Context, in *GetBCTransactionRequest, opts ...grpc.CallOption) (*GetBCTransactionResponse, error)
 }
 
 type transaksiServiceClient struct {
@@ -1811,86 +1833,6 @@ func (c *transaksiServiceClient) GetSolcVersion(ctx context.Context, in *Empty, 
 	return out, nil
 }
 
-func (c *transaksiServiceClient) DeployContract(ctx context.Context, in *DeployContractRequest, opts ...grpc.CallOption) (*DeployContractResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeployContractResponse)
-	err := c.cc.Invoke(ctx, TransaksiService_DeployContract_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *transaksiServiceClient) Deploy(ctx context.Context, in *DeployRequest, opts ...grpc.CallOption) (*DeployResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DeployResponse)
-	err := c.cc.Invoke(ctx, TransaksiService_Deploy_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *transaksiServiceClient) FundWalet(ctx context.Context, in *FundWaletRequest, opts ...grpc.CallOption) (*FundWaletResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(FundWaletResponse)
-	err := c.cc.Invoke(ctx, TransaksiService_FundWalet_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *transaksiServiceClient) DaftarSekolah(ctx context.Context, in *DaftarSekolahRequest, opts ...grpc.CallOption) (*DaftarSekolahResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(DaftarSekolahResponse)
-	err := c.cc.Invoke(ctx, TransaksiService_DaftarSekolah_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *transaksiServiceClient) ContractList(ctx context.Context, in *ContractListRequest, opts ...grpc.CallOption) (*ContractListResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ContractListResponse)
-	err := c.cc.Invoke(ctx, TransaksiService_ContractList_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *transaksiServiceClient) Contract(ctx context.Context, in *ContractRequest, opts ...grpc.CallOption) (*ContractResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ContractResponse)
-	err := c.cc.Invoke(ctx, TransaksiService_Contract_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *transaksiServiceClient) GetContractAddress(ctx context.Context, in *GetContractAddressRequest, opts ...grpc.CallOption) (*GetContractAddressResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetContractAddressResponse)
-	err := c.cc.Invoke(ctx, TransaksiService_GetContractAddress_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *transaksiServiceClient) GetBCTransaction(ctx context.Context, in *GetBCTransactionRequest, opts ...grpc.CallOption) (*GetBCTransactionResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetBCTransactionResponse)
-	err := c.cc.Invoke(ctx, TransaksiService_GetBCTransaction_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // TransaksiServiceServer is the server API for TransaksiService service.
 // All implementations must embed UnimplementedTransaksiServiceServer
 // for forward compatibility.
@@ -1903,14 +1845,6 @@ type TransaksiServiceServer interface {
 	SearchIjazahBlockchain(context.Context, *SearchIjazahBlockchainRequest) (*SearchIjazahBlockchainResponse, error)
 	// Contract
 	GetSolcVersion(context.Context, *Empty) (*GetSolcVersionResponse, error)
-	DeployContract(context.Context, *DeployContractRequest) (*DeployContractResponse, error)
-	Deploy(context.Context, *DeployRequest) (*DeployResponse, error)
-	FundWalet(context.Context, *FundWaletRequest) (*FundWaletResponse, error)
-	DaftarSekolah(context.Context, *DaftarSekolahRequest) (*DaftarSekolahResponse, error)
-	ContractList(context.Context, *ContractListRequest) (*ContractListResponse, error)
-	Contract(context.Context, *ContractRequest) (*ContractResponse, error)
-	GetContractAddress(context.Context, *GetContractAddressRequest) (*GetContractAddressResponse, error)
-	GetBCTransaction(context.Context, *GetBCTransactionRequest) (*GetBCTransactionResponse, error)
 	mustEmbedUnimplementedTransaksiServiceServer()
 }
 
@@ -1932,30 +1866,6 @@ func (UnimplementedTransaksiServiceServer) SearchIjazahBlockchain(context.Contex
 }
 func (UnimplementedTransaksiServiceServer) GetSolcVersion(context.Context, *Empty) (*GetSolcVersionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSolcVersion not implemented")
-}
-func (UnimplementedTransaksiServiceServer) DeployContract(context.Context, *DeployContractRequest) (*DeployContractResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DeployContract not implemented")
-}
-func (UnimplementedTransaksiServiceServer) Deploy(context.Context, *DeployRequest) (*DeployResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Deploy not implemented")
-}
-func (UnimplementedTransaksiServiceServer) FundWalet(context.Context, *FundWaletRequest) (*FundWaletResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method FundWalet not implemented")
-}
-func (UnimplementedTransaksiServiceServer) DaftarSekolah(context.Context, *DaftarSekolahRequest) (*DaftarSekolahResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DaftarSekolah not implemented")
-}
-func (UnimplementedTransaksiServiceServer) ContractList(context.Context, *ContractListRequest) (*ContractListResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ContractList not implemented")
-}
-func (UnimplementedTransaksiServiceServer) Contract(context.Context, *ContractRequest) (*ContractResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Contract not implemented")
-}
-func (UnimplementedTransaksiServiceServer) GetContractAddress(context.Context, *GetContractAddressRequest) (*GetContractAddressResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetContractAddress not implemented")
-}
-func (UnimplementedTransaksiServiceServer) GetBCTransaction(context.Context, *GetBCTransactionRequest) (*GetBCTransactionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetBCTransaction not implemented")
 }
 func (UnimplementedTransaksiServiceServer) mustEmbedUnimplementedTransaksiServiceServer() {}
 func (UnimplementedTransaksiServiceServer) testEmbeddedByValue()                          {}
@@ -2050,150 +1960,6 @@ func _TransaksiService_GetSolcVersion_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _TransaksiService_DeployContract_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeployContractRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TransaksiServiceServer).DeployContract(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TransaksiService_DeployContract_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransaksiServiceServer).DeployContract(ctx, req.(*DeployContractRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TransaksiService_Deploy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DeployRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TransaksiServiceServer).Deploy(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TransaksiService_Deploy_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransaksiServiceServer).Deploy(ctx, req.(*DeployRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TransaksiService_FundWalet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(FundWaletRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TransaksiServiceServer).FundWalet(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TransaksiService_FundWalet_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransaksiServiceServer).FundWalet(ctx, req.(*FundWaletRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TransaksiService_DaftarSekolah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DaftarSekolahRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TransaksiServiceServer).DaftarSekolah(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TransaksiService_DaftarSekolah_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransaksiServiceServer).DaftarSekolah(ctx, req.(*DaftarSekolahRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TransaksiService_ContractList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ContractListRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TransaksiServiceServer).ContractList(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TransaksiService_ContractList_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransaksiServiceServer).ContractList(ctx, req.(*ContractListRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TransaksiService_Contract_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ContractRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TransaksiServiceServer).Contract(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TransaksiService_Contract_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransaksiServiceServer).Contract(ctx, req.(*ContractRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TransaksiService_GetContractAddress_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetContractAddressRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TransaksiServiceServer).GetContractAddress(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TransaksiService_GetContractAddress_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransaksiServiceServer).GetContractAddress(ctx, req.(*GetContractAddressRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _TransaksiService_GetBCTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetBCTransactionRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(TransaksiServiceServer).GetBCTransaction(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: TransaksiService_GetBCTransaction_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(TransaksiServiceServer).GetBCTransaction(ctx, req.(*GetBCTransactionRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // TransaksiService_ServiceDesc is the grpc.ServiceDesc for TransaksiService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -2216,38 +1982,6 @@ var TransaksiService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetSolcVersion",
 			Handler:    _TransaksiService_GetSolcVersion_Handler,
-		},
-		{
-			MethodName: "DeployContract",
-			Handler:    _TransaksiService_DeployContract_Handler,
-		},
-		{
-			MethodName: "Deploy",
-			Handler:    _TransaksiService_Deploy_Handler,
-		},
-		{
-			MethodName: "FundWalet",
-			Handler:    _TransaksiService_FundWalet_Handler,
-		},
-		{
-			MethodName: "DaftarSekolah",
-			Handler:    _TransaksiService_DaftarSekolah_Handler,
-		},
-		{
-			MethodName: "ContractList",
-			Handler:    _TransaksiService_ContractList_Handler,
-		},
-		{
-			MethodName: "Contract",
-			Handler:    _TransaksiService_Contract_Handler,
-		},
-		{
-			MethodName: "GetContractAddress",
-			Handler:    _TransaksiService_GetContractAddress_Handler,
-		},
-		{
-			MethodName: "GetBCTransaction",
-			Handler:    _TransaksiService_GetBCTransaction_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

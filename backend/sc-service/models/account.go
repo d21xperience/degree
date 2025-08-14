@@ -98,35 +98,7 @@ type Account struct {
 	// UserID       uint32 // data dari admin sekolah
 }
 
-// Contract menyimpan informasi smart contract
-type Contract struct {
-	ID              uint    `gorm:"primaryKey"`
-	Name            string  `gorm:"size:255;not null"`
-	ContractAddress string  `gorm:"uniqueIndex;not null"`
-	ABI             string  `gorm:"type:text;not null"`
-	Bytecode        string  `gorm:"type:text"`
-	NetworkID       uint    `gorm:"not null;index"` // Relasi ke jaringan
-	Network         Network `gorm:"foreignKey:NetworkID"`
-	CreatedAt       time.Time
-	UpdatedAt       time.Time
-}
 
-// Transaction menyimpan data transaksi blockchain
-type Transaction struct {
-	ID         uint      `gorm:"primaryKey"`
-	AccountID  uint      `gorm:"not null;index"` // Relasi ke akun pengguna
-	Account    Account   `gorm:"foreignKey:AccountID"`
-	TxHash     string    `gorm:"uniqueIndex;not null"`
-	ContractID *uint     `gorm:"index"` // Opsional, relasi ke kontrak
-	Contract   *Contract `gorm:"foreignKey:ContractID"`
-	NetworkID  uint      `gorm:"not null;index"` // Relasi ke jaringan blockchain
-	Network    Network   `gorm:"foreignKey:NetworkID"`
-	Method     string    `gorm:"size:100"`
-	InputData  string    `gorm:"type:text"`
-	GasUsed    uint64
-	Status     string    `gorm:"size:20"` // pending, success, failed
-	Timestamp  time.Time // Waktu transaksi
-}
 
 // Buat ENUM secara manual sebelum AutoMigrate()
 func Migrate(db *gorm.DB) error {

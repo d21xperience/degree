@@ -1,7 +1,9 @@
 <script setup>
 import router from '@/router';
 import { onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
+import LanguageSwitcher from '../LanguageSwitcher.vue';
 const store = useStore();
 function smoothScroll(id) {
     document.body.click();
@@ -13,6 +15,7 @@ function smoothScroll(id) {
         });
     }
 }
+const { t } = useI18n();
 const isAuthenticated = ref(false);
 onMounted(async () => {
     isAuthenticated.value = await store.getters['authService/isAuthenticated'];
@@ -51,7 +54,7 @@ const toDashboard = async () => {
     <Button class="lg:!hidden" text severity="success" rounded v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }">
         <i class="pi pi-bars !text-2xl"></i>
     </Button>
-    <div class="items-center bg-transparent grow justify-between hidden lg:flex absolute lg:static w-full left-0 top-full px-12 lg:px-0 z-20 rounded-border">
+    <div class="items-center bg-white grow justify-between hidden lg:flex absolute lg:static w-full left-0 top-full px-12 lg:px-0 z-20 rounded-border">
         <ul class="list-none p-0 m-0 flex lg:items-center select-none flex-col lg:flex-row cursor-pointer gap-8">
             <li>
                 <a @click="smoothScroll('hero')" class="px-0 py-4 dark:text-surface-0 font-medium text-xl text-primary">
@@ -65,12 +68,12 @@ const toDashboard = async () => {
             </li>
             <li>
                 <a @click="smoothScroll('about')" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
-                    <span>Tentang</span>
+                    <span>{{t('about')}}</span>
                 </a>
             </li>
             <li>
                 <a @click="smoothScroll('contact')" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
-                    <span>Kontak</span>
+                    <span>{{ t('contact') }}</span>
                 </a>
             </li>
             <li>
@@ -91,6 +94,9 @@ const toDashboard = async () => {
             </div>
             <div v-else>
                 <Button label="Dashboard" rounded @click="toDashboard"></Button>
+            </div>
+            <div>
+                <LanguageSwitcher />
             </div>
         </div>
     </div>

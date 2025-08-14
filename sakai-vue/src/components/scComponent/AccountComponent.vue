@@ -1,50 +1,81 @@
 <template>
-    <Select v-model="internalValue" :options="accountOptions" fluid placeholder="Pilih Account" :option-label="handleLabelOption" />
+  <Select
+    v-model="internalValue"
+    :options="accountOptions"
+    fluid
+    placeholder="Pilih Account"
+    :option-label="handleLabelOption"
+    @update:modelValue="onSelectionChange"
+  />
 </template>
 
 <script setup>
 import { useSCService } from '@/composables/useSCService';
 import { useUtils } from '@/composables/useUtils';
+import { useWalletInfo } from '@/composables/useWalletInfo';
 import { onMounted, ref, watch } from 'vue';
+
 const scService = useSCService();
 const utils = useUtils();
+const { fetchWalletInfo } = useWalletInfo();
+
 const internalValue = ref(null);
 const accountOptions = ref([]);
-// const isPasswordEnter = ref(false);
-// const passwordInput = ref('');
-// const passwordError = ref('');
-// const isPasswordInvalid = ref(true); // Awalnya dianggap invalid
-const props = defineProps(['modelValue']); // props dari parent
-const emit = defineEmits(['update:modelValue', 'walletInfo']); // emit update ke parent
 
-const handleLabelOption = (newVal) => {
-    return `${utils.ringkasHash(newVal.address, 4, 4)}`;
+const props = defineProps({
+  modelValue: {
+    type: [Object, String, null],
+    default: null,
+  },
+});
+
+const emit = defineEmits(['update:modelValue', 'walletInfo']);
+
+// Fungsi label untuk tampilan opsi
+const handleLabelOption = (option) => {
+  return utils.ringkasHash(option.address, 4, 4);
 };
 
-watch(internalValue, async (newVal) => {
-    if (newVal) {
-        try {
-            const response = await scService.getWalletInfo({ public_address: internalValue.value.address });
-            // console.log(response)
-            if (response) {
-                console.log(response);
-                // Object.assign(walletInfo,)
-                // kirim ke parent component
-                emit('walletInfo', response.walletData);
-                // emit('update:modelValue', response.wallet);
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-});
-// watch(isPasswordEnter, (newVal) => {
-//     if (!newVal && isPasswordInvalid.value) {
-//         internalValue.value = null;
-//     }
-// });
+// Sinkronisasi dari parent (v-model) ke internalValue
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    internalValue.value = newVal;
+  },
+  { immediate: true }
+);
 
+// Ketika user memilih akun dari Select
+const onSelectionChange = async (selected) => {
+  // console.log("selected", selected)
+  if (!selected) return;
+  
+  try {
+    // console.log("selected", selected.address)
+    const response = await fetchWalletInfo({ public_address: selected.address });
+    console.log("response", response)
+    if (response?.walletData) {
+      // Emit wallet info untuk keperluan komponen lain
+      emit('walletInfo', response.walletData);
+
+      // Hanya emit address/selected object jika ingin sinkron ke parent
+      // Pastikan tipe datanya sesuai: apakah parent ingin objek atau hanya address?
+      emit('update:modelValue', selected); // <-- kirim objek akun yang dipilih
+    }
+  } catch (error) {
+    console.error('Gagal mengambil data wallet:', error);
+    emit('update:modelValue', null); // reset jika gagal
+  }
+};
+
+// Load daftar akun saat komponen mount
 onMounted(async () => {
-    accountOptions.value = await scService.fetchBCAccount();
+  try {
+    const accounts = await scService.fetchBCAccount();
+    accountOptions.value = Array.isArray(accounts) ? accounts : [];
+  } catch (error) {
+    console.error('Gagal memuat daftar akun:', error);
+    accountOptions.value = [];
+  }
 });
 </script>

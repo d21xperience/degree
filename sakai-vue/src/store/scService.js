@@ -16,7 +16,7 @@ const state = {
     MetamasConnected: JSON.parse(localStorage.getItem('METAMASK_CONNECTED')) || null,
     contract: JSON.parse(localStorage.getItem('CONTRACT')) || null,
     SCIjazah: JSON.parse(localStorage.getItem('SCIjazah')) || null,
-    walletInfo: JSON.parse(localStorage.getItem('WALLET_INFO')) || null,
+    walletInfo: JSON.parse(localStorage.getItem('WALLETINFO')) || null,
     bcConnected: null
 };
 
@@ -103,11 +103,11 @@ const actions = {
     },
 
     // ================================
-    async fetchBlockchainNetworks({ commit }, networkArchitecture) {
+    async fetchBlockchainNetworks({ commit }, payload) {
         try {
-            const response = await api.get(`scs/bc-networks`, {
+            const response = await api.get('/scs/bc-networks', {
                 params: {
-                    network_architecture: networkArchitecture
+                    network_architecture: payload
                 }
             });
             commit('SET_BCNETWORK', response.data.network);
@@ -188,16 +188,14 @@ const actions = {
         }
     },
     async importBCAccount({ commit }, payload) {
-        console.log('Payload yang dikirim:', JSON.stringify(payload, null, 2));
+        // console.log('Payload yang dikirim:', JSON.stringify(payload, null, 2));
 
         try {
-            const response = await api.post(`/blockchainaccount/import`, JSON.stringify(payload, null, 2), {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
+            // const response = await api.post(`scs/blockchainaccount/import`, JSON.stringify(payload, null, 2));
+            const { data } = await api.post(`scs/blockchainaccount/import`, payload);
+            console.log(data);
             // commit("SET_BCNETWORK", response.data);
-            return response.data; // Mengembalikan data sekolah
+            return data; // Mengembalikan data sekolah
         } catch (error) {
             throw error;
         }
@@ -347,15 +345,12 @@ const actions = {
         } catch (error) {}
     },
 
-    async fetchWalletInfo({ commit }, payload) {
+    async fetchWalletInfo({ commit }, pubAddress) {
         try {
-            const { data } = await api.post('scs/blockchainaccount/wallet', payload);
-            if (data.status) {
-                commit('SET_WALLETINFO', data.walletData);
-                return data;
-            }
+            const { data } = await api.post('/scs/blockchainaccount/wallet', pubAddress);
+            console.log(data)
+            return data;
         } catch (error) {
-            console.log(error);
             throw error;
         }
     },
@@ -368,14 +363,23 @@ const actions = {
             console.log(error);
         }
     },
-    async deployContract({ commit }, formData) {
-        const response = await fetch('/scs/contract/compile-contract', {
-            method: 'POST',
-            body: formData
-        });
 
-        const result = await response.json();
-        console.log(result);
+    async deployContract({ commit }, payload) {
+        const { data } = await api.post('/scs/contract/deploy', payload);
+        return data;
+    },
+
+    async getContract({ commit }, ownerAddress) {
+        const { data } = await api.get('/scs/contract', {
+            params: {
+                owner_address: ownerAddress
+            }
+        });
+        return data;
+    },
+    async activeContract({ commit }) {
+        const { data } = await api.get('/scs/contract/active-contract');
+        return data;
     },
 
     // ==========================================
@@ -389,6 +393,7 @@ const actions = {
                 return data;
             }
         } catch (error) {
+            console.log(error)
             throw error;
         }
     }
@@ -402,6 +407,7 @@ const getters = {
         (state) =>
         (filter = {}) => {
             const list = state.BCNetwork;
+            if (!list) return null;
             if (Object.keys(filter).length === 0) return list;
 
             return list.filter((item) => Object.entries(filter).every(([key, value]) => item[key] === value));

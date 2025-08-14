@@ -85,47 +85,24 @@ export function useSCService() {
         }
     };
 
-    const createWalletInfo = async (payload) => {
-        try {
-            if (payload) {
-                console.log(payload);
-                await store.dispatch('scService/createWalletInfo', payload);
-            }
-            // return;
-        } catch (error) {}
-    };
-    const getWalletInfo = async (payload) => {
-        try {
-            let response = store.getters['scService/getWalletInfo'];
-            if (!response) {
-                response = await store.dispatch('scService/fetchWalletInfo', payload);
-                if (response.status) {
-                    toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
-                    return response;
-                } else {
-                    toast.add({ severity: 'error', summary: 'Gagal', detail: `${response.message}`, life: 3000 });
-                    return null;
-                }
-            }
-            return response;
-        } catch (error) {
-            toast.add({ severity: 'error', summary: 'Error', detail: `${error}`, life: 3000 });
-        }
-    };
+    // =============================================
+
     // ================================================
-    const fetchBCNetworks = async (networkArchitecture = '') => {
+    const fetchBCNetworks = async (payload = '') => {
         try {
-            let response = store.getters['scService/getBCNETWORK'](networkArchitecture);
-            // console.log(response)
-            if (!response) {
-                response = await store.dispatch('scService/fetchBlockchainNetworks', networkArchitecture);
+            let response = store.getters['scService/getBCNETWORK'](payload);
+            console.log(response);
+            if (!response || !Array.isArray(response) || response.length == 0) {
+                response = await store.dispatch('scService/fetchBlockchainNetworks', payload);
                 toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
                 return response.network;
             }
-            toast.add({ severity: 'success', summary: 'Successful', detail: 'Berhasil mendapatkan network', life: 3000 });
+            // toast.add({ severity: 'success', summary: 'Successful', detail: 'Berhasil mendapatkan environment', life: 3000 });
             return response;
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan  BC Network: ${error}`, life: 3000 });
+            console.log(error);
+            throw error;
+            // toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan enviroment: ${error}`, life: 3000 });
         }
     };
 
@@ -301,6 +278,18 @@ export function useSCService() {
             toast.add({ severity: 'error', summary: 'Gagal', detail: `Gagal mendapatkan Platform: ${error.message}`, life: 3000 });
         }
     };
+
+    const importBCAccount = async (payload) => {
+        try {
+            const response = await store.dispatch('scService/importBCAccount', payload);
+            if (response.status) {
+                toast.add({ severity: 'success', summary: 'Berhasil', detail: `Berhasil mengambil data ${response.message} item`, life: 3000 });
+                return response.accounts;
+            }
+        } catch (error) {
+            toast.add({ severity: 'error', summary: 'Gagal', detail: `Gagal mengimpor akun: ${error}`, life: 3000 });
+        }
+    };
     // ========================================
     // ========================================
     // Blockchain service
@@ -312,14 +301,13 @@ export function useSCService() {
                 platform: await getNetowrkPlatform()
             };
             const response = await store.dispatch('scService/setBCConfig', { bc_config: payload });
-            console.log(response);
+            // console.log(response);
             if (response.status) {
-                toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
                 return response;
             }
         } catch (error) {
             console.log(error);
-            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal terhubung ke jaringan: ${error}`, life: 3000 });
+            throw error;
         }
     };
 
@@ -336,8 +324,7 @@ export function useSCService() {
         getContract,
         getSCIjazah,
         getBCTransaction,
-        createWalletInfo,
-        getWalletInfo,
+
         getSolVersion,
         deployContract,
         fetchBCNetworks,
@@ -353,8 +340,8 @@ export function useSCService() {
         getBCNetwork,
         setBCConfig,
         setBCConnected,
-        getBCConnected
-
+        getBCConnected,
+        importBCAccount
         // batchDeleteBCNetwork
     };
 }

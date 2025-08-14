@@ -3,13 +3,16 @@
 </template>
 
 <script setup>
+import { useContractDeployment } from '@/composables/useContractDeployment';
 import { useSCService } from '@/composables/useSCService';
 import DegreeContractABI from '@/VerifikasiIjazahABI.json';
 import { ethers, keccak256, toUtf8Bytes } from 'ethers';
 import { onMounted, ref } from 'vue';
 const scService = useSCService();
 
-const contractAddress = ref('0x700b6a60ce7eaaea56f065753d8dcb9653dbad35'); //'0xdc64a140aa3e981100a9beca4e685f962f0cf6c9';
+const {activeContract} = useContractDeployment()
+const contractAddress = ref(); //'0xdc64a140aa3e981100a9beca4e685f962f0cf6c9';
+// const contractAddress = ref('0x700b6a60ce7eaaea56f065753d8dcb9653dbad35'); //'0xdc64a140aa3e981100a9beca4e685f962f0cf6c9';
 const props = defineProps({
     degreeData: Object, // { name, nisn, graduationYear, major }
     sekolah: String,
@@ -135,6 +138,12 @@ const handleSubmit = async () => {
 
 onMounted(async () => {
     try {
+        // Ambil contaract yang aktif
+        contractAddress.value =  await activeContract()
+        console.log(contractAddress.value)
+        
+        
+        
         // const cek = await scService.getContract();
         // contractAddress.value = cek.contractAddress;
         // console.log(contractAddress.value);

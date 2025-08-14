@@ -13,6 +13,7 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -244,36 +245,7 @@ func TransactOptsAuth(key *keystore.Key, chainID, gasPrice *big.Int, nonce, gasL
 	return auth
 }
 
-// ImportPrivateKey mengimpor private key dan mengonversinya menjadi alamat Ethereum
-// func ImportPrivateKey(hexKey string) (common.Address, error) {
-// 	// Hapus "0x" jika ada di awal
-// 	hexKey = strings.TrimPrefix(hexKey, "0x")
-
-// 	// Validasi panjang private key
-// 	if len(hexKey) != 64 {
-// 		return common.Address{}, fmt.Errorf("panjang private key tidak valid: %d karakter (harus 64 karakter)", len(hexKey))
-// 	}
-// 	// Dekode private key dari hex ke byte array
-// 	privateKeyBytes, err := hex.DecodeString(hexKey)
-// 	if err != nil {
-// 		return common.Address{}, fmt.Errorf("gagal mendekode private key: %v", err)
-// 	}
-
-// 	// Parse private key menjadi objek ECDSA
-// 	privateKey, err := crypto.ToECDSA(privateKeyBytes)
-// 	if err != nil {
-// 		return common.Address{}, fmt.Errorf("private key tidak valid: %v", err)
-// 	}
-
-// 	// Ambil public key dari private key
-// 	publicKey := privateKey.Public().(*ecdsa.PublicKey)
-
-// 	// Hitung alamat Ethereum dari public key
-// 	address := crypto.PubkeyToAddress(*publicKey)
-
-//		return address, nil
-//	}
-func ImportPrivateKey(hexKey string) (common.Address, error) {
+func PrivateKeyToPubAddress(hexKey string) (common.Address, error) {
 	//  Hapus spasi yang tidak diinginkan
 	hexKey = strings.TrimSpace(hexKey)
 
@@ -321,3 +293,53 @@ func ConvertStringPrivateKey(privateKeyHex string) (*ecdsa.PrivateKey, common.Ad
 	publicAddress := crypto.PubkeyToAddress(privateKey.PublicKey)
 	return privateKey, publicAddress, nil
 }
+
+func DecryptKeyStore(filename, password string) (*keystore.Key, error) {
+	// Baca file UTC
+	path := "wallet"
+	wd, err := os.Getwd()
+	if err != nil {
+		log.Printf("Failed to get working directory: %v", err)
+	}
+	keystorePath := filepath.Join(wd, path, filename)
+	b, err := os.ReadFile(keystorePath)
+	if err != nil {
+		return nil, err
+	}
+	key, err := keystore.DecryptKey(b, password)
+	if err != nil {
+		return nil, err
+	}
+	return key, nil
+}
+
+func PvKeyHexToECDSA(privateKeyHex string) (*ecdsa.PrivateKey, error) {
+	// Hapus "0x" jika ada di awal
+	privateKeyHex = common.HexToHash(privateKeyHex).Hex()[2:]
+
+	// Konversi ke *ecdsa.PrivateKey
+	privateKey, err := crypto.HexToECDSA(privateKeyHex)
+	if err != nil {
+		return nil, fmt.Errorf("gagal mengonversi private key: %w", err)
+	}
+	return privateKey, nil
+}
+
+// func (c *EthereumClient) ImportEthereumAccount(ctx context.Context, privateKeyHex string) (common.Address, *ecdsa.PrivateKey, error) {
+// 	// Hapus "0x" jika ada di awal
+// 	privateKeyHex = common.HexToHash(privateKeyHex).Hex()[2:]
+
+// 	// Konversi ke *ecdsa.PrivateKey
+// 	privateKey, err := crypto.HexToECDSA(privateKeyHex)
+// 	if err != nil {
+// 		return common.Address{}, nil, fmt.Errorf("gagal mengonversi private key: %w", err)
+// 	}
+
+// 	// Ambil public key dari private key
+// 	publicKey := privateKey.Public().(*ecdsa.PublicKey)
+
+// 	// Dapatkan alamat Ethereum dari public key
+// 	address := crypto.PubkeyToAddress(*publicKey)
+
+// 	return address, privateKey, nil
+// }

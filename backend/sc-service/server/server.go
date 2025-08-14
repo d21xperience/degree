@@ -138,7 +138,7 @@ func createPattern(method string, pathSegments ...string) (string, runtime.Patte
 // generatePatternIndexes membantu membuat pola angka yang sesuai dengan jumlah segment
 func generatePatternIndexes(segmentCount int) []int {
 	indexes := []int{}
-	for i := 0; i < segmentCount; i++ {
+	for i := range segmentCount {
 		indexes = append(indexes, 2, i)
 	}
 	return indexes

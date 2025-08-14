@@ -65,9 +65,15 @@ CREATE TABLE IF NOT EXISTS degree_data (
 	CONSTRAINT degree_data_pkey PRIMARY KEY (id)
 );
 
-CREATE TABLE IF NOT EXISTS  contracts (
-	id INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-	contract_address VARCHAR NULL DEFAULT NULL,
-	contract_owner VARCHAR NULL DEFAULT NULL
+CREATE TABLE IF NOT EXISTS contracts (
+    id SERIAL PRIMARY KEY,
+    contract_name VARCHAR(255) NULL,
+    contract_owner VARCHAR(255), -- nullable
+    contract_address VARCHAR(255) NOT NULL,
+    owner_address VARCHAR(255), -- nullable
+    tx_hash VARCHAR(255) NOT NULL,
+    network_id INTEGER NULL,
+	is_active BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

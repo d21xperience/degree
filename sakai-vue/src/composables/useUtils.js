@@ -38,21 +38,21 @@ export function useUtils() {
         return `${hash.substring(0, 8)}...`;
     };
 
-    const formatBalance = (balance) => {
-        // Handle BigInt if needed
-        const wei = typeof balance === 'bigint' ? balance : BigInt(Math.floor(Number(balance) || 0));
+const formatBalance = (balance) => {
+    // Handle BigInt
+    const wei = typeof balance === 'bigint' ? balance : BigInt(Math.floor(Number(balance) || 0));
 
-        // Convert wei to ETH (1 ETH = 10^18 wei)
-        const eth = Number(wei) / 1e18;
+    // Pisahkan bagian integer dan desimal dari wei
+    const ether = (wei / 10n**18n).toString(); // bagian integer ETH
+    let remainder = wei % 10n**18n; // sisa dalam wei
 
-        // Format with 4 decimal places, but avoid trailing zeros
-        const formatted = eth.toLocaleString('en-US', {
-            minimumFractionDigits: 4,
-            maximumFractionDigits: 4
-        });
+    // Tambahkan 4 digit desimal dari remainder
+    // Kita ambil 4 digit pertama dari sisa (karena 1e18 punya 18 digit, kita ambil 4)
+    const decimalPart = (remainder * 10000n / 10n**18n).toString().padStart(4, '0');
 
-        return formatted;
-    };
+    // Gabungkan integer dan desimal
+    return `${ether}.${decimalPart}`;
+};
 
     const formatTimestamp = (timestamp) => {
         return new Date(timestamp * 1000).toLocaleString();

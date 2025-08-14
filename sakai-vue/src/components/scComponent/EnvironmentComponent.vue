@@ -24,12 +24,13 @@ watch(
 watch(
     () => props.architecture,
     async (newVal) => {
-        // console.log(newVal.name.toLowerCase() == 'hyperledger fabric');
+        console.log('EnvComponent', newVal);
         if (newVal) {
             if (newVal.name.toLowerCase() == 'hyperledger fabric') {
-                environmentOptions.value = await scService.fetchBCNetworks({ Architecture: 'NONEVM' });
+                environmentOptions.value = await scService.fetchBCNetworks('NONEVM');
             } else {
-                environmentOptions.value = await scService.fetchBCNetworks({ Architecture: 'EVM' });
+                console.log(newVal);
+                environmentOptions.value = await scService.fetchBCNetworks('EVM');
             }
         }
     }

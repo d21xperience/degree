@@ -17,6 +17,7 @@ type BlockchainClient interface {
 	GetBalance(address string) (*models.BalanceInfo, error)
 	GetChainInfo(rpcURL string) (*models.ChainInfo, error)
 	GetGasInfo() (*models.GasInfo, error)
+	DeployContract(ctx context.Context, password, abiName, binName string, bcAccount *models.Account) (string, string, error)
 }
 
 // BlockchainClientFactory mendefinisikan factory function
@@ -32,7 +33,7 @@ var blockchainFactories = map[string]BlockchainClientFactory{
 // CreateClientFactory memilih blockchain berdasarkan runtime config
 func CreateClientFactory(cfg *config.BCConfig) (BlockchainClient, error) {
 	if cfg == nil {
-		return nil, errors.New("config tidak boleh nil")
+		return nil, errors.New("config tidak boleh kosong")
 	}
 
 	factory, exists := blockchainFactories[cfg.BlockchainType]

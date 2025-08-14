@@ -2,7 +2,7 @@
     <div class="">
         <div class="">
             <div class="">
-                <div> 
+                <div>
                     <Toolbar>
                         <!-- <template #start>
                                 <div class="flex flex-wrap gap-2 items-center justify-between">
@@ -15,11 +15,16 @@
                                 </div>
                             </template> -->
                         <template #start>
+                            <div class="w-56">
+                                <KelasComponent class="mr-2" v-model="kelasSelected" />
+                            </div>
+                        </template>
+                        <template #end>
                             <IconField>
                                 <InputIcon>
                                     <i class="pi pi-search" />
                                 </InputIcon>
-                                <InputText v-model="filters['global'].value" placeholder="Search..." />
+                                <InputText v-model="filters['global'].value" placeholder="Search..." :disabled="true" />
                             </IconField>
                         </template>
                     </Toolbar>
@@ -100,7 +105,7 @@
                                     v-tooltip.bottom="'Hapus data'" /> -->
                             </template>
                             <template #end>
-                                <Button label="Import" icon="pi pi-download" severity="warn" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Import siswa'" />
+                                <Button label="Import" icon="pi pi-download" severity="warn" @click="isDialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Import siswa'" />
                                 <Button label="Export" icon="pi pi-upload" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" />
                             </template>
                         </Toolbar>
@@ -188,16 +193,15 @@
 
         <!-- import data -->
         <!-- DIALOG IMPORT -->
-        <DialogImport v-model:visible="dialogImport" @save="saveImport" @cancel="cancelImport" template-type="siswa" :schema-name="schemaname" />
+        <DialogImport v-model:visible="isDialogImport" @save="saveImport" @cancel="cancelImport" template-type="siswa" />
 
         <!-- end of import data -->
         <DialogLoading v-model="isLoading"> Memuat data, harap tunggu... </DialogLoading>
     </div>
 </template>
 
-
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 const store = useStore();
 // import FileUpload from 'primevue/fileupload';
@@ -263,20 +267,25 @@ const fetchMapel = async () => {
 
 // ==============================
 const dataNilaiSiswa = ref([]);
-onMounted(async () => {
-    // console.log("onMounted data nilai")
-    dataNilaiSiswa.value = store.getters['sekolahService/getNilaiSiswa'];
-    if (!dataNilaiSiswa.value || dataNilaiSiswa.value.length === 0) {
-        dataNilaiSiswa.value = await fetchNilaiSiswa();
-    }
+const kelasSelected = ref(null);
+watch(kelasSelected, (newVal) => {
+    console.log(newVal);
 });
+// onMounted(async () => {
+//     // console.log("onMounted data nilai")
+//     dataNilaiSiswa.value = store.getters['sekolahService/getNilaiSiswa'];
+//     console.log(dataNilaiSiswa.value);
+//     if (!dataNilaiSiswa.value || dataNilaiSiswa.value.length === 0) {
+//         dataNilaiSiswa.value = await fetchNilaiSiswa();
+//     }
+// });
 // ================================
 // composable
 // ================================
 import DialogLoading from '@/components/DialogLoading.vue';
 import { useSekolahService } from '@/composables/useSekolahService';
 const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
-const schemaname = computed(() => store.getters['sekolahService/getTabeltenant']?.schemaname);
+const schemaname = 'smkpasundanjatinangor'; //computed(() => store.getters['sekolahService/getTabeltenant']?.schemaname || '');
 const { fetchNilaiSiswa } = useSekolahService(schemaname, selectedSemester);
 // ================================
 watch(selectedSemester, async (newVal, oldVal) => {
@@ -386,15 +395,15 @@ const deletedataLulusan = () => {
 // ========IMPORT DATA========
 import DialogImport from '@/components/DialogImport.vue';
 const expandedRows = ref();
-const dialogImport = ref(false);
+const isDialogImport = ref(false);
 const saveImport = (e) => {
     // console.log("Data disimpan:", e);
-    dialogImport.value = false;
+    isDialogImport.value = false;
 };
 
 const cancelImport = () => {
     console.log('Import dibatalkan');
-    dialogImport.value = false;
+    isDialogImport.value = false;
 };
 // ===========================================
 
@@ -414,6 +423,7 @@ const collapseAll = () => {
     expandedRows.value = null;
 };
 
+import KelasComponent from '@/components/sekolah_components/KelasComponent.vue';
 import AutoComplete from 'primevue/autocomplete';
 // import { debounce } from 'lodash';
 

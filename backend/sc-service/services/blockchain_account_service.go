@@ -19,7 +19,7 @@ import (
 type BlockchainAccountService struct {
 	pb.UnimplementedBlockchainAccountServiceServer
 	// config   *Config          // Konfigurasi runtime
-	// client   BlockchainClient // Client yang digunakan (Ethereum/Quorum)
+	// client   clients.BlockchainClient // Client yang digunakan (Ethereum/Quorum)
 	schema   SchemaService
 	repoAkun *repositories.GenericRepository[models.Account]
 }
@@ -30,6 +30,7 @@ func NewBlockchainAccountService() *BlockchainAccountService {
 	sekolahTenantRepository := repositories.NewsekolahTenantRepository(config.DB)
 	schema := NewSchemaService(schemaRepository, sekolahTenantRepository)
 	akunRepository := repositories.NewAccountRepository(config.DB)
+	// client := NewBlockchainService()
 	return &BlockchainAccountService{
 		// config:   &Config{},
 		schema:   schema,
@@ -49,7 +50,13 @@ func (s *BlockchainAccountService) CreateBlockchainAccount(ctx context.Context, 
 
 	address, err := createKeystore(s, req.Password)
 	if err != nil {
-		return nil, err
+		return &pb.CreateBlockchainAccountResponse{
+			Status:  true,
+			Message: fmt.Sprintf("%v", err),
+			Account: &pb.BlockchainAccount{
+				Address: address,
+			},
+		}, nil
 	}
 
 	return &pb.CreateBlockchainAccountResponse{
@@ -176,6 +183,44 @@ func (s *BlockchainAccountService) DeleteWhiteListAccount(ctx context.Context, r
 	return &pb.DeleteWhiteListAccountResponse{
 		Status:  true,
 		Message: "Berhasil",
+	}, nil
+}
+
+func (s *BlockchainAccountService) ImportBlockchainAccount(ctx context.Context, req *pb.ImportBlockchainAccountRequest) (*pb.ImportBlockchainAccountResponse, error) {
+	log.Printf("bc_account_service/ImportBlockhainAccount received data from request: %+v\n", req)
+	// Daftar field yang wajib diisi
+	requiredFields := []string{"PrivateKey", "Username"}
+	// Validasi request
+	requiredFieldsResponse := utils.ValidateFields(req, requiredFields)
+	if requiredFieldsResponse != nil {
+		return nil, requiredFieldsResponse
+	}
+	pubAdd, err := utils.PrivateKeyToPubAddress(req.PrivateKey)
+	if err != nil {
+		return &pb.ImportBlockchainAccountResponse{
+			Status:    false,
+			Message:   "Gagal mengimpor akun",
+			BcAccount: nil,
+		}, nil
+	}
+	// simpan ke database
+	modelAkun := &models.Account{
+		Address:  pubAdd.Hex(),
+		Username: req.Username,
+	}
+	cek := s.repoAkun.Save(ctx, modelAkun, "ref")
+	if cek != nil {
+
+	}
+
+	return &pb.ImportBlockchainAccountResponse{
+		Status:  true,
+		Message: "Behasil mengimpor akun",
+		BcAccount: &pb.BlockchainAccount{
+			Address:  fmt.Sprint(pubAdd.Hex()),
+			Username: req.Username,
+			// CreatedAt: time.Now().GoString(),
+		},
 	}, nil
 }
 

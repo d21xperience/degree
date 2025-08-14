@@ -1,26 +1,85 @@
 <script setup>
 import DialogSignOut from '@/components/DialogSignOut.vue';
-import MetamaskIcon from '@/components/MetamaskIcon.vue';
 import { useSCService } from '@/composables/useSCService';
+import { useUtils } from '@/composables/useUtils';
+import { useWalletInfo } from '@/composables/useWalletInfo';
+import AppConfigurator from '@/layout/AppConfigurator.vue';
 import { useLayout } from '@/layout/composables/layout';
 import router from '@/router';
 import { useAuth } from '@/views/pages/auth/composables/auth';
-import { computed, ref } from 'vue';
+import { useToast } from 'primevue';
+import { computed, onMounted, ref, watch } from 'vue';
+const util = useUtils();
 const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
 const isDialogSignOut = ref(false);
 const { onLogout, currentUser } = useAuth();
+const { currentWallet, loadWalletInfo, updateWalletInStore, fetchWalletInfo } = useWalletInfo();
+
+const toast = useToast();
 const cek = () => {
+    // console.log(currentUser)
+    if (currentUser.value.username == 'superadmin') {
+        router.push({ name: 'ownProfile' });
+        return;
+    }
     router.push({ name: 'userProfile' });
 };
 const scService = useSCService();
 const isMetamask = computed(() => scService.getMetamaskConnected());
 const isSignerDialog = ref(false);
 
-const walletInfo = ref();
 const signerDialog = async () => {
     isSignerDialog.value = true;
-    walletInfo.value = await scService.getWalletInfo();
-    // console.log(walletInfo.value);
+    // currentWallet.value = await scService.loadWalletInfo();
+    // console.log(currentWallet.value);
+};
+const isWallet = ref(false);
+const selectedWallet = ref(null);
+const isSelectedWallet = ref(false);
+
+watch(selectedWallet, (newVal) => {
+    console.log(selectedWallet.value);
+    if (newVal) {
+        isSelectedWallet.value = true;
+    } else {
+        isSelectedWallet.value = false;
+    }
+});
+const saveWallet = async () => {
+    try {
+        console.log('Selected Wallet', selectedWallet.value);
+        const res = await fetchWalletInfo({ public_address: selectedWallet.value.address });
+        console.log(res);
+        if (res) {
+            updateWalletInStore(res?.walletData);
+            Object.assign(currentWallet.value, res?.walletData);
+            toast.add({
+                severity: 'success',
+                summary: 'Fetch success',
+                detail: `Address ${selectedWallet.value?.address} \n selected`,
+                life: 3000
+            });
+        }
+    } catch (error) {
+        toast.add({
+            severity: 'error',
+            summary: 'Fetch failed',
+            detail: `Error ${error}`,
+            life: 3000
+        });
+    } finally {
+        isWallet.value = false;
+    }
+};
+onMounted(async () => {
+    const res = await loadWalletInfo();
+    if (res) {
+        Object.assign(currentWallet.value, res);
+    }
+});
+
+const handleWalletInfo = (e) => {
+    console.log(e);
 };
 </script>
 
@@ -54,18 +113,31 @@ const signerDialog = async () => {
         </div>
         <div class="layout-topbar-actions">
             <div class="layout-config-menu">
+                <div class="flex justify-center items-center" v-show="currentUser?.username == 'superadmin'">
+                    <span v-show="currentWallet.address != ''" class="layout-menuitem-text" :class="currentWallet ? 'text-green-400' : ''">{{ util.shortenAddress(currentWallet?.address) || '' }}</span>
+                    <button type="button" class="layout-topbar-action" @click="isWallet = true">
+                        <i class="pi pi-wallet layout-menuitem-icon"></i>
+                    </button>
+                </div>
+
+                <div class="relative">
+                    <button
+                        type="button"
+                        v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
+                        class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 hover:bg-slate-200 layout-topbar-action"
+                    >
+                        <i class="pi pi-palette"></i>
+                    </button>
+                    <AppConfigurator />
+                </div>
                 <button type="button" class="layout-topbar-action" @click="toggleDarkMode">
                     <i :class="['pi', { 'pi-moon': isDarkTheme, 'pi-sun': !isDarkTheme }]"></i>
                 </button>
-                
-                <button type="button" class="layout-topbar-action" @click="toggleDarkMode"  v-show="!isMetamask">
-                    <i class="pi pi-wallet"></i>
-                </button>
 
                 <!-- <Button type="button" icon="pi pi-wallet" rounded class="layout-topbar-action !bg-transparent !text-black !border-none" /> -->
-                <button type="button" class="!rounded-full !border-none layout-topbar-action !bg-transparent !w-6" v-show="isMetamask" @click="signerDialog">
+                <!-- <button type="button" class="!rounded-full !border-none layout-topbar-action !bg-transparent !w-6" v-show="isMetamask" @click="signerDialog">
                     <MetamaskIcon class="" />
-                </button>
+                </button> -->
 
                 <!-- <div class="relative">
                     <button
@@ -88,7 +160,7 @@ const signerDialog = async () => {
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <h4 class="sm:block  hidden"><span class="font-normal">Helo</span>, {{ currentUser?.username }} !</h4>
+                    <!-- <h4 class="sm:block  hidden"><span class="font-normal">Helo</span>, {{ currentUser?.username }} !</h4> -->
                     <!-- <button type="button" class="layout-topbar-action">
                         <i class="pi pi-calendar"></i>
                         <span>Calendar</span>
@@ -113,11 +185,12 @@ const signerDialog = async () => {
                         <div
                             class="config-panel hidden absolute top-[3.25rem] right-0 w-64 p-4 bg-surface-0 dark:bg-surface-900 border border-surface rounded-border origin-top shadow-[0px_3px_5px_rgba(0,0,0,0.02),0px_0px_2px_rgba(0,0,0,0.05),0px_1px_4px_rgba(0,0,0,0.08)]"
                         >
-                            <div class="w-full hover:bg-primary hover:text-blue-100 py-2 cursor-pointer" @click="isDialogSignOut = true">
+                            <p class="font-semibold">Hello, {{ currentUser?.username.toUpperCase() ?? 'Your Account' }}</p>
+                            <div class="w-full hover:bg-primary hover:text-surface-100 p-2 cursor-pointer" @click="isDialogSignOut = true">
                                 <i class="pi pi-fw pi-sign-out"></i>
                                 Sign out
                             </div>
-                            <div class="w-full hover:bg-primary py-2 cursor-pointer" @click="cek">
+                            <div class="w-full hover:bg-primary hover:text-surface-100 p-2 cursor-pointer" @click="cek">
                                 <i class="pi pi-fw pi-user"></i>
                                 Profile
                             </div>
@@ -128,12 +201,25 @@ const signerDialog = async () => {
         </div>
 
         <DialogSignOut v-model:visible="isDialogSignOut" @confirm="onLogout" />
-        <Dialog v-model:visible="isSignerDialog" header="Metamask coneected" position="top">
+        <!-- <Dialog v-model:visible="isSignerDialog" header="Metamask conected" position="top">
             <div>
                 <h6>Metamask</h6>
                 <p>Address</p>
                 <p>{{ walletInfo?.address }}</p>
             </div>
+        </Dialog> -->
+
+        <Dialog v-model:visible="isWallet" style="width: 23rem" position="top" header="Wallet">
+            <div>
+                <label for="wallet">Pilih wallet</label>
+                <AccountComponent v-model="selectedWallet" @walletInfo="handleWalletInfo" />
+            </div>
+            <template #footer>
+                <div class="space-x-2">
+                    <!-- <Button icon="pi pi-plus" label="New Wallet" @click="saveWallet" /> -->
+                    <Button icon="pi pi-save" label="Set Wallet" @click="saveWallet" severity="info" :disabled="!isSelectedWallet" />
+                </div>
+            </template>
         </Dialog>
     </div>
 </template>

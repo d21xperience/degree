@@ -293,7 +293,7 @@ const router = createRouter({
                         {
                             path: 'smart-contract',
                             name: 'smartcontract',
-                            component: () => import('@/views/pages/super_admin/blockchain/BlockchainSettings.vue')
+                            component: () => import('@/views/pages/super_admin/blockchain/SmartContract.vue')
                         },
                         {
                             path: 'networks',

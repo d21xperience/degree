@@ -17,7 +17,7 @@ type TransaksiService struct {
 	pb.UnimplementedTransaksiServiceServer
 	repoIjazahBc      repositories.GenericRepository[models.IjazahBc]
 	repoDegreeData    repositories.GenericRepository[models.DegreeData]
-	repoContract      repositories.GenericRepository[models.ContractData]
+	repoContract      repositories.GenericRepository[models.Contract]
 	repoBCTransaction repositories.GenericRepository[models.BCTransaction]
 	// repoTransaksiTenant repositories.GenericRepository[models.TransaksiTabelTenant]
 }

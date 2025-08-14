@@ -106,12 +106,22 @@ const formatDate = (dateString) => {
 onMounted(() => {
     loadWallets();
 });
-
+const pvKey = ref();
 const isAddDialog = ref(false);
 const isImportPvK = ref(false);
-const importPrivateKey = () => {
+const importDialog = () => {
     isAddDialog.value = false;
     isImportPvK.value = true;
+};
+const importPrivateKey = async () => {
+    const payload = {
+        private_key: pvKey.value,
+        username: currentUser.value.username
+    };
+    const response = await scService.importBCAccount(payload);
+    console.log(response);
+    // isAddDialog.value = false;
+    // isImportPvK.value = true;
 };
 </script>
 
@@ -182,7 +192,7 @@ const importPrivateKey = () => {
             </div>
         </div>
 
-        <Dialog v-model:visible="isAddDialog" header="New Wallet" position="top" :modal="true" style="width: 20rem">
+        <Dialog v-model:visible="isAddDialog" header="New Wallet" position="top" :modal="true" style="width: 24rem">
             <form ref="form" @submit.prevent="generateWallet" class="space-y-6">
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-2"> Password </label>
@@ -223,17 +233,28 @@ const importPrivateKey = () => {
                     </span>
                     {{ state.isGenerating ? 'Generating...' : 'Generate Wallet' }}
                 </button>
-
-                <Button label="Import Private Key" fluid @click="importPrivateKey" severity="secondary" />
+                <div class="flex justify-center text-sm">Or</div>
+                <Button label="Import Private Key" fluid @click="importDialog" severity="secondary" />
             </form>
         </Dialog>
 
         <!-- Privatekey -->
-        <Dialog header="Import Private Key" v-model:visible="isImportPvK" style="width: 23rem" position="top">
-            <InputText placeholder="masukan private key" fluid />
+        <Dialog header="Import Private Key" v-model:visible="isImportPvK" style="width: 24rem" position="top">
+            <InputText placeholder="masukan private key" fluid v-model="pvKey" />
             <div class="mt-2">
-                <Button label="Import" icon="pi pi-upload" fluid />
+                <Button label="Import" icon="pi pi-upload" fluid @click="importPrivateKey" />
             </div>
+            <template #footer>
+                <div class="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <h4 class="font-bold text-red-800 mb-2">⚠️ Important Security Notice</h4>
+                    <ul class="text-red-700 space-y-1 text-sm list-disc px-2">
+                        <!-- <li>• Store your keystore file and password in separate secure locations</li> -->
+                        <li>Never share your private key or keystore file with anyone</li>
+                        <li>Make multiple backups of your keystore file</li>
+                        <li>Test your backup before storing large amounts of cryptocurrency</li>
+                    </ul>
+                </div>
+            </template>
         </Dialog>
     </div>
 </template>

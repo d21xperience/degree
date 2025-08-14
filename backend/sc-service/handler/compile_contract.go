@@ -3,63 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
 	"sc-service/utils"
 )
 
-// func HandlerCompileContractHTTP() http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		// Validasi method
-// 		if r.Method != http.MethodPost {
-// 			http.Error(w, "Hanya POST diizinkan", http.StatusMethodNotAllowed)
-// 			return
-// 		}
-
-// 		// Parse multipart form
-// 		err := r.ParseMultipartForm(10 << 20) // Max 10MB
-// 		if err != nil {
-// 			http.Error(w, "Gagal membaca form", http.StatusBadRequest)
-// 			return
-// 		}
-
-// 		file, handler, err := r.FormFile("file")
-// 		if err != nil {
-// 			http.Error(w, "File .sol tidak ditemukan", http.StatusBadRequest)
-// 			return
-// 		}
-// 		defer file.Close()
-
-// 		// Simpan file sementara
-// 		tempDir := "./contracts"
-// 		_ = os.MkdirAll(tempDir, os.ModePerm)
-// 		dstPath := filepath.Join(tempDir, handler.Filename)
-// 		dst, _ := os.Create(dstPath)
-// 		defer dst.Close()
-// 		_, _ = io.Copy(dst, file)
-
-// 		// Compile
-// 		abiPath, binPath, err := utils.CompileSolidityFile(dstPath)
-// 		if err != nil {
-// 			http.Error(w, "Compile gagal: "+err.Error(), http.StatusInternalServerError)
-// 			return
-// 		}
-
-// 		log.Printf("%v %v", abiPath, binPath)
-// 		abiContent, _ := os.ReadFile(abiPath)
-// 		binContent, _ := os.ReadFile(binPath)
-
-//			// Response
-//			w.Header().Set("Content-Type", "application/json")
-//			json.NewEncoder(w).Encode(map[string]any{
-//				"status":   true,
-//				"message":  "Compile berhasil",
-//				"abi":      string(abiContent),
-//				"bytecode": string(binContent),
-//			})
-//		}
-//	}
 func HandlerCompileContractHTTP() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Validasi method
@@ -107,37 +57,51 @@ func HandlerCompileContractHTTP() http.HandlerFunc {
 		// Compile kontrak
 		abiPath, binPath, err := utils.CompileSolidityFile(dstPath)
 		if err != nil {
-			http.Error(w, "Compile gagal: "+err.Error(), http.StatusInternalServerError)
+			utils.RespondWithError(w, http.StatusInternalServerError, "ABI tidak valid: "+err.Error())
 			return
 		}
 
-		// Baca konten hasil compile
-		abiContent, err := os.ReadFile(abiPath)
+		// Pastikan file ada dan bisa diakses
+		if err := utils.VerifyFileAccess(abiPath); err != nil {
+			utils.RespondWithError(w, http.StatusInternalServerError, "ABI tidak valid: "+err.Error())
+			return
+		}
+
+		if err := utils.VerifyFileAccess(binPath); err != nil {
+			utils.RespondWithError(w, http.StatusInternalServerError, "Bytecode tidak valid: "+err.Error())
+			return
+		}
+
+		// Baca konten dengan retry jika diperlukan
+		abiContent, err := utils.ReadFileWithRetry(abiPath, 3)
 		if err != nil {
-			http.Error(w, "Gagal membaca file ABI: "+err.Error(), http.StatusInternalServerError)
+			utils.RespondWithError(w, http.StatusInternalServerError, "Gagal membaca ABI setelah 3 percobaan: "+err.Error())
 			return
 		}
 
-		binContent, err := os.ReadFile(binPath)
+		binContent, err := utils.ReadFileWithRetry(binPath, 3)
 		if err != nil {
-			http.Error(w, "Gagal membaca file bytecode: "+err.Error(), http.StatusInternalServerError)
+			utils.RespondWithError(w, http.StatusInternalServerError, "Gagal membaca bytecode setelah 3 percobaan: "+err.Error())
 			return
 		}
-
-		// Bersihkan file temporary
-		defer func() {
-			os.Remove(dstPath)
-			os.Remove(abiPath)
-			os.Remove(binPath)
-		}()
+		log.Println("=== Bytecode Content ===")
+		log.Println(string(binContent))
+		// // Bersihkan file temporary
+		// defer func() {
+		// 	os.Remove(dstPath)
+		// 	os.Remove(abiPath)
+		// 	os.Remove(binPath)
+		// }()
 
 		// Response
 		w.Header().Set("Content-Type", "application/json")
 		response := map[string]any{
-			"status":   "true",
-			"message":  "Compile berhasil",
-			"abi":      string(abiContent),
-			"bytecode": string(binContent),
+			"status":            true,
+			"message":           "Compile berhasil",
+			"abi_filename":      filepath.Base(abiPath),
+			"bytecode_filename": filepath.Base(binPath),
+			"abi":               string(abiContent),
+			"bytecode":          string(binContent),
 		}
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {

@@ -185,12 +185,13 @@ export function useSekolahService() {
             console.error('Gagal mengambil data guru:', error);
         }
     };
-
+    // =================================================
+    // KELAS
+    // =================================================
     const fetchKelas = async (kelasId = null, tingkatPendidikanId = null) => {
         try {
             let response = store.getters['sekolahService/getKelas'];
-            // console.log(response);
-            if (!response || response.kelas.length == 0 || initSelectedSemester.value?.semesterId != response?.semesterId) {
+            if (!response || Array.isArray(response.kelas) || response.kelas.length == 0 || initSelectedSemester.value?.semesterId != response?.semesterId) {
                 const payload = {
                     schemaname: schemaname.value,
                     semester_id: initSelectedSemester.value?.semesterId

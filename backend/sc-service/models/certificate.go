@@ -84,15 +84,11 @@ func (DegreeData) TableName() string {
 	return "degree_data"
 }
 
-type ContractData struct {
-	Id             int32   `gorm:"column:id;primaryKey;autoIncrement" `
-	ContractAddres *string `gorm:"column:contract_address"`
-	ContractOwner  *string `gorm:"column:contract_owner"`
-}
-
-func (ContractData) TableName() string {
-	return "contracts"
-}
+// type ContractData struct {
+// 	Id             int32   `gorm:"column:id;primaryKey;autoIncrement" `
+// 	ContractAddres *string `gorm:"column:contract_address"`
+// 	ContractOwner  *string `gorm:"column:contract_owner"`
+// }
 
 type BCTransaction struct {
 	FromAddress string
@@ -109,4 +105,42 @@ type BCTransaction struct {
 
 func (BCTransaction) TableName() string {
 	return "transaksi_blockchain"
+}
+
+// Contract menyimpan informasi smart contract
+type Contract struct {
+	ID              uint32  `gorm:"primaryKey"`
+	OwnerAddress    string  `gorm:"column:owner_address"`
+	ContractName    string  `gorm:"column:contract_name"`
+	ContractAddress string  `gorm:"column:contract_address"`
+	ContractOwner   *string `gorm:"column:contract_owner"`
+	TxHash          string  `gorm:"column:tx_hash"`
+	NetworkID       uint32  `gorm:"column:network_id"` // Relasi ke jaringan
+	IsActive        bool    `gorm:"column:is_active"`
+	CreatedAt       time.Time
+	// ABI             string  `gorm:"column:abi"`
+	// Bytecode        string  `gorm:"column:byte_code"`
+	// Network         Network `gorm:"foreignKey:NetworkID"`
+	// UpdatedAt       time.Time
+}
+
+// func (Contract) TableName() string {
+// 	return "contracts"
+// }
+
+// Transaction menyimpan data transaksi blockchain
+type Transaction struct {
+	ID         uint      `gorm:"primaryKey"`
+	AccountID  uint      `gorm:"not null;index"` // Relasi ke akun pengguna
+	Account    Account   `gorm:"foreignKey:AccountID"`
+	TxHash     string    `gorm:"uniqueIndex;not null"`
+	ContractID *uint     `gorm:"index"` // Opsional, relasi ke kontrak
+	Contract   *Contract `gorm:"foreignKey:ContractID"`
+	NetworkID  uint      `gorm:"not null;index"` // Relasi ke jaringan blockchain
+	Network    Network   `gorm:"foreignKey:NetworkID"`
+	Method     string    `gorm:"size:100"`
+	InputData  string    `gorm:"type:text"`
+	GasUsed    uint64
+	Status     string    `gorm:"size:20"` // pending, success, failed
+	Timestamp  time.Time // Waktu transaksi
 }
