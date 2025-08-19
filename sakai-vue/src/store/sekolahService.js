@@ -149,6 +149,7 @@ const actions = {
                     semester_id: semester_id
                 }
             });
+            // console.log('sekolahService', response);
             commit('SET_TABELSEMESTER', response.data.semester);
             const tahunAjaran = state.selectedTahunAjaran?.tahunAjaranId;
             // const selectedSemester = response.data.semester.reduce((max, item) => (item.semesterId > max.semesterId ? item : max), response.data.semester[0]);
@@ -156,12 +157,38 @@ const actions = {
                 const selectedSemester = response.data.semester.filter((item) => item.tahunAjaranId == tahunAjaran);
                 commit('SET_SELECTEDSEMESTER', selectedSemester[0]);
             }
-            return true;
+            return response.data;
         } catch (error) {
             throw error;
         }
     },
 
+    async deleteSemester({ commit }, payload) {
+        try {
+            console.log(payload);
+            const { data } = await api.delete('ss/semester', {
+                params: {
+                    semester_ids: payload
+                }
+            });
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async updateSemester({ commit }, payload) {
+        try {
+            // console.log("sekolalhService",payload)
+            // return
+            const { data } = await api.put('ss/semester', { semester: payload });
+            console.log(data);
+            return data;
+        } catch (error) {
+            console.log(error);
+            throw error;
+        }
+    },
     async fetchSelectedSemester({ commit }, payload) {
         commit('SET_SELECTEDSEMESTER', payload);
     },
@@ -777,7 +804,6 @@ const actions = {
 
     async fetchKelas({ commit }, payload) {
         try {
-            // console.log(payload);
             const response = await api.get(`/ss/${payload.schemaname}/kelas`, {
                 params: {
                     semester_id: payload.semester_id,
@@ -789,8 +815,6 @@ const actions = {
                 semesterId: payload.semester_id,
                 kelas: response.data.kelas
             };
-            console.log(data);
-            // return
             commit('SET_TABELKELAS', data);
             return response.data;
         } catch (error) {

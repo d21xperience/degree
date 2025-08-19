@@ -12,6 +12,8 @@ import (
 	"sekolah/utils"
 
 	"github.com/google/uuid"
+	"github.com/spf13/cast"
+	"gorm.io/gorm"
 )
 
 type NilaiAkhirServiceServer struct {
@@ -87,7 +89,7 @@ func (s *NilaiAkhirServiceServer) GetNilaiSiswa(ctx context.Context, req *pb.Get
 	// Debugging: Cek nilai request yang diterima
 	// log.Printf("Received Sekolah data request: %+v\n", req)
 	// Daftar field yang wajib diisi
-	requiredFields := []string{"Schemaname", "SemesterId", "RombonganBelajarId"}
+	requiredFields := []string{"Schemaname", "SemesterId", "AnggotaRombelId"}
 	// Validasi request
 	err := utils.ValidateFields(req, requiredFields)
 	if err != nil {
@@ -286,9 +288,117 @@ func (s *NilaiAkhirServiceServer) GetNilaiSiswa(ctx context.Context, req *pb.Get
 // 		return nil, fmt.Errorf("gagal menyimpan data Nilai akhir ke database: %w", err)
 // 	}
 
-// 	return &pb.UploadNilai akhirResponse{
-// 		Message: "Nilai akhir berhasil diunggah",
-// 		Total:   int32(len(Nilai akhirList)),
-// 		Status:  true,
-// 	}, nil
-// }
+//		return &pb.UploadNilai akhirResponse{
+//			Message: "Nilai akhir berhasil diunggah",
+//			Total:   int32(len(Nilai akhirList)),
+//			Status:  true,
+//		}, nil
+//	}
+func hitungUrutanSemester(semesterID string, tahunMasuk int) int {
+	if len(semesterID) < 5 {
+		return 0
+	}
+
+	tahun := cast.ToInt(semesterID[:4])
+	sem := cast.ToInt(semesterID[4:])
+
+	return (tahun-tahunMasuk)*2 + sem
+}
+func GetNilaiSiswaPerSemester(db *gorm.DB, pesertaDidikID uuid.UUID) ([]models.SiswaNilai, string, error) {
+	var result []models.SiswaNilai
+	var jenjang string
+
+	// Dapatkan jenjang dan tahun masuk dari rombel
+	var rombel struct {
+		Jenjang    string
+		TahunMasuk int
+	}
+	err := db.Table("rombongan_belajar r").
+		Joins("JOIN anggota_rombel a ON a.rombongan_belajar_id = r.id").
+		Where("a.peserta_didik_id = ?", pesertaDidikID).
+		Select("r.jenjang_pendidikan as jenjang, r.tahun_ajaran as tahun_masuk").
+		Scan(&rombel).Error
+
+	if err != nil {
+		return nil, "", err
+	}
+	jenjang = rombel.Jenjang
+	tahunMasuk := rombel.TahunMasuk // Misal: 2022
+
+	// Tentukan jumlah semester maksimal
+	totalSemesters := map[string]int{
+		"TK": 2, "SD": 12, "SMP": 6, "SMA": 6,
+	}[jenjang]
+	if totalSemesters == 0 {
+		totalSemesters = 6
+	}
+
+	// Ambil data nilai + nama mata pelajaran
+	var rows []struct {
+		SemesterID    string
+		MataPelajaran string
+		NilaiPeng     int
+	}
+	err = db.Table("tabel_nilaiakhir n").
+		Joins("JOIN mata_pelajaran m ON m.id = n.mata_pelajaran_id").
+		Where("n.peserta_didik_id = ?", pesertaDidikID).
+		Select("n.semester_id, m.nama as mata_pelajaran, COALESCE(n.nilai_peng, 0) as nilai_peng").
+		Scan(&rows).Error
+
+	if err != nil {
+		return nil, "", err
+	}
+
+	// Mapping nilai ke struct
+	mapping := make(map[string]*models.SiswaNilai)
+	for _, row := range rows {
+		urutan := hitungUrutanSemester(row.SemesterID, tahunMasuk)
+
+		// Hanya proses semester 1 sampai max (misal 6 untuk SMA)
+		if urutan < 1 || urutan > totalSemesters {
+			continue
+		}
+
+		if _, exists := mapping[row.MataPelajaran]; !exists {
+			mapping[row.MataPelajaran] = &models.SiswaNilai{
+				MataPelajaran: row.MataPelajaran,
+			}
+		}
+
+		// Assign ke field semester ke-N
+		target := mapping[row.MataPelajaran]
+		switch urutan {
+		case 1:
+			target.Semester1 = &row.NilaiPeng
+		case 2:
+			target.Semester2 = &row.NilaiPeng
+		case 3:
+			target.Semester3 = &row.NilaiPeng
+		case 4:
+			target.Semester4 = &row.NilaiPeng
+		case 5:
+			target.Semester5 = &row.NilaiPeng
+		case 6:
+			target.Semester6 = &row.NilaiPeng
+		case 7:
+			target.Semester7 = &row.NilaiPeng
+		case 8:
+			target.Semester8 = &row.NilaiPeng
+		case 9:
+			target.Semester9 = &row.NilaiPeng
+		case 10:
+			target.Semester10 = &row.NilaiPeng
+		case 11:
+			target.Semester11 = &row.NilaiPeng
+		case 12:
+			target.Semester12 = &row.NilaiPeng
+		}
+	}
+
+	// Konversi map ke slice
+	for _, v := range mapping {
+		result = append(result, *v)
+	}
+
+	return result, jenjang, nil
+}

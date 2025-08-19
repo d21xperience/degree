@@ -9,6 +9,10 @@ import (
 	"sekolah/models"
 	"sekolah/repositories"
 	"sekolah/utils"
+	"time"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type SemesterServiceServer struct {
@@ -34,14 +38,22 @@ func (s *SemesterServiceServer) CreateSemester(ctx context.Context, req *pb.Crea
 	}
 	semester := req.GetSemester()
 	// tahunAjaranId := req.GetTahunAjaranId()
+	tglMulai, err := utils.StringToTime(semester.TanggalMulai, "2006-01-01")
+	if err != nil {
+		return nil, err
+	}
+	tglSelesai, err := utils.StringToTime(semester.TanggalSelesai, "2006-01-01")
+	if err != nil {
+		return nil, err
+	}
 	semesterModel := &models.Semester{
 		SemesterID:     semester.SemesterId,
 		Nama:           semester.NamaSemester,
 		TahunAjaranID:  semester.TahunAjaranId,
 		Semester:       semester.Semester,
 		PeriodeAktif:   semester.PeriodeAktif,
-		TanggalMulai:   semester.TanggalMulai,
-		TanggalSelesai: semester.TanggalSelesai,
+		TanggalMulai:   tglMulai,
+		TanggalSelesai: tglSelesai,
 	}
 
 	err = s.repo.Save(ctx, semesterModel, "ref")
@@ -58,64 +70,38 @@ func (s *SemesterServiceServer) CreateSemester(ctx context.Context, req *pb.Crea
 
 // **GetSemester**
 func (s *SemesterServiceServer) GetSemester(ctx context.Context, req *pb.GetSemesterRequest) (*pb.GetSemesterResponse, error) {
-	// Cek apakah harus mengambil semua data atau data spesifik berdasarkan SemesterId
-	SemesterID := req.GetSemesterId()
-	findAll := SemesterID == ""
-
-	if findAll {
-		// Ambil data spesifik berdasarkan SemesterId
-		conditions := map[string]interface{}{
-			"periode_aktif": 1,
-		}
-		orderBy := []string{
-			"semester_id",
-		}
-		SemesterModels, err := s.repo.FindAllByConditions(ctx, "ref", conditions, 100, 0, orderBy)
-		if err != nil {
-			log.Printf("[ERROR] Gagal menemukan tahun ajaran di schema '%s': %v", "ref", err)
-			return nil, fmt.Errorf("gagal menemukan tahun ajaran di schema '%s': %w", "ref", err)
-		}
-		// Konversi hasil ke response protobuf
-		SemesterList := utils.ConvertModelsToPB(SemesterModels, func(model *models.Semester) *pb.Semester {
-			return &pb.Semester{
-				SemesterId:     model.SemesterID,
-				TahunAjaranId:  model.TahunAjaranID,
-				NamaSemester:   model.Nama,
-				Semester:       model.Semester,
-				PeriodeAktif:   model.PeriodeAktif,
-				TanggalMulai:   model.TanggalMulai,
-				TanggalSelesai: model.TanggalSelesai,
-			}
-		})
-		// Return response
+	conditions := make(map[string]any)
+	orderBy := []string{"tahun_ajaran_id DESC", "semester ASC"}
+	if req.SemesterId != "" {
+		conditions["semester_id"] = req.SemesterId
+	}
+	SemesterModels, err := s.repo.FindAllByConditions(ctx, "ref", conditions, 100, 0, orderBy)
+	if err != nil {
+		log.Printf("[ERROR] Gagal menemukan tahun ajaran di schema '%s': %v", "ref", err)
 		return &pb.GetSemesterResponse{
-			Semester: SemesterList,
+			Status:  false,
+			Message: fmt.Sprintf("gagal menemukan tahun ajaran di schema '%s': %v", "ref", err),
 		}, nil
 	}
-
-	// Ambil data spesifik berdasarkan SemesterId
-
-	SemesterModel, err := s.repo.FindByID(ctx, SemesterID, "ref", "semester_id")
-	if err != nil {
-		log.Printf("[ERROR] Gagal menemukan tahun ajaran dengan ID '%s' di schema '%s': %v", SemesterID, "ref", err)
-		return nil, fmt.Errorf("gagal menemukan tahun ajaran dengan ID '%s': %w", SemesterID, err)
-	}
-
+	// Konversi hasil ke response protobuf
+	SemesterList := utils.ConvertModelsToPB(SemesterModels, func(model *models.Semester) *pb.Semester {
+		return &pb.Semester{
+			SemesterId:     model.SemesterID,
+			TahunAjaranId:  model.TahunAjaranID,
+			NamaSemester:   model.Nama,
+			Semester:       model.Semester,
+			PeriodeAktif:   model.PeriodeAktif,
+			TanggalMulai:   utils.TimeToString(model.TanggalMulai, "2006-01-01"),
+			TanggalSelesai: utils.TimeToString(model.TanggalSelesai, "2006-01-01"),
+		}
+	})
+	// Return response
 	return &pb.GetSemesterResponse{
-		Semester: []*pb.Semester{
-			utils.ConvertModelToPB(SemesterModel, func(model *models.Semester) *pb.Semester {
-				return &pb.Semester{
-					SemesterId:     model.SemesterID,
-					TahunAjaranId:  model.TahunAjaranID,
-					NamaSemester:   model.Nama,
-					Semester:       model.Semester,
-					PeriodeAktif:   model.PeriodeAktif,
-					TanggalMulai:   model.TanggalMulai,
-					TanggalSelesai: model.TanggalSelesai,
-				}
-			}),
-		},
+		Semester: SemesterList,
+		Status:   true,
+		Message:  "Berhasil mendapatkan data semester",
 	}, nil
+
 }
 
 // **UpdateSemester**
@@ -128,14 +114,23 @@ func (s *SemesterServiceServer) UpdateSemester(ctx context.Context, req *pb.Upda
 		return nil, err
 	}
 	semesterReq := req.Semester
+	tglMulai, err := time.Parse(time.RFC3339, semesterReq.TanggalMulai)
+	if err != nil {
+		return nil, err
+	}
+	tglSelesai, err := time.Parse(time.RFC3339, semesterReq.TanggalSelesai)
+	if err != nil {
+		return nil, err
+	}
+
 	SemesterModel := &models.Semester{
 		SemesterID:     semesterReq.SemesterId,
 		TahunAjaranID:  semesterReq.TahunAjaranId,
 		Semester:       semesterReq.Semester,
 		Nama:           semesterReq.NamaSemester,
 		PeriodeAktif:   semesterReq.PeriodeAktif,
-		TanggalMulai:   semesterReq.TanggalMulai,
-		TanggalSelesai: semesterReq.TanggalSelesai,
+		TanggalMulai:   tglMulai,
+		TanggalSelesai: tglSelesai,
 	}
 	err = s.repo.Update(ctx, SemesterModel, "ref", "semester_id", SemesterModel.SemesterID)
 	if err != nil {
@@ -151,22 +146,34 @@ func (s *SemesterServiceServer) UpdateSemester(ctx context.Context, req *pb.Upda
 // // **DeleteSemester**
 func (s *SemesterServiceServer) DeleteSemester(ctx context.Context, req *pb.DeleteSemesterRequest) (*pb.DeleteSemesterResponse, error) {
 	// Daftar field yang wajib diisi
-	requiredFields := []string{"SemesterId"}
+	requiredFields := []string{"SemesterIds"}
 	// Validasi request
 	err := utils.ValidateFields(req, requiredFields)
 	if err != nil {
 		return nil, err
 	}
-	SemesterID := req.GetSemesterId()
+	// Filter empty strings
+	var validIds []string
+	for _, id := range req.GetSemesterIds() {
+		if id != "" {
+			validIds = append(validIds, id)
+		}
+	}
+	if len(validIds) == 0 {
+		return nil, status.Error(codes.InvalidArgument, "semester_ids cannot be empty")
+	}
 
-	err = s.repo.Delete(ctx, SemesterID, "ref", "semester_id")
+	err = s.repo.DeleteBatch(ctx, validIds, "ref", "semester_id", repositories.ValidateString)
 	if err != nil {
-		log.Printf("Gagal menghapus tahun ajaran: %v", err)
-		return nil, fmt.Errorf("gagal menghapus tahun ajaran: %w", err)
+		log.Printf("Gagal menghapus semester: %v", err)
+		return &pb.DeleteSemesterResponse{
+			Message: "Semester gagal dihapus",
+			Status:  false,
+		}, nil
 	}
 
 	return &pb.DeleteSemesterResponse{
-		Message: "Tahun ajaran berhasil dihapus",
+		Message: "Semester berhasil dihapus",
 		Status:  true,
 	}, nil
 }

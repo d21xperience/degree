@@ -100,6 +100,17 @@ onMounted(async () => {
     siswa.value = await fetchSiswaAktif();
     tingkatPendidikanOptions.value = await fetchTingkat();
 });
+
+const initial = async () => {
+    try {
+        const res = await fetchSiswaAktif()
+        if (res.status){
+            
+        }
+    } catch (error) {
+        
+    }
+}
 const isEdit = ref(false);
 const dt = ref();
 const deleteSiswaDialog = ref(false);

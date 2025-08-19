@@ -1,9 +1,8 @@
 <template>
-    <Dialog v-model:visible="isVisible" :style="{ width: '450px' }" header="Confirm" :modal="true">
+    <Dialog v-model:visible="isVisible" :style="{ width: '450px' }" :header="judul" :modal="true">
         <div class="flex items-center gap-4">
             <i class="pi pi-exclamation-triangle !text-3xl" />
-            <span>Apakah <span v-html="message"></span></span
-            >
+            <span>Apakah <span v-html="message"></span></span>
         </div>
         <template #footer>
             <Button label="Tidak" icon="pi pi-times" text @click="closeDialog" />
@@ -13,36 +12,28 @@
 </template>
 
 <script setup>
-import { computed, defineEmits, defineProps, ref, watch } from 'vue';
+import { computed } from 'vue';
 
+const emit = defineEmits(['update:visible', 'confirm', 'closeDialog']);
 const props = defineProps({
     visible: Boolean,
     message: {
         type: String,
         default: 'data'
+    },
+    judul: {
+        type: String,
+        default: 'Hapus data'
     }
 });
 
 const isVisible = computed({
     get: () => props.visible,
-    set: (value) => emit('update:visible', value)
-});
-const emit = defineEmits(['update:visible', 'confirm', 'closeDialog']);
-
-const localVisible = ref(props.modelValue);
-
-// Sinkronisasi jika parent mengubah nilai modelValue
-watch(
-    () => props.modelValue,
-    (newVal) => {
-        localVisible.value = newVal;
+    set: (value) => {
+        emit('update:visible', value);
+        emit('closeDialog');
     }
-);
-
-// // Emit ke parent jika dialog ditutup dari dalam
-// watch(localVisible, (newVal) => {
-//     emit('update:modelValue', newVal);
-// });
+});
 
 // Function untuk menutup dialog
 const closeDialog = () => {

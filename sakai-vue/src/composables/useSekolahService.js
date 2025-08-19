@@ -190,31 +190,36 @@ export function useSekolahService() {
     // =================================================
     const fetchKelas = async (kelasId = null, tingkatPendidikanId = null) => {
         try {
+            const payload = {
+                schemaname: schemaname.value,
+                semester_id: initSelectedSemester.value?.semesterId
+            };
+            if (kelasId) {
+                payload.kelas_id = kelasId;
+            }
+            if (tingkatPendidikanId) {
+                payload.tingkat_pendidikan_id = tingkatPendidikanId;
+            }
+            const response = await store.dispatch('sekolahService/fetchKelas', payload);
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    };
+    const getKelas = async () => {
+        try {
             let response = store.getters['sekolahService/getKelas'];
             if (!response || Array.isArray(response.kelas) || response.kelas.length == 0 || initSelectedSemester.value?.semesterId != response?.semesterId) {
-                const payload = {
-                    schemaname: schemaname.value,
-                    semester_id: initSelectedSemester.value?.semesterId
-                };
-                if (kelasId) {
-                    payload.kelas_id = kelasId;
-                }
-                if (tingkatPendidikanId) {
-                    payload.tingkat_pendidikan_id = tingkatPendidikanId;
-                }
-                response = await store.dispatch('sekolahService/fetchKelas', payload);
-                if (response.status) {
-                    toast.add({ severity: 'success', summary: 'Success', detail: `${response.message}`, life: 3000 });
-                }
+                response = await fetchKelas();
             }
 
             kelasList.value = response.kelas;
-            // console.log(response);
-            return response.kelas;
+            return response;
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengambil kelas: ${error}`, life: 3000 });
+            throw error;
         }
     };
+
     const searchKelas = async (kelasId = null) => {
         try {
             let response = store.getters['sekolahService/getKelas'];
@@ -256,44 +261,46 @@ export function useSekolahService() {
             toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal update data kelas: ${error}`, life: 3000 });
         }
     };
-
-    // const fetchAnggotaKelas = async (anggotaRombelId = null) => {
-    //     try {
-    //         const payload = {
-    //             schemaname: schemaname.value,
-    //             semester_id: initSelectedSemester.value?.semesterId
-    //         };
-
-    //         if (anggotaRombelId) {
-    //             payload.anggota_rombel_id = anggotaRombelId;
-    //         }
-    //         const response = await store.dispatch('sekolahService/fetchSiswaAktif', payload);
-    //         return response;
-    //     } catch (error) {
-    //         console.error('Gagal mengambil data kelas:', error);
-    //     }
-    // };
-    const fetchSiswaAktif = async (semesterId = null) => {
-        const payload = {
-            schemaname: schemaname.value
-        };
-        if (!semesterId) {
-            payload.semesterId = initSelectedSemester.value.semesterId;
-        } else {
-            payload.semesterId = semesterId;
-        }
-        let res = await store.getters['sekolahService/getSiswaAktif'];
-
-        // console.log(res.semester_id != payload.semesterId);
-        if (!res || res?.peserta_didik.length == 0) {
-            res = await store.dispatch('sekolahService/fetchSiswaAktif', payload);
-        } else {
-            if (res.semester_id != payload.semesterId) {
-                res = await store.dispatch('sekolahService/fetchSiswaAktif', payload);
+    /**
+     *
+     * @param {String} rombonganBelajarId
+     * @param {String} semesterId
+     * @returns
+     */
+    const fetchAnggotaKelas = async (rombonganBelajarId = '', semesterId = '') => {
+        try {
+            const cachedData = await store.getters['sekolahService/getSiswaAktif'];
+            if (cachedData.semester_id === semesterId) {
+                const anggotaKelas = cachedData.peserta_didik.filter((val) => val.rombonganBelajarId === rombonganBelajarId);
+                return anggotaKelas;
             }
+            return null;
+        } catch (error) {
+            console.error('Gagal mengambil data kelas:', error);
         }
-        siswaAktifList.value = res.peserta_didik;
-        return res.peserta_didik;
+    };
+    const fetchSiswaAktif = async (semesterId = null) => {
+        try {
+            const requestData = {
+                schemaname: schemaname.value,
+                semesterId: semesterId || initSelectedSemester.value.semesterId
+            };
+            const cachedData = await store.getters['sekolahService/getSiswaAktif'];
+            const shouldFetchNewData = !cachedData || !cachedData?.peserta_didik?.length || cachedData.semester_id !== requestData.semesterId;
+
+            let studentData = cachedData;
+            if (shouldFetchNewData) {
+                studentData = await store.dispatch('sekolahService/fetchSiswaAktif', requestData);
+            }
+
+            // Update reactive data
+            siswaAktifList.value = studentData.peserta_didik;
+
+            return studentData.peserta_didik;
+        } catch (error) {
+            console.error('Failed to fetch active students:', error);
+            throw error;
+        }
     };
 
     const deleteSiswaAktif = async (anggotaRombelId) => {
@@ -355,20 +362,77 @@ export function useSekolahService() {
     const fetchSemester = async () => {
         try {
             const results = await store.dispatch('sekolahService/fetchSemester');
-            if (results) {
-                semester.value = store.getters['sekolahService/getSemester'];
-                // Cek apakah di vuex ada nilai
-                initSelectedSemester.value = await store.getters['sekolahService/getinitSelectedSemester'];
-                if (initSelectedSemester.value == null) {
-                    // jika tidak ada, ambil semester terbaru berdasarkan ID terbesar
-                    initSelectedSemester.value = semester.value.reduce((latest, current) => (current.semesterId > latest.semesterId ? current : latest));
-                }
-                // tetapkan semester yang dipilih
-                store.commit('sekolahService/SET_SELECTEDSEMESTER', initSelectedSemester.value);
+            if (results.status) {
+                return results.semester;
             }
-        } catch (error) {}
+        } catch (error) {
+            throw error;
+        }
     };
 
+    /**
+     * Gets a contract for the given owner address
+     * @param {Array} semester
+     * @returns {Promise} A promise that resolves with the contract response
+     * @throws {Error} If there's an error fetching the contract
+     */
+    /**
+     * Deletes semesters by their IDs
+     * @param {Array<Object>} semesters - Array of semester objects containing semesterId
+     * @returns {Promise<Object>} A promise that resolves with the deletion response
+     * @throws {Error} If the deletion request fails
+     *
+     * @example
+     * await deleteSemester([{ semesterId: 1 }, { semesterId: 2 }]);
+     */
+    const deleteSemester = async (semesters) => {
+        // Validasi input
+        if (!Array.isArray(semesters)) {
+            throw new Error('Parameter must be an array of semester objects');
+        }
+
+        // Ekstrak semesterId secara langsung
+        const semesterIds = semesters
+            .map((semester) => {
+                if (semester.semesterId == null) {
+                    console.warn('Semester object missing semesterId:', semester);
+                }
+                return semester.semesterId;
+            })
+            .filter((id) => id != null); // Filter null/undefined
+
+        if (semesterIds.length === 0) {
+            throw new Error('No valid semester IDs provided');
+        }
+        console.log(semesterIds);
+        // return;
+        try {
+            // Tunggu hasil dispatch dengan await
+            const response = await store.dispatch('sekolahService/deleteSemester', semesterIds);
+            console.log('deleteSemester', response);
+            // Asumsi response memiliki struktur { status: true, data: ... } atau sejenisnya
+            if (response.status) {
+                return response;
+            } else {
+                throw new Error(response?.message || 'Failed to delete semesters');
+            }
+        } catch (error) {
+            // Tambahkan konteks error
+            console.error('Error deleting semesters:', error);
+            throw new Error(`Failed to delete semesters: ${error.message || 'Unknown error'}`);
+        }
+    };
+
+    const updateSemester = async (semester) => {
+        try {
+            console.log('updateSemester', semester);
+            // return
+            const res = await store.dispatch('sekolahService/updateSemester', semester);
+            return res;
+        } catch (error) {
+            throw error;
+        }
+    };
     const fetchTahunAjaran = async () => {
         try {
             rawlistTahunAjaran.value = store.getters['sekolahService/getTahunAjaran'];
@@ -376,11 +440,12 @@ export function useSekolahService() {
                 const results = await store.dispatch('sekolahService/fetchTahunAjaran');
                 if (results.status) {
                     rawlistTahunAjaran.value = results.tahunAjaran;
-                    toast.add({ severity: 'success', summary: 'Successful', detail: `${results.message}`, life: 3000 });
+                    // toast.add({ severity: 'success', summary: 'Successful', detail: `${results.message}`, life: 3000 });
                 }
             }
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengambil tahun ajaran: ${error}`, life: 3000 });
+            throw error;
+            // toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengambil tahun ajaran: ${error}`, life: 3000 });
         }
     };
 
@@ -866,9 +931,12 @@ export function useSekolahService() {
         updateGuruTerdaftar,
         guruTerdaftarList,
         fetchKelas,
+        getKelas,
         // fetchSiswa,
         kelasList,
         fetchSemester,
+        deleteSemester,
+        updateSemester,
         fetchSiswaAktif,
         deleteSiswaAktif,
         deleteBatchSiswaAktif,
@@ -911,6 +979,7 @@ export function useSekolahService() {
         searchDnsLokal,
         searchSiswaAktif,
         searchKelas,
-        guruTerdaftarLoading
+        guruTerdaftarLoading,
+        fetchAnggotaKelas
     };
 }

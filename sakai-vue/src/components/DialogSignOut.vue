@@ -14,17 +14,17 @@
 </template>
 <script setup>
 import { computed } from 'vue';
+const emit = defineEmits(['update:visible', 'confirm']);
+const props = defineProps({
+    visible: Boolean
+});
 
-// const dialogSignOut = () => {};
 const onLogout = () => {
     emit('confirm')
 };
-const emit = defineEmits(['update:visible', 'confirm']);
 const isVisible = computed({
     get: () => props.visible,
     set: (value) => emit('update:visible', value)
 });
-const props = defineProps({
-    visible: Boolean
-});
+
 </script>

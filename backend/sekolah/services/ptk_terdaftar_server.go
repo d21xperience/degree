@@ -363,7 +363,7 @@ func (s *PTKTerdaftarServiceServer) DeletBatchPTKTerdaftar(ctx context.Context, 
 	}
 	schemaName := req.GetSchemaname()
 	PTKTerdaftarID := req.GetPtkTerdaftarId()
-	err = s.repo.DeleteBatch(ctx, PTKTerdaftarID, schemaName, "ptk_terdaftar_id")
+	err = s.repo.DeleteBatch(ctx, PTKTerdaftarID, schemaName, "ptk_terdaftar_id", repositories.ValidateUUID)
 	if err != nil {
 		log.Printf("Gagal menghapus PTKTerdaftar: %s", err)
 		return &pb.DeleteBatchPTKTerdaftarResponse{Message: "Gagal menghapus", Status: false}, fmt.Errorf("gagal menghapus PTKTerdaftar: %w", err)

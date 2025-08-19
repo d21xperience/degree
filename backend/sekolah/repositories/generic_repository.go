@@ -30,6 +30,48 @@ func NewGenericRepository[T any](db *gorm.DB, tableName string) *GenericReposito
 	}
 }
 
+type IDValidator func([]string) ([]string, error)
+
+func ValidateUUID(ids []string) ([]string, error) {
+	valid := make([]string, 0, len(ids))
+	for _, id := range ids {
+		if _, err := uuid.Parse(strings.TrimSpace(id)); err == nil {
+			valid = append(valid, id)
+		}
+	}
+	if len(valid) == 0 {
+		return nil, fmt.Errorf("tidak ada UUID valid")
+	}
+	return valid, nil
+}
+
+func ValidateString(ids []string) ([]string, error) {
+	valid := make([]string, 0, len(ids))
+	for _, id := range ids {
+		trimmed := strings.TrimSpace(id)
+		if trimmed != "" {
+			valid = append(valid, trimmed)
+		}
+	}
+	if len(valid) == 0 {
+		return nil, fmt.Errorf("tidak ada string valid")
+	}
+	return valid, nil
+}
+
+func ValidateInt(ids []string) ([]string, error) {
+	valid := make([]string, 0, len(ids))
+	for _, id := range ids {
+		if _, err := strconv.Atoi(strings.TrimSpace(id)); err == nil {
+			valid = append(valid, id)
+		}
+	}
+	if len(valid) == 0 {
+		return nil, fmt.Errorf("tidak ada int valid")
+	}
+	return valid, nil
+}
+
 // CRUD Operations
 func (r *GenericRepository[T]) Save(ctx context.Context, entity *T, schemaName string) error {
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
@@ -294,31 +336,52 @@ func (r *GenericRepository[T]) DeleteV1(ctx context.Context, schemaName, rawID, 
 	})
 }
 
-func (r *GenericRepository[T]) DeleteBatch(ctx context.Context, ids []string, schemaName, columnName string) error {
-	// Validasi UUID
-	validIDs := make([]string, 0, len(ids))
-	for _, id := range ids {
-		if u, err := uuid.Parse(strings.TrimSpace(id)); err == nil {
-			validIDs = append(validIDs, u.String())
-		}
+// func (r *GenericRepository[T]) DeleteBatch(ctx context.Context, ids []string, schemaName, columnName string) error {
+// 	// Validasi UUID
+// 	validIDs := make([]string, 0, len(ids))
+// 	for _, id := range ids {
+// 		if u, err := uuid.Parse(strings.TrimSpace(id)); err == nil {
+// 			validIDs = append(validIDs, u.String())
+// 		}
+// 	}
+
+// 	if len(validIDs) == 0 {
+// 		return fmt.Errorf("tidak ada ID valid untuk dihapus")
+// 	}
+
+// 	// Eksekusi dalam transaksi
+// 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+// 		// Set schema aktif
+// 		if err := tx.Exec(fmt.Sprintf("SET search_path TO %s", strings.ToLower(schemaName))).Error; err != nil {
+// 			return fmt.Errorf("gagal mengatur schema: %w", err)
+// 		}
+
+// 		// Eksekusi delete
+// 		if err := tx.Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)).
+// 			Where(fmt.Sprintf("%s IN ?", columnName), validIDs).
+// 			Delete(nil).Error; err != nil {
+// 			return fmt.Errorf("gagal menghapus record pada schema %s: %w", schemaName, err)
+// 		}
+
+// 		return nil
+// 	})
+// }
+
+func (r *GenericRepository[T]) DeleteBatch(ctx context.Context, ids []string, schemaName, columnName string, validator IDValidator) error {
+	validIDs, err := validator(ids)
+	if err != nil {
+		return err
 	}
 
-	if len(validIDs) == 0 {
-		return fmt.Errorf("tidak ada ID valid untuk dihapus")
-	}
-
-	// Eksekusi dalam transaksi
 	return r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		// Set schema aktif
 		if err := tx.Exec(fmt.Sprintf("SET search_path TO %s", strings.ToLower(schemaName))).Error; err != nil {
 			return fmt.Errorf("gagal mengatur schema: %w", err)
 		}
 
-		// Eksekusi delete
 		if err := tx.Table(fmt.Sprintf("%s.%s", strings.ToLower(schemaName), r.tableName)).
 			Where(fmt.Sprintf("%s IN ?", columnName), validIDs).
 			Delete(nil).Error; err != nil {
-			return fmt.Errorf("gagal menghapus record pada schema %s: %w", schemaName, err)
+			return fmt.Errorf("gagal menghapus record: %w", err)
 		}
 
 		return nil

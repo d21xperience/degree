@@ -65,6 +65,11 @@ const model = computed(() => {
                     icon: 'pi pi-fw pi-building-columns',
                     items: [
                         {
+                            label: 'Semester',
+                            icon: 'pi pi-fw pi-bookmark',
+                            to: `/${sekolahPath}/data-dapodik/info-semester`
+                        },
+                        {
                             label: 'Data Sekolah',
                             icon: 'pi pi-fw pi-bookmark',
                             to: `/${sekolahPath}/data-dapodik/info-sekolah`

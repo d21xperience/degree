@@ -1,5 +1,7 @@
 package models
 
+import "time"
+
 // type Jurusan struct {
 // 	JurusanId           string  `gorm:"column:jurusan_id;primaryKey"` // Primary key
 // 	NamaJurusan         string  `gorm:"column:nama_jurusan"`          // Nama jurusan
@@ -39,8 +41,6 @@ package models
 // 	LastSync            time.Time  `gorm:"column:last_sync;not null"`                               // TIMESTAMP, tidak boleh null
 // }
 
-
-
 type TahunAjaran struct {
 	TahunAjaranID  uint32 `gorm:"column:tahun_ajaran_id"`
 	Nama           string `gorm:"column:nama"`
@@ -50,13 +50,13 @@ type TahunAjaran struct {
 }
 
 type Semester struct {
-	SemesterID     string `gorm:"column:semester_id"`
-	TahunAjaranID  uint32 `gorm:"column:tahun_ajaran_id"`
-	Nama           string `gorm:"column:nama"`
-	Semester       int32  `gorm:"column:semester"`
-	PeriodeAktif   int32  `gorm:"column:periode_aktif"`
-	TanggalMulai   string `gorm:"column:tanggal_mulai"`
-	TanggalSelesai string `gorm:"column:tanggal_selesai"`
+	SemesterID     string    `gorm:"column:semester_id"`
+	TahunAjaranID  uint32    `gorm:"column:tahun_ajaran_id"`
+	Nama           string    `gorm:"column:nama"`
+	Semester       int32     `gorm:"column:semester"`
+	PeriodeAktif   int32     `gorm:"column:periode_aktif"`
+	TanggalMulai   time.Time `gorm:"column:tanggal_mulai"`
+	TanggalSelesai time.Time `gorm:"column:tanggal_selesai"`
 	// Relasi ke TahunAjaran
 	TahunAjaran TahunAjaran `gorm:"foreignKey:TahunAjaranID;references:TahunAjaranID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 }

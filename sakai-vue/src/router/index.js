@@ -99,6 +99,12 @@ const router = createRouter({
                             component: () => import('@/views/pages/dapodik/DataSekolah.vue')
                         },
                         {
+                            path: 'info-semester',
+                            name: 'infoSemester',
+                            meta: { title: 'Info Sekolah', namaRoute: 'Semester' },
+                            component: () => import('@/views/pages/dapodik/DataSemester.vue')
+                        },
+                        {
                             path: 'info-guru',
                             name: 'infoGuru',
                             meta: { title: 'Info Guru', namaRoute: 'Guru' },
@@ -165,7 +171,7 @@ const router = createRouter({
                             path: 'info-nilai',
                             name: 'infoNilai',
                             props: true,
-                            meta: { disableSelect: true, title: 'Nilai', namaRoute: 'Info NIlai' },
+                            meta: { disableSelect: false, title: 'Nilai', namaRoute: 'Info NIlai' },
                             component: () => import('@/views/pages/dapodik/data_nilai/DataNilai.vue')
                         },
                         {

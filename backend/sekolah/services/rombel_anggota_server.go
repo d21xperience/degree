@@ -416,7 +416,7 @@ func (s *RombelAnggotaService) DeleteBatchAnggotaKelas(ctx context.Context, req 
 	}
 	anggotaRombelId := req.GetAnggotaRombelId()
 
-	err = s.repo.DeleteBatch(ctx, anggotaRombelId, schemaName, "anggota_rombel_id")
+	err = s.repo.DeleteBatch(ctx, anggotaRombelId, schemaName, "anggota_rombel_id", repositories.ValidateUUID)
 	if err != nil {
 		log.Printf("Gagal menghapus anggota kelas: %v", err)
 		// return nil, fmt.Errorf("gagal menghapus Kelas: %w", err)

@@ -1,74 +1,75 @@
 <template>
     <div class="">
-        <div class="">
-            <Toolbar>
-                <template #start>
-                    <div v-show="kategoriMapelList.length > 0">
-                        <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="isVisible = !isVisible" v-tooltip.bottom="'Tambah Mapel'" />
-                        <Button
-                            icon="pi pi-trash"
-                            severity="danger"
-                            class="mr-2 text-lg"
-                            @click="dialogBatchDelete"
-                            :disabled="!selectedKategoriMapel || !selectedKategoriMapel.length || selectedKategoriMapel.length == 1"
-                            v-tooltip.bottom="'Hapus banyak mapel'"
-                        />
-                        <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download Mapel'" />
-                    </div>
-                    <Select v-model="selectedKategoriSekolah" :options="kategoriSekolahList" optionLabel="nama_kurikulum" placeholder="Kurikulum" class="mr-2 !w-96" checkmark fluid />
-                </template>
-                <template #end>
-                    <div class="flex">
+        <Toolbar>
+            <template #start>
+                <div v-show="kategoriMapelList.length > 0">
+                    <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="isVisible = !isVisible" v-tooltip.bottom="'Tambah Mapel'" />
+                    <Button
+                        icon="pi pi-trash"
+                        severity="danger"
+                        class="mr-2 text-lg"
+                        @click="dialogBatchDelete"
+                        :disabled="!selectedKategoriMapel || !selectedKategoriMapel.length || selectedKategoriMapel.length == 1"
+                        v-tooltip.bottom="'Hapus banyak mapel'"
+                    />
+                    <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download Mapel'" />
+                </div>
+                <Select v-model="selectedKategoriSekolah" :options="kategoriSekolahList" optionLabel="nama_kurikulum" placeholder="Kurikulum" class="mr-2 !w-96" checkmark fluid />
+            </template>
+            <template #end>
+                <div class="flex">
+                    <div>
                         <TingkatComponent v-model="selectedTingkat" :initial-value="initialTingkat" />
-                        <!-- <IconField>
+                    </div>
+                    <!-- <IconField>
                             <InputIcon>
                                 <i class="pi pi-search" />
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Search..." class="md:w-48" />
                         </IconField> -->
-                    </div>
+                    <Button icon="pi pi-refresh" severity="help" class="ml-2 text-lg" @click="" v-tooltip.bottom="'Refresh'" />
+                </div>
+            </template>
+        </Toolbar>
+        <DataTable
+            ref="dt"
+            v-model:selection="selectedKategoriMapel"
+            stripedRows
+            size="small"
+            :value="kategoriMapelList"
+            dataKey="id"
+            :paginator="true"
+            :rows="10"
+            :filters="filters"
+            :first="first"
+            @page="(e) => (first = e.first)"
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rowsPerPageOptions="[10, 20, 50]"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} kelas"
+        >
+            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
+            <Column header="No" style="width: 2rem">
+                <template #body="slotProps">
+                    <!-- {{ slotProps.index + 1 + (dt.value?.first || 0) }} -->
+                    {{ slotProps.index + 1 + first }}
                 </template>
-            </Toolbar>
-            <div class="w-full my-2 container">
-                <DataTable
-                    ref="dt"
-                    v-model:selection="selectedKategoriMapel"
-                    stripedRows
-                    size="small"
-                    :value="kategoriMapelList"
-                    dataKey="id"
-                    :paginator="true"
-                    :rows="10"
-                    :filters="filters"
-                    :first="first"
-                    @page="(e) => (first = e.first)"
-                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    :rowsPerPageOptions="[10, 20, 50]"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} kelas"
-                >
-                    <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-                    <Column header="No" style="width: 2rem">
-                        <template #body="slotProps">
-                            <!-- {{ slotProps.index + 1 + (dt.value?.first || 0) }} -->
-                            {{ slotProps.index + 1 + first }}
-                        </template>
-                    </Column>
-                    <Column field="nmMapel" header="Nama" sortable></Column>
-                    <Column field="tingkatPendidikan" header="Tingkat" sortable></Column>
-                    <Column field="" header="Jurusan" sortable>
-                        <template #body>
-                            {{ selectedKategoriSekolah?.namaJurusan }}
-                        </template>
-                    </Column>
-                    <!-- <Column field="ptk.nama" header="Guru Mapel"></Column> -->
-                    <!-- <Column field="ptk.nama" header="Jml.Mapel"></Column> -->
-                    <Column field="" header="Aksi">
-                        <template #body="{ data }">
-                            <!-- <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editMapel(data)" size="small" :rounded="true" /> -->
-                            <Button icon="pi pi-trash" outlined rounded severity="danger" @click="dialogDelete(data)" size="small" :rounded="true" />
-                        </template>
-                    </Column>
-                    <!-- <template #expansion="slotProps">
+            </Column>
+            <Column field="nmMapel" header="Nama" sortable></Column>
+            <Column field="tingkatPendidikan" header="Tingkat" sortable></Column>
+            <Column field="" header="Guru" sortable>
+                <template #body>
+                    {{ selectedKategoriSekolah?.namaJurusan }}
+                </template>
+            </Column>
+            <!-- <Column field="ptk.nama" header="Guru Mapel"></Column> -->
+            <!-- <Column field="ptk.nama" header="Jml.Mapel"></Column> -->
+            <Column field="" header="Aksi">
+                <template #body="{ data }">
+                    <!-- <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editMapel(data)" size="small" :rounded="true" /> -->
+                    <Button icon="pi pi-trash" outlined rounded severity="danger" @click="dialogDelete(data)" size="small" :rounded="true" />
+                </template>
+            </Column>
+            <!-- <template #expansion="slotProps">
                         <div class="p-4">
                             <DataTable :value="slotProps.data.pembelajaran">
                                 <Column field="namaMataPelajaran" header="Mata pelajaran" sortable></Column>
@@ -76,9 +77,7 @@
                             </DataTable>
                         </div>
                     </template> -->
-                </DataTable>
-            </div>
-        </div>
+        </DataTable>
 
         <!-- DIALOGBOX FOR EDIT DATA -->
         <Dialog v-model:visible="mapelDialog" :style="{ width: '50%' }" header="Edit Data" :modal="true" position="top">
@@ -273,7 +272,7 @@ const initKategoriMapel = async () => {
     // console.log(kategoriMapelList.value);
 };
 
-const initFirst = async () => {
+const initial = async () => {
     await sekolahService.fetchKategoriSekolah();
     kategoriSekolahList.value = sekolahService.kategoriSekolahTabel.value;
     selectedKategoriSekolah.value = kategoriSekolahList.value[0];
@@ -283,7 +282,7 @@ const initFirst = async () => {
 
 watch(sekolahService.initSelectedSemester, () => {
     // console.log(newVal);
-    initFirst();
+    initial();
     //    return sekolahService.initSelectedSemester.value?.tahunAjaranId;
 });
 
@@ -494,16 +493,13 @@ const addMapel1 = (e) => {
     console.log(e.value);
     isVisible.value = false;
     cekMapel.value = null;
-    const kategoriMapel = {
-
-    }
+    const kategoriMapel = {};
     // kategoriMapelList.value.push()
     // Kirim ke backend
-
 };
 
 onMounted(async () => {
     // await fetchK();
-    initFirst();
+    initial();
 });
 </script>
