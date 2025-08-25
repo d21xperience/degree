@@ -52,7 +52,7 @@ const handleDeploy = async () => {
                 name: contractRequest.name,
                 contract_address: currentWallet.value.address,
                 contract_owner: contractRequest.contract_owner,
-                owner_address: contractRequest.owner_address,
+                owner_address: contractRequest.owner_address
                 // network_id: contractRequest.
             },
             username: 'superadmin', //currentWallet.value.Username,
@@ -147,11 +147,11 @@ onMounted(async () => {
                         <p class="text-green-600">Contract Detail:</p>
                         <div>
                             Name:
-                            <InputText fluid placeholder="Isi nama kontrak" v-model="contractRequest.name"/>
+                            <InputText fluid placeholder="Isi nama kontrak" v-model="contractRequest.name" />
                         </div>
                         <div class="my-1">
                             Owner:
-                            <InputText fluid placeholder="Masukan nama pemilik kontrak" v-model="contractRequest.contract_owner"/>
+                            <InputText fluid placeholder="Masukan nama pemilik kontrak" v-model="contractRequest.contract_owner" />
                         </div>
                         <!-- <div class="my-1">
                             Address:

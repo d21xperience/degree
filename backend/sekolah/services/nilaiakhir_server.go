@@ -6,10 +6,11 @@ import (
 	"log"
 	"sekolah/config"
 	pb "sekolah/generated"
-	"sekolah/handler"
 	"sekolah/models"
 	"sekolah/repositories"
 	"sekolah/utils"
+	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/spf13/cast"
@@ -84,47 +85,93 @@ func (s *NilaiAkhirServiceServer) CreateNilaiAkhir(ctx context.Context, req *pb.
 	}, nil
 }
 
-// **GetNilai akhir**
-func (s *NilaiAkhirServiceServer) GetNilaiSiswa(ctx context.Context, req *pb.GetNilaiSiswaRequest) (*pb.GetNilaiSiswaResponse, error) {
-	// Debugging: Cek nilai request yang diterima
-	// log.Printf("Received Sekolah data request: %+v\n", req)
+func (s *NilaiAkhirServiceServer) SearchNilaiAkhir(ctx context.Context, req *pb.SearchNilaiAkhirRequest) (*pb.SearchNilaiAkhirResponse, error) {
+	log.Printf("nilaiakhir_server/SearchNilaiAkhir received data from request: %+v\n", req)
 	// Daftar field yang wajib diisi
-	requiredFields := []string{"Schemaname", "SemesterId", "AnggotaRombelId"}
+	requiredFields := []string{"SchemaName", "SemesterId", "PesertaDidikId"}
 	// Validasi request
-	err := utils.ValidateFields(req, requiredFields)
-	if err != nil {
-		return nil, err
-	}
-	schemaName := req.GetSchemaname()
-	rombelId := req.GetRombonganBelajarId()
-	handlerNilai := handler.NewNilaiSiswaHandler()
-	nilaiSiswa, err := handlerNilai.GetNilaiSiswa(ctx, schemaName, req.SemesterId, rombelId)
-	if err != nil {
-		return nil, err
+	requiredFieldsResponse := utils.ValidateFields(req, requiredFields)
+	if requiredFieldsResponse != nil {
+		return nil, requiredFieldsResponse
 	}
 
-	NilaiAkhirList := utils.ConvertModelsToPB(nilaiSiswa, func(item handler.NilaiSiswa) *pb.NilaiSiswa {
-		return &pb.NilaiSiswa{
-			NmSiswa:             item.NmSiswa,
-			NmKelas:             item.NmKelas,
-			TingkatPendidikanId: item.TingkatPendidikanId,
-			SemesterId:          item.SemesterId,
-			NilaiAkhir: utils.ConvertModelsToPB(*item.NilaiMapel, func(item handler.NilaiMapel) *pb.NilaiMapel {
-				return &pb.NilaiMapel{
-					NmMapel:         item.NmMapel,
-					MataPelajaranId: item.MataPelajaranId,
-					SemesterId:      item.SemesterId,
-					NilaiPeng:       item.NilaiPeng,
-				}
-			}),
+	schemaName := req.GetSchemaname()
+	pesertaDidikId := utils.StringToUUID(req.GetPesertaDidikId())
+	modelNilaiAkhir, jenjang, err := GetNilaiSiswaPerSemester(config.DB, schemaName, req.SemesterId, pesertaDidikId)
+	if err != nil {
+		return &pb.SearchNilaiAkhirResponse{
+			Status:  false,
+			Message: "Gagal mendapatkan nilai",
+		}, nil
+	}
+	results := utils.ConvertModelsToPB(modelNilaiAkhir, func(item models.NilaiMapel) *pb.NilaiMapel {
+		return &pb.NilaiMapel{
+			MataPelajaran: item.MataPelajaran,
+			Semester1:     utils.SafeUint32(item.Semester1),
+			Semester2:     utils.SafeUint32(item.Semester2),
+			Semester3:     utils.SafeUint32(item.Semester3),
+			Semester4:     utils.SafeUint32(item.Semester4),
+			Semester5:     utils.SafeUint32(item.Semester5),
+			Semester6:     utils.SafeUint32(item.Semester6),
+			Semester7:     utils.SafeUint32(item.Semester7),
+			Semester8:     utils.SafeUint32(item.Semester8),
+			Semester9:     utils.SafeUint32(item.Semester9),
+			Semester10:    utils.SafeUint32(item.Semester10),
+			Semester11:    utils.SafeUint32(item.Semester11),
+			Semester12:    utils.SafeUint32(item.Semester12),
 		}
 	})
-	return &pb.GetNilaiSiswaResponse{
-		NilaiSiswa: NilaiAkhirList,
-		Status:     true,
-		Message:    "berhasil mengambil data",
+
+	return &pb.SearchNilaiAkhirResponse{
+		Status:  true,
+		Message: "Berhasil mendapatkan nilai",
+		Nilai: &pb.NilaiSiswa{
+			NmSiswa:    "",
+			NmKelas:    "",
+			Jenjang:    jenjang,
+			NilaiMapel: results,
+		},
 	}, nil
 }
+
+// **GetNilai akhir**
+// func (s *NilaiAkhirServiceServer) GetNilaiSiswa(ctx context.Context, req *pb.GetNilaiSiswaRequest) (*pb.GetNilaiSiswaResponse, error) {
+// 	requiredFields := []string{"Schemaname", "SemesterId"}
+// 	// Validasi request
+// 	err := utils.ValidateFields(req, requiredFields)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	schemaName := req.GetSchemaname()
+// 	rombelId := req.GetRombonganBelajarId()
+// 	handlerNilai := handler.NewNilaiSiswaHandler()
+// 	nilaiSiswa, err := handlerNilai.GetNilaiSiswa(ctx, schemaName, req.SemesterId, rombelId)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	NilaiAkhirList := utils.ConvertModelsToPB(nilaiSiswa, func(item handler.NilaiSiswa) *pb.NilaiSiswa {
+// 		return &pb.NilaiSiswa{
+// 			NmSiswa:             item.NmSiswa,
+// 			NmKelas:             item.NmKelas,
+// 			TingkatPendidikanId: item.TingkatPendidikanId,
+// 			SemesterId:          item.SemesterId,
+// 			NilaiAkhir: utils.ConvertModelsToPB(*item.NilaiMapel, func(item handler.NilaiMapel) *pb.NilaiMapel {
+// 				return &pb.NilaiMapel{
+// 					NmMapel:         item.NmMapel,
+// 					MataPelajaranId: item.MataPelajaranId,
+// 					SemesterId:      item.SemesterId,
+// 					NilaiPeng:       item.NilaiPeng,
+// 				}
+// 			}),
+// 		}
+// 	})
+// 	return &pb.GetNilaiSiswaResponse{
+// 		NilaiSiswa: NilaiAkhirList,
+// 		Status:     true,
+// 		Message:    "berhasil mengambil data",
+// 	}, nil
+// }
 
 // **UpdateNilai akhir**
 // func (s *NilaiAkhirServiceServer) UpdateNilai akhir(ctx context.Context, req *pb.UpdateNilai akhirRequest) (*pb.UpdateNilai akhirResponse, error) {
@@ -304,8 +351,8 @@ func hitungUrutanSemester(semesterID string, tahunMasuk int) int {
 
 	return (tahun-tahunMasuk)*2 + sem
 }
-func GetNilaiSiswaPerSemester(db *gorm.DB, pesertaDidikID uuid.UUID) ([]models.SiswaNilai, string, error) {
-	var result []models.SiswaNilai
+func GetNilaiSiswaPerSemester(db *gorm.DB, schemaname, semesterId string, pesertaDidikID uuid.UUID) ([]models.NilaiMapel, string, error) {
+	var result []models.NilaiMapel
 	var jenjang string
 
 	// Dapatkan jenjang dan tahun masuk dari rombel
@@ -313,11 +360,35 @@ func GetNilaiSiswaPerSemester(db *gorm.DB, pesertaDidikID uuid.UUID) ([]models.S
 		Jenjang    string
 		TahunMasuk int
 	}
-	err := db.Table("rombongan_belajar r").
-		Joins("JOIN anggota_rombel a ON a.rombongan_belajar_id = r.id").
-		Where("a.peserta_didik_id = ?", pesertaDidikID).
-		Select("r.jenjang_pendidikan as jenjang, r.tahun_ajaran as tahun_masuk").
-		Scan(&rombel).Error
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	err := db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec(fmt.Sprintf("SET search_path TO %s", strings.ToLower(schemaname))).Error; err != nil {
+			return fmt.Errorf("failed to set schema: %w", err)
+		}
+
+		// query := tx.Table(fmt.Sprintf("%s.tabel_kelas", strings.ToLower(schemaname)))
+		query := tx.Table("tabel_kelas")
+
+		joins := []string{
+			"JOIN tabel_anggotakelas ak ON ak.rombongan_belajar_id = tabel_kelas.rombongan_belajar_id ",
+			"JOIN tabel_sekolah ts ON ts.sekolah_id = tabel_kelas.sekolah_id",
+			"JOIN ref.jenjang_pendidikan jp ON jp.jenjang_pendidikan_id = ts.jenjang_pendidikan_id",
+			"JOIN tabel_siswa tsis ON tsis.peserta_didik_id = ak.peserta_didik_id",
+		}
+		for _, join := range joins {
+			query = query.Joins(join)
+		}
+
+		query = query.Where("ak.peserta_didik_id = ?", pesertaDidikID).
+			Group("jp.nama, tsis.diterima_tanggal").
+			Select("jp.nama as jenjang, EXTRACT(YEAR FROM tsis.diterima_tanggal) as tahun_masuk")
+			// Scan(&rombel).Error
+		if err := query.Scan(&rombel).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 
 	if err != nil {
 		return nil, "", err
@@ -327,7 +398,7 @@ func GetNilaiSiswaPerSemester(db *gorm.DB, pesertaDidikID uuid.UUID) ([]models.S
 
 	// Tentukan jumlah semester maksimal
 	totalSemesters := map[string]int{
-		"TK": 2, "SD": 12, "SMP": 6, "SMA": 6,
+		"PAUD": 2, "TK / sederajat": 2, "SD / sederajat": 12, "SMP / sederajat": 6, "SMA / sederajat": 6,
 	}[jenjang]
 	if totalSemesters == 0 {
 		totalSemesters = 6
@@ -337,11 +408,11 @@ func GetNilaiSiswaPerSemester(db *gorm.DB, pesertaDidikID uuid.UUID) ([]models.S
 	var rows []struct {
 		SemesterID    string
 		MataPelajaran string
-		NilaiPeng     int
+		NilaiPeng     uint32
 	}
 	err = db.Table("tabel_nilaiakhir n").
-		Joins("JOIN mata_pelajaran m ON m.id = n.mata_pelajaran_id").
-		Where("n.peserta_didik_id = ?", pesertaDidikID).
+		Joins("JOIN ref.mata_pelajaran m ON m.mata_pelajaran_id = n.mata_pelajaran_id").
+		Where("n.peserta_didik_id = ?", pesertaDidikID).Where("n.semester_id <= ?", semesterId).
 		Select("n.semester_id, m.nama as mata_pelajaran, COALESCE(n.nilai_peng, 0) as nilai_peng").
 		Scan(&rows).Error
 
@@ -350,7 +421,7 @@ func GetNilaiSiswaPerSemester(db *gorm.DB, pesertaDidikID uuid.UUID) ([]models.S
 	}
 
 	// Mapping nilai ke struct
-	mapping := make(map[string]*models.SiswaNilai)
+	mapping := make(map[string]*models.NilaiMapel)
 	for _, row := range rows {
 		urutan := hitungUrutanSemester(row.SemesterID, tahunMasuk)
 
@@ -360,7 +431,129 @@ func GetNilaiSiswaPerSemester(db *gorm.DB, pesertaDidikID uuid.UUID) ([]models.S
 		}
 
 		if _, exists := mapping[row.MataPelajaran]; !exists {
-			mapping[row.MataPelajaran] = &models.SiswaNilai{
+			mapping[row.MataPelajaran] = &models.NilaiMapel{
+				MataPelajaran: row.MataPelajaran,
+			}
+		}
+
+		// Assign ke field semester ke-N
+		target := mapping[row.MataPelajaran]
+		switch urutan {
+		case 1:
+			target.Semester1 = &row.NilaiPeng
+		case 2:
+			target.Semester2 = &row.NilaiPeng
+		case 3:
+			target.Semester3 = &row.NilaiPeng
+		case 4:
+			target.Semester4 = &row.NilaiPeng
+		case 5:
+			target.Semester5 = &row.NilaiPeng
+		case 6:
+			target.Semester6 = &row.NilaiPeng
+		case 7:
+			target.Semester7 = &row.NilaiPeng
+		case 8:
+			target.Semester8 = &row.NilaiPeng
+		case 9:
+			target.Semester9 = &row.NilaiPeng
+		case 10:
+			target.Semester10 = &row.NilaiPeng
+		case 11:
+			target.Semester11 = &row.NilaiPeng
+		case 12:
+			target.Semester12 = &row.NilaiPeng
+		}
+	}
+
+	// Konversi map ke slice
+	for _, v := range mapping {
+		result = append(result, *v)
+	}
+
+	return result, jenjang, nil
+}
+func GetTranskripNilai(db *gorm.DB, schemaname string, pesertaDidikID uuid.UUID) ([]models.NilaiMapel, string, error) {
+	var result []models.NilaiMapel
+	var jenjang string
+
+	// Dapatkan jenjang dan tahun masuk dari rombel
+	var rombel struct {
+		Jenjang    string
+		TahunMasuk int
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	err := db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Exec(fmt.Sprintf("SET search_path TO %s", strings.ToLower(schemaname))).Error; err != nil {
+			return fmt.Errorf("failed to set schema: %w", err)
+		}
+
+		// query := tx.Table(fmt.Sprintf("%s.tabel_kelas", strings.ToLower(schemaname)))
+		query := tx.Table("tabel_kelas")
+
+		joins := []string{
+			"JOIN tabel_anggotakelas ak ON ak.rombongan_belajar_id = tabel_kelas.rombongan_belajar_id ",
+			"JOIN tabel_sekolah ts ON ts.sekolah_id = tabel_kelas.sekolah_id",
+			"JOIN ref.jenjang_pendidikan jp ON jp.jenjang_pendidikan_id = ts.jenjang_pendidikan_id",
+			"JOIN tabel_siswa tsis ON tsis.peserta_didik_id = ak.peserta_didik_id",
+		}
+		for _, join := range joins {
+			query = query.Joins(join)
+		}
+
+		query = query.Where("ak.peserta_didik_id = ?", pesertaDidikID).
+			Group("jp.nama, tsis.diterima_tanggal").
+			Select("jp.nama as jenjang, EXTRACT(YEAR FROM tsis.diterima_tanggal) as tahun_masuk")
+			// Scan(&rombel).Error
+		if err := query.Scan(&rombel).Error; err != nil {
+			return err
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, "", err
+	}
+	jenjang = rombel.Jenjang
+	tahunMasuk := rombel.TahunMasuk // Misal: 2022
+
+	// Tentukan jumlah semester maksimal
+	totalSemesters := map[string]int{
+		"PAUD": 2, "TK / sederajat": 2, "SD / sederajat": 12, "SMP / sederajat": 6, "SMA / sederajat": 6,
+	}[jenjang]
+	if totalSemesters == 0 {
+		totalSemesters = 6
+	}
+
+	// Ambil data nilai + nama mata pelajaran
+	var rows []struct {
+		SemesterID    string
+		MataPelajaran string
+		NilaiPeng     uint32
+	}
+	err = db.Table("tabel_nilaiakhir n").
+		Joins("JOIN ref.mata_pelajaran m ON m.mata_pelajaran_id = n.mata_pelajaran_id").
+		Where("n.peserta_didik_id = ?", pesertaDidikID).
+		Select("n.semester_id, m.nama as mata_pelajaran, COALESCE(n.nilai_peng, 0) as nilai_peng").
+		Scan(&rows).Error
+
+	if err != nil {
+		return nil, "", err
+	}
+
+	// Mapping nilai ke struct
+	mapping := make(map[string]*models.NilaiMapel)
+	for _, row := range rows {
+		urutan := hitungUrutanSemester(row.SemesterID, tahunMasuk)
+
+		// Hanya proses semester 1 sampai max (misal 6 untuk SMA)
+		if urutan < 1 || urutan > totalSemesters {
+			continue
+		}
+
+		if _, exists := mapping[row.MataPelajaran]; !exists {
+			mapping[row.MataPelajaran] = &models.NilaiMapel{
 				MataPelajaran: row.MataPelajaran,
 			}
 		}

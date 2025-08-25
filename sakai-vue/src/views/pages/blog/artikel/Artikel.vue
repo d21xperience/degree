@@ -1,33 +1,3 @@
-<template>
-    <!-- Featured Post -->
-    <section class="mb-12">
-        <div class="bg-white rounded-lg shadow-md overflow-hidden">
-            <img :src="featuredPost.image" alt="Featured Post" class="w-full h-64 object-cover" />
-            <div class="p-6">
-                <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium mb-2">
-                    {{ featuredPost.category }}
-                </span>
-                <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ featuredPost.title }}</h2>
-                <p class="text-gray-600 mb-4">
-                    {{ featuredPost.excerpt }}
-                    <span v-if="!expandedPosts[featuredPost.id]">...</span>
-                    <span v-if="expandedPosts[featuredPost.id]">{{ featuredPost.fullContent }}</span>
-                </p>
-                <div class="flex items-center">
-                    <img :src="featuredPost.author.avatar" alt="Author" class="w-10 h-10 rounded-full mr-3" />
-                    <div>
-                        <p class="text-sm font-medium text-gray-900">{{ featuredPost.author.name }}</p>
-                        <p class="text-sm text-gray-500">{{ formatDate(featuredPost.date) }}</p>
-                    </div>
-                    <button @click="toggleExpand(featuredPost.id)" class="ml-auto px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
-                        {{ expandedPosts[featuredPost.id] ? 'Read Less' : 'Read More' }}
-                    </button>
-                </div>
-            </div>
-        </div>
-    </section>
-</template>
-
 <script setup>
 import { reactive, ref } from 'vue';
 
@@ -115,3 +85,33 @@ const toggleExpand = (postId) => {
     expandedPosts[postId] = !expandedPosts[postId];
 };
 </script>
+
+<template>
+    <!-- Featured Post -->
+    <section class="mb-12">
+        <div class="bg-white rounded-lg shadow-md overflow-hidden">
+            <img :src="featuredPost.image" alt="Featured Post" class="w-full h-64 object-cover" />
+            <div class="p-6">
+                <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium mb-2">
+                    {{ featuredPost.category }}
+                </span>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ featuredPost.title }}</h2>
+                <p class="text-gray-600 mb-4">
+                    {{ featuredPost.excerpt }}
+                    <span v-if="!expandedPosts[featuredPost.id]">...</span>
+                    <span v-if="expandedPosts[featuredPost.id]">{{ featuredPost.fullContent }}</span>
+                </p>
+                <div class="flex items-center">
+                    <img :src="featuredPost.author.avatar" alt="Author" class="w-10 h-10 rounded-full mr-3" />
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">{{ featuredPost.author.name }}</p>
+                        <p class="text-sm text-gray-500">{{ formatDate(featuredPost.date) }}</p>
+                    </div>
+                    <button @click="toggleExpand(featuredPost.id)" class="ml-auto px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
+                        {{ expandedPosts[featuredPost.id] ? 'Read Less' : 'Read More' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>

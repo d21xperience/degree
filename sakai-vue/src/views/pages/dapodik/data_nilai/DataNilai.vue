@@ -1,3 +1,117 @@
+<script setup>
+import LoadingOverlay from '@/components/LoadingOverlay.vue';
+import KelasComponent from '@/components/sekolah_components/KelasComponent.vue';
+import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
+import { FilterMatchMode } from '@primevue/core/api';
+import { useToast } from 'primevue/usetoast';
+import { computed, ref, watch } from 'vue';
+const sekolahService = useSekolahService();
+const pembelajaran = ref({});
+const dataNilaiSiswa = ref([]);
+const kelasSelected = ref(null);
+const expandedRows = ref();
+// watch(selectedSemester, async (newVal, oldVal) => {
+//     // console.log(newVal)
+//     dataNilaiSiswa.value = await fetchNilaiSiswa();
+// });
+
+const isLoading = ref(false);
+const toast = useToast();
+const dt = ref();
+const mapelDialog = ref(false);
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    jurusan: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    tingkat: { value: null, matchMode: FilterMatchMode.GREATER_THAN }
+});
+const kelas = ref({});
+const editNilai = (mapel) => {
+    kelas.value = { ...mapel };
+    mapelDialog.value = true;
+    pembelajaran.value.rombongan_belajar_id = kelas.value.rombonganBelajarId;
+    pembelajaran.value.semester_id = kelas.value.semesterId;
+};
+
+const exportCSV = () => {
+    isLoading.value = true;
+    // alert("hello")
+    // dt.value.exportCSV();
+};
+
+const isDialogImport = ref(false);
+const saveImport = () => {
+    // console.log("Data disimpan:", e);
+    isDialogImport.value = false;
+};
+
+const cancelImport = () => {
+    console.log('Import dibatalkan');
+    isDialogImport.value = false;
+};
+// ===========================================
+let jenjang = '';
+const totalSemesters = computed(() => {
+    if (jenjang === 'TK / sederajat') return 2;
+    if (jenjang === 'SD / sederajat') return 12;
+    if (jenjang === 'SMP / sederajat') return 6;
+    if (jenjang === 'SMA / sederajat') return 6;
+    return 6; // default
+});
+
+// Data siswa
+const siswa = ref({
+    jenjang: '',
+    nilaiMapel: []
+});
+// const siswa = ref()
+const resetSiswa = () => {
+    dataNilaiSiswa.value = [];
+    siswa.value.jenjang = '';
+    siswa.value.nilaiMapel = [];
+};
+const onRowExpand = async (event) => {
+    try {
+        const res = await sekolahService.searchNilai(event.data.pesertaDidikId);
+        if (res.status) {
+            Object.assign(siswa.value, res.nilai);
+            jenjang = siswa.value.jenjang;
+            toast.add({ severity: 'info', summary: 'Success', detail: `${res.message}`, life: 3000 });
+        }
+    } catch (error) {
+        toast.add({ severity: 'error', summary: 'Failled', detail: 'Gagal mengambil nilai', life: 3000 });
+    }
+};
+const onRowCollapse = (event) => {
+    toast.add({ severity: 'success', summary: 'Product Collapsed', detail: event, life: 3000 });
+};
+const expandAll = () => {
+    expandedRows.value = dataNilaiSiswa.value.reduce((acc, p) => (acc[p.rombonganBelajarId] = true) && acc, {});
+};
+const collapseAll = () => {
+    expandedRows.value = null;
+};
+
+watch(kelasSelected, (newVal) => {
+    console.log(!newVal);
+    if (!newVal) {
+        resetSiswa();
+    } else {
+        loadSiswaAktif();
+    }
+});
+const loadSiswaAktif = async () => {
+    isLoading.value = true;
+    try {
+        dataNilaiSiswa.value = await sekolahService.fetchAnggotaKelas(kelasSelected.value?.rombonganBelajarId, sekolahService.initSelectedSemester.value?.semesterId);
+        console.log(dataNilaiSiswa.value);
+    } catch (error) {
+        toast.add({ severity: 'error', summary: 'Failled', detail: 'Gagal mendapatkan nilai siswa', life: 3000 });
+    } finally {
+        isLoading.value = false;
+    }
+};
+</script>
+
 <template>
     <div class="">
         <Toolbar>
@@ -18,7 +132,7 @@
                         <InputIcon>
                             <i class="pi pi-search" />
                         </InputIcon>
-                        <InputText v-model="filters['global'].value" placeholder="Search..." :disabled="!dataNilaiSiswa.length > 0" />
+                        <InputText v-model="filters['global'].value" placeholder="Search..." :disabled="!dataNilaiSiswa || (Array.isArray(dataNilaiSiswa) && !dataNilaiSiswa.length > 0)" />
                     </IconField>
                 </div>
                 <Button icon="pi pi-refresh" severity="help" class="mr-2 text-lg" @click="loadSiswaAktif" v-tooltip.bottom="'Refresh'" v-show="!!kelasSelected" />
@@ -64,22 +178,22 @@
                                     @click="confirmdeleteMapel(data)" /> -->
                 </template>
             </Column>
-            <template #expansion="slotProps">
+            <template #expansion="">
                 <div class="p-4">
-                    <DataTable  :value="siswa.nilai" >
-                        <Column field="mataPelajaran" header="Mata Pelajaran" class="text-slate-500" />
+                    <DataTable :value="siswa.nilaiMapel">
+                        <Column field="MataPelajaran" header="Mata Pelajaran" class="text-slate-500" />
                         <!-- Kolom Semester Dinamis -->
-                        <Column v-for="n in totalSemesters" :key="`semester${n}`" :field="`semester${n}`" :header="`${n}`">
+                        <Column v-for="n in totalSemesters" :key="`Semester${n}`" :field="`Semester${n}`" :header="`${n}`">
                             <!-- Opsional: Tambahkan warna berdasarkan nilai -->
                             <template #body="{ data }">
                                 <span
                                     :class="{
-                                        'text-green-600 font-medium': data[`semester${n}`] >= 85,
-                                        'text-yellow-600': data[`semester${n}`] >= 75 && data[`semester${n}`] < 85,
-                                        'text-red-600': data[`semester${n}`] < 75
+                                        'text-green-600 font-medium': data[`Semester${n}`] >= 85,
+                                        'text-yellow-600': data[`Semester${n}`] >= 75 && data[`Semester${n}`] < 85,
+                                        'text-red-600': data[`Semester${n}`] < 75
                                     }"
                                 >
-                                    {{ data[`semester${n}`] }}
+                                    {{ data[`Semester${n}`] }}
                                 </span>
                             </template>
                         </Column>
@@ -98,117 +212,9 @@
 
         <!-- import data -->
         <!-- DIALOG IMPORT -->
-        <DialogImport v-model:visible="isDialogImport" @save="saveImport" @cancel="cancelImport" template-type="siswa" />
+        <DialogImport v-model:visible="isDialogImport" @save="saveImport" @cancel="cancelImport" template-type="nilai" />
 
         <!-- end of import data -->
         <LoadingOverlay :visible="isLoading"> Memuat data, harap tunggu... </LoadingOverlay>
     </div>
 </template>
-
-<script setup>
-import LoadingOverlay from '@/components/LoadingOverlay.vue';
-import KelasComponent from '@/components/sekolah_components/KelasComponent.vue';
-import { useSekolahService } from '@/composables/useSekolahService';
-import { FilterMatchMode } from '@primevue/core/api';
-import { useToast } from 'primevue/usetoast';
-import { computed, onMounted, ref, watch } from 'vue';
-const sekolahService = useSekolahService();
-const pembelajaran = ref({});
-const dataNilaiSiswa = ref([]);
-const kelasSelected = ref(null);
-const expandedRows = ref();
-// watch(selectedSemester, async (newVal, oldVal) => {
-//     // console.log(newVal)
-//     dataNilaiSiswa.value = await fetchNilaiSiswa();
-// });
-
-const isLoading = ref(false);
-const toast = useToast();
-const dt = ref();
-const mapelDialog = ref(false);
-const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    jurusan: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    tingkat: { value: null, matchMode: FilterMatchMode.GREATER_THAN }
-});
-const kelas = ref({});
-const editNilai = (mapel) => {
-    kelas.value = { ...mapel };
-    mapelDialog.value = true;
-    pembelajaran.value.rombongan_belajar_id = kelas.value.rombonganBelajarId;
-    pembelajaran.value.semester_id = kelas.value.semesterId;
-};
-
-const exportCSV = () => {
-    isLoading.value = true;
-    // alert("hello")
-    // dt.value.exportCSV();
-};
-
-const isDialogImport = ref(false);
-const saveImport = (e) => {
-    // console.log("Data disimpan:", e);
-    isDialogImport.value = false;
-};
-
-const cancelImport = () => {
-    console.log('Import dibatalkan');
-    isDialogImport.value = false;
-};
-// ===========================================
-
-const onRowExpand = (event) => {
-    toast.add({ severity: 'info', summary: 'Product Expanded', detail: event, life: 3000 });
-    // Ambil data nilai akhir
-
-    // console.log(event)
-};
-const onRowCollapse = (event) => {
-    // toast.add({ severity: 'success', summary: 'Product Collapsed', detail: event, life: 3000 });
-};
-const expandAll = () => {
-    expandedRows.value = dataNilaiSiswa.value.reduce((acc, p) => (acc[p.rombonganBelajarId] = true) && acc, {});
-};
-const collapseAll = () => {
-    expandedRows.value = null;
-};
-
-watch(kelasSelected, (newVal) => {
-    loadSiswaAktif();
-});
-const loadSiswaAktif = async () => {
-    isLoading.value = true;
-    try {
-        dataNilaiSiswa.value = await sekolahService.fetchAnggotaKelas(kelasSelected.value?.rombonganBelajarId, sekolahService.initSelectedSemester.value?.semesterId);
-    } catch (error) {
-        toast.add({ severity: 'error', summary: 'Failled', detail: 'Gagal mendapatkan nilai siswa', life: 3000 });
-    } finally {
-        isLoading.value = false;
-    }
-};
-
-const jenjang = 'SMA';
-const totalSemesters = computed(() => {
-    //   const jenjang = props.jenjang; // Harus dikirim dari parent
-
-    if (jenjang === 'TK') return 2;
-    if (jenjang === 'SD') return 12;
-    if (jenjang === 'SMP') return 6;
-    if (jenjang === 'SMA') return 6;
-    return 6; // default
-});
-
-// Data siswa
-const siswa = {
-    nama: 'Ahmad',
-    jenjang: 'SMA',
-    nilai: [
-        { mataPelajaran: 'Bahasa Indonesia', semester1: 80, semester2: 85, semester3: 78, semester4: 82, semester5: 88, semester6: 90 },
-        { mataPelajaran: 'Matematika', semester1: 75, semester2: 70, semester3: 80, semester4: 85, semester5: 83, semester6: 87 },
-        { mataPelajaran: 'Bahasa Inggris', semester1: 88, semester2: 90, semester3: 92, semester4: 89, semester5: 91, semester6: 93 }
-    ]
-};
-onMounted(() => {
-    // loadSiswaAktif();
-});
-</script>

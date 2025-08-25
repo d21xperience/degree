@@ -1,3 +1,389 @@
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+const store = useStore();
+
+// import debounce from 'lodash/debounce';
+
+// import ProductService from '@/service/ProductService';
+import { useSiswa } from '@/composables/sekolah_composable/useSiswa';
+import { FilterMatchMode } from '@primevue/core/api';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
+import Select from 'primevue/select';
+import Toolbar from 'primevue/toolbar';
+import { useToast } from 'primevue/usetoast';
+import { onBeforeRouteLeave } from 'vue-router';
+
+const { fetchBanyakSiswaByRombelId } = useSiswa();
+const toast = useToast();
+const dt = ref();
+// const products = ref();
+const siswaDialog = ref(false);
+// const deletesiswaDialog = ref(false);
+const deleteSiswasDialog = ref(false);
+// const product = ref({});
+const pesertaDidik = ref({});
+const pesertaDidikQuery = ref('');
+const pesertaDidikSelected = ref([]);
+const pesertaDidikBaru = ref([]);
+const pesertaDidikAnggotaBaru = ref([]);
+
+const pesertaDidikPelengkap = ref({});
+const selectedSiswa = ref();
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
+const submitted = ref(false);
+let schemaname = '';
+const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
+
+const anggotaKelasList = ref([]);
+
+const openNew = () => {
+    pesertaDidik.value = {};
+    submitted.value = false;
+    siswaDialog.value = true;
+};
+
+const fromManual = ref(true);
+const semuaSiswaDialog = ref(false);
+const resultsQuerySiswa = ref([]);
+const semuaSiswaOpen = () => {
+    semuaSiswaDialog.value = true;
+};
+// const cariSemuaSiswa = async (val) => {
+//     try {
+//         const payload = {
+//             schemaname: schemaname,
+//             nm_siswa: val
+//         };
+//         const results = await store.dispatch('sekolahService/searchSiswa', payload);
+//         resultsQuerySiswa.value = results.siswa;
+//     } catch (error) {}
+// };
+
+const addSemuaSiswa = async () => {
+    let payloadBase = {
+        schemaname: schemaname,
+        semester_id: selectedSemester.value?.semesterId
+    };
+    for (const e of pesertaDidikSelected.value) {
+        const isExist = anggotaKelasList.value.some((i) => i.pesertaDidikId === e.pesertaDidikId);
+        if (!isExist) {
+            fromManual.value = false;
+            const payload = {
+                ...payloadBase,
+                peserta_didik_id: e.pesertaDidikId
+            };
+
+            try {
+                const response = await store.dispatch('sekolahService/searchAnggotaKelas', payload);
+                // console.log(response)
+                if (response.length === 0) {
+                    const anggotaTes = {
+                        anggotaRombelId: generateUUID(),
+                        semesterId: selectedSemester.value?.semesterId,
+                        rombonganBelajarId: props.rombonganBelajarId,
+                        pesertaDidikId: e.pesertaDidikId,
+                        pesertaDidik: e
+                    };
+                    // console.log(anggotaTes)
+                    anggotaKelasList.value.push(anggotaTes);
+                    pesertaDidikAnggotaBaru.value.push(anggotaTes);
+                    // Lakukan sesuatu dengan respons jika perlu
+                    toast.add({
+                        severity: 'success',
+                        summary: 'Berhasil',
+                        detail: `Siswa ${e.nmSiswa} ditambahkan`,
+                        life: 3000
+                    });
+                } else {
+                    toast.add({
+                        severity: 'error',
+                        summary: 'Gagal',
+                        detail: `${e.nmSiswa} sudah ada di kelas ${response[0]?.rombonganBelajar.nmKelas} `,
+                        life: 3000
+                    });
+                    localStorage.removeItem('unsavedPesertaDidik');
+                    clearSearch();
+
+                    return;
+                }
+            } catch (error) {
+                console.error('Gagal mengambil data anggota kelas:', error);
+                toast.add({
+                    severity: 'error',
+                    summary: 'Gagal',
+                    detail: `Gagal menambahkan ${e.nmSiswa}`,
+                    life: 3000
+                });
+            }
+        } else {
+            toast.add({
+                severity: 'error',
+                summary: 'Gagal',
+                detail: `Siswa A.N. ${e?.nmSiswa.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase())} sudah ada di kelas ini`,
+                life: 3000
+            });
+        }
+    }
+
+    let savedData = JSON.parse(localStorage.getItem('unsavedPesertaDidik'));
+    console.log(savedData === null);
+    if (savedData === null) {
+        localStorage.setItem('unsavedPesertaDidik', JSON.stringify(pesertaDidikAnggotaBaru.value));
+        pesertaDidikAnggotaBaru.value = [];
+    } else {
+        savedData.forEach((item) => pesertaDidikAnggotaBaru.value.push(item));
+        localStorage.setItem('unsavedPesertaDidik', JSON.stringify(pesertaDidikAnggotaBaru.value));
+        pesertaDidikAnggotaBaru.value = [];
+    }
+
+    clearSearch();
+};
+
+const addAnggotaSiswaFromInput = () => {
+    submitted.value = true;
+    pesertaDidik.value.pesertaDidikId = generateUUID();
+    pesertaDidikSelected.value.push(pesertaDidik.value);
+    addSemuaSiswa();
+    addPesertaDidikBaru();
+    siswaDialog.value = false;
+    pesertaDidikPelengkap.value = {};
+    selectedAgamaOptions.value = {};
+    selectedjenisKelaminOptions.value = {};
+    pesertaDidik.value = {};
+};
+
+// const addAnggotaSiswaFromSearch = () => {};
+// const addAnggotaSiswaFromImpor = () => {};
+
+const addPesertaDidikBaru = () => {
+    pesertaDidikBaru.value.push(pesertaDidik.value);
+    localStorage.setItem('unsavedPesertaDidikBaru', JSON.stringify(pesertaDidikBaru.value));
+};
+const batalSemuaSiswa = () => {
+    semuaSiswaDialog.value = false;
+    clearSearch();
+};
+
+const clearSearch = () => {
+    pesertaDidikQuery.value = '';
+    pesertaDidikSelected.value = [];
+    resultsQuerySiswa.value = [];
+};
+
+const hideDialog = () => {
+    siswaDialog.value = false;
+    submitted.value = false;
+};
+// const emit = defineEmits(["rombelAnggota"]);
+
+// const deleteSiswa = () => {
+//     pesertaDidik.value = anggotaKelasList.value.filter(val => val.pesertaDidikId !== product.value.pesertaDidikId);
+//     deletesiswaDialog.value = false;
+//     pesertaDidik.value = {};
+//     // emit("rombelAnggota", anggotaKelasList)
+//     localStorage.setItem("unsavedPesertaDidik", JSON.stringify(anggotaKelasList.value));
+//     toast.add({ severity: 'success', summary: 'Successful', detail: 'Student Deleted', life: 3000 });
+// };
+// const findIndexById = (id) => {
+//     let index = -1;
+//     for (let i = 0; i < products.value.length; i++) {
+//         if (products.value[i].id === id) {
+//             index = i;
+//             break;
+//         }
+//     }
+
+//     return index;
+// };
+const generateUUID = () => crypto.randomUUID();
+// const createId = () => {
+//     return generateUUID()
+// }
+// const exportCSV = () => {
+//     dt.value.exportCSV();
+// };
+const confirmDeleteSelected = () => {
+    deleteSiswasDialog.value = true;
+};
+const deleteselectedSiswa = () => {
+    anggotaKelasList.value = anggotaKelasList.value.filter((val) => !selectedSiswa.value.includes(val));
+    deleteSiswasDialog.value = false;
+    // localStorage.setItem("unsavedPesertaDidik", JSON.stringify(anggotaKelasList.value));
+    const payload = {
+        schemaname: schemaname
+    };
+    selectedSiswa.value.forEach(async (item) => {
+        payload.anggota_rombel_id = item?.anggotaRombelId;
+        const response = await store.dispatch('sekolahService/deleteAnggotaKelas', payload);
+        if (response) {
+            toast.add({ severity: 'success', summary: 'Successful', detail: `${item.pesertaDidik?.nmSiswa} telah dihapus`, life: 3000 });
+            selectedSiswa.value = null;
+        }
+    });
+};
+
+// ================================
+// Props dari parent
+const props = defineProps({
+    visible: Boolean,
+    semester: Array,
+    templateType: String,
+    rombonganBelajarId: String,
+    isEdit: Boolean
+});
+
+// ambil data anggota kelas
+// const fetchAnggotaKelas = async () => {
+//     const payload = {
+//         schemaname: await store.getters['sekolahService/getTabeltenant']?.schemaname,
+//         semester_id: selectedSemester.value?.semesterId,
+//         rombongan_belajar_id: props.rombonganBelajarId
+//     };
+//     const results = await store.dispatch('sekolahService/fetchAnggotaKelas', payload);
+//     results.forEach((item) => {
+//         anggotaKelasList.value.push(item);
+//     });
+// };
+
+onMounted(async () => {
+    // console.log("tes")
+    //ProductService.getProducts().then((data) => (products.value = data));
+    if (props.rombonganBelajarId) {
+        anggotaKelasList.value = await fetchBanyakSiswaByRombelId(props.rombonganBelajarId);
+    }
+    // const savedData = JSON.parse(localStorage.getItem('unsavedPesertaDidik'));
+    // if (savedData) {
+    //     // console.log(savedData)
+    //     savedData.forEach((item) => anggotaKelasList.value.push(item));
+    // }
+    // schemaname = store.getters['sekolahService/getTabeltenant']?.schemaname;
+});
+const selectedAgamaOptions = ref();
+const agamaOptions = ref([
+    { label: 'Islam', value: 'Islam' },
+    { label: 'Kristen', value: 'Kristen' },
+    { label: 'Katolik', value: 'Katolik' },
+    { label: 'Hindu', value: 'Hindu' },
+    { label: 'Buddha', value: 'Buddha' },
+    { label: 'Konghucu', value: 'Konghucu' }
+]);
+
+const selectedjenisKelaminOptions = ref();
+const jenisKelaminOptions = ref([
+    { label: 'Laki-Laki', value: 'L' },
+    { label: 'Perempuan', value: 'P' }
+]);
+
+const alamatLengkap = ref({
+    alamatJalan: '',
+    rt: '',
+    rw: '',
+    desa: '',
+    kec: '',
+    kab: '',
+    prov: ''
+});
+
+watch(selectedjenisKelaminOptions, (newVal) => {
+    pesertaDidik.value.jenisKelamin = newVal?.value;
+});
+watch(selectedAgamaOptions, (newVal) => {
+    pesertaDidik.value.agama = newVal?.value;
+});
+
+onBeforeRouteLeave((to, from, next) => {
+    if (localStorage.getItem('unsavedPesertaDidik')) {
+        const confirmLeave = confirm('Data belum disimpan. Apakah Anda ingin meninggalkan halaman?');
+        if (confirmLeave) {
+            localStorage.removeItem('unsavedPesertaDidik'); // Hapus data jika user mengabaikan
+            localStorage.removeItem('unsavedPesertaDidikBaru'); // Hapus data jika user mengabaikan
+            next();
+        } else {
+            next(false);
+        }
+    } else {
+        next();
+    }
+});
+
+// Fetch ulang jika props.userId berubah
+// watch(
+//     () => props.userId,
+//     (newId, oldId) => {
+//         if (newId !== oldId) {
+//             fetchData(newId);
+//         }
+//     }
+// );
+watch(
+    () => props.rombonganBelajarId,
+    (newVal) => {
+        console.log('from watch props');
+        console.log(newVal);
+    }
+);
+
+// computed(() => {
+//     console.log();
+// });
+const baseUrl = 'http://localhost:8183/api/v1/ss'; // Disimpan di child
+// const templateType = 'siswa';
+const templateUrl = computed(() => {
+    return `${baseUrl}/download/template?template_type=${props.templateType}&schemaname=${schemaname}&semesterId=${selectedSemester.value?.semesterId}`;
+});
+const downloadTemplate = async () => {
+    // if (isEmpty(selectedSemester.value)) {
+    //     // alert("Pilih tahun pelajaran")
+    //     isErr.value = true
+    //     return
+    // }
+    try {
+        const response = await fetch(templateUrl.value, {
+            method: 'GET',
+            headers: {
+                Accept: 'application/octet-stream'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error('Gagal mengunduh file');
+        }
+
+        // Coba ambil nama file dari header Content-Disposition
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let fileName = 'downloaded_file.xlsx'; // Default jika tidak ditemukan
+        if (contentDisposition) {
+            const match = contentDisposition.match(/filename="([^"]+)"/);
+            if (match && match[1]) {
+                fileName = match[1];
+            }
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        window.URL.revokeObjectURL(url);
+    } catch (error) {
+        toast.add({ severity: 'error', summary: 'Error', detail: 'Terjadi kesalahan saat mengunduh file', life: 3000 });
+    }
+};
+
+// const uploadSiswa = () => {
+//     uploadToStore('sekolahService/CreateBanyakSiswa', 'siswa');
+// };
+</script>
+
 <template>
     <div>
         <div class="card">
@@ -193,393 +579,3 @@
         <!-- End of Cari siswa dialog -->
     </div>
 </template>
-
-<script setup>
-import { useSekolahService } from '@/composables/useSekolahService';
-import { computed, onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
-const store = useStore();
-const { fetchBanyakSiswaByRombelId } = useSekolahService();
-// import debounce from 'lodash/debounce';
-
-// import ProductService from '@/service/ProductService';
-import { FilterMatchMode } from '@primevue/core/api';
-import Button from 'primevue/button';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Dialog from 'primevue/dialog';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-import InputText from 'primevue/inputtext';
-import Select from 'primevue/select';
-import Toolbar from 'primevue/toolbar';
-import { useToast } from 'primevue/usetoast';
-import { onBeforeRouteLeave } from 'vue-router';
-
-const toast = useToast();
-const dt = ref();
-// const products = ref();
-const siswaDialog = ref(false);
-// const deletesiswaDialog = ref(false);
-const deleteSiswasDialog = ref(false);
-// const product = ref({});
-const pesertaDidik = ref({});
-const pesertaDidikQuery = ref('');
-const pesertaDidikSelected = ref([]);
-const pesertaDidikBaru = ref([]);
-const pesertaDidikAnggotaBaru = ref([]);
-
-const pesertaDidikPelengkap = ref({});
-const selectedSiswa = ref();
-const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
-});
-const submitted = ref(false);
-let schemaname = '';
-const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
-
-const anggotaKelasList = ref([]);
-
-const openNew = () => {
-    pesertaDidik.value = {};
-    submitted.value = false;
-    siswaDialog.value = true;
-};
-
-let fromManual = true;
-const semuaSiswaDialog = ref(false);
-const resultsQuerySiswa = ref([]);
-const semuaSiswaOpen = () => {
-    semuaSiswaDialog.value = true;
-};
-const cariSemuaSiswa = async (val) => {
-    try {
-        const payload = {
-            schemaname: schemaname,
-            nm_siswa: val
-        };
-        const results = await store.dispatch('sekolahService/searchSiswa', payload);
-        resultsQuerySiswa.value = results.siswa;
-    } catch (error) {}
-};
-
-const addSemuaSiswa = async () => {
-    let payloadBase = {
-        schemaname: schemaname,
-        semester_id: selectedSemester.value?.semesterId
-    };
-    for (const e of pesertaDidikSelected.value) {
-        const isExist = anggotaKelasList.value.some((i) => i.pesertaDidikId === e.pesertaDidikId);
-        if (!isExist) {
-            fromManual = false;
-            const payload = {
-                ...payloadBase,
-                peserta_didik_id: e.pesertaDidikId
-            };
-
-            try {
-                const response = await store.dispatch('sekolahService/searchAnggotaKelas', payload);
-                // console.log(response)
-                if (response.length === 0) {
-                    const anggotaTes = {
-                        anggotaRombelId: generateUUID(),
-                        semesterId: selectedSemester.value?.semesterId,
-                        rombonganBelajarId: props.rombonganBelajarId,
-                        pesertaDidikId: e.pesertaDidikId,
-                        pesertaDidik: e
-                    };
-                    // console.log(anggotaTes)
-                    anggotaKelasList.value.push(anggotaTes);
-                    pesertaDidikAnggotaBaru.value.push(anggotaTes);
-                    // Lakukan sesuatu dengan respons jika perlu
-                    toast.add({
-                        severity: 'success',
-                        summary: 'Berhasil',
-                        detail: `Siswa ${e.nmSiswa} ditambahkan`,
-                        life: 3000
-                    });
-                } else {
-                    toast.add({
-                        severity: 'error',
-                        summary: 'Gagal',
-                        detail: `${e.nmSiswa} sudah ada di kelas ${response[0]?.rombonganBelajar.nmKelas} `,
-                        life: 3000
-                    });
-                    localStorage.removeItem('unsavedPesertaDidik');
-                    clearSearch();
-
-                    return;
-                }
-            } catch (error) {
-                console.error('Gagal mengambil data anggota kelas:', error);
-                toast.add({
-                    severity: 'error',
-                    summary: 'Gagal',
-                    detail: `Gagal menambahkan ${e.nmSiswa}`,
-                    life: 3000
-                });
-            }
-        } else {
-            toast.add({
-                severity: 'error',
-                summary: 'Gagal',
-                detail: `Siswa A.N. ${e?.nmSiswa.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase())} sudah ada di kelas ini`,
-                life: 3000
-            });
-        }
-    }
-
-    let savedData = JSON.parse(localStorage.getItem('unsavedPesertaDidik'));
-    console.log(savedData === null);
-    if (savedData === null) {
-        localStorage.setItem('unsavedPesertaDidik', JSON.stringify(pesertaDidikAnggotaBaru.value));
-        pesertaDidikAnggotaBaru.value = [];
-    } else {
-        savedData.forEach((item) => pesertaDidikAnggotaBaru.value.push(item));
-        localStorage.setItem('unsavedPesertaDidik', JSON.stringify(pesertaDidikAnggotaBaru.value));
-        pesertaDidikAnggotaBaru.value = [];
-    }
-
-    clearSearch();
-};
-
-const addAnggotaSiswaFromInput = () => {
-    submitted.value = true;
-    pesertaDidik.value.pesertaDidikId = generateUUID();
-    pesertaDidikSelected.value.push(pesertaDidik.value);
-    addSemuaSiswa();
-    addPesertaDidikBaru();
-    siswaDialog.value = false;
-    pesertaDidikPelengkap.value = {};
-    selectedAgamaOptions.value = {};
-    selectedjenisKelaminOptions.value = {};
-    pesertaDidik.value = {};
-};
-
-const addAnggotaSiswaFromSearch = () => {};
-const addAnggotaSiswaFromImpor = () => {};
-
-const addPesertaDidikBaru = () => {
-    pesertaDidikBaru.value.push(pesertaDidik.value);
-    localStorage.setItem('unsavedPesertaDidikBaru', JSON.stringify(pesertaDidikBaru.value));
-};
-const batalSemuaSiswa = () => {
-    semuaSiswaDialog.value = false;
-    clearSearch();
-};
-
-const clearSearch = () => {
-    pesertaDidikQuery.value = '';
-    pesertaDidikSelected.value = [];
-    resultsQuerySiswa.value = [];
-};
-
-const hideDialog = () => {
-    siswaDialog.value = false;
-    submitted.value = false;
-};
-// const emit = defineEmits(["rombelAnggota"]);
-
-// const deleteSiswa = () => {
-//     pesertaDidik.value = anggotaKelasList.value.filter(val => val.pesertaDidikId !== product.value.pesertaDidikId);
-//     deletesiswaDialog.value = false;
-//     pesertaDidik.value = {};
-//     // emit("rombelAnggota", anggotaKelasList)
-//     localStorage.setItem("unsavedPesertaDidik", JSON.stringify(anggotaKelasList.value));
-//     toast.add({ severity: 'success', summary: 'Successful', detail: 'Student Deleted', life: 3000 });
-// };
-// const findIndexById = (id) => {
-//     let index = -1;
-//     for (let i = 0; i < products.value.length; i++) {
-//         if (products.value[i].id === id) {
-//             index = i;
-//             break;
-//         }
-//     }
-
-//     return index;
-// };
-const generateUUID = () => crypto.randomUUID();
-// const createId = () => {
-//     return generateUUID()
-// }
-const exportCSV = () => {
-    dt.value.exportCSV();
-};
-const confirmDeleteSelected = () => {
-    deleteSiswasDialog.value = true;
-};
-const deleteselectedSiswa = () => {
-    anggotaKelasList.value = anggotaKelasList.value.filter((val) => !selectedSiswa.value.includes(val));
-    deleteSiswasDialog.value = false;
-    // localStorage.setItem("unsavedPesertaDidik", JSON.stringify(anggotaKelasList.value));
-    const payload = {
-        schemaname: schemaname
-    };
-    selectedSiswa.value.forEach(async (item) => {
-        payload.anggota_rombel_id = item?.anggotaRombelId;
-        const response = await store.dispatch('sekolahService/deleteAnggotaKelas', payload);
-        if (response) {
-            toast.add({ severity: 'success', summary: 'Successful', detail: `${item.pesertaDidik?.nmSiswa} telah dihapus`, life: 3000 });
-            selectedSiswa.value = null;
-        }
-    });
-};
-
-// ================================
-// Props dari parent
-const props = defineProps({
-    visible: Boolean,
-    semester: Array,
-    templateType: String,
-    rombonganBelajarId: String,
-    isEdit: Boolean
-});
-
-// ambil data anggota kelas
-const fetchAnggotaKelas = async () => {
-    const payload = {
-        schemaname: await store.getters['sekolahService/getTabeltenant']?.schemaname,
-        semester_id: selectedSemester.value?.semesterId,
-        rombongan_belajar_id: props.rombonganBelajarId
-    };
-    const results = await store.dispatch('sekolahService/fetchAnggotaKelas', payload);
-    results.forEach((item) => {
-        anggotaKelasList.value.push(item);
-    });
-};
-
-onMounted(async() => {
-    // console.log("tes")
-    //ProductService.getProducts().then((data) => (products.value = data));
-    if (props.rombonganBelajarId) {
-        anggotaKelasList.value =  await fetchBanyakSiswaByRombelId(props.rombonganBelajarId);
-    }
-    // const savedData = JSON.parse(localStorage.getItem('unsavedPesertaDidik'));
-    // if (savedData) {
-    //     // console.log(savedData)
-    //     savedData.forEach((item) => anggotaKelasList.value.push(item));
-    // }
-    // schemaname = store.getters['sekolahService/getTabeltenant']?.schemaname;
-});
-const selectedAgamaOptions = ref();
-const agamaOptions = ref([
-    { label: 'Islam', value: 'Islam' },
-    { label: 'Kristen', value: 'Kristen' },
-    { label: 'Katolik', value: 'Katolik' },
-    { label: 'Hindu', value: 'Hindu' },
-    { label: 'Buddha', value: 'Buddha' },
-    { label: 'Konghucu', value: 'Konghucu' }
-]);
-
-const selectedjenisKelaminOptions = ref();
-const jenisKelaminOptions = ref([
-    { label: 'Laki-Laki', value: 'L' },
-    { label: 'Perempuan', value: 'P' }
-]);
-
-const alamatLengkap = ref({
-    alamatJalan: '',
-    rt: '',
-    rw: '',
-    desa: '',
-    kec: '',
-    kab: '',
-    prov: ''
-});
-
-watch(selectedjenisKelaminOptions, (newVal) => {
-    pesertaDidik.value.jenisKelamin = newVal?.value;
-});
-watch(selectedAgamaOptions, (newVal) => {
-    pesertaDidik.value.agama = newVal?.value;
-});
-
-onBeforeRouteLeave((to, from, next) => {
-    if (localStorage.getItem('unsavedPesertaDidik')) {
-        const confirmLeave = confirm('Data belum disimpan. Apakah Anda ingin meninggalkan halaman?');
-        if (confirmLeave) {
-            localStorage.removeItem('unsavedPesertaDidik'); // Hapus data jika user mengabaikan
-            localStorage.removeItem('unsavedPesertaDidikBaru'); // Hapus data jika user mengabaikan
-            next();
-        } else {
-            next(false);
-        }
-    } else {
-        next();
-    }
-});
-
-// Fetch ulang jika props.userId berubah
-// watch(
-//     () => props.userId,
-//     (newId, oldId) => {
-//         if (newId !== oldId) {
-//             fetchData(newId);
-//         }
-//     }
-// );
-watch(
-    () => props.rombonganBelajarId,
-    (newVal) => {
-        console.log('from watch props');
-        console.log(newVal);
-    }
-);
-
-computed(() => {
-    console.log();
-});
-const baseUrl = 'http://localhost:8183/api/v1/ss'; // Disimpan di child
-const templateType = 'siswa';
-const templateUrl = computed(() => {
-    return `${baseUrl}/download/template?template_type=${templateType}&schemaname=${schemaname}&semesterId=${selectedSemester.value?.semesterId}`;
-});
-const downloadTemplate = async () => {
-    // if (isEmpty(selectedSemester.value)) {
-    //     // alert("Pilih tahun pelajaran")
-    //     isErr.value = true
-    //     return
-    // }
-    try {
-        const response = await fetch(templateUrl.value, {
-            method: 'GET',
-            headers: {
-                Accept: 'application/octet-stream'
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Gagal mengunduh file');
-        }
-
-        // Coba ambil nama file dari header Content-Disposition
-        const contentDisposition = response.headers.get('Content-Disposition');
-        let fileName = 'downloaded_file.xlsx'; // Default jika tidak ditemukan
-        if (contentDisposition) {
-            const match = contentDisposition.match(/filename="([^"]+)"/);
-            if (match && match[1]) {
-                fileName = match[1];
-            }
-        }
-
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
-        window.URL.revokeObjectURL(url);
-    } catch (error) {
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Terjadi kesalahan saat mengunduh file', life: 3000 });
-    }
-};
-
-const uploadSiswa = () => {
-    uploadToStore('sekolahService/CreateBanyakSiswa', 'siswa');
-};
-</script>

@@ -1,3 +1,108 @@
+<script setup>
+import DatePicker from 'primevue/datepicker';
+
+import { onMounted, ref } from 'vue';
+import { useStore } from 'vuex';
+const store = useStore();
+// ==========[PROFILE]-----------
+const fetchUserProfile = async () => {
+    try {
+        const userId = store.state.authService.user?.userId;
+        if (!userId) throw new Error('User ID not found');
+        // Dispatch untuk mendapatkan profil pengguna
+        await store.dispatch('authService/getUserProfile', userId);
+
+        // Ambil data terbaru dari store
+        akun.value = store.getters['authService/getUserProfile'];
+    } catch (error) {
+        console.error('Failed to fetch user profile:', error.message);
+    }
+};
+const showUpdateProfile = async () => {
+    try {
+        await store.dispatch('authService/updateUserProfile', akun.value);
+    } catch (error) {
+        console.log(error);
+    }
+};
+
+onMounted(fetchUserProfile);
+// ==============================
+// State untuk menyimpan file yang dipilih
+const selectedFile = ref(null);
+// Biodata
+// const akun = computed(() => store.getters["authService/getUserProfile"])
+const akun = ref({
+    userId: '',
+    username: '',
+    email: '',
+    role: '',
+    sekolahId: '',
+    nama: '',
+    jk: '',
+    phone: '',
+    tptLahir: '',
+    tglLahir: '',
+    alamatJalan: '',
+    kotaKab: '',
+    prov: '',
+    kodePos: '',
+    namaAyah: '',
+    namaIbu: ''
+    // photo_url: "@/assets/default_profile.jpg"
+});
+const isProfileEdit = ref(false);
+const editProfile = () => {
+    isProfileEdit.value = !isProfileEdit.value;
+};
+// const 'p-inputtext' = ref('edit')
+// const editProfileClass = ref('tes')
+
+const fileInput = ref(null);
+const previewPhoto = ref(null);
+
+// Data pengguna (contoh akun dengan photo_url dari backend)
+// const akun = ref({
+//     photo_url: "https://via.placeholder.com/150" // Ganti dengan URL default atau dari backend
+// });
+
+// Trigger input file saat ikon kamera diklik
+const triggerFileInput = () => {
+    fileInput.value.click();
+};
+
+// Handle file yang dipilih oleh pengguna
+const handleFileSelect = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        // Tampilkan preview foto sebelum upload
+        previewPhoto.value = URL.createObjectURL(file);
+
+        // Kirim ke backend
+        uploadPhoto(file);
+    }
+};
+
+// Upload foto ke backend
+const uploadPhoto = async (file) => {
+    const formData = new FormData();
+    formData.append('photo', file);
+
+    try {
+        const response = await axios.post('http://localhost:8080/api/upload/photo', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
+
+        // Update photo_url dengan respons dari server
+        akun.value.photo_url = response.data.photo_url;
+    } catch (error) {
+        console.error('Gagal upload foto:', error);
+    }
+};
+</script>
+
 <template>
     <div>
         <div class="">
@@ -135,111 +240,6 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import DatePicker from 'primevue/datepicker';
-
-import { onMounted, ref } from 'vue';
-import { useStore } from 'vuex';
-const store = useStore();
-// ==========[PROFILE]-----------
-const fetchUserProfile = async () => {
-    try {
-        const userId = store.state.authService.user?.userId;
-        if (!userId) throw new Error('User ID not found');
-        // Dispatch untuk mendapatkan profil pengguna
-        await store.dispatch('authService/getUserProfile', userId);
-
-        // Ambil data terbaru dari store
-        akun.value = store.getters['authService/getUserProfile'];
-    } catch (error) {
-        console.error('Failed to fetch user profile:', error.message);
-    }
-};
-const showUpdateProfile = async () => {
-    try {
-        await store.dispatch('authService/updateUserProfile', akun.value);
-    } catch (error) {
-        console.log(error);
-    }
-};
-
-onMounted(fetchUserProfile);
-// ==============================
-// State untuk menyimpan file yang dipilih
-const selectedFile = ref(null);
-// Biodata
-// const akun = computed(() => store.getters["authService/getUserProfile"])
-const akun = ref({
-    userId: '',
-    username: '',
-    email: '',
-    role: '',
-    sekolahId: '',
-    nama: '',
-    jk: '',
-    phone: '',
-    tptLahir: '',
-    tglLahir: '',
-    alamatJalan: '',
-    kotaKab: '',
-    prov: '',
-    kodePos: '',
-    namaAyah: '',
-    namaIbu: ''
-    // photo_url: "@/assets/default_profile.jpg"
-});
-const isProfileEdit = ref(false);
-const editProfile = () => {
-    isProfileEdit.value = !isProfileEdit.value;
-};
-// const 'p-inputtext' = ref('edit')
-// const editProfileClass = ref('tes')
-
-const fileInput = ref(null);
-const previewPhoto = ref(null);
-
-// Data pengguna (contoh akun dengan photo_url dari backend)
-// const akun = ref({
-//     photo_url: "https://via.placeholder.com/150" // Ganti dengan URL default atau dari backend
-// });
-
-// Trigger input file saat ikon kamera diklik
-const triggerFileInput = () => {
-    fileInput.value.click();
-};
-
-// Handle file yang dipilih oleh pengguna
-const handleFileSelect = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        // Tampilkan preview foto sebelum upload
-        previewPhoto.value = URL.createObjectURL(file);
-
-        // Kirim ke backend
-        uploadPhoto(file);
-    }
-};
-
-// Upload foto ke backend
-const uploadPhoto = async (file) => {
-    const formData = new FormData();
-    formData.append('photo', file);
-
-    try {
-        const response = await axios.post('http://localhost:8080/api/upload/photo', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        });
-
-        // Update photo_url dengan respons dari server
-        akun.value.photo_url = response.data.photo_url;
-    } catch (error) {
-        console.error('Gagal upload foto:', error);
-    }
-};
-</script>
 
 <style scoped>
 .p-inputext {

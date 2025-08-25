@@ -1,16 +1,3 @@
-<template>
-    <section class="trust-section">
-        <h2 class="trust-title">Mengapa Memilih Kami?</h2>
-        <div class="benefits-grid">
-            <div v-for="benefit in benefits" :key="benefit.title" class="benefit-card">
-                <div class="benefit-icon">{{ benefit.icon }}</div>
-                <h3 class="benefit-title">{{ benefit.title }}</h3>
-                <p class="benefit-description">{{ benefit.description }}</p>
-            </div>
-        </div>
-    </section>
-</template>
-
 <script setup>
 const benefits = [
     {
@@ -35,6 +22,19 @@ const benefits = [
     }
 ];
 </script>
+
+<template>
+    <section class="trust-section">
+        <h2 class="trust-title">Mengapa Memilih Kami?</h2>
+        <div class="benefits-grid">
+            <div v-for="benefit in benefits" :key="benefit.title" class="benefit-card">
+                <div class="benefit-icon">{{ benefit.icon }}</div>
+                <h3 class="benefit-title">{{ benefit.title }}</h3>
+                <p class="benefit-description">{{ benefit.description }}</p>
+            </div>
+        </div>
+    </section>
+</template>
 
 <style scoped>
 .trust-section {

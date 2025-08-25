@@ -23,7 +23,7 @@ onMounted(async () => {
 
 const toDashboard = async () => {
     const sekolah = await store.getters['authService/getSekolah']?.namaSekolah;
-    if (isAuthenticated) {
+    if (isAuthenticated.value) {
         router.push({ name: 'suDashboard' });
     }
     router.push({ name: 'dashboard', params: { sekolah: sekolah.toLowerCase().replace(/\s+/g, '') } });
@@ -68,7 +68,7 @@ const toDashboard = async () => {
             </li>
             <li>
                 <a @click="smoothScroll('about')" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
-                    <span>{{t('about')}}</span>
+                    <span>{{ t('about') }}</span>
                 </a>
             </li>
             <li>

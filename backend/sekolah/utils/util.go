@@ -172,6 +172,12 @@ func SafeInt32(ptr *int32) int32 {
 	}
 	return 0
 }
+func SafeFloat32(ptr *float32) float32 {
+	if ptr != nil {
+		return *ptr
+	}
+	return 0
+}
 func SafeUint32(ptr *uint32) uint32 {
 	if ptr != nil {
 		return *ptr
@@ -350,8 +356,6 @@ func DerefSlice[T any](input []*T) []T {
 	}
 	return output
 }
-
-
 
 // GenerateNomorIjazah generates a random ijazah number based on NPSN and year
 func GenerateNomorIjazah(npsn string, tahun int) string {

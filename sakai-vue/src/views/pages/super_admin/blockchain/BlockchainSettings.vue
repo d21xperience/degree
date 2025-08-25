@@ -9,7 +9,6 @@ import ContractDeployer from '@/components/scComponent/ContractDeployer.vue';
 <template>
     <!-- tempat mendeploy smartcontract -->
     <div class="flex">
-        
         <contract-deployer />
         <!-- <AccountDetailComponent /> -->
     </div>

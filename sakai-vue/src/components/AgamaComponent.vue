@@ -1,6 +1,3 @@
-<template>
-    <Select v-model="internalValue" :options="agamaOptions" option-label="label" placeholder="Pilih Agama" fluid option-value="value" />
-</template>
 <script setup>
 import { useFormOptions } from '@/composables/useFormOptions';
 import { onMounted, ref, watch } from 'vue';
@@ -24,3 +21,6 @@ onMounted(() => {
     agamaOptions.value = useFormOption.agamaOptions.value;
 });
 </script>
+<template>
+    <Select v-model="internalValue" :options="agamaOptions" option-label="label" placeholder="Pilih Agama" fluid option-value="value" />
+</template>

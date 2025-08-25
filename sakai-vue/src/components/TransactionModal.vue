@@ -1,3 +1,44 @@
+<script setup>
+import { defineEmits, defineProps } from 'vue';
+
+const props = defineProps({
+    transaction: {
+        type: Object,
+        required: true
+    }
+});
+
+const emit = defineEmits(['close']);
+
+const emitClose = () => {
+    emit('close');
+};
+
+// Format nama blockchain untuk tampilan
+const formatBlockchainName = (blockchain) => {
+    const names = {
+        ethereum: 'Ethereum',
+        quorum: 'Quorum',
+        fabric: 'Hyperledger Fabric'
+    };
+    return names[blockchain.toLowerCase()] || blockchain;
+};
+
+// Format nilai transaksi berdasarkan blockchain
+const formatValue = (value, blockchain) => {
+    if (blockchain.toLowerCase() === 'fabric') {
+        return value;
+    }
+    // Untuk Ethereum dan Quorum, konversi dari wei ke ether
+    return `${(parseInt(value) / 1e18).toFixed(4)} ETH`;
+};
+
+// Format timestamp
+const formatTimestamp = (timestamp) => {
+    return new Date(timestamp).toLocaleString();
+};
+</script>
+
 <template>
     <div class="modal-overlay" @click.self="emitClose">
         <div class="modal-content">
@@ -64,47 +105,6 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import { defineEmits, defineProps } from 'vue';
-
-const props = defineProps({
-    transaction: {
-        type: Object,
-        required: true
-    }
-});
-
-const emit = defineEmits(['close']);
-
-const emitClose = () => {
-    emit('close');
-};
-
-// Format nama blockchain untuk tampilan
-const formatBlockchainName = (blockchain) => {
-    const names = {
-        ethereum: 'Ethereum',
-        quorum: 'Quorum',
-        fabric: 'Hyperledger Fabric'
-    };
-    return names[blockchain.toLowerCase()] || blockchain;
-};
-
-// Format nilai transaksi berdasarkan blockchain
-const formatValue = (value, blockchain) => {
-    if (blockchain.toLowerCase() === 'fabric') {
-        return value;
-    }
-    // Untuk Ethereum dan Quorum, konversi dari wei ke ether
-    return `${(parseInt(value) / 1e18).toFixed(4)} ETH`;
-};
-
-// Format timestamp
-const formatTimestamp = (timestamp) => {
-    return new Date(timestamp).toLocaleString();
-};
-</script>
 
 <style scoped>
 .modal-overlay {

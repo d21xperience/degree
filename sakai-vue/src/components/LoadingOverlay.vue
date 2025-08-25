@@ -1,3 +1,14 @@
+<script setup>
+import ProgressSpinner from 'primevue/progressspinner';
+
+defineProps({
+    visible: {
+        type: Boolean,
+        default: false
+    }
+});
+</script>
+
 <template>
     <!-- Overlay fullscreen (bisa di-disable jika hanya ingin loading lokal) -->
     <div v-if="visible" class="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 backdrop-blur-sm">
@@ -22,14 +33,3 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import ProgressSpinner from 'primevue/progressspinner';
-
-defineProps({
-    visible: {
-        type: Boolean,
-        default: false
-    }
-});
-</script>

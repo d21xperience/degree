@@ -1,82 +1,6 @@
-<template>
-    <div class="">
-        <div class=" ">
-            <div class="mb-2">
-                <Toolbar>
-                    <template #end>
-                        <!-- <Select v-model="filters['kelas.nmKelas'].value" :options="namaKelas" optionLabel="nama" optionValue="value" placeholder="Kelas" class="w-full md:w-48 md:mr-2" checkmark show-clear /> -->
-                        <IconField>
-                            <InputIcon>
-                                <i class="pi pi-search" />
-                            </InputIcon>
-                            <InputText v-model="filters['global'].value" placeholder="Search..." name="search" id="search" />
-                        </IconField>
-                    </template>
-                </Toolbar>
-            </div>
-        </div>
-        <DataTable
-            ref="dt"
-            v-model:selection="selectedSiswa"
-            stripedRows
-            size="small"
-            :value="siswa"
-            scrollable
-            scrollHeight="29rem"
-            dataKey="pesertaDidikId"
-            :paginator="true"
-            :rows="10"
-            :filters="filters"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rowsPerPageOptions="[10, 20, 50]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} siswa"
-        >
-            <!-- <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column> -->
-            <!-- <Column field="kelas.nmKelas" header="Kelas" style="width: 5rem"></Column> -->
-            <Column field="ijazah.nisn" header="NISN"></Column>
-            <Column field="ijazah.nama" header="Nama" sortable></Column>
-            <Column field="ijazah.nomorIjazah" header="No Ijazah"></Column>
-            <Column field="" header="Txt Hash">
-                <template #body="slotProps">
-                    {{ utils.ringkasHash(slotProps.data.txHash) }}
-                </template>
-            </Column>
-            <Column field="" header="Ijazah Hash">
-                <template #body="slotProps">
-                    {{ utils.ringkasHash(slotProps.data.degreeHash) }}
-                </template>
-            </Column>
-            <Column field="" header="Tgl Trx">
-                <template #body="slotProps">
-                    {{ slotProps.data.tglTransaksi }}
-                </template>
-            </Column>
-            <Column field="namaOrtuWali" header="Aksi">
-                <template #body="slotProps">
-                    <Button icon="pi pi-ethereum" class="mr-2 !text-sm" severity="danger" @click="handleLinkBlockscout(slotProps.data)" size="small" rounded v-tooltip.bottom="'block explorer'" />
-                    <!-- <Button icon="pi pi-pencil" class="mr-2 !text-sm" severity="warn" @click="dialogEditKelas(slotProps.data)" size="small" rounded v-tooltip.bottom="'Edit kelas'" /> -->
-                </template>
-            </Column>
-            <!-- <Column field="cidUrl" header="CID Ijazah"></Column> -->
-            <!-- <Column field="nomorIjazah" header="No. Ijazah"></Column> -->
-            <!-- <Column field="nis" header="NIS"></Column> -->
-            <!-- <Column field="" header="Status">
-                <template #body="slotProps">
-                    <span :class="{ 'text-red-600': !slotProps.data.isComplete }">{{ slotProps.data.isComplete ? '✔' : 'X' }}</span>
-                </template>
-            </Column> -->
-        </DataTable>
-        <!-- <Dialog v-model:visible="visible" modal header="Data ijazah" :style="{ width: '60rem', height: '100rem' }">
-            <DialogIjazah :peserta-didik="selectedSiswa" :visible="visible" />
-        </Dialog>  -->
-        <DialogConfirmDelete message="Apakah data ini akan dihapus?" v-model:visible="visible" @confirm="deleteData" @closeDialog="closeDialog" />
-        <!-- <DialogImport :visible="dialogImport" /> -->
-    </div>
-</template>
-
 <script setup>
 import { useSCService } from '@/composables/useSCService';
-import { useSekolahService } from '@/composables/useSekolahService';
+import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
 import { useUtils } from '@/composables/useUtils';
 import { FilterMatchMode } from '@primevue/core/api';
 import Column from 'primevue/column';
@@ -155,7 +79,7 @@ const getNmKelas = (data) => {
 
 const editIjazah = async () => {
     // const sekolah = await fetchSekolah();
-    const nmSekolah = sekolah.sekolah?.nama.toLowerCase().replace(/\s+/g, '');
+    const nmSekolah = sekolah.value.sekolah?.nama.toLowerCase().replace(/\s+/g, '');
     // console.log(selectedSiswa.value);
     router.push({
         name: 'editIjazah',
@@ -208,3 +132,79 @@ onMounted(async () => {
     // namaKelas.value = getNmKelas(siswa);
 });
 </script>
+
+<template>
+    <div class="">
+        <div class=" ">
+            <div class="mb-2">
+                <Toolbar>
+                    <template #end>
+                        <!-- <Select v-model="filters['kelas.nmKelas'].value" :options="namaKelas" optionLabel="nama" optionValue="value" placeholder="Kelas" class="w-full md:w-48 md:mr-2" checkmark show-clear /> -->
+                        <IconField>
+                            <InputIcon>
+                                <i class="pi pi-search" />
+                            </InputIcon>
+                            <InputText v-model="filters['global'].value" placeholder="Search..." name="search" id="search" />
+                        </IconField>
+                    </template>
+                </Toolbar>
+            </div>
+        </div>
+        <DataTable
+            ref="dt"
+            v-model:selection="selectedSiswa"
+            stripedRows
+            size="small"
+            :value="siswa"
+            scrollable
+            scrollHeight="29rem"
+            dataKey="pesertaDidikId"
+            :paginator="true"
+            :rows="10"
+            :filters="filters"
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rowsPerPageOptions="[10, 20, 50]"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} siswa"
+        >
+            <!-- <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column> -->
+            <!-- <Column field="kelas.nmKelas" header="Kelas" style="width: 5rem"></Column> -->
+            <Column field="ijazah.nisn" header="NISN"></Column>
+            <Column field="ijazah.nama" header="Nama" sortable></Column>
+            <Column field="ijazah.nomorIjazah" header="No Ijazah"></Column>
+            <Column field="" header="Txt Hash">
+                <template #body="slotProps">
+                    {{ utils.ringkasHash(slotProps.data.txHash) }}
+                </template>
+            </Column>
+            <Column field="" header="Ijazah Hash">
+                <template #body="slotProps">
+                    {{ utils.ringkasHash(slotProps.data.degreeHash) }}
+                </template>
+            </Column>
+            <Column field="" header="Tgl Trx">
+                <template #body="slotProps">
+                    {{ slotProps.data.tglTransaksi }}
+                </template>
+            </Column>
+            <Column field="namaOrtuWali" header="Aksi">
+                <template #body="slotProps">
+                    <Button icon="pi pi-ethereum" class="mr-2 !text-sm" severity="danger" @click="handleLinkBlockscout(slotProps.data)" size="small" rounded v-tooltip.bottom="'block explorer'" />
+                    <!-- <Button icon="pi pi-pencil" class="mr-2 !text-sm" severity="warn" @click="dialogEditKelas(slotProps.data)" size="small" rounded v-tooltip.bottom="'Edit kelas'" /> -->
+                </template>
+            </Column>
+            <!-- <Column field="cidUrl" header="CID Ijazah"></Column> -->
+            <!-- <Column field="nomorIjazah" header="No. Ijazah"></Column> -->
+            <!-- <Column field="nis" header="NIS"></Column> -->
+            <!-- <Column field="" header="Status">
+                <template #body="slotProps">
+                    <span :class="{ 'text-red-600': !slotProps.data.isComplete }">{{ slotProps.data.isComplete ? '✔' : 'X' }}</span>
+                </template>
+            </Column> -->
+        </DataTable>
+        <!-- <Dialog v-model:visible="visible" modal header="Data ijazah" :style="{ width: '60rem', height: '100rem' }">
+            <DialogIjazah :peserta-didik="selectedSiswa" :visible="visible" />
+        </Dialog>  -->
+        <DialogConfirmDelete message="Apakah data ini akan dihapus?" v-model:visible="visible" @confirm="deleteData" @closeDialog="closeDialog" />
+        <!-- <DialogImport :visible="dialogImport" /> -->
+    </div>
+</template>

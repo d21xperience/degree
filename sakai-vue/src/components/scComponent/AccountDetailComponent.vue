@@ -1,3 +1,58 @@
+<script setup>
+import { ref } from 'vue';
+import { useWebSocket } from '@/composables/useWebSocket';
+
+// Account data
+const account = ref({
+    address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
+    balance: '1.542389',
+    transactionCount: 42,
+    tokenCount: 7
+});
+
+const transactions = ref([
+    {
+        hash: '0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b',
+        direction: 'in',
+        value: '0.25',
+        timestamp: 1678901234,
+        confirmations: 12
+    },
+    {
+        hash: '0x99df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713955c',
+        direction: 'out',
+        value: '1.0',
+        timestamp: 1678800234,
+        confirmations: 24
+    }
+]);
+
+// WebSocket connection
+const { isConnected } = useWebSocket('ws://localhost:8080/ws');
+
+// Utility functions
+const shortenAddress = (address) => {
+    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
+};
+
+const shortenHash = (hash) => {
+    return `${hash.substring(0, 8)}...`;
+};
+
+const formatBalance = (balance) => {
+    return parseFloat(balance).toFixed(4);
+};
+
+const formatTimestamp = (timestamp) => {
+    return new Date(timestamp * 1000).toLocaleString();
+};
+
+const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    // Add toast notification in real implementation
+};
+</script>
+
 <template>
     <div class="max-w-4xl mx-auto p-6 bg-gray-900 text-gray-100 rounded-lg shadow-lg">
         <!-- Header Section -->
@@ -6,7 +61,6 @@
                 <h1 class="text-2xl font-bold">Blockchain Account Details</h1>
                 <!-- <p class="text-gray-400">Ethereum Mainnet</p> -->
             </div>
-            
         </div>
 
         <!-- Address Card -->
@@ -89,58 +143,3 @@
         </div> -->
     </div>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-import { useWebSocket } from '@/composables/useWebSocket';
-
-// Account data
-const account = ref({
-    address: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e',
-    balance: '1.542389',
-    transactionCount: 42,
-    tokenCount: 7
-});
-
-const transactions = ref([
-    {
-        hash: '0x88df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713944b',
-        direction: 'in',
-        value: '0.25',
-        timestamp: 1678901234,
-        confirmations: 12
-    },
-    {
-        hash: '0x99df016429689c079f3b2f6ad39fa052532c56795b733da78a91ebe6a713955c',
-        direction: 'out',
-        value: '1.0',
-        timestamp: 1678800234,
-        confirmations: 24
-    }
-]);
-
-// WebSocket connection
-const { isConnected } = useWebSocket('ws://localhost:8080/ws');
-
-// Utility functions
-const shortenAddress = (address) => {
-    return `${address.substring(0, 6)}...${address.substring(address.length - 4)}`;
-};
-
-const shortenHash = (hash) => {
-    return `${hash.substring(0, 8)}...`;
-};
-
-const formatBalance = (balance) => {
-    return parseFloat(balance).toFixed(4);
-};
-
-const formatTimestamp = (timestamp) => {
-    return new Date(timestamp * 1000).toLocaleString();
-};
-
-const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-    // Add toast notification in real implementation
-};
-</script>

@@ -1,66 +1,3 @@
-<template>
-    <div>
-        Featured Post
-        <section class="mb-12">
-            <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <img :src="featuredPost.image" alt="Featured Post" class="w-full h-64 object-cover" />
-                <div class="p-6">
-                    <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium mb-2">
-                        {{ featuredPost.category }}
-                    </span>
-                    <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ featuredPost.title }}</h2>
-                    <p class="text-gray-600 mb-4">{{ featuredPost.excerpt }}</p>
-                    <div class="flex items-center">
-                        <img :src="featuredPost.author.avatar" alt="Author" class="w-10 h-10 rounded-full mr-3" />
-                        <div>
-                            <p class="text-sm font-medium text-gray-900">{{ featuredPost.author.name }}</p>
-                            <p class="text-sm text-gray-500">{{ formatDate(featuredPost.date) }}</p>
-                        </div>
-                        <a href="#" class="ml-auto px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition"> Read More </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Blog Posts Grid -->
-        <section>
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">Latest Articles</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                <article v-for="post in posts" :key="post.id" class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
-                    <img :src="post.image" :alt="post.title" class="w-full h-48 object-cover" />
-                    <div class="p-6">
-                        <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium mb-2">
-                            {{ post.category }}
-                        </span>
-                        <h3 class="text-xl font-bold text-gray-800 mb-2">{{ post.title }}</h3>
-                        <p class="text-gray-600 mb-4">{{ post.excerpt }}</p>
-                        <div class="flex items-center">
-                            <img :src="post.author.avatar" alt="Author" class="w-8 h-8 rounded-full mr-2" />
-                            <div>
-                                <p class="text-sm font-medium text-gray-900">{{ post.author.name }}</p>
-                                <p class="text-xs text-gray-500">{{ formatDate(post.date) }}</p>
-                            </div>
-                            <a href="#" class="ml-auto text-indigo-600 hover:text-indigo-800 text-sm font-medium"> Read → </a>
-                        </div>
-                    </div>
-                </article>
-            </div>
-        </section>
-
-        <!-- Newsletter Subscription -->
-        <section class="mt-16 bg-indigo-50 rounded-lg p-8">
-            <div class="max-w-2xl mx-auto text-center">
-                <h2 class="text-2xl font-bold text-gray-800 mb-2">Subscribe to our Newsletter</h2>
-                <p class="text-gray-600 mb-6">Get the latest articles and news delivered to your inbox.</p>
-                <div class="flex flex-col sm:flex-row gap-2">
-                    <input type="email" placeholder="Enter your email" class="flex-grow px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" v-model="email" />
-                    <button class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition" @click="subscribe">Subscribe</button>
-                </div>
-            </div>
-        </section>
-    </div>
-</template>
-
 <script setup>
 import { ref } from 'vue';
 
@@ -133,3 +70,66 @@ const subscribe = () => {
     }
 };
 </script>
+
+<template>
+    <div>
+        Featured Post
+        <section class="mb-12">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                <img :src="featuredPost.image" alt="Featured Post" class="w-full h-64 object-cover" />
+                <div class="p-6">
+                    <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium mb-2">
+                        {{ featuredPost.category }}
+                    </span>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">{{ featuredPost.title }}</h2>
+                    <p class="text-gray-600 mb-4">{{ featuredPost.excerpt }}</p>
+                    <div class="flex items-center">
+                        <img :src="featuredPost.author.avatar" alt="Author" class="w-10 h-10 rounded-full mr-3" />
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">{{ featuredPost.author.name }}</p>
+                            <p class="text-sm text-gray-500">{{ formatDate(featuredPost.date) }}</p>
+                        </div>
+                        <a href="#" class="ml-auto px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition"> Read More </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Blog Posts Grid -->
+        <section>
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Latest Articles</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <article v-for="post in posts" :key="post.id" class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
+                    <img :src="post.image" :alt="post.title" class="w-full h-48 object-cover" />
+                    <div class="p-6">
+                        <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-600 rounded-full text-sm font-medium mb-2">
+                            {{ post.category }}
+                        </span>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">{{ post.title }}</h3>
+                        <p class="text-gray-600 mb-4">{{ post.excerpt }}</p>
+                        <div class="flex items-center">
+                            <img :src="post.author.avatar" alt="Author" class="w-8 h-8 rounded-full mr-2" />
+                            <div>
+                                <p class="text-sm font-medium text-gray-900">{{ post.author.name }}</p>
+                                <p class="text-xs text-gray-500">{{ formatDate(post.date) }}</p>
+                            </div>
+                            <a href="#" class="ml-auto text-indigo-600 hover:text-indigo-800 text-sm font-medium"> Read → </a>
+                        </div>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Newsletter Subscription -->
+        <section class="mt-16 bg-indigo-50 rounded-lg p-8">
+            <div class="max-w-2xl mx-auto text-center">
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Subscribe to our Newsletter</h2>
+                <p class="text-gray-600 mb-6">Get the latest articles and news delivered to your inbox.</p>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="email" placeholder="Enter your email" class="flex-grow px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" v-model="email" />
+                    <button class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition" @click="subscribe">Subscribe</button>
+                </div>
+            </div>
+        </section>
+    </div>
+</template>

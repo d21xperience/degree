@@ -1,10 +1,102 @@
+<script setup>
+import { computed, onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+const store = useStore();
+
+import KategoriSekolahComponent from '@/components/KategoriSekolahComponent.vue';
+import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
+import { useSemester } from '@/composables/sekolah_composable/useSemester';
+const { initSelectedSemester } = useSemester();
+const { fetchSekolah, fetchTingkat, updateSekolah } = useSekolah();
+const fetchRefTable = async () => {
+    bentukPendidikan.value = await store.dispatch('sekolahService/fetchBentukPendidikan');
+    jenjangPendidikan.value = await store.dispatch('sekolahService/fetchJenjangPendidikan');
+};
+
+// Evaluasi variabel di bawah ini:
+const jenjangPendidikanFiltered = computed(() => {
+    return jenjangPendidikan.value.filter((item) => item.jenjangLembaga === 1);
+});
+
+const sekolah = ref({
+    sekolah: {}
+});
+
+const initFirst = async () => {
+    sekolah.value = await fetchSekolah();
+};
+const tingkat = ref();
+onMounted(async () => {
+    initFirst();
+    tingkat.value = await fetchTingkat();
+    // console.log(tingkat.value);
+    // const data = await fetchSekolah();
+    // Object.assign(sekolah, data);
+});
+watch(initSelectedSemester, () => {
+    // console.log('update semester');
+    initFirst();
+});
+const selectedBentukPendidikan = ref();
+const selectedJenjangPendidikan = ref();
+watch(selectedBentukPendidikan, (newVal) => {
+    if (newVal) {
+        sekolah.value.sekolah.bentukPendidikanId = newVal.bentukPendidikanId;
+        sekolah.value.bentukPendidikanStr = newVal.nama;
+    }
+});
+watch(selectedJenjangPendidikan, (newVal) => {
+    if (newVal) {
+        sekolah.value.sekolah.jenjangPendidikanId = newVal.jenjangPendidikanId;
+        sekolah.value.jenjangPendidikanStr = newVal.nama;
+    }
+});
+// Edit
+const isEdit = ref(false);
+
+const editSekolah = () => {
+    isEdit.value = !isEdit.value;
+};
+watch(isEdit, async (newVal) => {
+    if (newVal) {
+        await fetchRefTable();
+        selectedBentukPendidikan.value = bentukPendidikan.value.find((item) => item.nama === sekolah.value.bentukPendidikanStr);
+        selectedJenjangPendidikan.value = jenjangPendidikan.value.find((item) => item.nama === sekolah.value.jenjangPendidikanStr);
+    }
+});
+
+const bentukPendidikan = ref([]);
+const jenjangPendidikan = ref([]);
+const getWebsiteUrl = (url) => {
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        return `https://${url}`; // Tambahkan https jika belum ada
+    }
+    return url;
+};
+const loadingUpdate = ref(false);
+const updateData = async () => {
+    loadingUpdate.value = true;
+    // console.log(sekolah.value);
+    const payload = {
+        schemaname: store.getters['sekolahService/getTabeltenant']?.schemaname,
+        sekolah: sekolah.value.sekolah,
+        bentukPendidikanStr: selectedBentukPendidikan.value.nama,
+        jenjangPendidikanStr: selectedJenjangPendidikan.value.nama
+    };
+    await updateSekolah(payload);
+    selectedBentukPendidikan.value = null;
+    loadingUpdate.value = false;
+    isEdit.value = false;
+};
+</script>
+
 <template>
     <div>
         <div>
             <div class="flex justify-between items-center mb-2">
                 <h5>Data Sekolah</h5>
                 <div>
-                    <Button icon="pi pi-pencil" @click="editSekolah" :style="isEdit ? 'background-color:blue;border:none' : 'background-color:gray;border:none'" v-tooltip.bottom="'Edit data sekolah'" size="small" rounded=""/>
+                    <Button icon="pi pi-pencil" @click="editSekolah" :style="isEdit ? 'background-color:blue;border:none' : 'background-color:gray;border:none'" v-tooltip.bottom="'Edit data sekolah'" size="small" rounded="" />
                 </div>
             </div>
             <div>
@@ -116,100 +208,6 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import { computed, onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
-const store = useStore();
-
-import KategoriSekolahComponent from '@/components/KategoriSekolahComponent.vue';
-import { useSekolahService } from '@/composables/useSekolahService';
-import sekolahService from '@/store/sekolahService';
-const { fetchSekolah, initSelectedSemester, updateSekolah, fetchTingkat } = useSekolahService();
-
-const fetchRefTable = async () => {
-    bentukPendidikan.value = await store.dispatch('sekolahService/fetchBentukPendidikan');
-    jenjangPendidikan.value = await store.dispatch('sekolahService/fetchJenjangPendidikan');
-};
-
-// Evaluasi variabel di bawah ini:
-const jenjangPendidikanFiltered = computed(() => {
-    return jenjangPendidikan.value.filter((item) => item.jenjangLembaga === 1);
-});
-
-const sekolah = ref({
-    sekolah: {}
-});
-
-const initFirst = async () => {
-    sekolah.value = await fetchSekolah(); 
-};
-const tingkat = ref();
-onMounted(async () => {
-    
-    
-    initFirst();
-    tingkat.value = await fetchTingkat();
-    // console.log(tingkat.value);
-    // const data = await fetchSekolah();
-    // Object.assign(sekolah, data);
-});
-watch(initSelectedSemester, () => {
-    // console.log('update semester');
-    initFirst();
-});
-const selectedBentukPendidikan = ref();
-const selectedJenjangPendidikan = ref();
-watch(selectedBentukPendidikan, (newVal) => {
-    if (newVal) {
-        sekolah.value.sekolah.bentukPendidikanId = newVal.bentukPendidikanId;
-        sekolah.value.bentukPendidikanStr = newVal.nama;
-    }
-});
-watch(selectedJenjangPendidikan, (newVal) => {
-    if (newVal) {
-        sekolah.value.sekolah.jenjangPendidikanId = newVal.jenjangPendidikanId;
-        sekolah.value.jenjangPendidikanStr = newVal.nama;
-    }
-});
-// Edit
-const isEdit = ref(false);
-
-const editSekolah = () => {
-    isEdit.value = !isEdit.value;
-};
-watch(isEdit, async (newVal) => {
-    if (newVal) {
-        await fetchRefTable();
-        selectedBentukPendidikan.value = bentukPendidikan.value.find((item) => item.nama === sekolah.value.bentukPendidikanStr);
-        selectedJenjangPendidikan.value = jenjangPendidikan.value.find((item) => item.nama === sekolah.value.jenjangPendidikanStr);
-    }
-});
-
-const bentukPendidikan = ref([]);
-const jenjangPendidikan = ref([]);
-const getWebsiteUrl = (url) => {
-    if (!url.startsWith('http://') && !url.startsWith('https://')) {
-        return `https://${url}`; // Tambahkan https jika belum ada
-    }
-    return url;
-};
-const loadingUpdate = ref(false);
-const updateData = async () => {
-    loadingUpdate.value = true;
-    // console.log(sekolah.value);
-    const payload = {
-        schemaname: store.getters['sekolahService/getTabeltenant']?.schemaname,
-        sekolah: sekolah.value.sekolah,
-        bentukPendidikanStr: selectedBentukPendidikan.value.nama,
-        jenjangPendidikanStr: selectedJenjangPendidikan.value.nama
-    };
-    await updateSekolah(payload);
-    selectedBentukPendidikan.value = null;
-    loadingUpdate.value = false;
-    isEdit.value = false;
-};
-</script>
 
 <style scoped>
 edit-class {

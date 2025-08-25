@@ -68,6 +68,8 @@ const data = ref([
 onMounted(() => {});
 </script> -->
 
+<script setup></script>
+
 <template>
     <div class="min-h-screen bg-gray-50">
         <!-- Header -->
@@ -125,12 +127,6 @@ onMounted(() => {});
         </footer>
     </div>
 </template>
-
-<script setup>
-
-
-
-</script>
 
 <style>
 /* You can add custom styles here if needed */

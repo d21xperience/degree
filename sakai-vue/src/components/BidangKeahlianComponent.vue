@@ -1,6 +1,3 @@
-<template>
-    <Select v-model="internalValue" :options="bidangKeahlianOptions" :option-label="handleLabelOption" placeholder="Pilih bidang keahlian" fluid show-clear />
-</template>
 <script setup>
 import { useFormOptions } from '@/composables/useFormOptions';
 import { onMounted, ref, watch } from 'vue';
@@ -27,3 +24,6 @@ onMounted(async () => {
     bidangKeahlianOptions.value = await fetchBidangKeahlian();
 });
 </script>
+<template>
+    <Select v-model="internalValue" :options="bidangKeahlianOptions" :option-label="handleLabelOption" placeholder="Pilih bidang keahlian" fluid show-clear />
+</template>

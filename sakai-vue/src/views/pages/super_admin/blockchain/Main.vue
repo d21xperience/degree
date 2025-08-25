@@ -1,3 +1,51 @@
+<script setup>
+import { useSCService } from '@/composables/useSCService';
+import { useWebSocket } from '@/composables/useWebSocket';
+import { onMounted, ref, watchEffect } from 'vue';
+const scService = useSCService();
+const networkSelected = ref(null);
+const platformSelected = ref(null);
+// const isConnected = ref(false);
+watchEffect(async () => {
+    platformSelected.value = await scService.getNetowrkPlatform();
+    networkSelected.value = await scService.getBCNetwork();
+    isConnected.value = await scService.getBCConnected();
+    // console.log(isConnected.value)
+});
+const isShowConnected = ref(false);
+const showConnected = () => {
+    isShowConnected.value = true;
+};
+const handleCancel = () => {
+    isShowConnected.value = false;
+};
+const handleConnect = async () => {
+    const response = await scService.setBCConfig();
+    if (response.status) {
+        isShowConnected.value = false;
+        isConnected.value = true;
+    }
+    // console.log(response)
+};
+const { isConnected } = useWebSocket('ws://localhost:8080/ws');
+onMounted(async () => {
+    isConnected.value = await scService.getBCConnected();
+    console.log(isConnected.value);
+    // platforms.value = await scService.fetchNetworkPlatform();
+});
+
+// // Cleanup WebSocket on component unmount
+// onBeforeUnmount(() => {
+//     if (ws.value) {
+//         ws.value.close();
+//     }
+// });
+
+// // Initialize on component mount
+// onMounted(() => {
+//     initWebSocket();
+// });
+</script>
 <template>
     <div>
         <div class="">
@@ -32,51 +80,3 @@
         </Dialog>
     </div>
 </template>
-<script setup>
-import { useSCService } from '@/composables/useSCService';
-import { useWebSocket } from '@/composables/useWebSocket';
-import { onMounted, ref, watchEffect } from 'vue';
-const scService = useSCService();
-const networkSelected = ref(null);
-const platformSelected = ref(null);
-// const isConnected = ref(false);
-watchEffect(async () => {
-    platformSelected.value = await scService.getNetowrkPlatform();
-    networkSelected.value = await scService.getBCNetwork();
-    isConnected.value = await scService.getBCConnected();
-    // console.log(isConnected.value)
-});
-const isShowConnected = ref(false);
-const showConnected = () => {
-    isShowConnected.value = true;
-};
-const handleCancel = () => {
-    isShowConnected.value = false;
-};
-const handleConnect = async () => {
-    const response = await scService.setBCConfig();
-    if (response.status) {
-        isShowConnected.value = false;
-        isConnected.value = true;
-    }
-    // console.log(response)
-};
-const { isConnected, networkInfo, latestBlock } = useWebSocket('ws://localhost:8080/ws');
-onMounted(async () => {
-    isConnected.value = await scService.getBCConnected();
-    console.log(isConnected.value)
-    // platforms.value = await scService.fetchNetworkPlatform();
-});
-
-// // Cleanup WebSocket on component unmount
-// onBeforeUnmount(() => {
-//     if (ws.value) {
-//         ws.value.close();
-//     }
-// });
-
-// // Initialize on component mount
-// onMounted(() => {
-//     initWebSocket();
-// });
-</script>

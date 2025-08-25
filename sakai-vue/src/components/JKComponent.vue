@@ -1,6 +1,3 @@
-<template>
-    <Select v-model="internalValue" :options="jenisKelaminOptions" option-label="label" placeholder="Pilih Jenis kelamin" fluid option-value="value" />
-</template>
 <script setup>
 import { useFormOptions } from '@/composables/useFormOptions';
 import { onMounted, ref, watch } from 'vue';
@@ -24,3 +21,6 @@ onMounted(() => {
     jenisKelaminOptions.value = useFormOption.jenisKelaminOptions.value;
 });
 </script>
+<template>
+    <Select v-model="internalValue" :options="jenisKelaminOptions" option-label="label" placeholder="Pilih Jenis kelamin" fluid option-value="value" />
+</template>

@@ -1,9 +1,5 @@
-<template>
-    <Select v-model="internalValue" :options="tingkatPendidikanOptions" optionLabel="nama" optionValue="kode" placeholder="Pilih tingkat..." fluid checkmark />
-</template>
-
 <script setup>
-import { useSekolahService } from '@/composables/useSekolahService';
+import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
 import { onMounted, ref, watch } from 'vue';
 const tingkatPendidikanOptions = ref([]);
 const props = defineProps(['modelValue', 'initialValue']); // props dari parent
@@ -30,3 +26,7 @@ onMounted(async () => {
     tingkatPendidikanOptions.value = await fetchTingkat();
 });
 </script>
+
+<template>
+    <Select v-model="internalValue" :options="tingkatPendidikanOptions" optionLabel="nama" optionValue="kode" placeholder="Pilih tingkat..." fluid checkmark />
+</template>

@@ -1,6 +1,3 @@
-<template>
-    <Select v-model="internalValue" :options="jurusanOptions" :option-label="handleLabelOption" placeholder="Pilih kompetensi keahlian" fluid />
-</template>
 <script setup>
 import { useFormOptions } from '@/composables/useFormOptions';
 import { ref, watch } from 'vue';
@@ -32,3 +29,6 @@ watch(internalValue, (newVal) => {
     emit('update:modelValue', newVal);
 });
 </script>
+<template>
+    <Select v-model="internalValue" :options="jurusanOptions" :option-label="handleLabelOption" placeholder="Pilih kompetensi keahlian" fluid />
+</template>

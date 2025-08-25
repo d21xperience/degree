@@ -1,3 +1,269 @@
+<script setup>
+import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
+import { useKategoriSekolah } from '@/composables/sekolah_composable/useKategoriSekolah';
+import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
+import { useSemester } from '@/composables/sekolah_composable/useSemester';
+import { useFormOptions } from '@/composables/useFormOptions';
+import { onMounted, reactive, ref, watch } from 'vue';
+import TingkatComponent from './TingkatComponent.vue';
+
+// Services and composables
+const { kurikulumList } = useFormOptions();
+const { initSelectedSemester } = useSemester();
+const { fetchKategoriSekolah, createKategoriSekolah, deleteKategoriSekolahKurikulum, createProsesKategoriSekolahDanKelas, updateKategoriSekolah, kategoriSekolahList } = useKategoriSekolah();
+const { fetchSekolah, fetchTingkat } = useSekolah();
+// Data
+const sekolah = ref({ sekolah: {} });
+const tingkat = ref([]);
+const kategoriSekolahTabel = ref([]);
+const expandedRows = ref(null);
+
+// UI State
+const isEditKategoriSekolah = ref(false);
+const isLoadingEditKategoriSekolah = ref(false);
+const isDialogVisible = reactive({
+    addKategoriSekolah: false,
+    addKategoriKelas: false,
+    deleteKategoriSekolah: false,
+    deleteKategoriKelas: false,
+    prosesKurikulum: false
+});
+
+// Form State
+const formState = reactive({
+    title: '',
+    selectedKurikulum: null,
+    selectedTingkat: null,
+    selectedKategoriKelas: null,
+    isEditMode: false,
+    isSubmitDisabled: true,
+    submitButtonText: 'Tambah'
+});
+
+const messageDelete = ref('');
+const tahunAjaran = ref(`${initSelectedSemester.value?.tahunAjaranId}/${initSelectedSemester.value?.tahunAjaranId + 1}`);
+// Initialize component
+const initComponent = async () => {
+    try {
+        await fetchKategoriSekolah();
+        // console.log(kategoriSekolahList.value);
+        // kategoriSekolahTabel.value = kategoriSekolahTabel.value;
+    } catch (error) {
+        console.error('Initialization error:', error);
+        // Handle error (show toast/notification)
+    }
+};
+const currentKategori = reactive({
+    bidang_keahlian: null,
+    program_keahlian: null,
+    jurusan: null,
+    jumlah: 0,
+    tahun_ajaran_id: initSelectedSemester.value?.tahunAjaranId || '',
+    tingkat_id: ''
+});
+// Watch for edit mode changes
+watch(isEditKategoriSekolah, (newVal) => {
+    isLoadingEditKategoriSekolah.value = true;
+
+    if (newVal) {
+        expandedRows.value = kategoriSekolahTabel.value.reduce((acc, p) => {
+            acc[p.kurikulum_id] = true;
+            return acc;
+        }, {});
+    } else {
+        expandedRows.value = null;
+    }
+
+    isLoadingEditKategoriSekolah.value = false;
+});
+
+watch(
+    () => currentKategori.jurusan,
+    (newVal) => {
+        // console.log('currentKategori.jurusan', newVal);
+        if (newVal) {
+            // console.log(kurikulumList);
+            formState.selectedKurikulum = kurikulumList.value.find((item) => newVal.jurusanId.includes(item.jurusanId));
+            // console.log(formState.selectedKurikulum)
+            formState.isSubmitDisabled = false;
+        }
+    }
+);
+
+// Kategori Sekolah CRUD Operations
+const openAddDialog = () => {
+    formState.title = `Tambah Data T.A. ${tahunAjaran.value}`;
+    isDialogVisible.addKategoriSekolah = true;
+    // Reset currentKategori
+    Object.assign(currentKategori, {
+        bidang_keahlian: null,
+        program_keahlian: null,
+        jurusan: null,
+        jumlah: 0,
+        tahun_ajaran_id: initSelectedSemester.value?.tahunAjaranId || '',
+        tingkat_id: ''
+    });
+};
+
+const addKategoriSekolah = async () => {
+    if (!formState.selectedKurikulum) {
+        alert('Kurikulum harus dipilih!');
+        return;
+    }
+
+    try {
+        const newKategori = {
+            kurikulum_id: formState.selectedKurikulum.kurikulumId,
+            nama_kurikulum: formState.selectedKurikulum.namaKurikulum,
+            jurusan_id: currentKategori.jurusan?.jurusanId || '',
+            nama_jurusan: currentKategori.jurusan?.namaJurusan || '',
+            nama_bidang_keahlian: currentKategori.bidang_keahlian?.namaJurusan || '',
+            nama_program_keahlian: currentKategori.program_keahlian?.namaJurusan || '',
+            jenjang_pendidikan_id: formState.selectedKurikulum.jenjangPendidikanId,
+            tahun_ajaran_id: initSelectedSemester.value?.tahunAjaranId,
+            jumlah: 0
+        };
+        await createKategoriSekolah(newKategori);
+        isDialogVisible.addKategoriSekolah = false;
+        // await fetchKategoriSekolah()
+        kategoriSekolahList.value.push(newKategori);
+        kategoriSekolahTabel.value = kategoriSekolahTabel.value;
+    } catch (error) {
+        console.error('Error adding kategori sekolah:', error);
+        // Handle error
+    }
+};
+
+const selectedItemToDelete = ref(null);
+const handleDeleteKategoriSekolah = async (e) => {
+    isDialogVisible.deleteKategoriSekolah = true;
+    selectedItemToDelete.value = e;
+    messageDelete.value = `Kurikulum <b>${e.nama_kurikulum}</b> akan dihapus?<br><br>Semua kelas pada kurikulum tersebut juga akan dihapus!`;
+};
+const deleteKategoriSekolah = async (item) => {
+    try {
+        await deleteKategoriSekolahKurikulum(item.kurikulum_id);
+        kategoriSekolahList.value = kategoriSekolahList.value.filter((k) => k.kurikulum_id !== item.kurikulum_id);
+        kategoriSekolahTabel.value = kategoriSekolahTabel.value;
+        // kategoriSekolahTabel.value = kategoriSekolahTabel.value.filter((k) => k.kurikulum_id !== item.kurikulum_id);
+    } catch (error) {
+        console.error('Error deleting kategori sekolah:', error);
+        // Handle error
+    } finally {
+        isDialogVisible.deleteKategoriSekolah = false;
+    }
+};
+const dialogAddKelas = (kategoriSekolah) => {
+    formState.title = `Tambah kelas | ${kategoriSekolah.nama_jurusan}`;
+    formState.selectedKategoriKelas = kategoriSekolah;
+
+    // Reset form state
+    formState.selectedTingkat = null;
+    formState.isEditMode = false;
+    currentKategori.jumlah = 0;
+    currentKategori.tingkat_id = '';
+
+    isDialogVisible.addKategoriKelas = true;
+};
+
+const addKelas = async () => {
+    if (!formState.selectedTingkat) {
+        alert('Tingkat harus dipilih!');
+        return;
+    }
+
+    try {
+        const newKelas = formState.selectedKategoriKelas;
+        newKelas.tingkat_id = formState.selectedTingkat;
+        newKelas.jumlah = currentKategori.jumlah;
+        kategoriSekolahList.value.push(newKelas);
+        kategoriSekolahTabel.value = kategoriSekolahTabel.value;
+        await createKategoriSekolah(newKelas);
+
+        isDialogVisible.addKategoriKelas = false;
+        return;
+    } catch (error) {
+        console.error('Error adding kelas:', error);
+        // Handle error
+    }
+};
+const dialogEditKelas = (kategoriKelas) => {
+    const cek = kategoriSekolahList.value.find((item) => kategoriKelas.kategori_sekolah_id == item.kategori_sekolah_id);
+    formState.title = `Edit kelas | ${cek.nama_jurusan}`;
+    formState.selectedKategoriKelas = cek;
+    formState.isEditMode = true;
+    formState.selectedTingkat = cek.tingkat_id;
+    currentKategori.jumlah = cek.jumlah;
+    currentKategori.tingkat_id = cek.tingkat_id;
+    isDialogVisible.addKategoriKelas = true;
+};
+
+const updateKelas = async () => {
+    if (!formState.selectedTingkat) {
+        alert('Tingkat harus dipilih!');
+        return;
+    }
+    try {
+        const updatedKelas = {
+            ...formState.selectedKategoriKelas,
+            tingkat_id: formState.selectedTingkat,
+            jumlah: currentKategori.jumlah
+        };
+        // Update di local state
+        const index = kategoriSekolahList.value.findIndex((item) => item.kategori_sekolah_id === updatedKelas.kategori_sekolah_id);
+        if (index !== -1) {
+            kategoriSekolahList.value[index] = updatedKelas;
+        }
+        // Update tabel
+        kategoriSekolahTabel.value = [...kategoriSekolahTabel.value];
+
+        // Kirim ke API
+        await updateKategoriSekolah(updatedKelas);
+
+        // Tutup dialog
+        isDialogVisible.addKategoriKelas = false;
+    } catch (error) {
+        console.error('Error updating kelas:', error);
+    }
+};
+
+const handleDeleteKategoriKelas = async (e) => {
+    isDialogVisible.deleteKategoriKelas = true;
+    selectedItemToDelete.value = e;
+    messageDelete.value = `Kelas <b>${e.tingkat_id}</b> akan dihapus?<br>`;
+};
+const deleteKelas = async (item) => {
+    try {
+        await deleteKategoriSekolah(item.kategori_sekolah_id);
+        kategoriSekolahList.value = kategoriSekolahList.value.filter((k) => k.kategori_sekolah_id !== item.kategori_sekolah_id);
+        kategoriSekolahTabel.value = kategoriSekolahTabel.value;
+        // kategoriSekolahTabel.value = kategoriSekolahTabel.value.filter((k) => k.kurikulum_id !== item.kurikulum_id);
+    } catch (error) {
+        console.error('Error deleting kategori sekolah:', error);
+        // Handle error
+    } finally {
+        isDialogVisible.deleteKategoriSekolah = false;
+    }
+};
+
+const dialogProsesKurikulum = () => {
+    messageDelete.value = `Anda akan memproses kurikulum? <br>Pastikan kurikulum sudah sesuai dengan Satuan Pendidikan yang akan diproses!`;
+    isDialogVisible.prosesKurikulum = true;
+};
+const addProsesKurikulum = () => {
+    createProsesKategoriSekolahDanKelas();
+};
+// Lifecycle
+watch(initSelectedSemester, () => {
+    initComponent();
+});
+onMounted(async () => {
+    sekolah.value = await fetchSekolah();
+    tingkat.value = await fetchTingkat();
+    initComponent();
+});
+</script>
+
 <template>
     <div class="kategori-sekolah-container">
         <!-- Header Section -->
@@ -49,7 +315,7 @@
             </DataTable>
         </div>
         <div class="flex justify-end mt-10">
-            <Button icon="pi pi-process" label="Proses kurikulum" severity="danger" @click="dialogProsesKurikulum" v-show="isEditKategoriSekolah"/>
+            <Button icon="pi pi-process" label="Proses kurikulum" severity="danger" @click="dialogProsesKurikulum" v-show="isEditKategoriSekolah" />
         </div>
         <!-- Add Kategori Sekolah Dialog -->
         <Dialog v-model:visible="isDialogVisible.addKategoriSekolah" style="width: 550px" :header="formState.title" :modal="true">
@@ -107,266 +373,3 @@
         <DialogConfirmDelete :message="messageDelete" v-model:visible="isDialogVisible.prosesKurikulum" @confirm="addProsesKurikulum(selectedItemToDelete)" />
     </div>
 </template>
-
-<script setup>
-import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
-import { useFormOptions } from '@/composables/useFormOptions';
-import { useSekolahService } from '@/composables/useSekolahService';
-import { onMounted, reactive, ref, watch } from 'vue';
-import TingkatComponent from './TingkatComponent.vue';
-
-// Services and composables
-const { kurikulumList } = useFormOptions();
-const sekolahService = useSekolahService();
-
-// Data
-const sekolah = ref({ sekolah: {} });
-const tingkat = ref([]);
-const kategoriSekolahTabel = ref([]);
-const expandedRows = ref(null);
-
-// UI State
-const isEditKategoriSekolah = ref(false);
-const isLoadingEditKategoriSekolah = ref(false);
-const isDialogVisible = reactive({
-    addKategoriSekolah: false,
-    addKategoriKelas: false,
-    deleteKategoriSekolah: false,
-    deleteKategoriKelas: false,
-    prosesKurikulum: false
-});
-
-// Form State
-const formState = reactive({
-    title: '',
-    selectedKurikulum: null,
-    selectedTingkat: null,
-    selectedKategoriKelas: null,
-    isEditMode: false,
-    isSubmitDisabled: true,
-    submitButtonText: 'Tambah'
-});
-
-const messageDelete = ref('');
-const tahunAjaran = ref(`${sekolahService.initSelectedSemester.value?.tahunAjaranId}/${sekolahService.initSelectedSemester.value?.tahunAjaranId + 1}`);
-// Initialize component
-const initComponent = async () => {
-    try {
-        await sekolahService.fetchKategoriSekolah();
-        // console.log(sekolahService.kategoriSekolahList.value);
-        kategoriSekolahTabel.value = sekolahService.kategoriSekolahTabel.value;
-    } catch (error) {
-        console.error('Initialization error:', error);
-        // Handle error (show toast/notification)
-    }
-};
-const currentKategori = reactive({
-    bidang_keahlian: null,
-    program_keahlian: null,
-    jurusan: null,
-    jumlah: 0,
-    tahun_ajaran_id: sekolahService.initSelectedSemester.value?.tahunAjaranId || '',
-    tingkat_id: ''
-});
-// Watch for edit mode changes
-watch(isEditKategoriSekolah, (newVal) => {
-    isLoadingEditKategoriSekolah.value = true;
-
-    if (newVal) {
-        expandedRows.value = kategoriSekolahTabel.value.reduce((acc, p) => {
-            acc[p.kurikulum_id] = true;
-            return acc;
-        }, {});
-    } else {
-        expandedRows.value = null;
-    }
-
-    isLoadingEditKategoriSekolah.value = false;
-});
-
-watch(
-    () => currentKategori.jurusan,
-    (newVal) => {
-        // console.log('currentKategori.jurusan', newVal);
-        if (newVal) {
-            // console.log(kurikulumList);
-            formState.selectedKurikulum = kurikulumList.value.find((item) => newVal.jurusanId.includes(item.jurusanId));
-            // console.log(formState.selectedKurikulum)
-            formState.isSubmitDisabled = false;
-        }
-    }
-);
-
-// Kategori Sekolah CRUD Operations
-const openAddDialog = () => {
-    formState.title = `Tambah Data T.A. ${tahunAjaran.value}`;
-    isDialogVisible.addKategoriSekolah = true;
-    // Reset currentKategori
-    Object.assign(currentKategori, {
-        bidang_keahlian: null,
-        program_keahlian: null,
-        jurusan: null,
-        jumlah: 0,
-        tahun_ajaran_id: sekolahService.initSelectedSemester.value?.tahunAjaranId || '',
-        tingkat_id: ''
-    });
-};
-
-const addKategoriSekolah = async () => {
-    if (!formState.selectedKurikulum) {
-        alert('Kurikulum harus dipilih!');
-        return;
-    }
-
-    try {
-        const newKategori = {
-            kurikulum_id: formState.selectedKurikulum.kurikulumId,
-            nama_kurikulum: formState.selectedKurikulum.namaKurikulum,
-            jurusan_id: currentKategori.jurusan?.jurusanId || '',
-            nama_jurusan: currentKategori.jurusan?.namaJurusan || '',
-            nama_bidang_keahlian: currentKategori.bidang_keahlian?.namaJurusan || '',
-            nama_program_keahlian: currentKategori.program_keahlian?.namaJurusan || '',
-            jenjang_pendidikan_id: formState.selectedKurikulum.jenjangPendidikanId,
-            tahun_ajaran_id: sekolahService.initSelectedSemester.value?.tahunAjaranId,
-            jumlah: 0
-        };
-        await sekolahService.createKategoriSekolah(newKategori);
-        isDialogVisible.addKategoriSekolah = false;
-        // await sekolahService.fetchKategoriSekolah()
-        sekolahService.kategoriSekolahList.value.push(newKategori);
-        kategoriSekolahTabel.value = sekolahService.kategoriSekolahTabel.value;
-    } catch (error) {
-        console.error('Error adding kategori sekolah:', error);
-        // Handle error
-    }
-};
-
-const selectedItemToDelete = ref(null);
-const handleDeleteKategoriSekolah = async (e) => {
-    isDialogVisible.deleteKategoriSekolah = true;
-    selectedItemToDelete.value = e;
-    messageDelete.value = `Kurikulum <b>${e.nama_kurikulum}</b> akan dihapus?<br><br>Semua kelas pada kurikulum tersebut juga akan dihapus!`;
-};
-const deleteKategoriSekolah = async (item) => {
-    try {
-        await sekolahService.deleteKategoriSekolahKurikulum(item.kurikulum_id);
-        sekolahService.kategoriSekolahList.value = sekolahService.kategoriSekolahList.value.filter((k) => k.kurikulum_id !== item.kurikulum_id);
-        kategoriSekolahTabel.value = sekolahService.kategoriSekolahTabel.value;
-        // kategoriSekolahTabel.value = kategoriSekolahTabel.value.filter((k) => k.kurikulum_id !== item.kurikulum_id);
-    } catch (error) {
-        console.error('Error deleting kategori sekolah:', error);
-        // Handle error
-    } finally {
-        isDialogVisible.deleteKategoriSekolah = false;
-    }
-};
-const dialogAddKelas = (kategoriSekolah) => {
-    formState.title = `Tambah kelas | ${kategoriSekolah.nama_jurusan}`;
-    formState.selectedKategoriKelas = kategoriSekolah;
-
-    // Reset form state
-    formState.selectedTingkat = null;
-    formState.isEditMode = false;
-    currentKategori.jumlah = 0;
-    currentKategori.tingkat_id = '';
-
-    isDialogVisible.addKategoriKelas = true;
-};
-
-const addKelas = async () => {
-    if (!formState.selectedTingkat) {
-        alert('Tingkat harus dipilih!');
-        return;
-    }
-
-    try {
-        const newKelas = formState.selectedKategoriKelas;
-        newKelas.tingkat_id = formState.selectedTingkat;
-        newKelas.jumlah = currentKategori.jumlah;
-        sekolahService.kategoriSekolahList.value.push(newKelas);
-        kategoriSekolahTabel.value = sekolahService.kategoriSekolahTabel.value;
-        await sekolahService.createKategoriSekolah(newKelas);
-
-        isDialogVisible.addKategoriKelas = false;
-        return;
-    } catch (error) {
-        console.error('Error adding kelas:', error);
-        // Handle error
-    }
-};
-const dialogEditKelas = (kategoriKelas) => {
-    const cek = sekolahService.kategoriSekolahList.value.find((item) => kategoriKelas.kategori_sekolah_id == item.kategori_sekolah_id);
-    formState.title = `Edit kelas | ${cek.nama_jurusan}`;
-    formState.selectedKategoriKelas = cek;
-    formState.isEditMode = true;
-    formState.selectedTingkat = cek.tingkat_id;
-    currentKategori.jumlah = cek.jumlah;
-    currentKategori.tingkat_id = cek.tingkat_id;
-    isDialogVisible.addKategoriKelas = true;
-};
-
-const updateKelas = async () => {
-    if (!formState.selectedTingkat) {
-        alert('Tingkat harus dipilih!');
-        return;
-    }
-    try {
-        const updatedKelas = {
-            ...formState.selectedKategoriKelas,
-            tingkat_id: formState.selectedTingkat,
-            jumlah: currentKategori.jumlah
-        };
-        // Update di local state
-        const index = sekolahService.kategoriSekolahList.value.findIndex((item) => item.kategori_sekolah_id === updatedKelas.kategori_sekolah_id);
-        if (index !== -1) {
-            sekolahService.kategoriSekolahList.value[index] = updatedKelas;
-        }
-        // Update tabel
-        kategoriSekolahTabel.value = [...sekolahService.kategoriSekolahTabel.value];
-
-        // Kirim ke API
-        await sekolahService.updateKategoriSekolah(updatedKelas);
-
-        // Tutup dialog
-        isDialogVisible.addKategoriKelas = false;
-    } catch (error) {
-        console.error('Error updating kelas:', error);
-    }
-};
-
-const handleDeleteKategoriKelas = async (e) => {
-    isDialogVisible.deleteKategoriKelas = true;
-    selectedItemToDelete.value = e;
-    messageDelete.value = `Kelas <b>${e.tingkat_id}</b> akan dihapus?<br>`;
-};
-const deleteKelas = async (item) => {
-    try {
-        await sekolahService.deleteKategoriSekolah(item.kategori_sekolah_id);
-        sekolahService.kategoriSekolahList.value = sekolahService.kategoriSekolahList.value.filter((k) => k.kategori_sekolah_id !== item.kategori_sekolah_id);
-        kategoriSekolahTabel.value = sekolahService.kategoriSekolahTabel.value;
-        // kategoriSekolahTabel.value = kategoriSekolahTabel.value.filter((k) => k.kurikulum_id !== item.kurikulum_id);
-    } catch (error) {
-        console.error('Error deleting kategori sekolah:', error);
-        // Handle error
-    } finally {
-        isDialogVisible.deleteKategoriSekolah = false;
-    }
-};
-
-const dialogProsesKurikulum = () => {
-    messageDelete.value = `Anda akan memproses kurikulum? <br>Pastikan kurikulum sudah sesuai dengan Satuan Pendidikan yang akan diproses!`;
-    isDialogVisible.prosesKurikulum = true;
-};
-const addProsesKurikulum = () => {
-    sekolahService.createProsesKategoriSekolahDanKelas();
-};
-// Lifecycle
-watch(sekolahService.initSelectedSemester, (newVal) => {
-    initComponent();
-});
-onMounted(async () => {
-    sekolah.value = await sekolahService.fetchSekolah();
-    tingkat.value = await sekolahService.fetchTingkat();
-    initComponent();
-});
-</script>

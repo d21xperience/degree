@@ -1,26 +1,25 @@
 // composables/useFormOptions.js
 
 import { debounce } from 'lodash-es';
-import { useToast } from 'primevue';
 import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
-import { useSekolahService } from './useSekolahService';
+import { useSekolah } from './sekolah_composable/useSekolah';
+import { useTableTenant } from './sekolah_composable/useTableTenant';
 
 export function useFormOptions() {
-    const { sekolah, schemaname } = useSekolahService();
+    const { schemaname } = useTableTenant();
+    const { sekolah } = useSekolah();
     const store = useStore();
-    const toast = useToast();
-    const tahunAjaranOptions = ref();
     const selectedJenisKelamin = ref();
     const jenisKelaminOptions = ref([
         { label: 'Laki-Laki', value: 'L' },
         { label: 'Perempuan', value: 'P' }
     ]);
-    const statusAnakOptions = ref([
-        { label: 'Anak Kandung', value: '1' },
-        { label: 'Anak tiri', value: '2' },
-        { label: 'Anak Angkat', value: '3' }
-    ]);
+    // const statusAnakOptions = ref([
+    //     { label: 'Anak Kandung', value: '1' },
+    //     { label: 'Anak tiri', value: '2' },
+    //     { label: 'Anak Angkat', value: '3' }
+    // ]);
 
     const selectedAgama = ref();
     const agamaOptions = ref([
@@ -52,14 +51,15 @@ export function useFormOptions() {
             // console.log(cek);
             gelarAkademikOptions.value = cek;
         } catch (error) {
-            throw error;
+            console.log(error);
+            throw new Error('Gagal mendapatkan gelar akademik', error);
         }
     };
-    const handleKeydown = (event) => {
-        if (event.key === ' ') {
-            searchTerm.value += ' '; // Menambahkan spasi ke query
-        }
-    };
+    // const handleKeydown = (event) => {
+    //     if (event.key === ' ') {
+    //         searchTerm.value += ' '; // Menambahkan spasi ke query
+    //     }
+    // };
     const searchGelar = (posisiGelar, searcTerm) => {
         setTimeout(() => {
             if (!searcTerm.query.trim().length) {
@@ -81,27 +81,30 @@ export function useFormOptions() {
     const fetchKurikulum = async () => {
         try {
             let response = kurikulumList; //await store.getters['sekolahService/getKurikulum'];
-            if (!response || response.length == 0) {
-                response = await store.dispatch('sekolahService/fetchKurikulum', { jenjangPendidikanId: sekolah.value?.sekolah.jenjangPendidikanId, jenjangPendidikanStr: sekolah.value?.bentukPendidikanStr });
-                if (response.status) {
-                    toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
-                    return response.kurikulum;
-                }
+            if (!response.value || response.value.length == 0) {
+                response.value = await store.dispatch('sekolahService/fetchKurikulum', { jenjangPendidikanId: sekolah.value?.sekolah.jenjangPendidikanId, jenjangPendidikanStr: sekolah.value?.bentukPendidikanStr });
+                // if (response.value.status) {
+                //     toast.add({ severity: 'success', summary: 'Successful', detail: `${response.value.message}`, life: 3000 });
+                //     return response.value.kurikulum;
+                // }
             }
             return response;
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error.message}`, life: 3000 });
+            console.log(error);
+            throw new Error('Gagal mendapatkan kurikulum', error);
+
+            // toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error.message}`, life: 3000 });
         }
     };
     const searchKurikulum = debounce(async (searchTerm) => {
-        if (!kurikulumList) {
-            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan kurikulum`, life: 3000 });
+        if (!kurikulumList.value) {
+            // toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan kurikulum`, life: 3000 });
             return;
         }
         if (!searchTerm) {
             kurikulumOptions.value = [...kurikulumList];
         } else {
-            kurikulumOptions.value = kurikulumList.filter((item) => item.namaKurikulum.toLowerCase().includes(searchTerm.toLowerCase()));
+            kurikulumOptions.value = kurikulumList.value.filter((item) => item.namaKurikulum.toLowerCase().includes(searchTerm.toLowerCase()));
         }
     }, 250);
 
@@ -111,22 +114,26 @@ export function useFormOptions() {
         try {
             const response = await store.dispatch('sekolahService/fetchBidangKeahlian', { jurusanInduk: jurusanInduk });
             if (response.status) {
-                toast.add({ severity: 'info', summary: 'Successful', detail: `${response.message}`, life: 3000 });
+                // toast.add({ severity: 'info', summary: 'Successful', detail: `${response.message}`, life: 3000 });
                 return response.bidangKeahlian;
             }
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error.message}`, life: 3000 });
+            throw new Error('Gagal mendapatkan bidang keahlian:', error);
+
+            // toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error.message}`, life: 3000 });
         }
     };
     const fetchProgramKeahlian = async (jurusanInduk) => {
         try {
             const response = await store.dispatch('sekolahService/fetchProgramKeahlian', { jurusanInduk: jurusanInduk });
             if (response.status) {
-                toast.add({ severity: 'info', summary: 'Successful', detail: `${response.message}`, life: 3000 });
+                // toast.add({ severity: 'info', summary: 'Successful', detail: `${response.message}`, life: 3000 });
                 return response.programKeahlian;
             }
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error.message}`, life: 3000 });
+            throw new Error('Gagal mendapatkan program keahlian: ', error);
+
+            // toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error.message}`, life: 3000 });
         }
     };
 
@@ -134,11 +141,13 @@ export function useFormOptions() {
         try {
             const response = await store.dispatch('sekolahService/fetchJurusan', { jurusanInduk: jurusanInduk });
             if (response.status) {
-                toast.add({ severity: 'info', summary: 'Successful', detail: `${response.message}`, life: 3000 });
+                // toast.add({ severity: 'info', summary: 'Successful', detail: `${response.message}`, life: 3000 });
                 return response.jurusan;
             }
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error.message}`, life: 3000 });
+            throw new Error('Gagal mendapatkan jurusan:', error);
+
+            // toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error.message}`, life: 3000 });
         }
     };
 
@@ -153,15 +162,15 @@ export function useFormOptions() {
         }
     }, 250);
 
-    const fetchMapelKurikulum = debounce(async () => {
-        try {
-            const response = await store.dispatch('sekolahService/fetchMapelKurikulum', { schemaname: schemaname.value, nama: searchTerm.query.toLowerCase() });
-        } catch (error) {
-            alert('error');
-        } finally {
-            ptkLoading.value = false;
-        }
-    }, 250);
+    // const fetchMapelKurikulum = debounce(async () => {
+    //     try {
+    //         const response = await store.dispatch('sekolahService/fetchMapelKurikulum', { schemaname: schemaname.value, nama: searchTerm.query.toLowerCase() });
+    //     } catch (error) {
+    //         alert('error');
+    //     } finally {
+    //         ptkLoading.value = false;
+    //     }
+    // }, 250);
 
     return {
         selectedJenisKelamin,
@@ -174,7 +183,7 @@ export function useFormOptions() {
         searchGelar,
         gelarAkademikDepanOptions,
         gelarAkademikBelakangOptions,
-        handleKeydown,
+        // handleKeydown,
         kurikulumOptions,
         kurikulumList,
         kurikulumLoading,

@@ -110,12 +110,12 @@ const model = computed(() => {
                             label: 'Ijazah',
                             icon: 'pi pi-fw pi-bookmark',
                             to: `/${sekolahPath}/data-penerima/ijazah`
-                        },
-                        {
-                            label: 'Transkrip Nilai',
-                            icon: 'pi pi-fw pi-bookmark',
-                            to: `/${sekolahPath}/data-penerima/transkrip`
                         }
+                        // {
+                        //     label: 'Transkrip Nilai',
+                        //     icon: 'pi pi-fw pi-bookmark',
+                        //     to: `/${sekolahPath}/data-penerima/transkrip`
+                        // }
                     ]
                 },
                 {

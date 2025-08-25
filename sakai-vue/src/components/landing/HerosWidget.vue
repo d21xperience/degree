@@ -1,3 +1,12 @@
+<script setup>
+import { ref } from 'vue';
+
+const showDialog = ref(false);
+const verificationNow = () => {
+    showDialog.value = true;
+};
+</script>
+
 <template>
     <div>
         <div class="py-6 px-6 mx-0 md:mx-12 lg:mx-20 lg:px-20 flex items-center justify-between bg-transparent text-white lg:static z-50">
@@ -13,28 +22,19 @@
             <div class="blockchain-pattern"></div>
         </section>
 
-        <Dialog header="Verifikasi Ijazah" v-model:visible="showDialog" style="width: 32rem;">
+        <Dialog header="Verifikasi Ijazah" v-model:visible="showDialog" style="width: 32rem">
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-9 px-4 py-3">
                 <div>NISN</div>
                 <div class="w-full">
-                    <InputText fluid placeholder="Masukan NISN"/>
+                    <InputText fluid placeholder="Masukan NISN" />
                 </div>
             </div>
             <div class="flex justify-end mt-6">
-                <Button label="Verifikasi" class="w-32"/>
+                <Button label="Verifikasi" class="w-32" />
             </div>
         </Dialog>
     </div>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-
-const showDialog = ref(false);
-const verificationNow = () => {
-    showDialog.value = true;
-};
-</script>
 
 <style scoped>
 .hero-section {

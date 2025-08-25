@@ -1,26 +1,3 @@
-<template>
-    <section class="partner-schools" :class="{ 'bg-light-blue': useLightBackground }">
-        <div class="container">
-            <h2 class="section-title">Sekolah Terpercaya yang Telah Bergabung</h2>
-            <p class="section-subtitle">Bergabung dengan 500+ institusi pendidikan di Indonesia</p>
-
-            <!-- Logo Grid -->
-            <div class="logo-grid">
-                <div v-for="(school, index) in schools" :key="index" class="logo-item" :class="{ verified: school.verified }">
-                    <img :src="school.logo" :alt="school.name" class="logo-image" @mouseover="hoverIndex = index" @mouseleave="hoverIndex = -1" />
-                    <span v-if="school.verified" class="verified-badge">✔️</span>
-                </div>
-            </div>
-
-            <!-- CTA Mini -->
-            <div class="cta-container">
-                <p class="cta-text">Sekolah Anda belum terdaftar?</p>
-                <button class="cta-button" @click="router.push({ name: 'register' })">Ajukan Kolaborasi</button>
-            </div>
-        </div>
-    </section>
-</template>
-
 <script setup>
 import router from '@/router';
 import { ref } from 'vue';
@@ -70,6 +47,29 @@ const schools = ref([
     }
 ]);
 </script>
+
+<template>
+    <section class="partner-schools" :class="{ 'bg-light-blue': useLightBackground }">
+        <div class="container">
+            <h2 class="section-title">Sekolah Terpercaya yang Telah Bergabung</h2>
+            <p class="section-subtitle">Bergabung dengan 500+ institusi pendidikan di Indonesia</p>
+
+            <!-- Logo Grid -->
+            <div class="logo-grid">
+                <div v-for="(school, index) in schools" :key="index" class="logo-item" :class="{ verified: school.verified }">
+                    <img :src="school.logo" :alt="school.name" class="logo-image" @mouseover="hoverIndex = index" @mouseleave="hoverIndex = -1" />
+                    <span v-if="school.verified" class="verified-badge">✔️</span>
+                </div>
+            </div>
+
+            <!-- CTA Mini -->
+            <div class="cta-container">
+                <p class="cta-text">Sekolah Anda belum terdaftar?</p>
+                <button class="cta-button" @click="router.push({ name: 'register' })">Ajukan Kolaborasi</button>
+            </div>
+        </div>
+    </section>
+</template>
 
 <style scoped>
 .partner-schools {

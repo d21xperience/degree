@@ -1,104 +1,3 @@
-<template>
-    <div class="hero-wrapper">
-        <!-- Navigation Bar -->
-        <nav class="navigation-bar" role="navigation" aria-label="Main navigation">
-            <div class="nav-container">
-                <TopbarWidget />
-            </div>
-        </nav>
-
-        <!-- Hero Section -->
-        <section class="hero-section" role="banner" aria-labelledby="hero-title">
-            <!-- Background Image with Lazy Loading -->
-            <LazyImage :src="heroData.backgroundImage.src" :alt="heroData.backgroundImage.alt" container-class="hero-overlay" image-class="hero-background-image" :show-spinner="false" @load="onBackgroundLoad" @error="onBackgroundError" />
-
-            <!-- Hero Content -->
-            <div class="hero-content">
-                <h1 id="hero-title" class="hero-headline">
-                    {{ heroData.headline }}
-                </h1>
-                <p class="hero-subtitle">
-                    {{ heroData.subtitle }}
-                </p>
-                <button class="hero-cta" @click="openVerificationDialog" :disabled="isLoading" :aria-describedby="isLoading ? 'loading-description' : null">
-                    <span v-if="!isLoading">{{ heroData.ctaText }}</span>
-                    <span v-else class="loading-content">
-                        <svg class="loading-spinner" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25" />
-                            <path fill="currentColor" opacity="0.75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                        </svg>
-                        Memuat...
-                    </span>
-                </button>
-                <div id="loading-description" class="sr-only" v-if="isLoading">Sedang memuat dialog verifikasi</div>
-            </div>
-
-            <!-- Decorative Pattern -->
-            <div class="blockchain-pattern" aria-hidden="true"></div>
-        </section>
-
-        <!-- Verification Dialog -->
-        <Teleport to="body">
-            <div v-if="showDialog" class="dialog-overlay" @click="closeDialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description">
-                <div class="dialog-content" @click.stop ref="dialogContent">
-                    <header class="dialog-header">
-                        <h2 id="dialog-title" class="dialog-title">
-                            {{ dialogData.title }}
-                        </h2>
-                        <button class="dialog-close" @click="closeDialog" aria-label="Tutup dialog">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
-                    </header>
-
-                    <div id="dialog-description" class="dialog-body">
-                        <form @submit.prevent="handleVerification" class="verification-form">
-                            <div class="form-group">
-                                <label for="nisn-input" class="form-label"> NISN (Nomor Induk Siswa Nasional) </label>
-                                <input
-                                    id="nisn-input"
-                                    v-model="formData.nisn"
-                                    type="text"
-                                    class="form-input"
-                                    :class="{ error: formErrors.nisn }"
-                                    placeholder="Masukkan NISN Anda"
-                                    maxlength="10"
-                                    pattern="[0-9]{10}"
-                                    :disabled="isSubmitting"
-                                    @input="validateNisn"
-                                    @blur="validateNisn"
-                                    aria-describedby="nisn-error nisn-help"
-                                    required
-                                />
-                                <div id="nisn-help" class="form-help">NISN terdiri dari 10 digit angka</div>
-                                <div id="nisn-error" class="form-error" v-if="formErrors.nisn" role="alert">
-                                    {{ formErrors.nisn }}
-                                </div>
-                            </div>
-
-                            <div class="form-actions">
-                                <button type="button" class="btn-secondary" @click="closeDialog" :disabled="isSubmitting">Batal</button>
-                                <button type="submit" class="btn-primary" :disabled="!isFormValid || isSubmitting">
-                                    <span v-if="!isSubmitting">Verifikasi</span>
-                                    <span v-else class="loading-content">
-                                        <svg class="loading-spinner" viewBox="0 0 24 24">
-                                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25" />
-                                            <path fill="currentColor" opacity="0.75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                        </svg>
-                                        Memverifikasi...
-                                    </span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </Teleport>
-    </div>
-</template>
-
 <script setup>
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -241,6 +140,107 @@ onUnmounted(() => {
     document.removeEventListener('keydown', handleKeydown);
 });
 </script>
+
+<template>
+    <div class="hero-wrapper">
+        <!-- Navigation Bar -->
+        <nav class="navigation-bar" role="navigation" aria-label="Main navigation">
+            <div class="nav-container">
+                <TopbarWidget />
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero-section" role="banner" aria-labelledby="hero-title">
+            <!-- Background Image with Lazy Loading -->
+            <LazyImage :src="heroData.backgroundImage.src" :alt="heroData.backgroundImage.alt" container-class="hero-overlay" image-class="hero-background-image" :show-spinner="false" @load="onBackgroundLoad" @error="onBackgroundError" />
+
+            <!-- Hero Content -->
+            <div class="hero-content">
+                <h1 id="hero-title" class="hero-headline">
+                    {{ heroData.headline }}
+                </h1>
+                <p class="hero-subtitle">
+                    {{ heroData.subtitle }}
+                </p>
+                <button class="hero-cta" @click="openVerificationDialog" :disabled="isLoading" :aria-describedby="isLoading ? 'loading-description' : null">
+                    <span v-if="!isLoading">{{ heroData.ctaText }}</span>
+                    <span v-else class="loading-content">
+                        <svg class="loading-spinner" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25" />
+                            <path fill="currentColor" opacity="0.75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                        </svg>
+                        Memuat...
+                    </span>
+                </button>
+                <div id="loading-description" class="sr-only" v-if="isLoading">Sedang memuat dialog verifikasi</div>
+            </div>
+
+            <!-- Decorative Pattern -->
+            <div class="blockchain-pattern" aria-hidden="true"></div>
+        </section>
+
+        <!-- Verification Dialog -->
+        <Teleport to="body">
+            <div v-if="showDialog" class="dialog-overlay" @click="closeDialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description">
+                <div class="dialog-content" @click.stop ref="dialogContent">
+                    <header class="dialog-header">
+                        <h2 id="dialog-title" class="dialog-title">
+                            {{ dialogData.title }}
+                        </h2>
+                        <button class="dialog-close" @click="closeDialog" aria-label="Tutup dialog">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                            </svg>
+                        </button>
+                    </header>
+
+                    <div id="dialog-description" class="dialog-body">
+                        <form @submit.prevent="handleVerification" class="verification-form">
+                            <div class="form-group">
+                                <label for="nisn-input" class="form-label"> NISN (Nomor Induk Siswa Nasional) </label>
+                                <input
+                                    id="nisn-input"
+                                    v-model="formData.nisn"
+                                    type="text"
+                                    class="form-input"
+                                    :class="{ error: formErrors.nisn }"
+                                    placeholder="Masukkan NISN Anda"
+                                    maxlength="10"
+                                    pattern="[0-9]{10}"
+                                    :disabled="isSubmitting"
+                                    @input="validateNisn"
+                                    @blur="validateNisn"
+                                    aria-describedby="nisn-error nisn-help"
+                                    required
+                                />
+                                <div id="nisn-help" class="form-help">NISN terdiri dari 10 digit angka</div>
+                                <div id="nisn-error" class="form-error" v-if="formErrors.nisn" role="alert">
+                                    {{ formErrors.nisn }}
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="button" class="btn-secondary" @click="closeDialog" :disabled="isSubmitting">Batal</button>
+                                <button type="submit" class="btn-primary" :disabled="!isFormValid || isSubmitting">
+                                    <span v-if="!isSubmitting">Verifikasi</span>
+                                    <span v-else class="loading-content">
+                                        <svg class="loading-spinner" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25" />
+                                            <path fill="currentColor" opacity="0.75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        Memverifikasi...
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </Teleport>
+    </div>
+</template>
 
 <style scoped>
 .hero-wrapper {

@@ -1,3 +1,23 @@
+<script setup>
+import { Facebook, Instagram, Linkedin, Twitter, Youtube } from 'lucide-vue-next';
+
+const links = [
+    { text: 'Beranda', url: '#' },
+    { text: 'Tentang', url: '#' },
+    { text: 'Fitur', url: '#' },
+    { text: 'Harga', url: '#' },
+    { text: 'Kontak', url: '#' }
+];
+
+const socialMedia = [
+    { icon: Facebook, url: 'https://facebook.com' },
+    { icon: Twitter, url: 'https://twitter.com' },
+    { icon: Instagram, url: 'https://instagram.com' },
+    { icon: Linkedin, url: 'https://linkedin.com' },
+    { icon: Youtube, url: 'https://youtube.com' }
+];
+</script>
+
 <template>
     <footer class="footer-section">
         <div class="footer-container">
@@ -36,26 +56,6 @@
         </div>
     </footer>
 </template>
-
-<script setup>
-import { Facebook, Instagram, Linkedin, Twitter, Youtube } from 'lucide-vue-next';
-
-const links = [
-    { text: 'Beranda', url: '#' },
-    { text: 'Tentang', url: '#' },
-    { text: 'Fitur', url: '#' },
-    { text: 'Harga', url: '#' },
-    { text: 'Kontak', url: '#' }
-];
-
-const socialMedia = [
-    { icon: Facebook, url: 'https://facebook.com' },
-    { icon: Twitter, url: 'https://twitter.com' },
-    { icon: Instagram, url: 'https://instagram.com' },
-    { icon: Linkedin, url: 'https://linkedin.com' },
-    { icon: Youtube, url: 'https://youtube.com' }
-];
-</script>
 
 <style scoped>
 .footer-section {

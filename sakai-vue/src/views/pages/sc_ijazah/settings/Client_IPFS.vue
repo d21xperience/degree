@@ -1,24 +1,3 @@
-<template>
-    <div>
-        <h1>IPFS Docker Connection Check</h1>
-        <button @click="checkIpfsConnection" :disabled="isChecking">
-            {{ isChecking ? 'Checking...' : 'Check IPFS Connection' }}
-        </button>
-
-        <div v-if="connectionStatus" class="status-container">
-            <p :class="['status', connectionStatus.toLowerCase()]">
-                Status: {{ connectionStatus }}
-            </p>
-            <div v-if="nodeInfo.id" class="node-info">
-                <p><strong>Node ID:</strong> {{ nodeInfo.id }}</p>
-                <p><strong>Version:</strong> {{ nodeInfo.version }}</p>
-                <p><strong>Public Key:</strong> {{ nodeInfo.publicKey }}</p>
-            </div>
-            <p v-if="error" class="error">Error: {{ error }}</p>
-        </div>
-    </div>
-</template>
-
 <script setup>
 import { ref } from 'vue';
 import { create } from 'ipfs-http-client';
@@ -74,6 +53,25 @@ async function checkIpfsConnection() {
     }
 }
 </script>
+
+<template>
+    <div>
+        <h1>IPFS Docker Connection Check</h1>
+        <button @click="checkIpfsConnection" :disabled="isChecking">
+            {{ isChecking ? 'Checking...' : 'Check IPFS Connection' }}
+        </button>
+
+        <div v-if="connectionStatus" class="status-container">
+            <p :class="['status', connectionStatus.toLowerCase()]">Status: {{ connectionStatus }}</p>
+            <div v-if="nodeInfo.id" class="node-info">
+                <p><strong>Node ID:</strong> {{ nodeInfo.id }}</p>
+                <p><strong>Version:</strong> {{ nodeInfo.version }}</p>
+                <p><strong>Public Key:</strong> {{ nodeInfo.publicKey }}</p>
+            </div>
+            <p v-if="error" class="error">Error: {{ error }}</p>
+        </div>
+    </div>
+</template>
 
 <style scoped>
 .status {

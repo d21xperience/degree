@@ -1,17 +1,3 @@
-<template>
-    <AutoComplete
-        v-model="internalValue"
-        :suggestions="kurikulumOptions"
-        option-label="namaKurikulum"
-        @complete="searchKurikulum(query)"
-        @keydown.space.prevent="kurikulumHandleKeydown"
-        placeholder="Pilih kurikulum"
-        fluid
-        dropdown
-        :loading="kurikulumLoading"
-        
-    />
-</template>
 <script setup>
 import { useFormOptions } from '@/composables/useFormOptions';
 import { onMounted, ref, watch } from 'vue';
@@ -48,3 +34,16 @@ onMounted(async () => {
     await fetchKurikulum();
 });
 </script>
+<template>
+    <AutoComplete
+        v-model="internalValue"
+        :suggestions="kurikulumOptions"
+        option-label="namaKurikulum"
+        @complete="searchKurikulum(query)"
+        @keydown.space.prevent="kurikulumHandleKeydown"
+        placeholder="Pilih kurikulum"
+        fluid
+        dropdown
+        :loading="kurikulumLoading"
+    />
+</template>

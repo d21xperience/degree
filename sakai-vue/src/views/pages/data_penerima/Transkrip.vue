@@ -1,3 +1,60 @@
+<script setup>
+import DialogImport from '@/components/DialogImport.vue';
+import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
+
+import { FilterMatchMode } from '@primevue/core/api';
+import { computed, onMounted, ref } from 'vue';
+// Kompoenen Tingkat
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'kelas.nmKelas': { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
+const sekolahService = useSekolahService();
+
+const isEditKategoriSekolah = ref(false);
+const confirmDeleteSelected = () => {};
+const selectedSiswa = ref();
+const sekolah = computed(() => sekolahService.sekolah.value);
+const expandedRows = ref(null);
+
+const siswa = ref([]);
+const namaKelas = ref();
+
+const dialogImport = ref(false);
+const saveImport = async (e) => {
+    // console.log('Data disimpan:', e);
+    dialogImport.value = false;
+    const cek = await fetchSiswaAktif();
+    // console.log(cek);
+    siswa.value = cek;
+};
+
+const cancelImport = () => {
+    // console.log('Import dibatalkan');
+    dialogImport.value = false;
+};
+const jenjangPendidikan = ref(2);
+
+const initJenjang = () => {
+    if (sekolah.value.sekolah.jenjangPendidikanId == 6) {
+        jenjangPendidikan.value = 6;
+    }
+    // console.log(jenjangPendidikan.value);
+};
+
+onMounted(async () => {
+    // console.log(sekolah.value)
+    initJenjang();
+    siswa.value = await sekolahService.getDns(sekolahService.initSelectedTahunAjaran.value?.tahunAjaranId);
+    // console.log(siswa.value)
+    namaKelas.value = [...new Set(siswa.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
+        nama: nm,
+        value: nm.toLowerCase()
+    }));
+    // namaKelas.value = getNmKelas(siswa);
+});
+</script>
+
 <template>
     <!-- Main Table -->
     <div class="grid grid-cols-1 gap-4">
@@ -62,60 +119,3 @@
     </div>
     <DialogImport v-model:visible="dialogImport" @save="saveImport" @cancel="cancelImport" template-type="transkrip" />
 </template>
-
-<script setup>
-import DialogImport from '@/components/DialogImport.vue';
-import { useSekolahService } from '@/composables/useSekolahService';
-
-import { FilterMatchMode } from '@primevue/core/api';
-import { computed, onMounted, ref } from 'vue';
-// Kompoenen Tingkat
-const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    'kelas.nmKelas': { value: null, matchMode: FilterMatchMode.CONTAINS }
-});
-const sekolahService = useSekolahService();
-
-const isEditKategoriSekolah = ref(false);
-const confirmDeleteSelected = () => {};
-const selectedSiswa = ref();
-const sekolah = computed(() => sekolahService.sekolah.value);
-const expandedRows = ref(null);
-
-const siswa = ref([]);
-const namaKelas = ref();
-
-const dialogImport = ref(false);
-const saveImport = async (e) => {
-    // console.log('Data disimpan:', e);
-    dialogImport.value = false;
-    const cek = await fetchSiswaAktif();
-    // console.log(cek);
-    siswa.value = cek;
-};
-
-const cancelImport = () => {
-    // console.log('Import dibatalkan');
-    dialogImport.value = false;
-};
-const jenjangPendidikan = ref(2);
-
-const initJenjang = () => {
-    if (sekolah.value.sekolah.jenjangPendidikanId == 6) {
-        jenjangPendidikan.value = 6;
-    }
-    // console.log(jenjangPendidikan.value);
-};
-
-onMounted(async () => {
-    // console.log(sekolah.value)
-    initJenjang();
-    siswa.value = await sekolahService.getDns(sekolahService.initSelectedTahunAjaran.value?.tahunAjaranId);
-    // console.log(siswa.value)
-    namaKelas.value = [...new Set(siswa.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
-        nama: nm,
-        value: nm.toLowerCase()
-    }));
-    // namaKelas.value = getNmKelas(siswa);
-});
-</script>

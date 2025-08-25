@@ -1,3 +1,20 @@
+<script setup>
+const testimonials = [
+    {
+        photo: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200',
+        name: 'Budi Santoso',
+        role: 'Admin Sekolah',
+        quote: 'Sistem ini memudahkan kami memverifikasi ijazah palsu.'
+    },
+    {
+        photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+        name: 'Anita Rahayu',
+        role: 'Siswa',
+        quote: 'Lamar kerja lebih percaya diri dengan ijazah terverifikasi!'
+    }
+];
+</script>
+
 <template>
     <section class="testimonials-section">
         <h2 class="testimonials-title">Apa Kata Mereka?</h2>
@@ -16,23 +33,6 @@
         </div>
     </section>
 </template>
-
-<script setup>
-const testimonials = [
-    {
-        photo: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200',
-        name: 'Budi Santoso',
-        role: 'Admin Sekolah',
-        quote: 'Sistem ini memudahkan kami memverifikasi ijazah palsu.'
-    },
-    {
-        photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
-        name: 'Anita Rahayu',
-        role: 'Siswa',
-        quote: 'Lamar kerja lebih percaya diri dengan ijazah terverifikasi!'
-    }
-];
-</script>
 
 <style scoped>
 .testimonials-section {

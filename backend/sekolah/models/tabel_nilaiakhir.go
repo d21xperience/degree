@@ -32,18 +32,28 @@ func (NilaiAkhir) TableName() string {
 	return "tabel_nilaiakhir"
 }
 
-type SiswaNilai struct {
-	MataPelajaran string `json:"mataPelajaran"`
-	Semester1     *int   `json:"semester1,omitempty"`
-	Semester2     *int   `json:"semester2,omitempty"`
-	Semester3     *int   `json:"semester3,omitempty"`
-	Semester4     *int   `json:"semester4,omitempty"`
-	Semester5     *int   `json:"semester5,omitempty"`
-	Semester6     *int   `json:"semester6,omitempty"`
-	Semester7     *int   `json:"semester7,omitempty"`
-	Semester8     *int   `json:"semester8,omitempty"`
-	Semester9     *int   `json:"semester9,omitempty"`
-	Semester10    *int   `json:"semester10,omitempty"`
-	Semester11    *int   `json:"semester11,omitempty"`
-	Semester12    *int   `json:"semester12,omitempty"`
+type NilaiSiswa struct {
+	PesertaDidikId      uuid.UUID
+	NmSiswa             string
+	RombonganBelajarId  uuid.UUID
+	NmKelas             string
+	SemesterId          string
+	TingkatPendidikanId int32
+	NilaiMapel          *[]NilaiMapel
+}
+
+type NilaiMapel struct {
+	MataPelajaran string  `json:"mataPelajaran"`
+	Semester1     *uint32 `json:"semester1,omitempty"`
+	Semester2     *uint32 `json:"semester2,omitempty"`
+	Semester3     *uint32 `json:"semester3,omitempty"`
+	Semester4     *uint32 `json:"semester4,omitempty"`
+	Semester5     *uint32 `json:"semester5,omitempty"`
+	Semester6     *uint32 `json:"semester6,omitempty"`
+	Semester7     *uint32 `json:"semester7,omitempty"`
+	Semester8     *uint32 `json:"semester8,omitempty"`
+	Semester9     *uint32 `json:"semester9,omitempty"`
+	Semester10    *uint32 `json:"semester10,omitempty"`
+	Semester11    *uint32 `json:"semester11,omitempty"`
+	Semester12    *uint32 `json:"semester12,omitempty"`
 }

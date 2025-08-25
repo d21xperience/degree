@@ -1,7 +1,3 @@
-<template>
-    <Select v-model="internalValue" :options="environmentOptions" fluid placeholder="Pilih Environment" :option-label="handleLabelOption" />
-</template>
-
 <script setup>
 import { useSCService } from '@/composables/useSCService';
 import { ref, watch } from 'vue';
@@ -39,3 +35,7 @@ watch(internalValue, (newVal) => {
     emit('update:modelValue', newVal);
 });
 </script>
+
+<template>
+    <Select v-model="internalValue" :options="environmentOptions" fluid placeholder="Pilih Environment" :option-label="handleLabelOption" />
+</template>

@@ -1,12 +1,3 @@
-<template>
-    <AutoComplete v-model="internalValue" :suggestions="mapelOptions" option-label="nama" @complete="filterMapel" @keydown.space.prevent="handleKeydown" placeholder="Cari mapel..." fluid :loading="isLoading" />
-    <div class="flex justify-end mt-6">
-        <!-- <Button label="Batal" icon="pi pi-times" text severity="warn" /> -->
-        <Button label="Tambah" icon="pi pi-check" text @click="addMapel" />
-    </div>
-    <!-- </Dialog> -->
-    <!-- Dialog end -->
-</template>
 <script setup>
 import { debounce } from 'lodash-es';
 import { onMounted, ref, watch } from 'vue';
@@ -55,3 +46,12 @@ const addMapel = () => {
 };
 onMounted(async () => {});
 </script>
+<template>
+    <AutoComplete v-model="internalValue" :suggestions="mapelOptions" option-label="nama" @complete="filterMapel" @keydown.space.prevent="handleKeydown" placeholder="Cari mapel..." fluid :loading="isLoading" />
+    <div class="flex justify-end mt-6">
+        <!-- <Button label="Batal" icon="pi pi-times" text severity="warn" /> -->
+        <Button label="Tambah" icon="pi pi-check" text @click="addMapel" />
+    </div>
+    <!-- </Dialog> -->
+    <!-- Dialog end -->
+</template>

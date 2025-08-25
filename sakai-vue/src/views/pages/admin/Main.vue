@@ -1,17 +1,17 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed } from 'vue';
 defineProps(['username']); // Parameter username dari route diterima sebagai props
 import PanelMenu from 'primevue/panelmenu';
 // import router from "@/router";
 // import store from "@/store";
-import 'primeicons/primeicons.css'
-import Dialog from "primevue/dialog";
-import Button from "primevue/button";
+import 'primeicons/primeicons.css';
+import Dialog from 'primevue/dialog';
+import Button from 'primevue/button';
 // import { useRouter } from "vue-router";
 const store = useStore();
-import { useStore } from "vuex";
+import { useStore } from 'vuex';
 // const router = useRouter();
-import router from "@/router";
+import router from '@/router';
 const userRole = ref(store.state.authService.userRole); // Ambil role user dari Vuex
 
 // import Menubar from 'primevue/menubar';
@@ -26,33 +26,30 @@ const menuItems = ref([
         label: 'Home',
         icon: 'pi pi-home',
         command: () => {
-            router.push({ path: '/' })
+            router.push({ path: '/' });
         }
-
     },
     {
         label: 'Dashboard',
         icon: 'pi pi-objects-column',
         command: () => {
-            router.push({ name: 'admin' })
+            router.push({ name: 'admin' });
             // router.push(`${username}`)
         }
-
     },
     {
         label: 'Profile',
         icon: 'pi pi-user',
         command: () => {
-            router.push({ name: 'profile' })
+            router.push({ name: 'profile' });
         }
     },
     {
         label: 'Data User',
         icon: 'pi pi-users',
         command: () => {
-            router.push({ name: 'dataUsers' })
-        },
-
+            router.push({ name: 'dataUsers' });
+        }
     },
     {
         label: 'Data Akademik',
@@ -65,14 +62,14 @@ const menuItems = ref([
                 label: 'Ketuntasan Rapor',
                 icon: 'pi pi-file',
                 command: () => {
-                    router.push({ name: 'ketuntasanRapor' })
+                    router.push({ name: 'ketuntasanRapor' });
                 }
             },
             {
                 label: 'Ijazah',
                 icon: 'pi pi-image',
                 command: () => {
-                    router.push({ name: 'dataIjazah' })
+                    router.push({ name: 'dataIjazah' });
                 }
                 // items: [
                 //     {
@@ -87,43 +84,41 @@ const menuItems = ref([
         label: 'Master Dapodik',
         icon: 'pi pi-tag',
         items: [
-
             {
                 label: 'Data Sekolah',
                 icon: 'pi pi-building-columns',
                 command: () => {
-                    router.push({ name: 'dapodikSekolah' })
+                    router.push({ name: 'dapodikSekolah' });
                 }
             },
             {
                 label: 'Data Guru',
                 icon: 'pi pi-graduation-cap',
                 command: () => {
-                    router.push({ name: 'readGuru' })
+                    router.push({ name: 'readGuru' });
                 }
             },
             {
                 label: 'Data Kelas',
                 icon: 'pi pi-building',
                 command: () => {
-                    router.push({ name: 'readKelas' })
+                    router.push({ name: 'readKelas' });
                 }
             },
             {
                 label: 'Data Mapel',
                 icon: 'pi pi-book',
                 command: () => {
-                    router.push({ name: 'readMapel' })
+                    router.push({ name: 'readMapel' });
                 }
             },
-
 
             {
                 label: 'Data Siswa',
                 icon: 'pi pi-users',
 
                 command: () => {
-                    router.push({ name: 'readSiswa' })
+                    router.push({ name: 'readSiswa' });
                 }
             },
             {
@@ -131,9 +126,9 @@ const menuItems = ref([
                 icon: 'pi pi-file-check',
 
                 command: () => {
-                    router.push({ name: 'dapodikNilaiSiswa' })
+                    router.push({ name: 'dapodikNilaiSiswa' });
                 }
-            },
+            }
             // {
             //     label: 'Data Ijazah',
             //     icon: 'pi pi-file-check',
@@ -149,7 +144,6 @@ const menuItems = ref([
             //         router.push({ name: 'syncDapodik' })
             //     }
             // },
-
         ]
     },
 
@@ -168,97 +162,89 @@ const menuItems = ref([
                         label: 'Ethereum',
                         icon: 'pi pi-cog',
                         command: () => {
-                            router.push({ name: 'ethereum' })
+                            router.push({ name: 'ethereum' });
                         }
                     },
                     {
                         label: 'Quorum',
                         icon: 'pi pi-cog',
                         command: () => {
-                            router.push({ name: 'quorum' })
+                            router.push({ name: 'quorum' });
                         }
                     },
                     {
                         label: 'Hyperledger',
                         icon: 'pi pi-cog',
                         command: () => {
-                            router.push({ name: 'hyperledger' })
+                            router.push({ name: 'hyperledger' });
                         }
-                    },
-
+                    }
                 ]
             },
             {
                 label: 'IPFS',
                 icon: 'pi pi-desktop',
                 command: () => {
-                    router.push({ name: 'ipfs' })
+                    router.push({ name: 'ipfs' });
                 }
-
             },
             {
                 label: 'Ijazah',
                 icon: 'pi pi-desktop',
                 command: () => {
-                    router.push({ name: 'ijazah' })
+                    router.push({ name: 'ijazah' });
                 }
-
-            },
+            }
         ]
     },
     {
         label: 'SC-Ijazah',
         icon: 'pi pi-file',
         command: () => {
-            router.push({ name: 'scIjazah' })
+            router.push({ name: 'scIjazah' });
         }
     },
     {
         label: 'Transaksi',
         icon: 'pi pi-chart-line',
         command: () => {
-            router.push({ name: 'daftarTrx' })
+            router.push({ name: 'daftarTrx' });
         }
     },
     {
         label: 'Sign Out',
         icon: 'pi pi-sign-out',
         command: () => {
-            dialogSignOut.value = !dialogSignOut.value
+            dialogSignOut.value = !dialogSignOut.value;
         }
     }
 ]);
 
 // Filter menu berdasarkan role
 const items = computed(() => {
-    let excludedLabels = []
-    if (userRole.value === "siswa") {
-        excludedLabels = ["Home", "Blockchain", "IPFS", "Data Dapodik", "Data User"]; // Kategori yang akan dihapus
-    } else if (userRole.value === "admin") {
-        excludedLabels = ["Data Akademik"]; // Kategori yang akan dihapus
+    let excludedLabels = [];
+    if (userRole.value === 'siswa') {
+        excludedLabels = ['Home', 'Blockchain', 'IPFS', 'Data Dapodik', 'Data User']; // Kategori yang akan dihapus
+    } else if (userRole.value === 'admin') {
+        excludedLabels = ['Data Akademik']; // Kategori yang akan dihapus
     }
-    return menuItems.value.filter(item => !excludedLabels.includes(item.label))
+    return menuItems.value.filter((item) => !excludedLabels.includes(item.label));
 });
 
-
-
 // SignOut
-const dialogSignOut = ref(false)
+const dialogSignOut = ref(false);
 const signOut = async () => {
     const resp = await store.dispatch('authService/logout');
-    router.push({ name: 'home' })
-}
+    router.push({ name: 'home' });
+};
 
 // Logout
 const onLogout = async () => {
     await store.dispatch('authService/logout');
-    dialogSignOut.value = false
+    dialogSignOut.value = false;
     router.push({ name: 'login' }); // Arahkan ke halaman login
 };
-
-
 </script>
-
 
 <template>
     <!-- <nav
@@ -272,7 +258,6 @@ const onLogout = async () => {
             <RouterView></RouterView>
         </div>
     </div>
-
 
     <!-- Dialog start -->
     <Dialog v-model:visible="dialogSignOut" :style="{ width: '450px' }" header="Keluar" :modal="true" position="top">

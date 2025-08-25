@@ -1,15 +1,12 @@
-import { useToast } from 'primevue/usetoast';
-import { computed } from 'vue';
+// import { useToast } from 'primevue/usetoast';
 import { useStore } from 'vuex';
-import { useSekolahService } from './useSekolahService';
+import { useTableTenant } from './sekolah_composable/useTableTenant';
 export function useSCService() {
     const store = useStore();
-    const toast = useToast();
-    const sekolahService = useSekolahService();
+    const { schemaname } = useTableTenant();
     const createMetamaskConnected = (payload) => {
         store.commit('scService/SET_METAMASKCONNECTED', payload);
     };
-    const schemaname = computed(() => sekolahService.schemaname.value);
     const getMetamaskConnected = () => {
         try {
             const response = store.getters['scService/getMetamaskConnected'];
@@ -26,12 +23,10 @@ export function useSCService() {
     const createSCIjazah = async (payload) => {
         try {
             const response = await store.dispatch('scService/createIjazahBC', { degree_data: payload });
-            console.log(response);
-            if (response.status) {
-                toast.add({ severity: 'info', summary: 'Success', detail: `${response.message}`, life: 3000 });
-            }
+            return response;
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal menyimpan data: ${error}`, life: 3000 });
+            console.error('Create Ijazah failed:', error);
+            throw new Error(`Gagal membuat ijazah: ${error.message}`);
         }
     };
 
@@ -44,17 +39,15 @@ export function useSCService() {
                 response = await store.dispatch('scService/fetchSCIjazah', payload);
                 // console.log(response);
                 if (response) {
-                    toast.add({ severity: 'success', summary: 'Successful', detail: `"${response.message}"`, life: 3000 });
                     return response.degreeData;
                 } else {
-                    toast.add({ severity: 'info', summary: 'Failled', detail: `Silahkan reload aplikasi: "${response.message}"`, life: 3000 });
                     return [];
                 }
             }
             return response.degreeData;
         } catch (error) {
             console.log(error);
-            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengirimkan  BC Ijazah: ${error}`, life: 3000 });
+            throw new Error(`Gagal mendapatkan ijazah: ${error.message}`);
         }
     };
     const getContract = () => {
@@ -94,15 +87,12 @@ export function useSCService() {
             console.log(response);
             if (!response || !Array.isArray(response) || response.length == 0) {
                 response = await store.dispatch('scService/fetchBlockchainNetworks', payload);
-                toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
                 return response.network;
             }
-            // toast.add({ severity: 'success', summary: 'Successful', detail: 'Berhasil mendapatkan environment', life: 3000 });
             return response;
         } catch (error) {
             console.log(error);
-            throw error;
-            // toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan enviroment: ${error}`, life: 3000 });
+            throw new Error(`Gagal mengambil BC Network: ${error.message}`);
         }
     };
 
@@ -127,27 +117,14 @@ export function useSCService() {
 
             // Commit perubahan ke store
             store.commit('scService/SET_BCNETWORK', updatedNetworks);
-
-            toast.add({
-                severity: 'success',
-                summary: 'Berhasil',
-                detail: `Berhasil update BC Network: ${message}`,
-                life: 3000
-            });
         } catch (error) {
             console.error('updateBCNetwork error:', error);
-            toast.add({
-                severity: 'error',
-                summary: 'Gagal',
-                detail: `Gagal update BC Network: ${error.message || error}`,
-                life: 3000
-            });
         }
     };
     const deleteBCNetwork = async (bcNetwork = []) => {
         try {
             // kirim ke server
-            const { status, message } = await store.dispatch('scService/deleteBlockchainNetwork', bcNetwork);
+            const { status } = await store.dispatch('scService/deleteBlockchainNetwork', bcNetwork);
             // console.log(status);
             if (status) {
                 // Validasi awal
@@ -171,12 +148,8 @@ export function useSCService() {
                 // Commit perubahan ke store
                 store.commit('scService/SET_BCNETWORK', updatedData);
             }
-
-            // Tampilkan notifikasi berhasil
-            toast.add({ severity: 'success', summary: 'Berhasil', detail: `Berhasil menghapus ${message} item`, life: 3000 });
         } catch (error) {
             console.error(error);
-            toast.add({ severity: 'error', summary: 'Gagal', detail: `Gagal menghapus BC Network: ${error.message}`, life: 3000 });
         }
     };
 
@@ -186,13 +159,11 @@ export function useSCService() {
             // console.log(response)
             if (!response) {
                 response = await store.dispatch('scService/searchBlockchainNetworks', param);
-                toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
-                return response.network;
             }
-            toast.add({ severity: 'success', summary: 'Successful', detail: 'Berhasil mendapatkan network', life: 3000 });
             return response;
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan  BC Network: ${error}`, life: 3000 });
+            console.log(error);
+            throw new Error(`Gagal melakukan pencarian BC Netowrk: ${error.message}`);
         }
     };
     const setBCNetwork = async (networkPlatform) => {
@@ -230,12 +201,10 @@ export function useSCService() {
         try {
             const response = await store.dispatch('scService/getNetworkChainId', rpcUrl);
             if (response.status) {
-                toast.add({ severity: 'success', summary: 'Berhasil', detail: `Berhasil terhubung: ${response.message}`, life: 3000 });
                 return response.networkDetail;
             }
         } catch (error) {
             console.log(error);
-            toast.add({ severity: 'error', summary: 'Gagal', detail: `Gagal koneksi ke Network: ${error.message}`, life: 3000 });
         }
     };
 
@@ -251,7 +220,7 @@ export function useSCService() {
                 return response.bcPlatform;
             }
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Gagal', detail: `Gagal mendapatkan Platform: ${error.message}`, life: 3000 });
+            throw new Error(`Gagal mendapatkan platform network: ${error.message}`);
         }
     };
     const setNetwrokPlatform = async (networkPlatform) => {
@@ -260,8 +229,6 @@ export function useSCService() {
     const getNetowrkPlatform = () => {
         return store.getters['scService/getBCPlatformSelected'];
     };
-    const cekNetworkPlatform = (networConfig) => {};
-    // ========================================
 
     // ========================================
     // BC ACCOUNT - Acount Service
@@ -271,11 +238,11 @@ export function useSCService() {
             const currentUser = store.getters['authService/currentUser'];
             const response = await store.dispatch('scService/fetchBCAccount', currentUser.username);
             if (response.status) {
-                toast.add({ severity: 'success', summary: 'Berhasil', detail: `Berhasil mengambil data ${response.message} item`, life: 3000 });
                 return response.accounts;
             }
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Gagal', detail: `Gagal mendapatkan Platform: ${error.message}`, life: 3000 });
+            console.log(error);
+            throw new Error(`Gagal mendapatkan BC Akun: ${error.message}`);
         }
     };
 
@@ -283,11 +250,11 @@ export function useSCService() {
         try {
             const response = await store.dispatch('scService/importBCAccount', payload);
             if (response.status) {
-                toast.add({ severity: 'success', summary: 'Berhasil', detail: `Berhasil mengambil data ${response.message} item`, life: 3000 });
                 return response.accounts;
             }
         } catch (error) {
-            toast.add({ severity: 'error', summary: 'Gagal', detail: `Gagal mengimpor akun: ${error}`, life: 3000 });
+            console.log(error);
+            throw new Error(`Gagal mengimpor BC Akun: ${error.message}`);
         }
     };
     // ========================================
@@ -342,6 +309,5 @@ export function useSCService() {
         setBCConnected,
         getBCConnected,
         importBCAccount
-        // batchDeleteBCNetwork
     };
 }

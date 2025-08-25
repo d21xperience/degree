@@ -1,43 +1,3 @@
-<template>
-    <div class="ipfs-container">
-        <!-- Download Section -->
-        <div class="section">
-            <h3>Retrieve File</h3>
-            <input type="text" v-model="cidInput" placeholder="Enter IPFS CID" class="cid-input" />
-            <button @click="retrieveFile" :disabled="!cidInput || isRetrieving">
-                {{ isRetrieving ? 'Retrieving...' : 'Retrieve from IPFS' }}
-            </button>
-
-            <div v-if="retrievedFile" class="file-preview">
-                <h4>File Preview</h4>
-                <p>Name: {{ retrievedFile.name }}</p>
-                <p>Type: {{ retrievedFile.type }}</p>
-                <p>Size: {{ formatBytes(retrievedFile.size) }}</p>
-
-                <!-- Preview berdasarkan tipe file -->
-                <img v-if="isImageFile" :src="filePreviewUrl" alt="IPFS File Preview" class="preview-image" />
-                <video v-else-if="isVideoFile" controls class="preview-video">
-                    <source :src="filePreviewUrl" :type="retrievedFile.type" />
-                </video>
-                <audio v-else-if="isAudioFile" controls class="preview-audio">
-                    <source :src="filePreviewUrl" :type="retrievedFile.type" />
-                </audio>
-                <div v-else-if="isTextFile" class="text-preview">
-                    <pre>{{ fileContent }}</pre>
-                </div>
-                <div v-else>
-                    <p>Binary file - no preview available</p>
-                    <a :href="filePreviewUrl" download>Download File</a>
-                </div>
-            </div>
-
-            <div v-if="retrieveError" class="error">
-                {{ retrieveError }}
-            </div>
-        </div>
-    </div>
-</template>
-
 <script setup>
 import { computed, ref } from 'vue';
 
@@ -132,6 +92,46 @@ const isTextFile = computed(() => {
     return retrievedFile.value?.type?.startsWith('text/') || fileContent.value !== '';
 });
 </script>
+
+<template>
+    <div class="ipfs-container">
+        <!-- Download Section -->
+        <div class="section">
+            <h3>Retrieve File</h3>
+            <input type="text" v-model="cidInput" placeholder="Enter IPFS CID" class="cid-input" />
+            <button @click="retrieveFile" :disabled="!cidInput || isRetrieving">
+                {{ isRetrieving ? 'Retrieving...' : 'Retrieve from IPFS' }}
+            </button>
+
+            <div v-if="retrievedFile" class="file-preview">
+                <h4>File Preview</h4>
+                <p>Name: {{ retrievedFile.name }}</p>
+                <p>Type: {{ retrievedFile.type }}</p>
+                <p>Size: {{ formatBytes(retrievedFile.size) }}</p>
+
+                <!-- Preview berdasarkan tipe file -->
+                <img v-if="isImageFile" :src="filePreviewUrl" alt="IPFS File Preview" class="preview-image" />
+                <video v-else-if="isVideoFile" controls class="preview-video">
+                    <source :src="filePreviewUrl" :type="retrievedFile.type" />
+                </video>
+                <audio v-else-if="isAudioFile" controls class="preview-audio">
+                    <source :src="filePreviewUrl" :type="retrievedFile.type" />
+                </audio>
+                <div v-else-if="isTextFile" class="text-preview">
+                    <pre>{{ fileContent }}</pre>
+                </div>
+                <div v-else>
+                    <p>Binary file - no preview available</p>
+                    <a :href="filePreviewUrl" download>Download File</a>
+                </div>
+            </div>
+
+            <div v-if="retrieveError" class="error">
+                {{ retrieveError }}
+            </div>
+        </div>
+    </div>
+</template>
 
 <style scoped>
 .ipfs-container {

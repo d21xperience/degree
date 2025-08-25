@@ -1,4 +1,4 @@
-import { useSekolahService } from '@/composables/useSekolahService';
+import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
 import router from '@/router';
 import { computed } from 'vue';
 import { useStore } from 'vuex';
@@ -13,7 +13,7 @@ const isValidUsername = (input) => {
 };
 
 export function useAuth() {
-    const { fetchSekolah } = useSekolahService();
+    const { fetchSekolah } = useSekolah();
     const store = useStore();
     const currentUser = computed(() => store.getters['authService/getUserProfile']);
     const user = store.getters['authService/userRole'];
@@ -55,7 +55,6 @@ export function useAuth() {
             alert('Login gagal. Silakan periksa kembali informasi Anda.');
             store.dispatch('authService/logout');
             return; // pastikan keluar supaya finally tidak berjalan seolah login sukses
-        } finally {
         }
     };
 

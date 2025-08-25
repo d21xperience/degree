@@ -1,3 +1,10 @@
+<script setup>
+import { ref } from 'vue';
+
+const submitForm = () => {};
+const batal = () => {};
+const isLoading = ref(false);
+</script>
 <template>
     <h1>helelo from setting blockchain</h1>
     <div class="card">
@@ -15,10 +22,3 @@
         </div>
     </div>
 </template>
-<script setup>
-import { ref } from 'vue';
-
-const submitForm = () => {};
-const batal = () => {};
-const isLoading = ref(false);
-</script>

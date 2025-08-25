@@ -1,3 +1,18 @@
+<script setup>
+import { computed } from 'vue';
+const emit = defineEmits(['update:visible', 'confirm']);
+const props = defineProps({
+    visible: Boolean
+});
+
+const onLogout = () => {
+    emit('confirm');
+};
+const isVisible = computed({
+    get: () => props.visible,
+    set: (value) => emit('update:visible', value)
+});
+</script>
 <template>
     <!-- Dialog start -->
     <Dialog v-model:visible="isVisible" :style="{ width: '450px' }" header="Keluar" :modal="true" position="top">
@@ -12,19 +27,3 @@
     </Dialog>
     <!-- Dialog end -->
 </template>
-<script setup>
-import { computed } from 'vue';
-const emit = defineEmits(['update:visible', 'confirm']);
-const props = defineProps({
-    visible: Boolean
-});
-
-const onLogout = () => {
-    emit('confirm')
-};
-const isVisible = computed({
-    get: () => props.visible,
-    set: (value) => emit('update:visible', value)
-});
-
-</script>

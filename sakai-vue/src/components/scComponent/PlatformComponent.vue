@@ -1,7 +1,3 @@
-<template>
-    <Select v-model="internalValue" :options="platformOptions" fluid placeholder="Pilih platform" option-label="name" />
-</template>
-
 <script setup>
 import { useSCService } from '@/composables/useSCService';
 import { onMounted, ref, watch } from 'vue';
@@ -24,3 +20,7 @@ onMounted(async () => {
     platformOptions.value = await scService.fetchNetworkPlatform();
 });
 </script>
+
+<template>
+    <Select v-model="internalValue" :options="platformOptions" fluid placeholder="Pilih platform" option-label="name" />
+</template>

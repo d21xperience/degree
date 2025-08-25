@@ -1,3 +1,110 @@
+<script setup>
+import router from '@/router';
+import { debounce } from 'lodash-es';
+
+import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+const store = useStore();
+// import FileUpload from 'primevue/fileupload';
+
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
+
+import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
+import DialogImport from '@/components/DialogImport.vue';
+import { useUtils } from '@/composables/useUtils';
+
+import { FilterMatchMode } from '@primevue/core/api';
+import Button from 'primevue/button';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+import InputText from 'primevue/inputtext';
+import Toolbar from 'primevue/toolbar';
+
+// ==============================
+onMounted(async () => {
+    siswa.value = await fetchSiswaAktif();
+    tingkatPendidikanOptions.value = await fetchTingkat();
+});
+
+const initial = async () => {
+    try {
+        const res = await fetchSiswaAktif();
+        if (res.status) {
+        }
+    } catch (error) {}
+};
+const isEdit = ref(false);
+const dt = ref();
+const deleteSiswaDialog = ref(false);
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    tingkatPendidikanId: { value: null, matchMode: FilterMatchMode.EQUALS }
+});
+
+const isOpenNew = ref(false);
+const openNew = debounce(() => {
+    router.push({ name: 'inputSiswa' });
+}, 250);
+const closeDialog = () => {
+    selectedSiswa.value = null;
+};
+const exportCSV = () => {
+    dt.value.exportCSV();
+};
+const deleteSiswa = () => {
+    siswa.value = siswa.value.filter((val) => !selectedSiswa.value.includes(val));
+    if (selectedSiswa.value.length == 1) {
+        deleteSiswaAktif(selectedSiswa.value[0].anggotaRombelId);
+    } else if (selectedSiswa.value.length > 1) {
+        const ids = selectedSiswa.value.map((item) => item.anggotaRombelId);
+        deleteBatchSiswaAktif(ids);
+    }
+};
+
+import Select from 'primevue/select';
+
+const selectedSiswa = ref();
+const siswa = ref([]);
+// ================================
+// composable
+// ================================
+const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
+// const schemaname = computed(() => store.getters['sekolahService/getTabeltenant']?.schemaname);
+const { fetchSiswaAktif, fetchTingkat, deleteSiswaAktif, deleteBatchSiswaAktif } = useSekolahService();
+// ================================
+watch(selectedSemester, async (e, b) => {
+    siswa.value = await fetchSiswaAktif();
+});
+// ========IMPORT DATA========
+const dialogImport = ref(false);
+const saveImport = async (e) => {
+    // console.log('Data disimpan:', e);
+    dialogImport.value = false;
+    const cek = await fetchSiswaAktif();
+    // console.log(cek)
+    siswa.value = cek;
+};
+
+const cancelImport = () => {
+    // console.log('Import dibatalkan');
+    dialogImport.value = false;
+};
+
+const { formatterDateID } = useUtils();
+const tingkatPendidikanOptions = ref([]);
+const loadingEdit = ref(false);
+const editSiswa = async () => {
+    await nextTick();
+    loadingEdit.value = true;
+    router.push({
+        name: 'editSiswa',
+        query: { pesertaDidikId: selectedSiswa.value[0]?.pesertaDidikId.toString() }
+    });
+};
+</script>
+
 <template>
     <div>
         <div>
@@ -70,113 +177,3 @@
         <DialogConfirmDelete v-model:visible="deleteSiswaDialog" message="Apakah siswa tersebut akan dihapus?" @confirm="deleteSiswa" @closeDialog="closeDialog" />
     </div>
 </template>
-
-<script setup>
-import router from '@/router';
-import { debounce } from 'lodash-es';
-
-import { useSekolahService } from '@/composables/useSekolahService';
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
-const store = useStore();
-// import FileUpload from 'primevue/fileupload';
-
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-
-import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
-import DialogImport from '@/components/DialogImport.vue';
-import { useUtils } from '@/composables/useUtils';
-
-import { FilterMatchMode } from '@primevue/core/api';
-import Button from 'primevue/button';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-import InputText from 'primevue/inputtext';
-import Toolbar from 'primevue/toolbar';
-
-// ==============================
-onMounted(async () => {
-    siswa.value = await fetchSiswaAktif();
-    tingkatPendidikanOptions.value = await fetchTingkat();
-});
-
-const initial = async () => {
-    try {
-        const res = await fetchSiswaAktif()
-        if (res.status){
-            
-        }
-    } catch (error) {
-        
-    }
-}
-const isEdit = ref(false);
-const dt = ref();
-const deleteSiswaDialog = ref(false);
-const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    tingkatPendidikanId: { value: null, matchMode: FilterMatchMode.EQUALS }
-});
-
-const isOpenNew = ref(false);
-const openNew = debounce(() => {
-    router.push({ name: 'inputSiswa' });
-}, 250);
-const closeDialog = () => {
-    selectedSiswa.value = null;
-};
-const exportCSV = () => {
-    dt.value.exportCSV();
-};
-const deleteSiswa = () => {
-    siswa.value = siswa.value.filter((val) => !selectedSiswa.value.includes(val));
-    if (selectedSiswa.value.length == 1) {
-        deleteSiswaAktif(selectedSiswa.value[0].anggotaRombelId);
-    } else if (selectedSiswa.value.length > 1) {
-        const ids = selectedSiswa.value.map((item) => item.anggotaRombelId);
-        deleteBatchSiswaAktif(ids);
-    }
-};
-
-import Select from 'primevue/select';
-
-const selectedSiswa = ref();
-const siswa = ref([]);
-// ================================
-// composable
-// ================================
-const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
-// const schemaname = computed(() => store.getters['sekolahService/getTabeltenant']?.schemaname);
-const { fetchSiswaAktif, fetchTingkat, deleteSiswaAktif, deleteBatchSiswaAktif } = useSekolahService();
-// ================================
-watch(selectedSemester, async (e, b) => {
-    siswa.value = await fetchSiswaAktif();
-});
-// ========IMPORT DATA========
-const dialogImport = ref(false);
-const saveImport = async (e) => {
-    // console.log('Data disimpan:', e);
-    dialogImport.value = false;
-    const cek = await fetchSiswaAktif();
-    // console.log(cek)
-    siswa.value = cek;
-};
-
-const cancelImport = () => {
-    // console.log('Import dibatalkan');
-    dialogImport.value = false;
-};
-
-const { formatterDateID } = useUtils();
-const tingkatPendidikanOptions = ref([]);
-const loadingEdit = ref(false);
-const editSiswa = async () => {
-    await nextTick();
-    loadingEdit.value = true;
-    router.push({
-        name: 'editSiswa',
-        query: { pesertaDidikId: selectedSiswa.value[0]?.pesertaDidikId.toString() }
-    });
-};
-</script>

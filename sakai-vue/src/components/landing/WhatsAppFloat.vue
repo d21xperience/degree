@@ -1,4 +1,13 @@
 <!-- WhatsAppFloat.vue -->
+<script setup>
+/* Props opsional */
+defineProps({
+    phone: { type: String, required: true },
+    prefill: { type: String, default: 'Halo, saya ingin bertanya...' },
+    color: { type: String, default: '#25D366' }
+});
+</script>
+
 <template>
     <transition appear name="zoom-fade">
         <a :href="`https://wa.me/${phone}?text=${encodeURIComponent(prefill)}`" target="_blank" rel="noopener noreferrer" class="wa-float" :style="{ backgroundColor: color }">
@@ -35,15 +44,6 @@
         </a>
     </transition>
 </template>
-
-<script setup>
-/* Props opsional */
-defineProps({
-    phone: { type: String, required: true },
-    prefill: { type: String, default: 'Halo, saya ingin bertanya...' },
-    color: { type: String, default: '#25D366' }
-});
-</script>
 
 <style scoped>
 /* posisi tetap di kanan bawah */

@@ -1,3 +1,67 @@
+<script setup>
+import { useWebSocket } from '@/composables/useWebSocket';
+import Chart from 'primevue/chart';
+import { onMounted, ref } from 'vue';
+const { networkInfo } = useWebSocket('ws://localhost:8080/ws');
+onMounted(() => {
+    chartData.value = setChartData();
+    chartOptions.value = setChartOptions();
+});
+
+const chartData = ref();
+const chartOptions = ref();
+
+const setChartData = () => {
+    return {
+        labels: ['2007', '2008', '2009', '2010'],
+        datasets: [
+            {
+                label: 'Data Lulusan',
+                data: [240, 325, 302, 220],
+                backgroundColor: ['rgba(249, 115, 22, 0.2)', 'rgba(6, 182, 212, 0.2)', 'rgb(107, 114, 128, 0.2)', 'rgba(139, 92, 246 0.2)'],
+                borderColor: ['rgb(249, 115, 22)', 'rgb(6, 182, 212)', 'rgb(107, 114, 128)', 'rgb(139, 92, 246)'],
+                borderWidth: 1
+            }
+        ]
+    };
+};
+const setChartOptions = () => {
+    const documentStyle = getComputedStyle(document.documentElement);
+    const textColor = documentStyle.getPropertyValue('--p-text-color');
+    const textColorSecondary = documentStyle.getPropertyValue('--p-text-muted-color');
+    const surfaceBorder = documentStyle.getPropertyValue('--p-content-border-color');
+
+    return {
+        plugins: {
+            legend: {
+                labels: {
+                    color: textColor
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: {
+                    color: textColorSecondary
+                },
+                grid: {
+                    color: surfaceBorder
+                }
+            },
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    color: textColorSecondary
+                },
+                grid: {
+                    color: surfaceBorder
+                }
+            }
+        }
+    };
+};
+</script>
+
 <template>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <div class="bg-white p-6 rounded-lg shadow-md">
@@ -136,81 +200,4 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import { useWebSocket } from '@/composables/useWebSocket';
-import Chart from 'primevue/chart';
-import { onMounted, ref } from 'vue';
-import { useStore } from 'vuex';
-// import CardInfo from '@/components/CardInfo.vue';
-const { isConnected, networkInfo, latestBlock } = useWebSocket('ws://localhost:8080/ws');
-const store = useStore();
-onMounted(() => {
-    chartData.value = setChartData();
-    chartOptions.value = setChartOptions(); 
-});
-
-const chartData = ref();
-const chartOptions = ref();
-
-const setChartData = () => {
-    return {
-        labels: ['2007', '2008', '2009', '2010'],
-        datasets: [
-            {
-                label: 'Data Lulusan',
-                data: [240, 325, 302, 220],
-                backgroundColor: ['rgba(249, 115, 22, 0.2)', 'rgba(6, 182, 212, 0.2)', 'rgb(107, 114, 128, 0.2)', 'rgba(139, 92, 246 0.2)'],
-                borderColor: ['rgb(249, 115, 22)', 'rgb(6, 182, 212)', 'rgb(107, 114, 128)', 'rgb(139, 92, 246)'],
-                borderWidth: 1
-            }
-        ]
-    };
-};
-const setChartOptions = () => {
-    const documentStyle = getComputedStyle(document.documentElement);
-    const textColor = documentStyle.getPropertyValue('--p-text-color');
-    const textColorSecondary = documentStyle.getPropertyValue('--p-text-muted-color');
-    const surfaceBorder = documentStyle.getPropertyValue('--p-content-border-color');
-
-    return {
-        plugins: {
-            legend: {
-                labels: {
-                    color: textColor
-                }
-            }
-        },
-        scales: {
-            x: {
-                ticks: {
-                    color: textColorSecondary
-                },
-                grid: {
-                    color: surfaceBorder
-                }
-            },
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    color: textColorSecondary
-                },
-                grid: {
-                    color: surfaceBorder
-                }
-            }
-        }
-    };
-};
-
-const handleUpdate = (newValue) => {
-    totalBlocks.value = newValue;
-};
-
-// ambil data untuk tampilan di dashboard beserta variabel yang dibutuhkan
-const totalBlocks = ref(10215845);
-const totalSiswa = ref(800);
-const totalGuru = ref(0);
-const totalKelas = ref(28);
-</script>
 <style></style>

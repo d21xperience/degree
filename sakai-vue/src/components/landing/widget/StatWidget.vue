@@ -1,10 +1,3 @@
-<template>
-    <div class="stat-box">
-        <div class="stat-number">{{ displayNumber }}+</div>
-        <div class="stat-label">{{ props.label }}</div>
-    </div>
-</template>
-
 <script setup>
 import { onMounted, ref } from 'vue';
 const displayNumber = ref(0);
@@ -38,6 +31,13 @@ onMounted(() => {
     requestAnimationFrame(update);
 });
 </script>
+
+<template>
+    <div class="stat-box">
+        <div class="stat-number">{{ displayNumber }}+</div>
+        <div class="stat-label">{{ props.label }}</div>
+    </div>
+</template>
 <style scoped>
 .stat-box {
     text-align: center;

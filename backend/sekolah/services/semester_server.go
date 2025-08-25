@@ -71,7 +71,7 @@ func (s *SemesterServiceServer) CreateSemester(ctx context.Context, req *pb.Crea
 // **GetSemester**
 func (s *SemesterServiceServer) GetSemester(ctx context.Context, req *pb.GetSemesterRequest) (*pb.GetSemesterResponse, error) {
 	conditions := make(map[string]any)
-	orderBy := []string{"tahun_ajaran_id DESC", "semester ASC"}
+	orderBy := []string{"tahun_ajaran_id DESC", "semester DESC"}
 	if req.SemesterId != "" {
 		conditions["semester_id"] = req.SemesterId
 	}

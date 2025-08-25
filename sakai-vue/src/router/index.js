@@ -101,7 +101,7 @@ const router = createRouter({
                         {
                             path: 'info-semester',
                             name: 'infoSemester',
-                            meta: { title: 'Info Sekolah', namaRoute: 'Semester' },
+                            meta: { title: 'Info Semester', namaRoute: 'Semester' },
                             component: () => import('@/views/pages/dapodik/DataSemester.vue')
                         },
                         {
@@ -338,6 +338,12 @@ const router = createRouter({
             ]
         }
     ]
+});
+
+// Tambahkan afterEach untuk update title
+router.afterEach((to) => {
+    const defaultTitle = 'Verfikasi Ijazah';
+    document.title = to.meta.title ? `${to.meta.title}` : defaultTitle;
 });
 
 export default router;

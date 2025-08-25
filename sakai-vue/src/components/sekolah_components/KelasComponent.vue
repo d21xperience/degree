@@ -1,23 +1,15 @@
-<template>
-    <Select v-model="internalValue" :options="kelasOptions" optionLabel="nmKelas" placeholder="Pilih Kelas..." fluid checkmark :showClear="true" />
-</template>
-
 <script setup>
 import { useToast } from 'primevue/usetoast';
 
-import { useSekolahService } from '@/composables/useSekolahService';
-import { onMounted, ref, watch } from 'vue';
+import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
+import { computed, onMounted, ref, watch } from 'vue';
 const kelasOptions = ref([]);
 const props = defineProps(['modelValue']); // props dari parent
 const emit = defineEmits(['update:modelValue']); // emit update ke parent
-
-const { fetchKelas } = useSekolahService();
-const internalValue = ref();
+const loadingKelas = ref(false);
+const { fetchKelas, initSelectedSemester } = useSekolahService();
+// const internalValue = ref();
 const toast = useToast();
-
-watch(internalValue, (newVal) => {
-    emit('update:modelValue', newVal);
-});
 
 const initial = async () => {
     try {
@@ -30,7 +22,37 @@ const initial = async () => {
         toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengambil kelas: ${error}`, life: 3000 });
     }
 };
+// watch(internalValue, (newVal) => {
+//     emit('update:modelValue', newVal);
+// });
+
+const internalValue = computed({
+    get: () => props.modelValue,
+    set: (value) => emit('update:modelValue', value)
+});
+
+watch(initSelectedSemester, async (newVal) => {
+    console.log(newVal);
+    if (newVal) {
+        loadingKelas.value = true;
+        try {
+            // kelasOptions.value = []
+            internalValue.value = null;
+            await initial();
+        } catch (error) {
+            console.error(error);
+            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengambil kelas: ${error}`, life: 3000 });
+        } finally {
+            loadingKelas.value = false;
+        }
+    }
+});
+
 onMounted(async () => {
     await initial();
 });
 </script>
+
+<template>
+    <Select v-model="internalValue" :options="kelasOptions" optionLabel="nmKelas" :placeholder="!loadingKelas ? 'Pilih Kelas...' : 'Memuat data..'" fluid checkmark :showClear="true" :loading="loadingKelas" />
+</template>

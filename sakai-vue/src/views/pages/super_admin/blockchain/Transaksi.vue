@@ -1,74 +1,3 @@
-<template>
-    <div class="blockchain-transactions">
-        <h1>Daftar Transaksi Blockchain</h1>
-
-        <div class="filter-controls">
-            <select v-model="selectedBlockchain" @change="fetchTransactions">
-                <option value="">Semua Blockchain</option>
-                <option value="ethereum">Ethereum</option>
-                <option value="quorum">Quorum</option>
-                <option value="fabric">Hyperledger Fabric</option>
-            </select>
-
-            <input type="text" v-model="searchQuery" placeholder="Cari transaksi..." @input="debouncedSearch" />
-        </div>
-
-        <div v-if="isLoading" class="loading">Memuat data transaksi...</div>
-
-        <div v-else-if="error" class="error">
-            {{ error }}
-        </div>
-
-        <div v-else-if="transactions.length === 0" class="empty">Tidak ada transaksi ditemukan</div>
-
-        <div v-else class="transactions-list">
-            <div class="transaction-card" v-for="tx in transactions" :key="tx.id">
-                <div class="tx-header">
-                    <span class="tx-id">{{ tx.id }}</span>
-                    <span class="tx-chain" :class="tx.blockchain.toLowerCase()">
-                        {{ formatBlockchainName(tx.blockchain) }}
-                    </span>
-                </div>
-
-                <div class="tx-details">
-                    <div class="tx-row">
-                        <span class="label">Dari:</span>
-                        <span class="value">{{ tx.from }}</span>
-                    </div>
-                    <div class="tx-row">
-                        <span class="label">Ke:</span>
-                        <span class="value">{{ tx.to }}</span>
-                    </div>
-                    <div class="tx-row">
-                        <span class="label">Nilai:</span>
-                        <span class="value">{{ formatValue(tx.value, tx.blockchain) }}</span>
-                    </div>
-                    <div class="tx-row">
-                        <span class="label">Waktu:</span>
-                        <span class="value">{{ formatTimestamp(tx.timestamp) }}</span>
-                    </div>
-                    <div class="tx-row" v-if="tx.blockNumber">
-                        <span class="label">Block:</span>
-                        <span class="value">{{ tx.blockNumber }}</span>
-                    </div>
-                </div>
-
-                <div class="tx-footer">
-                    <button @click="showTransactionDetails(tx)" class="details-btn">Detail</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="pagination" v-if="totalPages > 1">
-            <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1">Sebelumnya</button>
-            <span>Halaman {{ currentPage }} dari {{ totalPages }}</span>
-            <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">Berikutnya</button>
-        </div>
-
-        <TransactionModal v-if="selectedTransaction" :transaction="selectedTransaction" @close="selectedTransaction = null" />
-    </div>
-</template>
-
 <script setup>
 import TransactionModal from '@/components/TransactionModal.vue';
 import { debounce } from 'lodash-es';
@@ -165,6 +94,77 @@ onMounted(() => {
     fetchTransactions();
 });
 </script>
+
+<template>
+    <div class="blockchain-transactions">
+        <h1>Daftar Transaksi Blockchain</h1>
+
+        <div class="filter-controls">
+            <select v-model="selectedBlockchain" @change="fetchTransactions">
+                <option value="">Semua Blockchain</option>
+                <option value="ethereum">Ethereum</option>
+                <option value="quorum">Quorum</option>
+                <option value="fabric">Hyperledger Fabric</option>
+            </select>
+
+            <input type="text" v-model="searchQuery" placeholder="Cari transaksi..." @input="debouncedSearch" />
+        </div>
+
+        <div v-if="isLoading" class="loading">Memuat data transaksi...</div>
+
+        <div v-else-if="error" class="error">
+            {{ error }}
+        </div>
+
+        <div v-else-if="transactions.length === 0" class="empty">Tidak ada transaksi ditemukan</div>
+
+        <div v-else class="transactions-list">
+            <div class="transaction-card" v-for="tx in transactions" :key="tx.id">
+                <div class="tx-header">
+                    <span class="tx-id">{{ tx.id }}</span>
+                    <span class="tx-chain" :class="tx.blockchain.toLowerCase()">
+                        {{ formatBlockchainName(tx.blockchain) }}
+                    </span>
+                </div>
+
+                <div class="tx-details">
+                    <div class="tx-row">
+                        <span class="label">Dari:</span>
+                        <span class="value">{{ tx.from }}</span>
+                    </div>
+                    <div class="tx-row">
+                        <span class="label">Ke:</span>
+                        <span class="value">{{ tx.to }}</span>
+                    </div>
+                    <div class="tx-row">
+                        <span class="label">Nilai:</span>
+                        <span class="value">{{ formatValue(tx.value, tx.blockchain) }}</span>
+                    </div>
+                    <div class="tx-row">
+                        <span class="label">Waktu:</span>
+                        <span class="value">{{ formatTimestamp(tx.timestamp) }}</span>
+                    </div>
+                    <div class="tx-row" v-if="tx.blockNumber">
+                        <span class="label">Block:</span>
+                        <span class="value">{{ tx.blockNumber }}</span>
+                    </div>
+                </div>
+
+                <div class="tx-footer">
+                    <button @click="showTransactionDetails(tx)" class="details-btn">Detail</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="pagination" v-if="totalPages > 1">
+            <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1">Sebelumnya</button>
+            <span>Halaman {{ currentPage }} dari {{ totalPages }}</span>
+            <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">Berikutnya</button>
+        </div>
+
+        <TransactionModal v-if="selectedTransaction" :transaction="selectedTransaction" @close="selectedTransaction = null" />
+    </div>
+</template>
 
 <style scoped>
 .blockchain-transactions {

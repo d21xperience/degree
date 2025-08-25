@@ -1,3 +1,100 @@
+<script setup>
+import { onMounted, ref } from 'vue';
+
+// Data profil
+const profile = ref({
+    siteName: '',
+    siteDescription: '',
+    logoUrl: '',
+    contact: {
+        email: '',
+        phone: '',
+        address: ''
+    },
+    socialMedia: [{ platform: '', url: '' }],
+    businessHours: '',
+    privacyPolicy: '',
+    termsConditions: ''
+});
+
+// Notifikasi
+const notification = ref({
+    show: false,
+    message: '',
+    success: false
+});
+
+// Memuat data dari localStorage
+const loadProfile = () => {
+    const savedProfile = localStorage.getItem('websiteProfile');
+    if (savedProfile) {
+        profile.value = JSON.parse(savedProfile);
+    }
+};
+
+// Menyimpan data ke localStorage
+const saveProfile = () => {
+    try {
+        localStorage.setItem('websiteProfile', JSON.stringify(profile.value));
+        showNotification('Profil berhasil disimpan!', true);
+    } catch (error) {
+        showNotification('Gagal menyimpan profil: ' + error.message, false);
+    }
+};
+
+// Menampilkan notifikasi
+const showNotification = (message, isSuccess) => {
+    notification.value = {
+        show: true,
+        message,
+        success: isSuccess
+    };
+    setTimeout(() => {
+        notification.value.show = false;
+    }, 5000);
+};
+
+// Menambahkan media sosial baru
+const addSocial = () => {
+    profile.value.socialMedia.push({ platform: '', url: '' });
+};
+
+// Menghapus media sosial
+const removeSocial = (index) => {
+    if (profile.value.socialMedia.length > 1) {
+        profile.value.socialMedia.splice(index, 1);
+    } else {
+        showNotification('Minimal harus ada satu media sosial', false);
+    }
+};
+
+// Reset form
+const resetForm = () => {
+    if (confirm('Apakah Anda yakin ingin mengembalikan ke nilai default?')) {
+        profile.value = {
+            siteName: '',
+            siteDescription: '',
+            logoUrl: '',
+            contact: {
+                email: '',
+                phone: '',
+                address: ''
+            },
+            socialMedia: [{ platform: '', url: '' }],
+            businessHours: '',
+            privacyPolicy: '',
+            termsConditions: ''
+        };
+        showNotification('Form telah direset', true);
+    }
+};
+
+// Muat data saat komponen di-load
+onMounted(() => {
+    loadProfile();
+});
+</script>
+
 <template>
     <div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
         <h1 class="text-2xl font-bold text-gray-800 mb-6">Pengaturan Profil Website</h1>
@@ -146,100 +243,3 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import { onMounted, ref } from 'vue';
-
-// Data profil
-const profile = ref({
-    siteName: '',
-    siteDescription: '',
-    logoUrl: '',
-    contact: {
-        email: '',
-        phone: '',
-        address: ''
-    },
-    socialMedia: [{ platform: '', url: '' }],
-    businessHours: '',
-    privacyPolicy: '',
-    termsConditions: ''
-});
-
-// Notifikasi
-const notification = ref({
-    show: false,
-    message: '',
-    success: false
-});
-
-// Memuat data dari localStorage
-const loadProfile = () => {
-    const savedProfile = localStorage.getItem('websiteProfile');
-    if (savedProfile) {
-        profile.value = JSON.parse(savedProfile);
-    }
-};
-
-// Menyimpan data ke localStorage
-const saveProfile = () => {
-    try {
-        localStorage.setItem('websiteProfile', JSON.stringify(profile.value));
-        showNotification('Profil berhasil disimpan!', true);
-    } catch (error) {
-        showNotification('Gagal menyimpan profil: ' + error.message, false);
-    }
-};
-
-// Menampilkan notifikasi
-const showNotification = (message, isSuccess) => {
-    notification.value = {
-        show: true,
-        message,
-        success: isSuccess
-    };
-    setTimeout(() => {
-        notification.value.show = false;
-    }, 5000);
-};
-
-// Menambahkan media sosial baru
-const addSocial = () => {
-    profile.value.socialMedia.push({ platform: '', url: '' });
-};
-
-// Menghapus media sosial
-const removeSocial = (index) => {
-    if (profile.value.socialMedia.length > 1) {
-        profile.value.socialMedia.splice(index, 1);
-    } else {
-        showNotification('Minimal harus ada satu media sosial', false);
-    }
-};
-
-// Reset form
-const resetForm = () => {
-    if (confirm('Apakah Anda yakin ingin mengembalikan ke nilai default?')) {
-        profile.value = {
-            siteName: '',
-            siteDescription: '',
-            logoUrl: '',
-            contact: {
-                email: '',
-                phone: '',
-                address: ''
-            },
-            socialMedia: [{ platform: '', url: '' }],
-            businessHours: '',
-            privacyPolicy: '',
-            termsConditions: ''
-        };
-        showNotification('Form telah direset', true);
-    }
-};
-
-// Muat data saat komponen di-load
-onMounted(() => {
-    loadProfile();
-});
-</script>

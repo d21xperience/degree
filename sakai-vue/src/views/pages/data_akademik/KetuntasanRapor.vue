@@ -1,20 +1,262 @@
+<script setup>
+import FileUpload from 'primevue/fileupload';
+
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
+
+import Button from 'primevue/button';
+
+import Dialog from 'primevue/dialog';
+
+import Toolbar from 'primevue/toolbar';
+
+import ColumnGroup from 'primevue/columngroup'; // optional
+import Row from 'primevue/row'; // optional
+
+import { ref, onMounted } from 'vue';
+import { FilterMatchMode } from '@primevue/core/api';
+import { useToast } from 'primevue/usetoast';
+
+import InputText from 'primevue/inputtext';
+
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+
+import RadioButton from 'primevue/radiobutton';
+
+import DataLulusanService from '@/service/ProductService.js';
+
+onMounted(() => {
+    DataLulusanService.getProducts().then((data) => (products.value = data));
+});
+
+const toast = useToast();
+const dt = ref();
+const products = ref();
+const productDialog = ref(false);
+const deleteProductDialog = ref(false);
+const deleteProductsDialog = ref(false);
+const product = ref({});
+const dataLulusan = ref();
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
+const submitted = ref(false);
+const statuses = ref([
+    { label: 'INSTOCK', value: 'instock' },
+    { label: 'LOWSTOCK', value: 'lowstock' },
+    { label: 'OUTOFSTOCK', value: 'outofstock' }
+]);
+
+const formatCurrency = (value) => {
+    if (value) return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+    return;
+};
+const openNew = () => {
+    product.value = {};
+    submitted.value = false;
+    productDialog.value = true;
+};
+const hideDialog = () => {
+    productDialog.value = false;
+    submitted.value = false;
+};
+const saveProduct = () => {
+    submitted.value = true;
+
+    if (product?.value.name?.trim()) {
+        if (product.value.id) {
+            product.value.inventoryStatus = product.value.inventoryStatus.value ? product.value.inventoryStatus.value : product.value.inventoryStatus;
+            products.value[findIndexById(product.value.id)] = product.value;
+            toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
+        } else {
+            product.value.id = createId();
+            product.value.code = createId();
+            product.value.image = 'product-placeholder.svg';
+            product.value.inventoryStatus = product.value.inventoryStatus ? product.value.inventoryStatus.value : 'INSTOCK';
+            products.value.push(product.value);
+            toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
+        }
+
+        productDialog.value = false;
+        product.value = {};
+    }
+};
+const editProduct = (prod) => {
+    product.value = { ...prod };
+    productDialog.value = true;
+};
+const confirmDeleteProduct = (prod) => {
+    product.value = prod;
+    deleteProductDialog.value = true;
+};
+const deleteProduct = () => {
+    products.value = products.value.filter((val) => val.id !== product.value.id);
+    deleteProductDialog.value = false;
+    product.value = {};
+    toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
+};
+const findIndexById = (id) => {
+    let index = -1;
+    for (let i = 0; i < products.value.length; i++) {
+        if (products.value[i].id === id) {
+            index = i;
+            break;
+        }
+    }
+
+    return index;
+};
+const createId = () => {
+    let id = '';
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (var i = 0; i < 5; i++) {
+        id += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return id;
+};
+const exportCSV = () => {
+    dt.value.exportCSV();
+};
+const confirmDeleteSelected = () => {
+    deleteProductsDialog.value = true;
+};
+const deletedataLulusan = () => {
+    products.value = products.value.filter((val) => !dataLulusan.value.includes(val));
+    deleteProductsDialog.value = false;
+    dataLulusan.value = null;
+    toast.add({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
+};
+
+const getStatusLabel = (status) => {
+    switch (status) {
+        case 'INSTOCK':
+            return 'success';
+
+        case 'LOWSTOCK':
+            return 'warn';
+
+        case 'OUTOFSTOCK':
+            return 'danger';
+
+        default:
+            return null;
+    }
+};
+
+import Select from 'primevue/select';
+
+// select tahun ijazah
+const selectedCity = ref();
+const cities = ref([
+    { name: '2023/2024', code: '20232' },
+    { name: '2022/2023', code: '20222' },
+    { name: '2021/2022', code: '20212' },
+    { name: '2022/2021', code: '20202' },
+    { name: '2019/2020', code: '20192' }
+]);
+const selectedJurusan = ref();
+const jurusan = ref([
+    { name: 'Teknik Kendaraan Ringan', code: 'TKR' },
+    { name: 'Teknik Mesin Sepeda Motor', code: 'TSM' },
+    { name: 'Teknik Komputer dan Jaringan', code: 'TKJ' },
+    { name: 'Otomatisasi Perkantoran', code: 'OTKP' },
+    { name: 'AKuntansi Lembaga', code: 'AKL' }
+]);
+
+const capaianPenilaian = ref([
+    {
+        namaMapel: 'Pendidikan Agama Islam dan Budi Pekerti',
+        smt: {
+            satu: 90,
+            dua: 50,
+            tiga: 60,
+            empat: 79,
+            lima: 79,
+            enam: 79
+        }
+    },
+    {
+        namaMapel: 'Pendidikan Pancasila dan Kewarganegaraan',
+        smt: {
+            satu: 90,
+            dua: 50,
+            tiga: 60,
+            empat: 79,
+            lima: 79,
+            enam: 79
+        }
+    },
+    {
+        namaMapel: 'Bahasa Indonesia',
+        smt: {
+            satu: 90,
+            dua: 50,
+            tiga: 60,
+            empat: 79,
+            lima: 79,
+            enam: 79
+        }
+    },
+    {
+        namaMapel: 'Bahasa Inggris',
+        smt: {
+            satu: 90,
+            dua: 50,
+            tiga: 60,
+            empat: 79,
+            lima: 79,
+            enam: 79
+        }
+    },
+    {
+        namaMapel: 'Matematika (Umum)',
+        smt: {
+            satu: 90,
+            dua: 50,
+            tiga: 60,
+            empat: 79,
+            lima: 79,
+            enam: 79
+        }
+    },
+    {
+        namaMapel: 'Muatan Lokal Bahasa Daerah',
+        smt: {
+            satu: 90,
+            dua: 50,
+            tiga: 60,
+            empat: 79,
+            lima: 79,
+            enam: 79
+        }
+    },
+    {
+        namaMapel: 'Pendidikan Jasmani, Olahraga, dan Kesehatan',
+        smt: {
+            satu: 90,
+            dua: 50,
+            tiga: 60,
+            empat: 79,
+            lima: 79,
+            enam: 79
+        }
+    }
+]);
+</script>
+
 <template>
-
     <div>
-
         <div class="card">
             <div class="flex flex-wrap justify-between my-2">
-                <h4 class="font-bold text-2xl lg:text-lg my-2">Capaian Nilai Rapor </h4>
+                <h4 class="font-bold text-2xl lg:text-lg my-2">Capaian Nilai Rapor</h4>
                 <!-- <div>
                     <Select v-model="selectedCity" :options="cities" optionLabel="name" placeholder="Tahun Pelajaran"
                         class="w-full md:w-56 mr-2" />
                 </div> -->
-
             </div>
             <Toolbar class="">
-                <template #start>
-
-                </template>
+                <template #start> </template>
                 <template #end>
                     <!-- <Button label="New" icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" /> -->
                     <!-- <Button label="Delete" icon="pi pi-trash" severity="danger" class="mr-2"
@@ -27,11 +269,18 @@
                 </template>
             </Toolbar>
 
-            <DataTable ref="dt" v-model:selection="dataLulusan" :value="capaianPenilaian" dataKey="id" :paginator="true"
-                :rows="10" :filters="filters"
+            <DataTable
+                ref="dt"
+                v-model:selection="dataLulusan"
+                :value="capaianPenilaian"
+                dataKey="id"
+                :paginator="true"
+                :rows="10"
+                :filters="filters"
                 paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                 :rowsPerPageOptions="[5, 10, 25]"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products">
+                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+            >
                 <!-- <template #header>
                     <div class="flex flex-wrap gap-2 items-center justify-between">
                         <div>
@@ -83,7 +332,6 @@
                             :severity="getStatusLabel(slotProps.data.inventoryStatus)" />
                     </template>
                 </Column>-->
-
             </DataTable>
         </div>
 
@@ -93,26 +341,22 @@
                     :alt="product.image" class="block m-auto pb-4" /> -->
                 <div>
                     <label for="name" class="block font-bold">NISN</label>
-                    <InputText id="name" v-model.trim="product.code" required="true" autofocus
-                        :invalid="submitted && !product.code" fluid />
+                    <InputText id="name" v-model.trim="product.code" required="true" autofocus :invalid="submitted && !product.code" fluid />
                     <small v-if="submitted && !product.code" class="text-red-500">NISN is required.</small>
                 </div>
                 <div>
-                    <label for="name" class="block font-bold ">Nama</label>
-                    <InputText id="name" v-model.trim="product.name" required="true" autofocus
-                        :invalid="submitted && !product.name" fluid />
+                    <label for="name" class="block font-bold">Nama</label>
+                    <InputText id="name" v-model.trim="product.name" required="true" autofocus :invalid="submitted && !product.name" fluid />
                     <small v-if="submitted && !product.name" class="text-red-500">Nama is required.</small>
                 </div>
                 <div>
-                    <label for="name" class="block font-bold ">Rerata Nilai</label>
-                    <InputText id="name" v-model.trim="product.price" required="true" autofocus
-                        :invalid="submitted && !product.price" fluid />
+                    <label for="name" class="block font-bold">Rerata Nilai</label>
+                    <InputText id="name" v-model.trim="product.price" required="true" autofocus :invalid="submitted && !product.price" fluid />
                     <small v-if="submitted && !product.price" class="text-red-500">Nilai is required.</small>
                 </div>
                 <div>
-                    <label for="name" class="block font-bold ">Thn Lulus</label>
-                    <InputText id="name" v-model.trim="product.category" required="true" autofocus
-                        :invalid="submitted && !product.category" fluid />
+                    <label for="name" class="block font-bold">Thn Lulus</label>
+                    <InputText id="name" v-model.trim="product.category" required="true" autofocus :invalid="submitted && !product.category" fluid />
                     <small v-if="submitted && !product.category" class="text-red-500">Thn lulus is required.</small>
                 </div>
                 <!-- <div>
@@ -171,7 +415,10 @@
         <Dialog v-model:visible="deleteProductDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
                 <i class="pi pi-exclamation-triangle !text-3xl" />
-                <span v-if="product">Are you sure you want to delete <b>{{ product.name }}</b>?</span>
+                <span v-if="product"
+                    >Are you sure you want to delete <b>{{ product.name }}</b
+                    >?</span
+                >
             </div>
             <template #footer>
                 <Button label="No" icon="pi pi-times" text @click="deleteProductDialog = false" />
@@ -191,270 +438,3 @@
         </Dialog>
     </div>
 </template>
-
-<script setup>
-
-import FileUpload from 'primevue/fileupload';
-
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-
-import Button from 'primevue/button';
-
-import Dialog from 'primevue/dialog';
-
-import Toolbar from 'primevue/toolbar';
-
-import ColumnGroup from 'primevue/columngroup';   // optional
-import Row from 'primevue/row';                   // optional
-
-import { ref, onMounted } from 'vue';
-import { FilterMatchMode } from '@primevue/core/api';
-import { useToast } from 'primevue/usetoast';
-
-import InputText from 'primevue/inputtext';
-
-
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-
-import RadioButton from 'primevue/radiobutton';
-
-import DataLulusanService from '@/service/ProductService.js';
-
-onMounted(() => {
-    DataLulusanService.getProducts().then((data) => (products.value = data));
-});
-
-const toast = useToast();
-const dt = ref();
-const products = ref();
-const productDialog = ref(false);
-const deleteProductDialog = ref(false);
-const deleteProductsDialog = ref(false);
-const product = ref({});
-const dataLulusan = ref();
-const filters = ref({
-    'global': { value: null, matchMode: FilterMatchMode.CONTAINS },
-});
-const submitted = ref(false);
-const statuses = ref([
-    { label: 'INSTOCK', value: 'instock' },
-    { label: 'LOWSTOCK', value: 'lowstock' },
-    { label: 'OUTOFSTOCK', value: 'outofstock' }
-]);
-
-const formatCurrency = (value) => {
-    if (value)
-        return value.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-    return;
-};
-const openNew = () => {
-    product.value = {};
-    submitted.value = false;
-    productDialog.value = true;
-};
-const hideDialog = () => {
-    productDialog.value = false;
-    submitted.value = false;
-};
-const saveProduct = () => {
-    submitted.value = true;
-
-    if (product?.value.name?.trim()) {
-        if (product.value.id) {
-            product.value.inventoryStatus = product.value.inventoryStatus.value ? product.value.inventoryStatus.value : product.value.inventoryStatus;
-            products.value[findIndexById(product.value.id)] = product.value;
-            toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Updated', life: 3000 });
-        }
-        else {
-            product.value.id = createId();
-            product.value.code = createId();
-            product.value.image = 'product-placeholder.svg';
-            product.value.inventoryStatus = product.value.inventoryStatus ? product.value.inventoryStatus.value : 'INSTOCK';
-            products.value.push(product.value);
-            toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Created', life: 3000 });
-        }
-
-        productDialog.value = false;
-        product.value = {};
-    }
-};
-const editProduct = (prod) => {
-    product.value = { ...prod };
-    productDialog.value = true;
-};
-const confirmDeleteProduct = (prod) => {
-    product.value = prod;
-    deleteProductDialog.value = true;
-};
-const deleteProduct = () => {
-    products.value = products.value.filter(val => val.id !== product.value.id);
-    deleteProductDialog.value = false;
-    product.value = {};
-    toast.add({ severity: 'success', summary: 'Successful', detail: 'Product Deleted', life: 3000 });
-};
-const findIndexById = (id) => {
-    let index = -1;
-    for (let i = 0; i < products.value.length; i++) {
-        if (products.value[i].id === id) {
-            index = i;
-            break;
-        }
-    }
-
-    return index;
-};
-const createId = () => {
-    let id = '';
-    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    for (var i = 0; i < 5; i++) {
-        id += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return id;
-}
-const exportCSV = () => {
-    dt.value.exportCSV();
-};
-const confirmDeleteSelected = () => {
-    deleteProductsDialog.value = true;
-};
-const deletedataLulusan = () => {
-    products.value = products.value.filter(val => !dataLulusan.value.includes(val));
-    deleteProductsDialog.value = false;
-    dataLulusan.value = null;
-    toast.add({ severity: 'success', summary: 'Successful', detail: 'Products Deleted', life: 3000 });
-};
-
-const getStatusLabel = (status) => {
-    switch (status) {
-        case 'INSTOCK':
-            return 'success';
-
-        case 'LOWSTOCK':
-            return 'warn';
-
-        case 'OUTOFSTOCK':
-            return 'danger';
-
-        default:
-            return null;
-    }
-};
-
-
-
-import Select from 'primevue/select';
-
-// select tahun ijazah
-const selectedCity = ref();
-const cities = ref([
-    { name: '2023/2024', code: '20232' },
-    { name: '2022/2023', code: '20222' },
-    { name: '2021/2022', code: '20212' },
-    { name: '2022/2021', code: '20202' },
-    { name: '2019/2020', code: '20192' }
-]);
-const selectedJurusan = ref();
-const jurusan = ref([
-    { name: 'Teknik Kendaraan Ringan', code: 'TKR' },
-    { name: 'Teknik Mesin Sepeda Motor', code: 'TSM' },
-    { name: 'Teknik Komputer dan Jaringan', code: 'TKJ' },
-    { name: 'Otomatisasi Perkantoran', code: 'OTKP' },
-    { name: 'AKuntansi Lembaga', code: 'AKL' }
-]);
-
-const capaianPenilaian = ref([
-    {
-        namaMapel: "Pendidikan Agama Islam dan Budi Pekerti",
-        smt:
-        {
-            satu: 90,
-            dua: 50,
-            tiga: 60,
-            empat: 79,
-            lima: 79,
-            enam: 79,
-        }
-
-    },
-    {
-        namaMapel: "Pendidikan Pancasila dan Kewarganegaraan",
-        smt:
-        {
-            satu: 90,
-            dua: 50,
-            tiga: 60,
-            empat: 79,
-            lima: 79,
-            enam: 79,
-        }
-
-    },
-    {
-        namaMapel: "Bahasa Indonesia",
-        smt:
-        {
-            satu: 90,
-            dua: 50,
-            tiga: 60,
-            empat: 79,
-            lima: 79,
-            enam: 79,
-        }
-
-    },
-    {
-        namaMapel: "Bahasa Inggris",
-        smt:
-        {
-            satu: 90,
-            dua: 50,
-            tiga: 60,
-            empat: 79,
-            lima: 79,
-            enam: 79,
-        }
-
-    },
-    {
-        namaMapel: "Matematika (Umum)",
-        smt:
-        {
-            satu: 90,
-            dua: 50,
-            tiga: 60,
-            empat: 79,
-            lima: 79,
-            enam: 79,
-        }
-
-    },
-    {
-        namaMapel: "Muatan Lokal Bahasa Daerah",
-        smt:
-        {
-            satu: 90,
-            dua: 50,
-            tiga: 60,
-            empat: 79,
-            lima: 79,
-            enam: 79,
-        }
-
-    },
-    {
-        namaMapel: "Pendidikan Jasmani, Olahraga, dan Kesehatan",
-        smt:
-        {
-            satu: 90,
-            dua: 50,
-            tiga: 60,
-            empat: 79,
-            lima: 79,
-            enam: 79,
-        }
-
-    },
-])
-</script>

@@ -8,12 +8,9 @@ import DatePicker from 'primevue/datepicker';
 
 import Button from 'primevue/button';
 
-
 import Toast from 'primevue/toast';
 import { useToast } from 'primevue/usetoast';
 const toast = useToast();
-
-
 
 import Textarea from 'primevue/textarea';
 
@@ -24,9 +21,6 @@ import InputMask from 'primevue/inputmask';
 import Card from 'primevue/card';
 import router from '@/router';
 
-
-
-
 const alamatLengkap = ref({
     alamatJalan: '',
     rt: '',
@@ -35,18 +29,17 @@ const alamatLengkap = ref({
     kec: '',
     kab: '',
     prov: ''
-})
+});
 // Model Peserta Didik
 const mapel = ref({
-    pembelajaran_id: "",
-    rombongan_belajar_id: "",
-    mata_pelajaran_id: "",
-    semester_id: "",
-    ptk_terdaftar_id: "",
-    status_di_kurikulum: "",
-    nama_mata_pelajaran: "",
-    induk_pembelajaran: "",
-
+    pembelajaran_id: '',
+    rombongan_belajar_id: '',
+    mata_pelajaran_id: '',
+    semester_id: '',
+    ptk_terdaftar_id: '',
+    status_di_kurikulum: '',
+    nama_mata_pelajaran: '',
+    induk_pembelajaran: ''
 });
 
 // Model Peserta Didik Pelengkap
@@ -65,12 +58,12 @@ const mapelPelengkap = ref({
 });
 
 // Opsi Dropdown
-const selectedjenisKelaminOptions = ref()
+const selectedjenisKelaminOptions = ref();
 const jenisKelaminOptions = ref([
     { label: 'Laki-Laki', value: 'L' },
     { label: 'Perempuan', value: 'P' }
 ]);
-const selectedAgamaOptions = ref()
+const selectedAgamaOptions = ref();
 const agamaOptions = ref([
     { label: 'Islam', value: 'Islam' },
     { label: 'Kristen', value: 'Kristen' },
@@ -97,14 +90,8 @@ const submitForm = () => {
 // };
 
 const batal = () => {
-    router.push({ name: 'readSiswa' })
-}
-
-
-
-
-
-
+    router.push({ name: 'readSiswa' });
+};
 </script>
 
 <template>
@@ -121,27 +108,21 @@ const batal = () => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-gray-700" for="nama_mata_pelajaran">Nama Mata pelajaran</label>
-                    <InputText v-model="mapel.nama_mata_pelajaran" fluid name="nama_mata_pelajaran"
-                        id="nama_mata_pelajaran" placeholder="Masukan nama" />
+                    <InputText v-model="mapel.nama_mata_pelajaran" fluid name="nama_mata_pelajaran" id="nama_mata_pelajaran" placeholder="Masukan nama" />
                 </div>
                 <div class="w-full">
                     <label class="block text-gray-700">Guru</label>
-                    <Select v-model="selectedjenisKelaminOptions" :options="jenisKelaminOptions"
-                        placeholder="Pilih Guru" optionLabel="label" class="w-full" />
+                    <Select v-model="selectedjenisKelaminOptions" :options="jenisKelaminOptions" placeholder="Pilih Guru" optionLabel="label" class="w-full" />
                 </div>
                 <div class="w-full">
                     <label class="block text-gray-700">Kelas</label>
-                    <Select v-model="selectedjenisKelaminOptions" :options="jenisKelaminOptions"
-                        placeholder="Pilih Guru" optionLabel="label" class="w-full" />
+                    <Select v-model="selectedjenisKelaminOptions" :options="jenisKelaminOptions" placeholder="Pilih Guru" optionLabel="label" class="w-full" />
                 </div>
             </div>
         </section>
 
-        
-
         <div class="flex justify-end space-x-4">
-            <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                @click="submitForm">Simpan</button>
+            <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" @click="submitForm">Simpan</button>
             <button class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400" @click="batal">Batal</button>
         </div>
     </div>

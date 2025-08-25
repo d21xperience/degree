@@ -1,7 +1,3 @@
-<template>
-    <Select v-model="internalValue" :options="networkTypeOptions" fluid placeholder="Pilih tipe Network" option-label="Type" option-value="Type" />
-</template>
-
 <script setup>
 import { ref, watch } from 'vue';
 const internalValue = ref();
@@ -40,3 +36,7 @@ watch(
     { immediate: true }
 );
 </script>
+
+<template>
+    <Select v-model="internalValue" :options="networkTypeOptions" fluid placeholder="Pilih tipe Network" option-label="Type" option-value="Type" />
+</template>

@@ -24,7 +24,7 @@ import WhyTrustUsWidget from '@/components/landing/WhyTrustUsWidget.vue';
             <TestimonialsWidget />
             <ContactUsWidget />
             <CallToActionWidget />
-            <WhatsAppFloat phone="6289602897265"/>
+            <WhatsAppFloat phone="6289602897265" />
             <FooterWidget />
         </div>
     </div>

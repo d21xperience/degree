@@ -1,100 +1,3 @@
-<template>
-    <div class="">
-        <!-- <div class="flex flex-wrap justify-between my-2">
-            <h4 class="font-bold text-2xl lg:text-lg my-2">Daftar Jaringan Blockhain </h4>
-        </div> -->
-        <Toolbar class="mb-6">
-            <template #start>
-                <Button icon="pi pi-plus" severity="success" class="mr-2" @click="addBCNetwork" :disabled="selectedBCNetwork.length" />
-                <Button icon="pi pi-pencil" severity="warn" @click="editBCNetwork" :disabled="!selectedBCNetwork || !selectedBCNetwork.length || selectedBCNetwork.length >= 2" class="mr-2" />
-                <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!selectedBCNetwork || !selectedBCNetwork.length" />
-            </template>
-
-            <template #end>
-                <IconField>
-                    <InputIcon>
-                        <i class="pi pi-search" />
-                    </InputIcon>
-                    <InputText v-model="filters['global'].value" placeholder="Search..." />
-                </IconField>
-            </template>
-        </Toolbar>
-
-        <DataTable
-            ref="dt"
-            v-model:selection="selectedBCNetwork"
-            :value="BCNetworks"
-            dataKey="Type"
-            :paginator="true"
-            :rows="10"
-            :filters="filters"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rowsPerPageOptions="[5, 10, 25]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} BCNetworks"
-        >
-            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-            <Column field="Name" header="Nama Jaringan" bodyStyle="width:20rem" />
-            <Column field="Architecture" header="Arsitektur" />
-            <Column field="Type" header="Tipe Jaringan" sortable />
-            <Column field="ChainId" header="Chain ID" />
-            <Column field="RPCURL" header="RPC URL" />
-            <Column field="ExplorerURL" header="Explorer URL" />
-        </DataTable>
-    </div>
-
-    <!--  -------------------------------------------- -->
-    <!--  -------------------------------------------- -->
-    <!-- EDIT BCNETWORK DIALOG -->
-    <Dialog v-model:visible="BCNetworkDialog" :header="headerTitle" :modal="true" :style="{ width: '450px' }">
-        <div class="flex flex-col gap-4">
-            <label class="font-bold">Nama Jaringan</label>
-            <InputText v-model.trim="editingItem.Name" required />
-
-            <label class="font-bold">Jaringan</label>
-            <Select :options="architecture" option-label="name"/>
-
-            <label class="font-bold">Tipe Jaringan</label>
-            <!-- <InputText v-model.trim="editingItem.Type" required /> -->
-            <NetworkTypeComponent v-model:modelValue="editingItem.Type" :initialValue="editingItem.Type" />
-            <label class="font-bold">RPC URL</label>
-            <div class="flex justify-between space-x-2">
-                <div class="w-full">
-                    <InputText v-model.trim="editingItem.RPCURL" required fluid />
-                </div>
-                <Button label="Test" severity="secondary" @click="testNetwork" />
-            </div>
-
-            <label class="font-bold">Chain ID</label>
-            <InputText v-model.trim="editingItem.ChainId" required :disabled="true" />
-
-            <label class="font-bold">Explorer URL</label>
-            <InputText v-model.trim="editingItem.ExplorerURL" />
-        </div>
-
-        <template #footer>
-            <Button label="Cancel" text @click="hideDialog" />
-            <Button v-if="isEdit" icon="pi pi-save" label="Update" @click="handleEditBCNetwork" />
-            <Button v-else icon="pi pi-save" label="Save" @click="handleAddBCNetwork" />
-        </template>
-    </Dialog>
-
-    <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
-        <div class="flex items-center gap-4">
-            <i class="pi pi-exclamation-triangle !text-3xl" />
-            <span v-if="selectedBCNetwork.length == 1"
-                >Apakah jaringan <span class="font-medium">{{ selectedBCNetwork[0].Name }} </span> akan dihapus?</span
-            >
-            <span v-else> Apakah jaringan yang dipilih akan dihapus? </span>
-        </div>
-        <template #footer>
-            <Button label="Tidak" icon="pi pi-times" text @click="deleteDialog = false" />
-            <Button label="Ya" icon="pi pi-check" text @click="handleDeleteBCNetwork" />
-        </template>
-    </Dialog>
-    <!-- END OF DIALOGBOX FOR EDIT DATA -->
-    <!--  -------------------------------------------- -->
-</template>
-
 <script setup>
 import NetworkTypeComponent from '@/components/scComponent/NetworkTypeComponent.vue';
 import { useSCService } from '@/composables/useSCService';
@@ -115,7 +18,7 @@ const deleteDialog = ref(false);
 const BCPlatformSelected = computed(() => scService.getNetowrkPlatform());
 watch(BCPlatformSelected, (newVal) => {
     // console.log(newVal);
-    filters['architecture'];
+    filters.value['architecture'];
 });
 onMounted(async () => {
     BCNetworks.value = await scService.fetchBCNetworks();
@@ -224,3 +127,100 @@ const architecture = ref([
     }
 ]);
 </script>
+
+<template>
+    <div class="">
+        <!-- <div class="flex flex-wrap justify-between my-2">
+            <h4 class="font-bold text-2xl lg:text-lg my-2">Daftar Jaringan Blockhain </h4>
+        </div> -->
+        <Toolbar class="mb-6">
+            <template #start>
+                <Button icon="pi pi-plus" severity="success" class="mr-2" @click="addBCNetwork" :disabled="selectedBCNetwork.length" />
+                <Button icon="pi pi-pencil" severity="warn" @click="editBCNetwork" :disabled="!selectedBCNetwork || !selectedBCNetwork.length || selectedBCNetwork.length >= 2" class="mr-2" />
+                <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!selectedBCNetwork || !selectedBCNetwork.length" />
+            </template>
+
+            <template #end>
+                <IconField>
+                    <InputIcon>
+                        <i class="pi pi-search" />
+                    </InputIcon>
+                    <InputText v-model="filters['global'].value" placeholder="Search..." />
+                </IconField>
+            </template>
+        </Toolbar>
+
+        <DataTable
+            ref="dt"
+            v-model:selection="selectedBCNetwork"
+            :value="BCNetworks"
+            dataKey="Type"
+            :paginator="true"
+            :rows="10"
+            :filters="filters"
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rowsPerPageOptions="[5, 10, 25]"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} BCNetworks"
+        >
+            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
+            <Column field="Name" header="Nama Jaringan" bodyStyle="width:20rem" />
+            <Column field="Architecture" header="Arsitektur" />
+            <Column field="Type" header="Tipe Jaringan" sortable />
+            <Column field="ChainId" header="Chain ID" />
+            <Column field="RPCURL" header="RPC URL" />
+            <Column field="ExplorerURL" header="Explorer URL" />
+        </DataTable>
+    </div>
+
+    <!--  -------------------------------------------- -->
+    <!--  -------------------------------------------- -->
+    <!-- EDIT BCNETWORK DIALOG -->
+    <Dialog v-model:visible="BCNetworkDialog" :header="headerTitle" :modal="true" :style="{ width: '450px' }">
+        <div class="flex flex-col gap-4">
+            <label class="font-bold">Nama Jaringan</label>
+            <InputText v-model.trim="editingItem.Name" required />
+
+            <label class="font-bold">Jaringan</label>
+            <Select :options="architecture" option-label="name" />
+
+            <label class="font-bold">Tipe Jaringan</label>
+            <!-- <InputText v-model.trim="editingItem.Type" required /> -->
+            <NetworkTypeComponent v-model:modelValue="editingItem.Type" :initialValue="editingItem.Type" />
+            <label class="font-bold">RPC URL</label>
+            <div class="flex justify-between space-x-2">
+                <div class="w-full">
+                    <InputText v-model.trim="editingItem.RPCURL" required fluid />
+                </div>
+                <Button label="Test" severity="secondary" @click="testNetwork" />
+            </div>
+
+            <label class="font-bold">Chain ID</label>
+            <InputText v-model.trim="editingItem.ChainId" required :disabled="true" />
+
+            <label class="font-bold">Explorer URL</label>
+            <InputText v-model.trim="editingItem.ExplorerURL" />
+        </div>
+
+        <template #footer>
+            <Button label="Cancel" text @click="hideDialog" />
+            <Button v-if="isEdit" icon="pi pi-save" label="Update" @click="handleEditBCNetwork" />
+            <Button v-else icon="pi pi-save" label="Save" @click="handleAddBCNetwork" />
+        </template>
+    </Dialog>
+
+    <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
+        <div class="flex items-center gap-4">
+            <i class="pi pi-exclamation-triangle !text-3xl" />
+            <span v-if="selectedBCNetwork.length == 1"
+                >Apakah jaringan <span class="font-medium">{{ selectedBCNetwork[0].Name }} </span> akan dihapus?</span
+            >
+            <span v-else> Apakah jaringan yang dipilih akan dihapus? </span>
+        </div>
+        <template #footer>
+            <Button label="Tidak" icon="pi pi-times" text @click="deleteDialog = false" />
+            <Button label="Ya" icon="pi pi-check" text @click="handleDeleteBCNetwork" />
+        </template>
+    </Dialog>
+    <!-- END OF DIALOGBOX FOR EDIT DATA -->
+    <!--  -------------------------------------------- -->
+</template>

@@ -1,3 +1,7 @@
+<script setup>
+// Tidak perlu logic tambahan untuk komponen sederhana ini
+</script>
+
 <template>
     <section class="cta-section">
         <div class="cta-content">
@@ -7,10 +11,6 @@
         </div>
     </section>
 </template>
-
-<script setup>
-// Tidak perlu logic tambahan untuk komponen sederhana ini
-</script>
 
 <style scoped>
 .cta-section {

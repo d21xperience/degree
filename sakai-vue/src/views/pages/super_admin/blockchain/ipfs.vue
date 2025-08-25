@@ -1,172 +1,3 @@
-<template>
-    <div class="ipfs-admin">
-        <h2><i class="pi pi-cog" style="font-size: 1.5rem;"></i> IPFS Admin Configuration</h2>
-
-        <!-- Status IPFS Node -->
-        <div class="status-card" :class="nodeStatus.class">
-            <div class="status-header">
-                <h3>Node Status</h3>
-                <span class="status-badge">{{ nodeStatus.text }}</span>
-            </div>
-            <div v-if="nodeInfo" class="status-details">
-                <div class="detail-item">
-                    <label>ID:</label>
-                    <span class="monospace">{{ nodeInfo.id }}</span>
-                </div>
-                <div class="detail-item">
-                    <label>Version:</label>
-                    <span>{{ nodeInfo.version }}</span>
-                </div>
-                <div class="detail-item">
-                    <label>Peers:</label>
-                    <span>{{ nodeInfo.peers }}</span>
-                </div>
-                <div class="detail-item">
-                    <label>Repository:</label>
-                    <span>{{ formatBytes(nodeInfo.repoSize) }} / {{ formatBytes(nodeInfo.repoSizeMax) }}</span>
-                </div>
-            </div>
-            <Button @click="checkNodeStatus" :disabled="isCheckingStatus" icon="pi pi-sync" :class="{ 'pi pi-spin': isCheckingStatus }" label="Refresh Status" />
-        </div>
-
-        <!-- Konfigurasi Koneksi -->
-        <div class="config-section">
-            <h3><i class="pi pi-server" style="font-size: 1.5rem;"></i> Connection Configuration</h3>
-            <form @submit.prevent="updateConnectionConfig">
-                <div class="form-group">
-                    <label>API Endpoint</label>
-                    <input type="text" v-model="connectionConfig.apiEndpoint" required />
-                </div>
-                <div class="form-group">
-                    <label>Gateway URL</label>
-                    <input type="text" v-model="connectionConfig.gatewayUrl" required />
-                </div>
-                <div class="form-group">
-                    <label>Swarm Ports</label>
-                    <InputText v-model="connectionConfig.swarmPorts" placeholder="e.g., 4001,4002,4003" fluid />
-                </div>
-                <div class="form-actions">
-                    <Button :disabled="isSavingConfig" icon="pi pi-save" label="Save Configuration" />
-                    <Button type="button" @click="resetConfig" class="secondary" icon="pi pi-undo" label="Reset" severity="secondary" />
-                </div>
-            </form>
-        </div>
-
-        <!-- Manajemen Peer -->
-        <div class="config-section">
-            <h3><i class="fas fa-network-wired"></i> Peer Management</h3>
-            <div class="peer-controls">
-                <input type="text" v-model="newPeerAddress" placeholder="/ip4/127.0.0.1/tcp/4001/p2p/QmPeerID" class="peer-input" />
-                <button @click="addPeer" :disabled="!newPeerAddress || isManagingPeers"><i class="fas fa-plus"></i> Add Peer</button>
-            </div>
-
-            <div class="peer-list">
-                <div v-if="peers.length === 0" class="empty-state">No peers configured</div>
-                <div v-for="peer in peers" :key="peer.id" class="peer-item">
-                    <div class="peer-info">
-                        <span class="peer-id">{{ peer.id }}</span>
-                        <span class="peer-address">{{ peer.address }}</span>
-                    </div>
-                    <button @click="removePeer(peer.id)" class="danger small">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Manajemen Pin -->
-        <div class="config-section">
-            <h3><i class="pi pi-thumbtack" style="font-size: 1.5rem;"></i> Pin Management</h3>
-            <div class="pin-controls">
-                <input type="text" v-model="pinCid" placeholder="Enter CID to pin" class="cid-input" />
-                <Button @click="pinContent" :disabled="!pinCid || isManagingPins" icon="pi pi-thumbtack" label="Pin Content" />
-                <Button @click="unpinContent" :disabled="!pinCid || isManagingPins" severity="danger" icon="pi pi-trash-alt" label="Unpin" />
-            </div>
-
-            <div class="pin-list">
-                <div v-if="pinnedItems.length === 0" class="empty-state">No pinned items</div>
-                <div v-for="item in pinnedItems" :key="item.cid" class="pin-item">
-                    <span class="pin-cid">{{ item.cid }}</span>
-                    <span class="pin-size">{{ formatBytes(item.size) }}</span>
-                    <span class="pin-type">{{ item.type || 'unknown' }}</span>
-                    <button @click="showPinInfo(item.cid)" class="small"><i class="fas fa-info-circle"></i> Details</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Advanced Configuration -->
-        <div class="config-section advanced">
-            <h3 @click="showAdvanced = !showAdvanced">
-                <i class="pi" :class="showAdvanced ? 'pi-chevron-down' : 'pi-chevron-right'"></i>
-                Advanced Configuration
-            </h3>
-            <div v-if="showAdvanced" class="advanced-content">
-                <div class="form-group">
-                    <label>GC Interval (minutes)</label>
-                    <input type="number" v-model="advancedConfig.gcInterval" />
-                </div>
-                <div class="form-group">
-                    <label>Routing Type</label>
-                    <select v-model="advancedConfig.routingType">
-                        <option value="dht">DHT (distributed)</option>
-                        <option value="dhtclient">DHT Client</option>
-                        <option value="none">None</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Enable Auto-NAT</label>
-                    <input type="checkbox" v-model="advancedConfig.autoNAT" />
-                </div>
-                <div class="form-group">
-                    <label>Enable PubSub</label>
-                    <input type="checkbox" v-model="advancedConfig.pubSub" />
-                </div>
-                <button @click="saveAdvancedConfig" :disabled="isSavingAdvanced"><i class="fas fa-save"></i> Save Advanced Config</button>
-            </div>
-        </div>
-
-        <!-- Modal untuk detail pin -->
-        <div v-if="currentPinDetail" class="modal-backdrop" @click.self="currentPinDetail = null">
-            <div class="modal">
-                <div class="modal-header">
-                    <h3>Pin Details</h3>
-                    <button @click="currentPinDetail = null" class="close-button">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="modal-content">
-                    <div class="detail-grid">
-                        <div class="detail-row">
-                            <label>CID:</label>
-                            <span class="monospace">{{ currentPinDetail.cid }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <label>Size:</label>
-                            <span>{{ formatBytes(currentPinDetail.size) }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <label>Type:</label>
-                            <span>{{ currentPinDetail.type || 'unknown' }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <label>Pinned At:</label>
-                            <span>{{ formatDate(currentPinDetail.created) }}</span>
-                        </div>
-                        <div class="detail-row">
-                            <label>References:</label>
-                            <span>{{ currentPinDetail.refs || 'none' }}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-actions">
-                    <button @click="unpinContent(currentPinDetail.cid)" class="danger"><i class="fas fa-thumbtack"></i> Unpin This Content</button>
-                    <button @click="currentPinDetail = null">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</template>
-
 <script setup>
 import { formatBytes, formatDate } from '@/utils/format'; // Anda perlu membuat utility functions ini
 import { computed, onMounted, ref } from 'vue';
@@ -415,6 +246,175 @@ const saveAdvancedConfig = async () => {
     }
 };
 </script>
+
+<template>
+    <div class="ipfs-admin">
+        <h2><i class="pi pi-cog" style="font-size: 1.5rem"></i> IPFS Admin Configuration</h2>
+
+        <!-- Status IPFS Node -->
+        <div class="status-card" :class="nodeStatus.class">
+            <div class="status-header">
+                <h3>Node Status</h3>
+                <span class="status-badge">{{ nodeStatus.text }}</span>
+            </div>
+            <div v-if="nodeInfo" class="status-details">
+                <div class="detail-item">
+                    <label>ID:</label>
+                    <span class="monospace">{{ nodeInfo.id }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Version:</label>
+                    <span>{{ nodeInfo.version }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Peers:</label>
+                    <span>{{ nodeInfo.peers }}</span>
+                </div>
+                <div class="detail-item">
+                    <label>Repository:</label>
+                    <span>{{ formatBytes(nodeInfo.repoSize) }} / {{ formatBytes(nodeInfo.repoSizeMax) }}</span>
+                </div>
+            </div>
+            <Button @click="checkNodeStatus" :disabled="isCheckingStatus" icon="pi pi-sync" :class="{ 'pi pi-spin': isCheckingStatus }" label="Refresh Status" />
+        </div>
+
+        <!-- Konfigurasi Koneksi -->
+        <div class="config-section">
+            <h3><i class="pi pi-server" style="font-size: 1.5rem"></i> Connection Configuration</h3>
+            <form @submit.prevent="updateConnectionConfig">
+                <div class="form-group">
+                    <label>API Endpoint</label>
+                    <input type="text" v-model="connectionConfig.apiEndpoint" required />
+                </div>
+                <div class="form-group">
+                    <label>Gateway URL</label>
+                    <input type="text" v-model="connectionConfig.gatewayUrl" required />
+                </div>
+                <div class="form-group">
+                    <label>Swarm Ports</label>
+                    <InputText v-model="connectionConfig.swarmPorts" placeholder="e.g., 4001,4002,4003" fluid />
+                </div>
+                <div class="form-actions">
+                    <Button :disabled="isSavingConfig" icon="pi pi-save" label="Save Configuration" />
+                    <Button type="button" @click="resetConfig" class="secondary" icon="pi pi-undo" label="Reset" severity="secondary" />
+                </div>
+            </form>
+        </div>
+
+        <!-- Manajemen Peer -->
+        <div class="config-section">
+            <h3><i class="fas fa-network-wired"></i> Peer Management</h3>
+            <div class="peer-controls">
+                <input type="text" v-model="newPeerAddress" placeholder="/ip4/127.0.0.1/tcp/4001/p2p/QmPeerID" class="peer-input" />
+                <button @click="addPeer" :disabled="!newPeerAddress || isManagingPeers"><i class="fas fa-plus"></i> Add Peer</button>
+            </div>
+
+            <div class="peer-list">
+                <div v-if="peers.length === 0" class="empty-state">No peers configured</div>
+                <div v-for="peer in peers" :key="peer.id" class="peer-item">
+                    <div class="peer-info">
+                        <span class="peer-id">{{ peer.id }}</span>
+                        <span class="peer-address">{{ peer.address }}</span>
+                    </div>
+                    <button @click="removePeer(peer.id)" class="danger small">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Manajemen Pin -->
+        <div class="config-section">
+            <h3><i class="pi pi-thumbtack" style="font-size: 1.5rem"></i> Pin Management</h3>
+            <div class="pin-controls">
+                <input type="text" v-model="pinCid" placeholder="Enter CID to pin" class="cid-input" />
+                <Button @click="pinContent" :disabled="!pinCid || isManagingPins" icon="pi pi-thumbtack" label="Pin Content" />
+                <Button @click="unpinContent" :disabled="!pinCid || isManagingPins" severity="danger" icon="pi pi-trash-alt" label="Unpin" />
+            </div>
+
+            <div class="pin-list">
+                <div v-if="pinnedItems.length === 0" class="empty-state">No pinned items</div>
+                <div v-for="item in pinnedItems" :key="item.cid" class="pin-item">
+                    <span class="pin-cid">{{ item.cid }}</span>
+                    <span class="pin-size">{{ formatBytes(item.size) }}</span>
+                    <span class="pin-type">{{ item.type || 'unknown' }}</span>
+                    <button @click="showPinInfo(item.cid)" class="small"><i class="fas fa-info-circle"></i> Details</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced Configuration -->
+        <div class="config-section advanced">
+            <h3 @click="showAdvanced = !showAdvanced">
+                <i class="pi" :class="showAdvanced ? 'pi-chevron-down' : 'pi-chevron-right'"></i>
+                Advanced Configuration
+            </h3>
+            <div v-if="showAdvanced" class="advanced-content">
+                <div class="form-group">
+                    <label>GC Interval (minutes)</label>
+                    <input type="number" v-model="advancedConfig.gcInterval" />
+                </div>
+                <div class="form-group">
+                    <label>Routing Type</label>
+                    <select v-model="advancedConfig.routingType">
+                        <option value="dht">DHT (distributed)</option>
+                        <option value="dhtclient">DHT Client</option>
+                        <option value="none">None</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Enable Auto-NAT</label>
+                    <input type="checkbox" v-model="advancedConfig.autoNAT" />
+                </div>
+                <div class="form-group">
+                    <label>Enable PubSub</label>
+                    <input type="checkbox" v-model="advancedConfig.pubSub" />
+                </div>
+                <button @click="saveAdvancedConfig" :disabled="isSavingAdvanced"><i class="fas fa-save"></i> Save Advanced Config</button>
+            </div>
+        </div>
+
+        <!-- Modal untuk detail pin -->
+        <div v-if="currentPinDetail" class="modal-backdrop" @click.self="currentPinDetail = null">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3>Pin Details</h3>
+                    <button @click="currentPinDetail = null" class="close-button">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-content">
+                    <div class="detail-grid">
+                        <div class="detail-row">
+                            <label>CID:</label>
+                            <span class="monospace">{{ currentPinDetail.cid }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>Size:</label>
+                            <span>{{ formatBytes(currentPinDetail.size) }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>Type:</label>
+                            <span>{{ currentPinDetail.type || 'unknown' }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>Pinned At:</label>
+                            <span>{{ formatDate(currentPinDetail.created) }}</span>
+                        </div>
+                        <div class="detail-row">
+                            <label>References:</label>
+                            <span>{{ currentPinDetail.refs || 'none' }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button @click="unpinContent(currentPinDetail.cid)" class="danger"><i class="fas fa-thumbtack"></i> Unpin This Content</button>
+                    <button @click="currentPinDetail = null">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
 
 <style scoped>
 .ipfs-admin {

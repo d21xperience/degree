@@ -20,7 +20,7 @@ export default defineConfig({
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url))
         }
-    },
+    }
     // server: {
     //     https: true // Aktifkan HTTPS dengan sertifikat self-signed
     // }

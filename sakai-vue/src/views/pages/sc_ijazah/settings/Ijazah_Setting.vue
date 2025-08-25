@@ -1,3 +1,57 @@
+<script setup>
+import { useFormOptions } from '@/composables/useFormOptions';
+import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
+import InputText from 'primevue/inputtext';
+import { useToast } from 'primevue/usetoast';
+import { onMounted, ref } from 'vue';
+const { listTahunAjaran, selectedTahunAjaran, initSelectedTahunAjaran, createInfoIjazah, fetchGuruTerdaftar, guruTerdaftarList } = useSekolahService();
+const { handleKeydown } = useFormOptions();
+const loading = ref(false);
+const isLoading = ref(false);
+const selectedPtk = ref();
+const ptk = ref();
+const ptkList = ref();
+const ijazahParam = ref({
+    tahun_ajaran_id: initSelectedTahunAjaran.value?.tahunAjaranId,
+    tempat_dikeluarkan_ijazah: '',
+    tgl_dikeluarkan_ijazah: '',
+    ptk_id: '',
+    kop_sekolah_url: ''
+});
+onMounted(async () => {
+    selectedTahunAjaran.value = initSelectedTahunAjaran.value;
+    await fetchGuruTerdaftar();
+    ptkList.value = guruTerdaftarList.value.map((item) => item.ptk);
+    // console.log(tes)
+    // console.log(ptk.value);
+});
+
+const toast = useToast();
+const fileupload = ref();
+
+function upload() {
+    fileupload.value.upload();
+}
+
+function onUpload() {
+    toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
+}
+
+const save = () => {
+    createInfoIjazah(ijazahParam.value);
+};
+const batal = () => {};
+const getPtk = (event) => {
+    setTimeout(() => {
+        if (!event.query.trim().length) {
+            ptk.value = ptkList.value;
+        } else {
+            ptk.value = ptkList.value.filter((item) => item.nama.toLowerCase().includes(event.query.toLowerCase()));
+        }
+    }, 250);
+};
+</script>
+
 <template>
     <div class="card">
         <div class="lg:flex lg:justify-between">
@@ -30,7 +84,7 @@
                 </div>
                 <div>
                     <label class="block" for="ptk-id">Kepala Sekolah</label>
-                    <AutoComplete v-model="selectedPtk" dropdown :suggestions="ptk" optionLabel="nama" fluid @complete="getPtk($event)" @keydown.space.prevent="handleKeydown"   />
+                    <AutoComplete v-model="selectedPtk" dropdown :suggestions="ptk" optionLabel="nama" fluid @complete="getPtk($event)" @keydown.space.prevent="handleKeydown" />
                 </div>
             </div>
         </section>
@@ -83,57 +137,3 @@
         </div>
     </div>
 </template>
-
-<script setup>
-import { useFormOptions } from '@/composables/useFormOptions';
-import { useSekolahService } from '@/composables/useSekolahService';
-import InputText from 'primevue/inputtext';
-import { useToast } from 'primevue/usetoast';
-import { onMounted, ref } from 'vue';
-const { listTahunAjaran, selectedTahunAjaran, initSelectedTahunAjaran, createInfoIjazah, fetchGuruTerdaftar, guruTerdaftarList } = useSekolahService();
-const { handleKeydown } = useFormOptions();
-const loading = ref(false);
-const isLoading = ref(false);
-const selectedPtk = ref();
-const ptk = ref();
-const ptkList = ref();
-const ijazahParam = ref({
-    tahun_ajaran_id: initSelectedTahunAjaran.value?.tahunAjaranId,
-    tempat_dikeluarkan_ijazah: '',
-    tgl_dikeluarkan_ijazah: '',
-    ptk_id: '',
-    kop_sekolah_url: ''
-});
-onMounted(async () => {
-    selectedTahunAjaran.value = initSelectedTahunAjaran.value;
-    await fetchGuruTerdaftar();
-    ptkList.value = guruTerdaftarList.value.map((item) => item.ptk);
-    // console.log(tes)
-    // console.log(ptk.value);
-});
-
-const toast = useToast();
-const fileupload = ref();
-
-function upload() {
-    fileupload.value.upload();
-}
-
-function onUpload() {
-    toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
-}
-
-const save = () => {
-    createInfoIjazah(ijazahParam.value);
-};
-const batal = () => {};
-const getPtk = (event) => {
-    setTimeout(() => {
-        if (!event.query.trim().length) {
-            ptk.value = ptkList.value;
-        } else {
-            ptk.value = ptkList.value.filter((item) => item.nama.toLowerCase().includes(event.query.toLowerCase()));
-        }
-    }, 250);
-};
-</script>

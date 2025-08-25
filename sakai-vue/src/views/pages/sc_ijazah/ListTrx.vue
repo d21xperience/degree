@@ -1,19 +1,3 @@
-<template>
-    <div class="p2 my-2">
-        <div>
-            <DataTable stripedRows :value="bcTransactions">
-                <Column field="ijazah.nama" header="Nama"></Column>
-                <Column field="degreeHash" header="Degree Hash"></Column>
-                <Column field="txHash" header="Trx Hash"></Column>
-                <!-- <Column field="bcType" header="BC Type"></Column> -->
-                <Column field="ipfsUrl" header="IPFS URL"></Column>
-                <Column field="ipfsUrl" header="BC URL"></Column>
-                <Column header="Created"></Column>
-            </DataTable>
-        </div>
-        <Toast />
-    </div>
-</template>
 <script setup>
 import { useSCService } from '@/composables/useSCService';
 import { onMounted, ref } from 'vue';
@@ -43,3 +27,19 @@ onMounted(async () => {
     console.log(bcTransactions.value);
 });
 </script>
+<template>
+    <div class="p2 my-2">
+        <div>
+            <DataTable stripedRows :value="bcTransactions">
+                <Column field="ijazah.nama" header="Nama"></Column>
+                <Column field="degreeHash" header="Degree Hash"></Column>
+                <Column field="txHash" header="Trx Hash"></Column>
+                <!-- <Column field="bcType" header="BC Type"></Column> -->
+                <Column field="ipfsUrl" header="IPFS URL"></Column>
+                <Column field="ipfsUrl" header="BC URL"></Column>
+                <Column header="Created"></Column>
+            </DataTable>
+        </div>
+        <Toast />
+    </div>
+</template>

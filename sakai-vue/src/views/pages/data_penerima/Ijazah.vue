@@ -1,3 +1,123 @@
+<script setup>
+import IssueDegreeButton from '@/components/IssueDegreeButton.vue';
+import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
+import { useUtils } from '@/composables/useUtils';
+import { FilterMatchMode } from '@primevue/core/api';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
+import IconField from 'primevue/iconfield';
+import InputIcon from 'primevue/inputicon';
+import InputText from 'primevue/inputtext';
+import Toolbar from 'primevue/toolbar';
+import { computed, onMounted, ref, watch } from 'vue';
+const { formatterDateID } = useUtils();
+const visible = ref(false);
+const tingkatPendidikanOptions = ref();
+const selectedSiswa = ref();
+const siswa = ref([]);
+const bentukPendidikan = ref('smk');
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    'kelas.nmKelas': { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
+const { getDns, deleteDns, initSelectedTahunAjaran, fetchSekolah } = useSekolahService();
+const tahunAjaranId = computed(() => initSelectedTahunAjaran.value.tahunAjaranId);
+watch(initSelectedTahunAjaran, async (e) => {
+    // console.log(`${e.tahunAjaranId}`)
+    siswa.value = await getDns(`${e.tahunAjaranId}`);
+    namaKelas.value = getNmKelas(siswa);
+});
+
+// ==================================
+const scData = ref({
+    degreeData: null,
+    sekolah: null,
+    ipfsUrl: null,
+    transcript: null
+});
+// const selectedJurusan = ref()
+import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
+import UploadIjazah from '@/components/UploadIjazah.vue';
+import router from '@/router';
+// Dummy data (bisa kamu ambil dari API atau input form)
+// const degreeData = ref({
+//     nama: '',
+//     nisn: '',
+//     nik: '3211142109820004',
+//     tahun_lulus: 2024,
+//     major: 'Rekayasa Perangkat Lunak'
+// })
+const sekolah = ref('SMK PASUNDAN JATINANGOR');
+
+const ipfsUrl = ref('https://ipfs.io/ipfs/Qm...examplehash');
+const transcript = ref({
+    subjects: ['Matematika', 'Pemrograman', 'Basis Data'],
+    grades: [85, 90, 88]
+});
+const contract = null;
+
+watch(selectedSiswa, (newVal) => {
+    // if (newVal.length === 1) {
+    //     console.log(newVal[0].pesertaDidik.nmSiswa)
+    //     degreeData.value.nama = newVal[0].pesertaDidik.nmSiswa
+    //     degreeData.value.nisn = newVal[0].pesertaDidik.nisn
+    //     degreeData.value.tahun_lulus = 2023
+    // }
+});
+const namaKelas = ref();
+
+const getNmKelas = (data) => {
+    return [...new Set(data.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
+        nama: nm,
+        value: nm.toLowerCase()
+    }));
+};
+
+const editIjazah = async () => {
+    const sekolah = await fetchSekolah();
+    const nmSekolah = sekolah.sekolah?.nama.toLowerCase().replace(/\s+/g, '');
+    // console.log(selectedSiswa.value)
+    router.push({
+        name: 'editIjazah',
+        query: {
+            pesertaDidikId: selectedSiswa.value[0]?.pesertaDidikId.toString()
+        },
+        params: {
+            sekolah: nmSekolah
+        }
+    });
+};
+const confirmDeleteSelected = () => {
+    visible.value = true;
+};
+const deleteData = () => {
+    siswa.value = siswa.value.filter((val) => !selectedSiswa.value.includes(val));
+    if (selectedSiswa.value.length == 1) {
+        deleteDns(selectedSiswa.value[0].pesertaDidikId);
+        // } else if (selectedSiswa.value.length > 1) {
+        //     const ids = selectedSiswa.value.map((item) => item.anggotaRombelId)
+        //     deleteBatchSiswaAktif(ids)
+    }
+};
+const closeDialog = () => {
+    selectedSiswa.value = null;
+};
+const onSubmitIjazah = () => {
+    deleteData();
+};
+// ==================================
+
+onMounted(async () => {
+    siswa.value = await getDns(initSelectedTahunAjaran.value?.tahunAjaranId);
+    // console.log(siswa.value)
+    namaKelas.value = [...new Set(siswa.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
+        nama: nm,
+        value: nm.toLowerCase()
+    }));
+    // namaKelas.value = getNmKelas(siswa)
+});
+</script>
+
 <template>
     <div class="">
         <div class=" ">
@@ -76,128 +196,7 @@
             <DialogIjazah :peserta-didik="selectedSiswa" :visible="visible" />
         </Dialog>  -->
         <DialogConfirmDelete message="Apakah data ini akan dihapus?" v-model:visible="visible" @confirm="deleteData" @closeDialog="closeDialog" />
-        <!-- <DialogImport :visible="dialogImport" /> -->
 
         <UploadIjazah />
     </div>
 </template>
-
-<script setup>
-import IssueDegreeButton from '@/components/IssueDegreeButton.vue';
-import { useSekolahService } from '@/composables/useSekolahService';
-import { useUtils } from '@/composables/useUtils';
-import { FilterMatchMode } from '@primevue/core/api';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-import InputText from 'primevue/inputtext';
-import Toolbar from 'primevue/toolbar';
-import { computed, onMounted, ref, watch } from 'vue';
-const { formatterDateID } = useUtils();
-const visible = ref(false);
-const tingkatPendidikanOptions = ref();
-const selectedSiswa = ref();
-const siswa = ref([]);
-const bentukPendidikan = ref('smk');
-const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    'kelas.nmKelas': { value: null, matchMode: FilterMatchMode.CONTAINS }
-});
-const { getDns, deleteDns, initSelectedTahunAjaran, fetchSekolah } = useSekolahService();
-const tahunAjaranId = computed(() => initSelectedTahunAjaran.value.tahunAjaranId);
-watch(initSelectedTahunAjaran, async (e) => {
-    // console.log(`${e.tahunAjaranId}`);
-    siswa.value = await getDns(`${e.tahunAjaranId}`);
-    namaKelas.value = getNmKelas(siswa);
-});
-
-// ==================================
-const scData = ref({
-    degreeData: null,
-    sekolah: null,
-    ipfsUrl: null,
-    transcript: null
-});
-// const selectedJurusan = ref();
-import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
-import UploadIjazah from '@/components/UploadIjazah.vue';
-import router from '@/router';
-// Dummy data (bisa kamu ambil dari API atau input form)
-// const degreeData = ref({
-//     nama: '',
-//     nisn: '',
-//     nik: '3211142109820004',
-//     tahun_lulus: 2024,
-//     major: 'Rekayasa Perangkat Lunak'
-// });
-const sekolah = ref('SMK PASUNDAN JATINANGOR');
-
-const ipfsUrl = ref('https://ipfs.io/ipfs/Qm...examplehash');
-const transcript = ref({
-    subjects: ['Matematika', 'Pemrograman', 'Basis Data'],
-    grades: [85, 90, 88]
-});
-const contract = null;
-
-watch(selectedSiswa, (newVal) => {
-    // if (newVal.length === 1) {
-    //     console.log(newVal[0].pesertaDidik.nmSiswa);
-    //     degreeData.value.nama = newVal[0].pesertaDidik.nmSiswa;
-    //     degreeData.value.nisn = newVal[0].pesertaDidik.nisn;
-    //     degreeData.value.tahun_lulus = 2023;
-    // }
-});
-const namaKelas = ref();
-
-const getNmKelas = (data) => {
-    return [...new Set(data.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
-        nama: nm,
-        value: nm.toLowerCase()
-    }));
-};
-
-const editIjazah = async () => {
-    const sekolah = await fetchSekolah();
-    const nmSekolah = sekolah.sekolah?.nama.toLowerCase().replace(/\s+/g, '');
-    // console.log(selectedSiswa.value);
-    router.push({
-        name: 'editIjazah',
-        query: {
-            pesertaDidikId: selectedSiswa.value[0]?.pesertaDidikId.toString()
-        },
-        params: {
-            sekolah: nmSekolah
-        }
-    });
-};
-const confirmDeleteSelected = () => {
-    visible.value = true;
-};
-const deleteData = () => {
-    siswa.value = siswa.value.filter((val) => !selectedSiswa.value.includes(val));
-    if (selectedSiswa.value.length == 1) {
-        deleteDns(selectedSiswa.value[0].pesertaDidikId);
-        // } else if (selectedSiswa.value.length > 1) {
-        //     const ids = selectedSiswa.value.map((item) => item.anggotaRombelId);
-        //     deleteBatchSiswaAktif(ids);
-    }
-};
-const closeDialog = () => {
-    selectedSiswa.value = null;
-};
-const onSubmitIjazah = () => {
-    deleteData();
-};
-// ==================================
-
-onMounted(async () => {
-    siswa.value = await getDns(initSelectedTahunAjaran.value?.tahunAjaranId);
-    // console.log(siswa.value);
-    namaKelas.value = [...new Set(siswa.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
-        nama: nm,
-        value: nm.toLowerCase()
-    }));
-    // namaKelas.value = getNmKelas(siswa);
-});
-</script>

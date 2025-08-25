@@ -1,4 +1,1 @@
-<template>
-
-    Hyperledger
-</template>
+<template>Hyperledger</template>

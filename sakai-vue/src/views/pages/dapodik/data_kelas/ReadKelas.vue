@@ -1,3 +1,208 @@
+<script setup>
+import { onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+const store = useStore();
+// import DialogImport from '@/components/DialogImport.vue'
+import { FilterMatchMode } from '@primevue/core/api';
+import Button from 'primevue/button';
+import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
+import Select from 'primevue/select';
+import Toolbar from 'primevue/toolbar';
+import { useToast } from 'primevue/usetoast';
+// import DialogLoading from '@/components/DialogLoading.vue';
+import router from '@/router';
+
+import AnggotaKelas from '@/components/AnggotaKelas.vue';
+import Skeleton from 'primevue/skeleton';
+// ================================
+// composable
+// ================================
+// import DialogAnggotaKelas from '@/components/dapodik/AnggotaKelas.vue';
+import { useDns } from '@/composables/sekolah_composable/useDns';
+import { useKelas } from '@/composables/sekolah_composable/useKelas';
+import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
+import { useSemester } from '@/composables/sekolah_composable/useSemester';
+import { useTableTenant } from '@/composables/sekolah_composable/useTableTenant';
+
+const { schemaname } = useTableTenant();
+const { sekolah, fetchTingkat } = useSekolah();
+const { getKelas } = useKelas();
+const { addDns } = useDns();
+const { selectedSemester } = useSemester();
+// ================================
+const kelasList = ref([]);
+// const isLoading = ref(false);
+const tingkatPendidikanOptions = ref();
+
+// const openNew = async () => {
+//     // console.log(sekolah.value)
+//     await nextTick();
+//     router.push({ name: 'inputKelas', params: { sekolah: sekolah.value?.uri } });
+// };
+const closeDialog = () => {
+    selectedKelas.value = null;
+};
+const closeDialogKelulusan = () => {
+    isDialogKelulusan.value = false;
+    isLulus.value = false;
+    selectedKelas.value = null;
+};
+const exportCSV = () => {
+    dt.value.exportCSV();
+};
+
+const deleteKelas = () => {
+    kelasList.value = kelasList.value.filter((val) => !selectedKelas.value.includes(val));
+    // if (selectedKelas.value.length == 1) {
+    //     deleteSiswaAktif(selectedKelas.value[0].anggotaRombelId);
+    // } else if (selectedKelas.value.length > 1) {
+    //     const ids = selectedKelas.value.map((item) => item.anggotaRombelId);
+    //     deleteBatchSiswaAktif(ids);
+    // }
+};
+// const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
+watch(selectedSemester, async () => {
+    await initial();
+});
+const initial = async () => {
+    try {
+        const res = await getKelas();
+        if (res.status) {
+            kelasList.value = res.kelas;
+        }
+        if (kelasList.value.length > 0) {
+            tingkatPendidikanOptions.value = await fetchTingkat();
+        }
+    } catch (error) {
+        console.log(error);
+        throw new Error('Gagal initialisasi kelas: ', error);
+    }
+};
+
+const toast = useToast();
+const dt = ref();
+const deleteKelasDialog = ref(false);
+const selectedKelas = ref([]);
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    tingkatPendidikanId: { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
+// const submitted = ref(false);
+
+const editKelas = async () => {
+    router.push({
+        name: 'editKelas',
+        params: { sekolah: sekolah.value?.uri },
+        query: { kelasId: selectedKelas.value[0]?.rombonganBelajarId.toString() }
+    });
+};
+
+const confirmDeleteSelected = () => {
+    deleteKelasDialog.value = true;
+};
+
+const showAnggotaKelas = ref(false);
+const rombonganBelajarId = ref();
+const dialogAnggotaRombel = (d) => {
+    console.log(d);
+    selectedKelas.value.push(d);
+    showAnggotaKelas.value = true;
+    rombonganBelajarId.value = d?.rombonganBelajarId;
+};
+watch(showAnggotaKelas, (e) => {
+    if (!e) {
+        selectedKelas.value = [];
+    }
+});
+
+const bentukPendidikan = ref('smk');
+
+const isLulus = ref(false);
+// const isNaik = ref(false);
+// const selectedKelasLulus = ref();
+
+watch(selectedKelas, (newVal) => {
+    if (!newVal) {
+        return;
+    }
+    if (newVal.length === 1) {
+        if (newVal[0]?.tingkatPendidikanId == 12) {
+            isLulus.value = true;
+        }
+    } else if (newVal.length > 1) {
+        isLulus.value = true;
+        const kelas12 = newVal.filter((item) => item.tingkatPendidikanId == 12);
+        if (kelas12) {
+            isLulus.value = true;
+        }
+    }
+});
+// const isDialogKenaikan = ref(false);
+const isDialogKelulusan = ref(false);
+// const luluskan = async () => {
+//     try {
+//         isDialogKelulusan.value = false;
+//         const anggotaKelas = selectedKelas.value.flatMap((kelas) => kelas?.anggotaKelas || []);
+//         const payload = {
+//             schemaname: schemaname,
+//             tahun_ajaran_id: `${selectedSemester.value?.tahunAjaranId + 1}`,
+//             anggota_kelas: anggotaKelas,
+//             sekolah_id: await store.getters['sekolahService/getSekolah']?.sekolah_id
+//         };
+//         const res = await store.dispatch('sekolahService/createProsesIjazah', payload);
+//         // console.log(res);
+//         if (res) {
+//             toast.add({ severity: 'success', summary: 'Successful', detail: 'Data Ijazah berhasil ditambahkan', life: 3000 });
+//             selectedKelas.value = [];
+//         }
+//     } catch (error) {
+//         toast.add({ severity: 'error', summary: 'Gagal', detail: 'Gagal menambahkan data', life: 3000 });
+//     }
+//     isDialogKelulusan.value = false;
+// };
+const dialogImport = ref(false);
+
+const sendToDns = async () => {
+    // console.log(selectedSemester.value);
+
+    const sekolah = store.getters['sekolahService/getSekolah'];
+    const anggotaKelas = selectedKelas.value[0].anggotaKelas.map((item) => ({
+        peserta_didik_id: item.pesertaDidikId || '',
+        rombongan_belajar_id: item.rombonganBelajarId || '',
+        program_keahlian: selectedKelas.value[0].namaJurusanSp || '',
+        paket_keahlian: selectedKelas.value[0].namaJurusanSp || '',
+        sekolah_id: sekolah.sekolah.sekolah_id || '',
+        npsn: sekolah.sekolah.npsn || '', // jika ada, ambil dari sekolah
+        kabupaten_kota: sekolah.sekolah.kabKota || '',
+        provinsi: sekolah.sekolah.propinsi || '',
+        nama: item.pesertaDidik.nmSiswa || '',
+        tempat_lahir: item.pesertaDidik.tempatLahir || '',
+        tanggal_lahir: item.pesertaDidik.tanggalLahir || '',
+        jenis_kelamin: item.pesertaDidik.jenisKelamin,
+        nis: item.pesertaDidik.nis || '',
+        nisn: item.pesertaDidik.nisn || '',
+        nama_ortu_wali: item.pesertaDidik.nmAyah || '',
+        sekolah_penyelenggara_ujian_us: sekolah.sekolah.nama || '',
+        sekolah_penyelenggara_ujian_un: sekolah.sekolah.nama || '',
+        asal_sekolah: sekolah.sekolah.nama || '',
+        nomor_ijazah: '',
+        tempat_ijazah: sekolah.sekolah.kabKota || '',
+        tanggal_ijazah: '',
+        tahun_ajaran_id: `${selectedSemester.value.tahunAjaranId}`,
+        is_complete: false
+    }));
+    // console.log(anggotaKelas);
+    // return;
+    isDialogKelulusan.value = false;
+    addDns(anggotaKelas);
+};
+
+onMounted(async () => {
+    await initial();
+});
+</script>
+
 <template>
     <div>
         <Toolbar>
@@ -10,7 +215,7 @@
                     <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2" v-tooltip.bottom="'Download'" />
 
                     <Button
-                        v-show="selectedSemester.semester == 2"
+                        v-show="selectedSemester?.semester == 2"
                         label="Lulus"
                         severity="help"
                         class="mr-2 text-sm"
@@ -112,196 +317,3 @@
         <!-- end of import data -->
     </div>
 </template>
-
-<script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
-const store = useStore();
-// import DialogImport from '@/components/DialogImport.vue'
-import { FilterMatchMode } from '@primevue/core/api';
-import Button from 'primevue/button';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Select from 'primevue/select';
-import Toolbar from 'primevue/toolbar';
-import { useToast } from 'primevue/usetoast';
-// import DialogLoading from '@/components/DialogLoading.vue';
-import router from '@/router';
-
-import AnggotaKelas from '@/components/AnggotaKelas.vue';
-import Skeleton from 'primevue/skeleton';
-// ================================
-// composable
-// ================================
-// import DialogAnggotaKelas from '@/components/dapodik/AnggotaKelas.vue';
-import { useSekolahService } from '@/composables/useSekolahService';
-
-const { schemaname, fetchKelas, getKelas, fetchTingkat, sekolah, addDns } = useSekolahService();
-// ================================
-const kelasList = ref([]);
-const isLoading = ref(false);
-const tingkatPendidikanOptions = ref();
-
-const openNew = async () => {
-    // console.log(sekolah.value)
-    await nextTick();
-    router.push({ name: 'inputKelas', params: { sekolah: sekolah.value?.uri } });
-};
-const closeDialog = () => {
-    selectedKelas.value = null;
-};
-const closeDialogKelulusan = () => {
-    isDialogKelulusan.value = false;
-    isLulus.value = false;
-    selectedKelas.value = null;
-};
-const exportCSV = () => {
-    dt.value.exportCSV();
-};
-
-const deleteKelas = () => {
-    kelasList.value = kelasList.value.filter((val) => !selectedKelas.value.includes(val));
-    // if (selectedKelas.value.length == 1) {
-    //     deleteSiswaAktif(selectedKelas.value[0].anggotaRombelId);
-    // } else if (selectedKelas.value.length > 1) {
-    //     const ids = selectedKelas.value.map((item) => item.anggotaRombelId);
-    //     deleteBatchSiswaAktif(ids);
-    // }
-};
-const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
-watch(selectedSemester, async () => {
-    await initial();
-});
-const initial = async () => {
-    try {
-        const res = await getKelas();
-        if (res.status) {
-            kelasList.value = res.kelas;
-        }
-        if (kelasList.value.length > 0) {
-            tingkatPendidikanOptions.value = await fetchTingkat();
-        }
-    } catch (error) {}
-};
-
-const toast = useToast();
-const dt = ref();
-const deleteKelasDialog = ref(false);
-const selectedKelas = ref([]);
-const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    tingkatPendidikanId: { value: null, matchMode: FilterMatchMode.CONTAINS }
-});
-const submitted = ref(false);
-
-const editKelas = async () => {
-    router.push({
-        name: 'editKelas',
-        params: { sekolah: sekolah.value?.uri },
-        query: { kelasId: selectedKelas.value[0]?.rombonganBelajarId.toString() }
-    });
-};
-
-const confirmDeleteSelected = () => {
-    deleteKelasDialog.value = true;
-};
-
-const showAnggotaKelas = ref(false);
-const rombonganBelajarId = ref();
-const dialogAnggotaRombel = (d) => {
-    console.log(d);
-    selectedKelas.value.push(d);
-    showAnggotaKelas.value = true;
-    rombonganBelajarId.value = d?.rombonganBelajarId;
-};
-watch(showAnggotaKelas, (e) => {
-    if (!e) {
-        selectedKelas.value = [];
-    }
-});
-
-const bentukPendidikan = ref('smk');
-
-const isLulus = ref(false);
-const isNaik = ref(false);
-// const selectedKelasLulus = ref();
-
-watch(selectedKelas, (newVal) => {
-    if (!newVal) {
-        return;
-    }
-    if (newVal.length === 1) {
-        if (newVal[0]?.tingkatPendidikanId == 12) {
-            isLulus.value = true;
-        }
-    } else if (newVal.length > 1) {
-        isLulus.value = true;
-        const kelas12 = newVal.filter((item) => item.tingkatPendidikanId == 12);
-        if (kelas12) {
-            isLulus.value = true;
-        }
-    }
-});
-const isDialogKenaikan = ref(false);
-const isDialogKelulusan = ref(false);
-const luluskan = async () => {
-    try {
-        isDialogKelulusan.value = false;
-        const anggotaKelas = selectedKelas.value.flatMap((kelas) => kelas?.anggotaKelas || []);
-        const payload = {
-            schemaname: schemaname,
-            tahun_ajaran_id: `${selectedSemester.value?.tahunAjaranId + 1}`,
-            anggota_kelas: anggotaKelas,
-            sekolah_id: await store.getters['sekolahService/getSekolah']?.sekolah_id
-        };
-        const res = await store.dispatch('sekolahService/createProsesIjazah', payload);
-        // console.log(res);
-        if (res) {
-            toast.add({ severity: 'success', summary: 'Successful', detail: 'Data Ijazah berhasil ditambahkan', life: 3000 });
-            selectedKelas.value = [];
-        }
-    } catch (error) {
-        toast.add({ severity: 'error', summary: 'Gagal', detail: 'Gagal menambahkan data', life: 3000 });
-    }
-    isDialogKelulusan.value = false;
-};
-const dialogImport = ref(false);
-
-const sendToDns = async () => {
-    // console.log(selectedSemester.value);
-
-    const sekolah = store.getters['sekolahService/getSekolah'];
-    const anggotaKelas = selectedKelas.value[0].anggotaKelas.map((item) => ({
-        peserta_didik_id: item.pesertaDidikId || '',
-        rombongan_belajar_id: item.rombonganBelajarId || '',
-        program_keahlian: selectedKelas.value[0].namaJurusanSp || '',
-        paket_keahlian: selectedKelas.value[0].namaJurusanSp || '',
-        sekolah_id: sekolah.sekolah.sekolah_id || '',
-        npsn: sekolah.sekolah.npsn || '', // jika ada, ambil dari sekolah
-        kabupaten_kota: sekolah.sekolah.kabKota || '',
-        provinsi: sekolah.sekolah.propinsi || '',
-        nama: item.pesertaDidik.nmSiswa || '',
-        tempat_lahir: item.pesertaDidik.tempatLahir || '',
-        tanggal_lahir: item.pesertaDidik.tanggalLahir || '',
-        nis: item.pesertaDidik.nis || '',
-        nisn: item.pesertaDidik.nisn || '',
-        nama_ortu_wali: item.pesertaDidik.nmAyah || '',
-        sekolah_penyelenggara_ujian_us: sekolah.sekolah.nama || '',
-        sekolah_penyelenggara_ujian_un: sekolah.sekolah.nama || '',
-        asal_sekolah: sekolah.sekolah.nama || '',
-        nomor_ijazah: '',
-        tempat_ijazah: sekolah.sekolah.kabKota || '',
-        tanggal_ijazah: '',
-        tahun_ajaran_id: `${selectedSemester.value.tahunAjaranId}`,
-        is_complete: false
-    }));
-    // console.log(anggotaKelas);
-    // return;
-    isDialogKelulusan.value = false;
-    addDns(anggotaKelas);
-};
-
-onMounted(async () => {
-    await initial();
-});
-</script>

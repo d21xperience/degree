@@ -23,7 +23,7 @@ onMounted(async () => {
 
 const toDashboard = async () => {
     const sekolah = await store.getters['authService/getSekolah']?.namaSekolah;
-    if (isAuthenticated) {
+    if (isAuthenticated.value) {
         router.push({ name: 'suDashboard' });
     }
     router.push({ name: 'dashboard', params: { sekolah: sekolah.toLowerCase().replace(/\s+/g, '') } });

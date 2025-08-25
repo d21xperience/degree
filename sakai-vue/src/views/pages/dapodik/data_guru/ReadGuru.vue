@@ -1,3 +1,81 @@
+<script setup>
+import { useUtils } from '@/composables/useUtils';
+import { nextTick, onMounted, ref, watch } from 'vue';
+const { formatterDateID } = useUtils();
+// import FileUpload from 'primevue/fileupload';
+
+import { useGuru } from '@/composables/sekolah_composable/useGuru';
+import { useSemester } from '@/composables/sekolah_composable/useSemester';
+import router from '@/router';
+import { FilterMatchMode } from '@primevue/core/api';
+const loading = ref(false);
+const { initSelectedSemester } = useSemester();
+const dt = ref();
+
+const deleteGuruDialog = ref(false);
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
+});
+
+const openNew = async () => {
+    loadingAdd.value = true;
+    router.push({ name: 'inputGuru', params: { sekolah: 'smkspasundanjatinangor' } }).catch((err) => {
+        console.error('Router error:', err);
+    });
+    loadingAdd.value = false;
+};
+
+const exportCSV = () => {
+    dt.value.exportCSV();
+};
+
+onMounted(async () => {
+    await fetchGuruTerdaftar();
+});
+
+// ==================================
+// =======composable=============
+const selectedGuru = ref();
+const { guruTerdaftarList, fetchGuruTerdaftar, deleteGuruTerdaftar, deleteBatchGuruTerdaftar } = useGuru();
+
+// ==================================
+
+watch(initSelectedSemester, () => {
+    fetchGuruTerdaftar();
+});
+
+// ========IMPORT DATA========
+const dialogImport = ref(false);
+
+const deletGuru = () => {
+    guruTerdaftarList.value = guruTerdaftarList.value.filter((val) => !selectedGuru.value.includes(val));
+    if (selectedGuru.value.length == 1) {
+        deleteGuruTerdaftar(selectedGuru.value[0].ptkTerdaftarId);
+    } else if (selectedGuru.value.length > 1) {
+        const ids = selectedGuru.value.map((item) => item.ptkTerdaftarId);
+        deleteBatchGuruTerdaftar(ids);
+    }
+};
+
+const editGuru = async () => {
+    await nextTick();
+    loadingEdit.value = true;
+    router.push({
+        name: 'editGuru',
+        query: { ptkTerdaftarId: selectedGuru.value[0]?.ptkTerdaftarId.toString() }
+    });
+};
+
+const afterUpload = async (e) => {
+    console.log('cek', e);
+    await fetchGuruTerdaftar();
+    // if (!e) {
+    // }
+};
+const loadingEdit = ref(false);
+const loadingAdd = ref(false);
+</script>
+
 <template>
     <div class="">
         <div class="">
@@ -91,90 +169,3 @@
         <!-- end of import data -->
     </div>
 </template>
-
-<script setup>
-import { useSekolahService } from '@/composables/useSekolahService';
-import { useUtils } from '@/composables/useUtils';
-import { nextTick, onMounted, ref, watch } from 'vue';
-const { formatterDateID } = useUtils();
-// import FileUpload from 'primevue/fileupload';
-
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-
-import Button from 'primevue/button';
-
-import Dialog from 'primevue/dialog';
-
-import router from '@/router';
-import { FilterMatchMode } from '@primevue/core/api';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-import InputText from 'primevue/inputtext';
-import Toolbar from 'primevue/toolbar';
-const loading = ref(false);
-
-const dt = ref();
-
-const deleteGuruDialog = ref(false);
-const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS }
-});
-
-const openNew = async () => {
-    loadingAdd.value = true;
-    router.push({ name: 'inputGuru', params: { sekolah: 'smkspasundanjatinangor' } }).catch((err) => {
-        console.error('Router error:', err);
-    });
-    loadingAdd.value = false;
-};
-
-const exportCSV = () => {
-    dt.value.exportCSV();
-};
-
-onMounted(async () => {
-    await fetchGuruTerdaftar();
-});
-
-// ==================================
-// =======composable=============
-const selectedGuru = ref();
-const { initSelectedSemester, guruTerdaftarList, fetchGuruTerdaftar, deleteGuruTerdaftar, deleteBatchGuruTerdaftar } = useSekolahService();
-// ==================================
-
-watch(initSelectedSemester, (e, b) => {
-    fetchGuruTerdaftar();
-});
-
-// ========IMPORT DATA========
-const dialogImport = ref(false);
-
-const deletGuru = () => {
-    guruTerdaftarList.value = guruTerdaftarList.value.filter((val) => !selectedGuru.value.includes(val));
-    if (selectedGuru.value.length == 1) {
-        deleteGuruTerdaftar(selectedGuru.value[0].ptkTerdaftarId);
-    } else if (selectedGuru.value.length > 1) {
-        const ids = selectedGuru.value.map((item) => item.ptkTerdaftarId);
-        deleteBatchGuruTerdaftar(ids);
-    }
-};
-
-const editGuru = async () => {
-    await nextTick();
-    loadingEdit.value = true;
-    router.push({
-        name: 'editGuru',
-        query: { ptkTerdaftarId: selectedGuru.value[0]?.ptkTerdaftarId.toString() }
-    });
-};
-
-const afterUpload = async (e) => {
-    console.log('cek', e);
-    await fetchGuruTerdaftar();
-    if (!e) {
-    }
-};
-const loadingEdit = ref(false);
-const loadingAdd = ref(false);
-</script>

@@ -1,4 +1,1 @@
-<template>
-
-    Quorum
-</template>
+<template>Quorum</template>

@@ -1,37 +1,3 @@
-<template>
-    <div class="ipfs-interface">
-        <!-- <h1>IPFS Interface via Golang</h1>
-
-        <div class="section">
-            <h2>Node Info</h2>
-            <button @click="getNodeInfo">Get Node Info</button>
-            <div v-if="nodeInfo">
-                <pre>{{ nodeInfo }}</pre>
-            </div>
-        </div> -->
-
-        <div class="section">
-            <h2>Upload File Ijazah</h2>
-            <input type="file" @change="handleFileUpload" />
-            <button @click="uploadFile" :disabled="!selectedFile">Upload</button>
-            <div v-if="uploadResult">
-                <p>File uploaded with CID: {{ uploadResult.cid }}</p>
-                <button @click="viewFile(uploadResult.cid)">View File</button>
-            </div>
-        </div>
-
-        <div class="section" v-if="fileContent">
-            <h2>File Content</h2>
-            <pre>{{ fileContent }}</pre>
-        </div>
-
-        <div class="status" v-if="status">
-            {{ status }}
-        </div>
-        <div class="error" v-if="error">Error: {{ error }}</div>
-    </div>
-</template>
-
 <script setup>
 import { ref } from 'vue';
 
@@ -124,6 +90,40 @@ async function viewFile(cid) {
     }
 }
 </script>
+
+<template>
+    <div class="ipfs-interface">
+        <!-- <h1>IPFS Interface via Golang</h1>
+
+        <div class="section">
+            <h2>Node Info</h2>
+            <button @click="getNodeInfo">Get Node Info</button>
+            <div v-if="nodeInfo">
+                <pre>{{ nodeInfo }}</pre>
+            </div>
+        </div> -->
+
+        <div class="section">
+            <h2>Upload File Ijazah</h2>
+            <input type="file" @change="handleFileUpload" />
+            <button @click="uploadFile" :disabled="!selectedFile">Upload</button>
+            <div v-if="uploadResult">
+                <p>File uploaded with CID: {{ uploadResult.cid }}</p>
+                <button @click="viewFile(uploadResult.cid)">View File</button>
+            </div>
+        </div>
+
+        <div class="section" v-if="fileContent">
+            <h2>File Content</h2>
+            <pre>{{ fileContent }}</pre>
+        </div>
+
+        <div class="status" v-if="status">
+            {{ status }}
+        </div>
+        <div class="error" v-if="error">Error: {{ error }}</div>
+    </div>
+</template>
 
 <style scoped>
 .ipfs-interface {

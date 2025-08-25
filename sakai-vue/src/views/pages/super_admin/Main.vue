@@ -1,44 +1,5 @@
-<template>
-    <div class="">
-        <div class="">
-            <div class="flex justify-between p-2">
-                <div class="text-xl" md:text-2xl>Data Ijazah Smart Contract</div>
-                <!-- <div class="flex items-center space-x-2">
-                    <label class="text-gray-500">Platform</label>
-                    <button @click="dialogSelectplatforms = true" class="rounded-full bg-slate-300 py-2 px-4 hover:opacity-80">
-                        <span v-if="platformsActivate">{{ platformsActivate?.name ?? 'Pilih Platform' }}</span>
-                        <i class="ml-2 pi pi-angle-up"></i>
-                    </button>
-                </div> -->
-                <div class="md:flex md:items-center md:space-x-2">
-                    <label class="text-slate-500 md:text-base text-sm">Tahun Pelajaran</label>
-                    <div>
-                        <Select v-model="sekolahService.selectedTahunAjaran" :options="listTahunAjaran" optionLabel="nama" placeholder="Tahun Pelajaran" class="w-full md:w-52 mr-2" :disabled="isDisabled" />
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="card">
-            <RouterView></RouterView>
-        </div>
-
-        <Dialog v-model:visible="dialogSelectplatforms" modal header="Pilih Platform" position="top">
-            <div>
-                <div v-for="platform in platforms" :key="platform.id" class="my-2 flex space-x-1">
-                    <input type="radio" :name="platform.id" :id="platform.id" :value="platform.name" v-model="selectedPlatform" />
-                    <label :for="platform.id">{{ platform?.name }}</label>
-                </div>
-
-                <div class="flex justify-center">
-                    <button type="button" class="bg-blue-400 p-2 rounded-md text-white" @click="saveSelection">Simpan</button>
-                </div>
-            </div>
-        </Dialog>
-    </div>
-</template>
-
 <script setup>
-import { useSekolahService } from '@/composables/useSekolahService';
+import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
@@ -185,5 +146,44 @@ onBeforeMount(async () => {
     }
 });
 </script>
+
+<template>
+    <div class="">
+        <div class="">
+            <div class="flex justify-between p-2">
+                <div class="text-xl" md:text-2xl>Data Ijazah Smart Contract</div>
+                <!-- <div class="flex items-center space-x-2">
+                    <label class="text-gray-500">Platform</label>
+                    <button @click="dialogSelectplatforms = true" class="rounded-full bg-slate-300 py-2 px-4 hover:opacity-80">
+                        <span v-if="platformsActivate">{{ platformsActivate?.name ?? 'Pilih Platform' }}</span>
+                        <i class="ml-2 pi pi-angle-up"></i>
+                    </button>
+                </div> -->
+                <div class="md:flex md:items-center md:space-x-2">
+                    <label class="text-slate-500 md:text-base text-sm">Tahun Pelajaran</label>
+                    <div>
+                        <Select v-model="sekolahService.selectedTahunAjaran" :options="listTahunAjaran" optionLabel="nama" placeholder="Tahun Pelajaran" class="w-full md:w-52 mr-2" :disabled="isDisabled" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card">
+            <RouterView></RouterView>
+        </div>
+
+        <Dialog v-model:visible="dialogSelectplatforms" modal header="Pilih Platform" position="top">
+            <div>
+                <div v-for="platform in platforms" :key="platform.id" class="my-2 flex space-x-1">
+                    <input type="radio" :name="platform.id" :id="platform.id" :value="platform.name" v-model="selectedPlatform" />
+                    <label :for="platform.id">{{ platform?.name }}</label>
+                </div>
+
+                <div class="flex justify-center">
+                    <button type="button" class="bg-blue-400 p-2 rounded-md text-white" @click="saveSelection">Simpan</button>
+                </div>
+            </div>
+        </Dialog>
+    </div>
+</template>
 
 <style lang="scss" scoped></style>

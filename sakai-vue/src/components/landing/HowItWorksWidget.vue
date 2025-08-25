@@ -1,22 +1,3 @@
-<template>
-    <section id="how-it-works" class="how-it-works">
-        <div class="container">
-            <h2 class="section-title">Bagaimana Cara Verifikasi?</h2>
-
-            <div class="steps-container">
-                <div class="step-card" v-for="(step, index) in steps" :key="index">
-                    <div class="step-number">{{ index + 1 }}</div>
-                    <div class="step-icon" :class="step.iconClass">
-                        <component :is="icons[step.iconName]" />
-                    </div>
-                    <h3 class="step-title">{{ step.title }}</h3>
-                    <p class="step-description">{{ step.description }}</p>
-                </div>
-            </div>
-        </div>
-    </section>
-</template>
-
 <script setup>
 import { FileText as DocumentText, Network as ShareNetwork, ShieldCheck } from 'lucide-vue-next';
 import { shallowRef } from 'vue';
@@ -49,6 +30,25 @@ const steps = [
     }
 ];
 </script>
+
+<template>
+    <section id="how-it-works" class="how-it-works">
+        <div class="container">
+            <h2 class="section-title">Bagaimana Cara Verifikasi?</h2>
+
+            <div class="steps-container">
+                <div class="step-card" v-for="(step, index) in steps" :key="index">
+                    <div class="step-number">{{ index + 1 }}</div>
+                    <div class="step-icon" :class="step.iconClass">
+                        <component :is="icons[step.iconName]" />
+                    </div>
+                    <h3 class="step-title">{{ step.title }}</h3>
+                    <p class="step-description">{{ step.description }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
 
 <style scoped>
 /* Your existing styles remain the same */

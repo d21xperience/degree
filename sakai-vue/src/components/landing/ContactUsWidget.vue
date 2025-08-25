@@ -1,149 +1,3 @@
-<template>
-    <section id="contact" class="contact-section" role="region" aria-labelledby="contact-title">
-        <div class="container">
-            <header class="section-header">
-                <h2 id="contact-title" class="section-title">
-                    {{ sectionData.title }}
-                </h2>
-                <p class="section-subtitle">
-                    {{ sectionData.subtitle }}
-                </p>
-            </header>
-
-            <div class="contact-content">
-                <div class="contact-form-container">
-                    <form @submit.prevent="handleSubmit" class="contact-form" novalidate>
-                        <div class="form-group">
-                            <label for="contact-name" class="form-label"> Nama Lengkap </label>
-                            <input
-                                id="contact-name"
-                                v-model="formData.name"
-                                type="text"
-                                class="form-input"
-                                :class="{ error: formErrors.name }"
-                                placeholder="Masukkan nama lengkap Anda"
-                                :disabled="isSubmitting"
-                                @input="validateField('name')"
-                                @blur="validateField('name')"
-                                aria-describedby="name-error"
-                                required
-                            />
-                            <div id="name-error" class="form-error" v-if="formErrors.name" role="alert">
-                                {{ formErrors.name }}
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="contact-email" class="form-label"> Email </label>
-                            <input
-                                id="contact-email"
-                                v-model="formData.email"
-                                type="email"
-                                class="form-input"
-                                :class="{ error: formErrors.email }"
-                                placeholder="Masukkan alamat email Anda"
-                                :disabled="isSubmitting"
-                                @input="validateField('email')"
-                                @blur="validateField('email')"
-                                aria-describedby="email-error"
-                                required
-                            />
-                            <div id="email-error" class="form-error" v-if="formErrors.email" role="alert">
-                                {{ formErrors.email }}
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="contact-subject" class="form-label"> Subjek </label>
-                            <select id="contact-subject" v-model="formData.subject" class="form-select" :class="{ error: formErrors.subject }" :disabled="isSubmitting" @change="validateField('subject')" aria-describedby="subject-error" required>
-                                <option value="">Pilih subjek pesan</option>
-                                <option v-for="(option, index) in subjectOptions" :key="index" :value="option.value">
-                                    {{ option.label }}
-                                </option>
-                            </select>
-                            <div id="subject-error" class="form-error" v-if="formErrors.subject" role="alert">
-                                {{ formErrors.subject }}
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="contact-message" class="form-label"> Pesan </label>
-                            <textarea
-                                id="contact-message"
-                                v-model="formData.message"
-                                class="form-textarea"
-                                :class="{ error: formErrors.message }"
-                                placeholder="Tulis pesan Anda di sini..."
-                                rows="5"
-                                :disabled="isSubmitting"
-                                @input="validateField('message')"
-                                @blur="validateField('message')"
-                                aria-describedby="message-error message-counter"
-                                required
-                            ></textarea>
-                            <div class="form-meta">
-                                <div id="message-counter" class="character-counter" :class="{ warning: messageLength > 450 }">{{ messageLength }}/500 karakter</div>
-                                <div id="message-error" class="form-error" v-if="formErrors.message" role="alert">
-                                    {{ formErrors.message }}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-actions">
-                            <button type="submit" class="btn-submit" :disabled="!isFormValid || isSubmitting">
-                                <span v-if="!isSubmitting">Kirim Pesan</span>
-                                <span v-else class="loading-content">
-                                    <svg class="loading-spinner" viewBox="0 0 24 24">
-                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25" />
-                                        <path fill="currentColor" opacity="0.75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                    </svg>
-                                    Mengirim...
-                                </span>
-                            </button>
-                        </div>
-                    </form>
-
-                    <!-- Success Message -->
-                    <div v-if="showSuccessMessage" class="success-message" role="alert" aria-live="polite">
-                        <svg class="success-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                        </svg>
-                        <div>
-                            <h3>Pesan Berhasil Dikirim!</h3>
-                            <p>Terima kasih atas pesan Anda. Tim kami akan merespons dalam 1-2 hari kerja.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Contact Information -->
-                <div class="contact-info">
-                    <h3 class="info-title">Informasi Kontak</h3>
-                    <div class="info-items">
-                        <div v-for="(info, index) in contactInfo" :key="index" class="info-item">
-                            <div class="info-icon" aria-hidden="true">
-                                <component :is="info.icon" />
-                            </div>
-                            <div class="info-content">
-                                <h4 class="info-label">{{ info.label }}</h4>
-                                <p class="info-value">{{ info.value }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="social-links">
-                        <h4 class="social-title">Ikuti Kami</h4>
-                        <div class="social-icons">
-                            <a v-for="(social, index) in socialLinks" :key="index" :href="social.url" class="social-link" :aria-label="`Ikuti kami di ${social.name}`" target="_blank" rel="noopener noreferrer">
-                                <component :is="social.icon" />
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-</template>
-
 <script setup>
 import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Twitter } from 'lucide-vue-next';
 import { computed, onMounted, reactive, ref } from 'vue';
@@ -307,6 +161,152 @@ onMounted(() => {
     console.log('ContactSection mounted');
 });
 </script>
+
+<template>
+    <section id="contact" class="contact-section" role="region" aria-labelledby="contact-title">
+        <div class="container">
+            <header class="section-header">
+                <h2 id="contact-title" class="section-title">
+                    {{ sectionData.title }}
+                </h2>
+                <p class="section-subtitle">
+                    {{ sectionData.subtitle }}
+                </p>
+            </header>
+
+            <div class="contact-content">
+                <div class="contact-form-container">
+                    <form @submit.prevent="handleSubmit" class="contact-form" novalidate>
+                        <div class="form-group">
+                            <label for="contact-name" class="form-label"> Nama Lengkap </label>
+                            <input
+                                id="contact-name"
+                                v-model="formData.name"
+                                type="text"
+                                class="form-input"
+                                :class="{ error: formErrors.name }"
+                                placeholder="Masukkan nama lengkap Anda"
+                                :disabled="isSubmitting"
+                                @input="validateField('name')"
+                                @blur="validateField('name')"
+                                aria-describedby="name-error"
+                                required
+                            />
+                            <div id="name-error" class="form-error" v-if="formErrors.name" role="alert">
+                                {{ formErrors.name }}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contact-email" class="form-label"> Email </label>
+                            <input
+                                id="contact-email"
+                                v-model="formData.email"
+                                type="email"
+                                class="form-input"
+                                :class="{ error: formErrors.email }"
+                                placeholder="Masukkan alamat email Anda"
+                                :disabled="isSubmitting"
+                                @input="validateField('email')"
+                                @blur="validateField('email')"
+                                aria-describedby="email-error"
+                                required
+                            />
+                            <div id="email-error" class="form-error" v-if="formErrors.email" role="alert">
+                                {{ formErrors.email }}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contact-subject" class="form-label"> Subjek </label>
+                            <select id="contact-subject" v-model="formData.subject" class="form-select" :class="{ error: formErrors.subject }" :disabled="isSubmitting" @change="validateField('subject')" aria-describedby="subject-error" required>
+                                <option value="">Pilih subjek pesan</option>
+                                <option v-for="(option, index) in subjectOptions" :key="index" :value="option.value">
+                                    {{ option.label }}
+                                </option>
+                            </select>
+                            <div id="subject-error" class="form-error" v-if="formErrors.subject" role="alert">
+                                {{ formErrors.subject }}
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contact-message" class="form-label"> Pesan </label>
+                            <textarea
+                                id="contact-message"
+                                v-model="formData.message"
+                                class="form-textarea"
+                                :class="{ error: formErrors.message }"
+                                placeholder="Tulis pesan Anda di sini..."
+                                rows="5"
+                                :disabled="isSubmitting"
+                                @input="validateField('message')"
+                                @blur="validateField('message')"
+                                aria-describedby="message-error message-counter"
+                                required
+                            ></textarea>
+                            <div class="form-meta">
+                                <div id="message-counter" class="character-counter" :class="{ warning: messageLength > 450 }">{{ messageLength }}/500 karakter</div>
+                                <div id="message-error" class="form-error" v-if="formErrors.message" role="alert">
+                                    {{ formErrors.message }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-submit" :disabled="!isFormValid || isSubmitting">
+                                <span v-if="!isSubmitting">Kirim Pesan</span>
+                                <span v-else class="loading-content">
+                                    <svg class="loading-spinner" viewBox="0 0 24 24">
+                                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" opacity="0.25" />
+                                        <path fill="currentColor" opacity="0.75" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                    </svg>
+                                    Mengirim...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Success Message -->
+                    <div v-if="showSuccessMessage" class="success-message" role="alert" aria-live="polite">
+                        <svg class="success-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                        <div>
+                            <h3>Pesan Berhasil Dikirim!</h3>
+                            <p>Terima kasih atas pesan Anda. Tim kami akan merespons dalam 1-2 hari kerja.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="contact-info">
+                    <h3 class="info-title">Informasi Kontak</h3>
+                    <div class="info-items">
+                        <div v-for="(info, index) in contactInfo" :key="index" class="info-item">
+                            <div class="info-icon" aria-hidden="true">
+                                <component :is="info.icon" />
+                            </div>
+                            <div class="info-content">
+                                <h4 class="info-label">{{ info.label }}</h4>
+                                <p class="info-value">{{ info.value }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="social-links">
+                        <h4 class="social-title">Ikuti Kami</h4>
+                        <div class="social-icons">
+                            <a v-for="(social, index) in socialLinks" :key="index" :href="social.url" class="social-link" :aria-label="`Ikuti kami di ${social.name}`" target="_blank" rel="noopener noreferrer">
+                                <component :is="social.icon" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</template>
 
 <style scoped>
 .contact-section {

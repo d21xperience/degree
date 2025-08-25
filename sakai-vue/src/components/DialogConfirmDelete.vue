@@ -1,16 +1,3 @@
-<template>
-    <Dialog v-model:visible="isVisible" :style="{ width: '450px' }" :header="judul" :modal="true">
-        <div class="flex items-center gap-4">
-            <i class="pi pi-exclamation-triangle !text-3xl" />
-            <span>Apakah <span v-html="message"></span></span>
-        </div>
-        <template #footer>
-            <Button label="Tidak" icon="pi pi-times" text @click="closeDialog" />
-            <Button label="Ya" icon="pi pi-check" text @click="confirm" />
-        </template>
-    </Dialog>
-</template>
-
 <script setup>
 import { computed } from 'vue';
 
@@ -46,3 +33,16 @@ const confirm = () => {
     isVisible.value = false;
 };
 </script>
+
+<template>
+    <Dialog v-model:visible="isVisible" :style="{ width: '450px' }" :header="judul" :modal="true">
+        <div class="flex items-center gap-4">
+            <i class="pi pi-exclamation-triangle !text-3xl" />
+            <span>Apakah <span v-html="message"></span></span>
+        </div>
+        <template #footer>
+            <Button label="Tidak" icon="pi pi-times" text @click="closeDialog" />
+            <Button label="Ya" icon="pi pi-check" text @click="confirm" />
+        </template>
+    </Dialog>
+</template>

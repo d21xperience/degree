@@ -1,3 +1,9 @@
+<script setup>
+import { ref } from 'vue';
+
+const fullWidthLayout = ref(false); // Set to true for full-width blue background
+</script>
+
 <template>
     <section id="about" class="about-section" :class="{ 'full-width': fullWidthLayout }">
         <div class="container">
@@ -68,13 +74,6 @@
         </div>
     </section>
 </template>
-
-<script setup>
-import { ref } from 'vue';
-import LazyImage from './LazyImage.vue';
-
-const fullWidthLayout = ref(false); // Set to true for full-width blue background
-</script>
 
 <style scoped>
 .about-section {
