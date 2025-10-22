@@ -1,10 +1,11 @@
+/* eslint-disable no-unused-vars */
 import api from './api';
 // ==================================
 // IJAZAH SERVICE
 // ==================================
 
 const actions = {
-    async createProsesIjazah(payload) {
+    async createProsesIjazah({ commit }, payload) {
         try {
             const response = await api.post(`ss/ijazah/create`, payload);
             return response.data;
@@ -13,7 +14,7 @@ const actions = {
             throw new Error('Gagal menghapus proses Ijazah:', error);
         }
     },
-    async fetchProsesIjazah(payload) {
+    async fetchProsesIjazah({ commit }, payload) {
         try {
             const response = await api.get(`ss/proses-ijazah`, {
                 params: {
@@ -29,7 +30,7 @@ const actions = {
         }
     },
 
-    async createInfoIjazah(payload) {
+    async createInfoIjazah({ commit }, payload) {
         console.log(payload);
 
         const response = await api.post(`ss/ijazah/seting-ijazah`, payload);

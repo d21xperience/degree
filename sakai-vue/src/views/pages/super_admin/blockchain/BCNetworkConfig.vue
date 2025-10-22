@@ -4,7 +4,7 @@ import EthereumMonitor from '@/components/scComponent/EthereumMonitor.vue';
 import PlatformComponent from '@/components/scComponent/PlatformComponent.vue';
 import { useSCService } from '@/composables/useSCService';
 import { useToast } from 'primevue/usetoast';
-import { computed, onMounted, ref, watchEffect } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 const scService = useSCService();
 const toast = useToast();
@@ -64,17 +64,20 @@ const saveConfiguration = () => {
 const editConfiguration = () => {
     isNetworkPlatform.value = false;
 };
-
-const isConnected = ref(true);
+watch(environmentSelected, (newVal) => {
+    if (newVal) {
+        isNetworkPlatform.value = true;
+    }
+});
+// const isConnected = ref(true);
 // Load data saat komponen dimount
 onMounted(async () => {
-    platformSelected.value = {
-        id: 'f45865b2-9dd9-4085-942c-89a8d1847674',
-        name: 'Ethereum',
-        active: false
-    };
+    // platformSelected.value = {
+    //     id: 'f45865b2-9dd9-4085-942c-89a8d1847674',
+    //     name: 'Ethereum',
+    //     active: false
+    // };
     // environmentSelected.value = await scService.getBCNetwork();
-
     // console.log(environmentSelected.value)
     // await Promise.all([checknetworkStatus()]);
     // await Promise.all([checknetworkStatus(), fetchConfig(), fetchPeers(), fetchPinnedItems()]);

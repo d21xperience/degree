@@ -3,30 +3,21 @@ import { onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 const store = useStore();
 
-import TingkatComponent from '@/components/TingkatComponent.vue';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
+import TingkatComponent from '@/components/sekolah_components/TingkatComponent.vue';
 
-import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
 import { FilterMatchMode } from '@primevue/core/api';
-import AutoComplete from 'primevue/autocomplete';
-// =============UJI FITUR FOTO========================
-// import Image from 'primevue/image';
-// =====================================
 const pembelajaran = ref({});
 const pembelajaranList = ref([]);
 const guruList = ref();
 
-import DialogMapel from '@/components/DialogMapel.vue';
+import DialogMapel from '@/components/sekolah_components/DialogMapel.vue';
 import { useKategoriSekolah } from '@/composables/sekolah_composable/useKategoriSekolah';
 import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
 import { useSemester } from '@/composables/sekolah_composable/useSemester';
 import { useTableTenant } from '@/composables/sekolah_composable/useTableTenant';
 import { useToast } from 'primevue';
-// const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
-// const schemaname = computed(() => store.getters['sekolahService/getTabeltenant']?.schemaname);
 const { schemaname } = useTableTenant();
-const { fetchKategoriSekolah, deleteKategoriMapel, deleteBatchKategoriMapel, kategoriSekolahTabel } = useKategoriSekolah();
+const { fetchKategoriSekolah, deleteKategoriMapel, deleteBatchKategoriMapel, fetchKategoriMapel } = useKategoriSekolah();
 const { initSelectedSemester } = useSemester();
 const { fetchTingkat } = useSekolah();
 
@@ -36,23 +27,27 @@ const selectedKategoriSekolah = ref();
 const selectedTingkat = ref([]);
 const initialTingkat = ref();
 const initKategoriMapel = async () => {
-    const payload = {
-        kurikulumId: selectedKategoriSekolah.value?.kurikulum_id,
-        tingkatPendidikan: Number(selectedTingkat.value)
-    };
-    // console.log(payload);
-    // return;
-    if (payload.kurikulumId && payload.tingkatPendidikan) {
-        // alert("Data error")
-    }
+    try {
+        const payload = {
+            kurikulumId: selectedKategoriSekolah.value?.kurikulum_id,
+            tingkatPendidikan: Number(selectedTingkat.value)
+        };
+        console.log(payload);
+        // return;
+        if (payload.kurikulumId && payload.tingkatPendidikan) {
+            // alert("Data error")
+        }
 
-    kategoriMapelList.value = await fetchKategoriMapel(payload);
-    // console.log(kategoriMapelList.value);
+        kategoriMapelList.value = await fetchKategoriMapel(payload);
+        // console.log(kategoriMapelList.value);
+    } catch (error) {
+        toast.add({ severity: 'error', summary: 'Failled', detail: `${error.message}`, life: 3000 });
+    }
 };
 
 const initial = async () => {
-    await fetchKategoriSekolah();
-    kategoriSekolahList.value = kategoriSekolahTabel.value;
+    // await fetchKategoriSekolah();
+    kategoriSekolahList.value = await fetchKategoriSekolah(); //kategoriSekolahTabel.value;
     selectedKategoriSekolah.value = kategoriSekolahList.value[0];
     const results = await fetchTingkat();
     initialTingkat.value = results[0].kode;
@@ -60,6 +55,7 @@ const initial = async () => {
 
 watch(initSelectedSemester, () => {
     // console.log(newVal);
+    // initKategoriMapel();
     initial();
     //    return initSelectedSemester.value?.tahunAjaranId;
 });
@@ -163,17 +159,6 @@ const searchGuru = (event) => {
         filteredGuru.value = guruList.value.filter((guru) => guru.ptk.nama.toLowerCase().includes(query));
     }, 250);
 };
-// const handleKeydown = (event) => {
-//     if (event.key === ' ') {
-//         selectedMapel.value += ' '; // Menambahkan spasi ke query
-//     }
-// };
-
-// const cancelAddMapel = () => {
-//     addMapelDialog.value = false;
-//     selectedGuru.value = {};
-//     selectedMapel.value = {};
-// };
 
 const generateUUID = () => crypto.randomUUID();
 
@@ -259,6 +244,10 @@ onMounted(async () => {
     // await fetchK();
     initial();
 });
+
+// const resetValue = () => {
+
+// }
 </script>
 
 <template>
@@ -308,7 +297,7 @@ onMounted(async () => {
             @page="(e) => (first = e.first)"
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             :rowsPerPageOptions="[10, 20, 50]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} kelas"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} mata pelajaran"
         >
             <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
             <Column header="No" style="width: 2rem">

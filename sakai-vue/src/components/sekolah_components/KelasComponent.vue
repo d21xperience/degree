@@ -1,13 +1,15 @@
 <script setup>
+import { useKelas } from '@/composables/sekolah_composable/useKelas';
+import { useSemester } from '@/composables/sekolah_composable/useSemester';
 import { useToast } from 'primevue/usetoast';
 
-import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
 import { computed, onMounted, ref, watch } from 'vue';
 const kelasOptions = ref([]);
 const props = defineProps(['modelValue']); // props dari parent
 const emit = defineEmits(['update:modelValue']); // emit update ke parent
 const loadingKelas = ref(false);
-const { fetchKelas, initSelectedSemester } = useSekolahService();
+const { fetchKelas } = useKelas();
+const { initSelectedSemester } = useSemester();
 // const internalValue = ref();
 const toast = useToast();
 

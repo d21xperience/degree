@@ -45,25 +45,6 @@ export function useSekolah() {
         }
     };
 
-    /**
-     *
-     * @param {String} rombonganBelajarId
-     * @param {String} semesterId
-     * @returns
-     */
-    const fetchAnggotaKelas = async (rombonganBelajarId = '', semesterId = '') => {
-        try {
-            const cachedData = await store.getters['sekolahService/getSiswaAktif'];
-            if (cachedData.semester_id === semesterId) {
-                const anggotaKelas = cachedData.peserta_didik.filter((val) => val.rombonganBelajarId === rombonganBelajarId);
-                return anggotaKelas;
-            }
-            return null;
-        } catch (error) {
-            console.error('Gagal mengambil data kelas:', error);
-        }
-    };
-
     const fetchTingkat = async () => {
         try {
             let response = await store.getters['sekolahService/getTingkatPendidikan'];
@@ -89,6 +70,18 @@ export function useSekolah() {
         console.log(response);
     };
 
+    const fetchBentukPendidikan = async () => {
+        const { data } = await store.dispatch('sekolahService/fetchBentukPendidikan');
+        return data;
+    };
+    /**
+     * @param {Object} jenjang - Default value = jenjangLembaga = 1; jenjangOrang = 0
+     * @returns Object
+     */
+    const fetchJenjangPendidikan = async (jenjang = { isJenjangLembaga: true, jenjangLembaga: 1, isJenjangOrang: false, jenjangOrang: 0 }) => {
+        const response = await store.dispatch('sekolahService/fetchJenjangPendidikan', jenjang);
+        return response;
+    };
     // const fetchMapel = async (mapel) => {
     //     try {
     //         let response = await store.dispatch('sekolahService/fetchMapel');
@@ -102,15 +95,13 @@ export function useSekolah() {
     //         toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error}`, life: 3000 });
     //     }
     // };
-
     return {
-        // fetchSiswa,
-
         fetchTingkat,
         fetchSekolah,
         createInfoIjazah,
         sekolah,
         updateSekolah,
-        fetchAnggotaKelas
+        fetchBentukPendidikan,
+        fetchJenjangPendidikan
     };
 }

@@ -1,6 +1,6 @@
 # Base image
-FROM golang:1.22.3 AS builder
-
+# FROM golang:1.22.3 AS builder
+FROM golang:1.23.4-alpine
 # Set environment variables
 ENV GO111MODULE=on
 ENV GOPROXY=https://proxy.golang.org,direct

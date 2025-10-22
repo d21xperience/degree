@@ -1,15 +1,17 @@
+/* eslint-disable no-unused-vars */
 import api from '../api';
 const state = {
     tabelTenant: JSON.parse(localStorage.getItem('tabelTenant')) || null,
     tabelSekolah: JSON.parse(localStorage.getItem('tabelSekolah')) || null,
     tabelTingkatPendidikan: JSON.parse(localStorage.getItem('tabelTingkatPendidikan')) || null,
-    tabelKurikulum: JSON.parse(localStorage.getItem('tabelKurikulum')) || null,
+
     tabelJurusan: JSON.parse(localStorage.getItem('tabelJurusan')) || null,
     tabelMapel: JSON.parse(localStorage.getItem('tabelMapel')) || null,
-    tabelTahunAjaran: JSON.parse(localStorage.getItem('tabelTahunAjaran')) || [],
+
     // selectedTahunAjaran: JSON.parse(localStorage.getItem('selectedTahunAjaran')) || [],
     tabelGelarAkademik: JSON.parse(localStorage.getItem('gelarAkademik')) || [],
-    tabelDashboard: JSON.parse(localStorage.getItem('tabelDashboard')) || []
+    tabelDashboard: JSON.parse(localStorage.getItem('tabelDashboard')) || null,
+    tabelJenjang: JSON.parse(localStorage.getItem('tabelJenjang')) || []
 };
 
 const mutations = {
@@ -27,10 +29,7 @@ const mutations = {
         state.tabelTingkatPendidikan = value;
         localStorage.setItem('tabelTingkatPendidikan', JSON.stringify(value));
     },
-    SET_TABELKURIKULUM(state, value) {
-        state.tabelKurikulum = value;
-        localStorage.setItem('tabelKurikulum', JSON.stringify(value));
-    },
+
     SET_TABELJURUSAN(state, value) {
         state.tabelJurusan = value;
         localStorage.setItem('tabelJurusan', JSON.stringify(value));
@@ -41,14 +40,6 @@ const mutations = {
         localStorage.setItem('tabelMapel', JSON.stringify(value));
     },
 
-    SET_TABELTAHUNAJARAN(state, value) {
-        state.tabelTahunAjaran = value;
-        localStorage.setItem('tabelTahunAjaran', JSON.stringify(value));
-    },
-    SET_SELECTEDTAHUNAJARAN(state, value) {
-        state.selectedTahunAjaran = value;
-        localStorage.setItem('selectedTahunAjaran', JSON.stringify(value));
-    },
     SET_GELARAKADEMIK(state, value) {
         state.tabelGelarAkademik = value;
         localStorage.setItem('gelarAkademik', JSON.stringify(value));
@@ -58,18 +49,21 @@ const mutations = {
         localStorage.setItem('tabelDashboard', JSON.stringify(value));
     },
 
+    SET_TABELJENJANG(state, value) {
+        state.tabelJenjang = value;
+        localStorage.setItem('tabelJenjang', JSON.stringify(value));
+    },
     resetState(state) {
         state.tabelTenant = null;
 
         state.tabelSekolah = null;
 
         state.tabelTingkatPendidikan = null;
-        state.tabelKurikulum = null;
+
         state.tabelJurusan = null;
 
         state.tabelMapel = null;
 
-        state.tabelTahunAjaran = [];
         state.selectedTahunAjaran = [];
         state.tabelGelarAkademik = [];
         state.tabelDashboard = [];
@@ -86,29 +80,6 @@ const actions = {
     },
 
     // ================================================
-    // Tahun Ajaran
-    // ================================================
-    async fetchTahunAjaran({ commit }, tahun_ajaran_id) {
-        try {
-            const response = await api.get(`/ss/tahun-ajaran`, {
-                params: {
-                    tahun_ajaran_id: tahun_ajaran_id
-                }
-            });
-            commit('SET_TABELTAHUNAJARAN', response.data.tahunAjaran);
-            const selectedTahunAjaran = response.data.tahunAjaran.reduce((max, item) => (item.tahunAjaranId > max.tahunAjaranId ? item : max), response.data.tahunAjaran[0]);
-            commit('SET_SELECTEDTAHUNAJARAN', selectedTahunAjaran);
-            return response.data;
-        } catch (error) {
-            console.log(error);
-            throw new Error('Gagal mendapatkan tahun ajaran:', error);
-        }
-    },
-
-    async fetchSelectedTahunAjaran({ commit }, payload) {
-        commit('SET_SELECTEDTAHUNAJARAN', payload);
-    },
-    // ================================================
 
     // =============================================
 
@@ -124,8 +95,7 @@ const actions = {
             return response;
         } catch (error) {
             commit('SET_ERROR', error.response?.data || 'Terjadi kesalahan');
-            console.error('Gagal membuat template:', error);
-            return null;
+            throw new Error(`Gagal membuat template: ${error}`);
         }
     },
     async fetchSekolah({ commit }, payload) {
@@ -134,19 +104,17 @@ const actions = {
             commit('SET_TABELSEKOLAH', response.data);
             return response.data;
         } catch (error) {
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal menghapus Kategori Mapel: ${error}`);
         }
     },
-    async updateSekolah(payload) {
+    async updateSekolah({ commit }, payload) {
         try {
             const response = await api.put(`/ss/${payload.schemaname}/update`, payload);
             if (response.status) {
                 return response.data;
             }
         } catch (error) {
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal menghapus Kategori Mapel: ${error}`);
         }
     },
 
@@ -163,9 +131,7 @@ const actions = {
             commit('SET_TABELTENANT', response.data);
             return response.data;
         } catch (error) {
-            console.error('Gagal mengambil data tabel tenant:', error);
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal mengambil data tabel tenant: ${error}`);
         }
     },
 
@@ -180,28 +146,33 @@ const actions = {
             return response.data;
         } catch (error) {
             // commit('SET_ERROR', error.response?.data || 'Terjadi kesalahan');
-            console.error('Gagal membuat tabel tenant:', error);
-            return null;
+            throw new Error(`Gagal membuat tabel tenant: ${error}`);
         }
     },
     async fetchBentukPendidikan() {
         try {
-            const response = await api.get(`/ss/ref/bentuk-pendidikan`);
-            return response.data.bentukPendidikan;
+            const { data } = await api.get(`/ss/ref/bentuk-pendidikan`);
+            return data.bentukPendidikan;
         } catch (error) {
-            // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
-            console.error('Gagal membuat bentuk pendidikan:', error);
-            return null;
+            throw new Error(`Gagal membuat bentuk pendidikan: ${error}`);
         }
     },
-    async fetchJenjangPendidikan() {
+    async fetchJenjangPendidikan({ commit }, payload) {
         try {
-            const response = await api.get(`/ss/ref/jenjang`);
-            return response.data.jenjang;
+            const { data } = await api.get(`/ss/ref/jenjang`, {
+                params: {
+                    is_jenjang_orang: payload.isJenjangOrang,
+                    is_jenjang_lembaga: payload.isJenjangLembaga,
+                    jenjang_orang: payload.jenjangOrang,
+                    jenjang_lembaga: payload.jenjangLembaga
+                }
+            });
+            if (data.status) {
+                commit('SET_TABELJENJANG', data.jenjang);
+                return data;
+            }
         } catch (error) {
-            // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
-            console.error('Gagal membuat jenjang pendidikan:', error);
-            return null;
+            throw new Error(`Gagal mendapatkan jenjang pendidikan: ${error}`);
         }
     },
     async fetchTingkatPendidikan({ commit }, payload) {
@@ -215,31 +186,14 @@ const actions = {
             return response.data.tingkatPendidikan;
         } catch (error) {
             // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
-            console.error('Gagal membuat tingkat pendidikan:', error);
-            return null;
+            throw new Error(`Gagal mendapatkan tingkat pendidikan: ${error}`);
         }
     },
-    async fetchKurikulum({ commit }, payload) {
-        try {
-            const response = await api.get(`/ss/ref/kurikulum`, {
-                params: {
-                    jenjang_pendidikan_id: payload.jenjangPendidikanId,
-                    jenjang_pendidikan_str: payload.jenjangPendidikanStr
-                }
-            });
-            if (response.data.status) {
-                commit('SET_TABELKURIKULUM', response.data.kurikulum);
-                return response.data;
-            }
-        } catch (error) {
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
-        }
-    },
+
     // ==============================
     // Bidang Keahlian
 
-    async fetchBidangKeahlian(payload) {
+    async fetchBidangKeahlian({ commit }, payload) {
         try {
             const response = await api.get(`/ss/ref/bidang-keahlian`, {
                 params: {
@@ -251,14 +205,13 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal mendapatkan bidang keahlian: ${error}`);
         }
     },
     // ==============================
     // Program Keahlian
 
-    async fetchProgramKeahlian(payload) {
+    async fetchProgramKeahlian({ commit }, payload) {
         try {
             const response = await api.get(`/ss/ref/program-keahlian`, {
                 params: {
@@ -269,11 +222,10 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal mendapatkan program keahlian: ${error}`);
         }
     },
-    async fetchJurusan(payload) {
+    async fetchJurusan({ commit }, payload) {
         try {
             const response = await api.get(`/ss/ref/jurusan`, {
                 params: {
@@ -284,8 +236,7 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal mendapatkan jurusan: ${error}`);
         }
     },
     async fetchMapel({ commit }, payload) {
@@ -300,11 +251,10 @@ const actions = {
             return response.data.mapel;
         } catch (error) {
             // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
-            console.error('Gagal memuat mata pelajaran:', error);
-            return null;
+            throw new Error(`Gagal mendapatkan mata pelajaran: ${error}`);
         }
     },
-    async filterMapel(payload) {
+    async filterMapel({ commit }, payload) {
         try {
             // console.log("filterMapel",payload)
             const response = await api.get(`/ss/ref/mapel/filter`, {
@@ -317,8 +267,7 @@ const actions = {
             return response.data.mapel;
         } catch (error) {
             // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
-            console.error('Gagal memuat mata pelajaran:', error);
-            return null;
+            throw new Error(`Gagal memfilter mata pelajaran: ${error}`);
         }
     },
     async fetchMapelKurikulum({ commit }, payload) {
@@ -333,8 +282,7 @@ const actions = {
             return response.data.mapel;
         } catch (error) {
             // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
-            console.error('Gagal memuat mata pelajaran:', error);
-            return null;
+            throw new Error(`Gagal medapatakan mapel kurikulum: ${error}`);
         }
     },
     async fetchGelarAkademik({ commit }) {
@@ -343,8 +291,7 @@ const actions = {
             commit('SET_GELARAKADEMIK', response.data.gelarAkademik);
             return response.data.gelarAkademik;
         } catch (error) {
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal mendapatkan gelar akademik: ${error}`);
         }
     },
 
@@ -360,16 +307,15 @@ const actions = {
                 }
             });
             if (response) {
-                commit('SET_DASHBOARD', response.data);
+                commit('SET_DASHBOARD', { semester_id: payload.semester_id, data: response.data });
                 return response.data;
             }
         } catch (error) {
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal mendapatkan data dashboard: ${error}`);
         }
     },
 
-    async fetchKategoriSekolah(payload) {
+    async fetchKategoriSekolah({ commit }, payload) {
         try {
             const response = await api.get(`/ss/${payload.schemaname}/kategori-sekolah`, {
                 params: {
@@ -381,13 +327,11 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
-            console.log(error);
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal mendapatkan Kategori Sekolah: ${error}`);
         }
     },
-    async createKategoriSekolah(payload) {
-        // console.log(payload);
+    async createKategoriSekolah({ commit }, payload) {
+        // console.log({commit}, payload);
         try {
             const response = await api.post(`/ss/${payload.schemaname}/kategori-sekolah/create`, payload);
             if (response.status) {
@@ -395,26 +339,22 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
-            console.log(error);
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal menghapus Kategori Mapel: ${error}`);
         }
     },
-    async updateKategoriSekolah(payload) {
+    async updateKategoriSekolah({ commit }, payload) {
         try {
-            // console.log(payload)
+            // console.log({commit}, payload)
             // return
             const response = await api.put(`/ss/${payload.schemaname}/kategori-sekolah/update`, payload);
             if (response.status) {
                 return response.data;
             }
         } catch (error) {
-            console.log(error);
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal menghapus Kategori Mapel: ${error}`);
         }
     },
-    async deleteKategoriSekolah(payload) {
+    async deleteKategoriSekolah({ commit }, payload) {
         try {
             const response = await api.delete(`/ss/${payload.schemaname}/kategori-sekolah/delete`, {
                 params: {
@@ -426,11 +366,10 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal menghapus Kategori Mapel: ${error}`);
         }
     },
-    async deleteKategoriSekolahKurikulum(payload) {
+    async deleteKategoriSekolahKurikulum({ commit }, payload) {
         try {
             const response = await api.delete(`/ss/${payload.schemaname}/kategori-sekolah/delete`, {
                 params: {
@@ -442,14 +381,13 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal menghapus Kategori Mapel: ${error}`);
         }
     },
 
-    async createProsesKelas(payload) {
+    async createProsesKelas({ commit }, payload) {
         try {
-            // console.log(payload);
+            // console.log({commit}, payload);
             // return
             const response = await api.post(`/ss/${payload.schemaname}/kategori-sekolah-kelas/proses`, payload);
             if (response.status) {
@@ -457,13 +395,11 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
-            console.log(error);
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal menghapus Kategori Mapel: ${error}`);
         }
     },
 
-    async fetchKategoriMapel(payload) {
+    async fetchKategoriMapel({ commit }, payload) {
         try {
             const response = await api.get(`/ss/${payload.schemaname}/kategori-sekolah/mapel`, {
                 params: {
@@ -477,13 +413,11 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
-            console.log(error);
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal menghapus Kategori Mapel: ${error}`);
         }
     },
 
-    async deleteKategoriMapel(payload) {
+    async deleteKategoriMapel({ commit }, payload) {
         try {
             const response = await api.delete(`/ss/${payload.schemaname}/kategori-sekolah/mapel/delete`, {
                 params: {
@@ -495,11 +429,10 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal menghapus Kategori Mapel: ${error}`);
         }
     },
-    async deleteBatchKategoriMapel(payload) {
+    async deleteBatchKategoriMapel({ commit }, payload) {
         try {
             console.log('sekolahService =>', payload);
             // return;
@@ -513,9 +446,7 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
-            console.log(error);
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal menghapus Kategori Mapel: ${error}`);
         }
     },
     // ==================================
@@ -524,23 +455,19 @@ const actions = {
     async createPembelajaran({ commit }, payload) {
         try {
             const response = await api.post(`ss/pembelajaran/create`, payload);
-            console.log(response.data);
             return response.data;
         } catch (error) {
-            commit('SET_ERROR', error.response?.data || 'Terjadi kesalahan');
-            console.error('Gagal membuat pembelajaran:', error);
-            return null;
+            throw new Error(`Gagal membuat pembelajaran: ${error}`);
         }
     },
 
-    async createKenaikan(payload) {
+    async createKenaikan({ commit }, payload) {
         try {
             const response = await api.post(`ss/kenaikan/create`, payload);
             console.log(response.data);
         } catch (error) {
             // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
-            console.error('Gagal membuat kenaikan siswa:', error);
-            return null;
+            throw new Error(`Gagal membuat kenaikan siswa: ${error}`);
         }
     },
 
@@ -554,11 +481,10 @@ const getters = {
     getError: (state) => state.error,
     getTabeltenant: (state) => state.tabelTenant,
     getSekolah: (state) => state.tabelSekolah,
-    getKurikulum: (state) => state.tabelKurikulum,
+
     getJurusan: (state) => state.tabelJurusan,
     getTingkatPendidikan: (state) => state.tabelTingkatPendidikan,
     getMapel: (state) => state.tabelMapel,
-
     getGelarAkademik: (state) => state.tabelGelarAkademik,
     getDashboard: (state) => state.tabelDashboard
 };

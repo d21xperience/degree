@@ -1,45 +1,19 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
-const store = useStore();
-// import DialogImport from '@/components/DialogImport.vue'
-import { FilterMatchMode } from '@primevue/core/api';
-import Button from 'primevue/button';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import Select from 'primevue/select';
-import Toolbar from 'primevue/toolbar';
-import { useToast } from 'primevue/usetoast';
-// import DialogLoading from '@/components/DialogLoading.vue';
-import router from '@/router';
-
-import AnggotaKelas from '@/components/AnggotaKelas.vue';
-import Skeleton from 'primevue/skeleton';
-// ================================
-// composable
-// ================================
-// import DialogAnggotaKelas from '@/components/dapodik/AnggotaKelas.vue';
+import AnggotaKelas from '@/components/sekolah_components/AnggotaKelas.vue';
+import TingkatComponent from '@/components/sekolah_components/TingkatComponent.vue';
 import { useDns } from '@/composables/sekolah_composable/useDns';
 import { useKelas } from '@/composables/sekolah_composable/useKelas';
 import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
 import { useSemester } from '@/composables/sekolah_composable/useSemester';
-import { useTableTenant } from '@/composables/sekolah_composable/useTableTenant';
+import router from '@/router';
+import { FilterMatchMode } from '@primevue/core/api';
+import { computed, onMounted, ref, watch } from 'vue';
 
-const { schemaname } = useTableTenant();
-const { sekolah, fetchTingkat } = useSekolah();
+const { sekolah } = useSekolah();
 const { getKelas } = useKelas();
 const { addDns } = useDns();
 const { selectedSemester } = useSemester();
-// ================================
 const kelasList = ref([]);
-// const isLoading = ref(false);
-const tingkatPendidikanOptions = ref();
-
-// const openNew = async () => {
-//     // console.log(sekolah.value)
-//     await nextTick();
-//     router.push({ name: 'inputKelas', params: { sekolah: sekolah.value?.uri } });
-// };
 const closeDialog = () => {
     selectedKelas.value = null;
 };
@@ -71,16 +45,15 @@ const initial = async () => {
         if (res.status) {
             kelasList.value = res.kelas;
         }
-        if (kelasList.value.length > 0) {
-            tingkatPendidikanOptions.value = await fetchTingkat();
-        }
+        // if (kelasList.value.length > 0) {
+        //     tingkatPendidikanOptions.value = await fetchTingkat();
+        // }
     } catch (error) {
         console.log(error);
         throw new Error('Gagal initialisasi kelas: ', error);
     }
 };
 
-const toast = useToast();
 const dt = ref();
 const deleteKelasDialog = ref(false);
 const selectedKelas = ref([]);
@@ -116,11 +89,10 @@ watch(showAnggotaKelas, (e) => {
     }
 });
 
-const bentukPendidikan = ref('smk');
-
-const isLulus = ref(false);
 // const isNaik = ref(false);
 // const selectedKelasLulus = ref();
+const isLulus = ref(false);
+const isKejuruan = computed(() => ['SMK', 'MAK'].includes(sekolah.value.bentukPendidikanStr ?? false));
 
 watch(selectedKelas, (newVal) => {
     if (!newVal) {
@@ -164,9 +136,6 @@ const isDialogKelulusan = ref(false);
 const dialogImport = ref(false);
 
 const sendToDns = async () => {
-    // console.log(selectedSemester.value);
-
-    const sekolah = store.getters['sekolahService/getSekolah'];
     const anggotaKelas = selectedKelas.value[0].anggotaKelas.map((item) => ({
         peserta_didik_id: item.pesertaDidikId || '',
         rombongan_belajar_id: item.rombonganBelajarId || '',
@@ -228,17 +197,7 @@ onMounted(async () => {
             <template #end>
                 <div class="flex flex-wrap gap-2 items-center justify-between">
                     <div class="flex">
-                        <Select
-                            v-model="filters['tingkatPendidikanId'].value"
-                            :options="tingkatPendidikanOptions"
-                            optionLabel="nama"
-                            optionValue="kode"
-                            placeholder="Tingkat"
-                            class="w-full md:w-48"
-                            checkmark
-                            show-clear
-                            v-show="kelasList.length > 0"
-                        />
+                        <TingkatComponent v-model:model-value="filters['tingkatPendidikanId'].value" />
                     </div>
                     <div>
                         <Button icon="pi pi-refresh" severity="help" class="mr-2 text-lg" @click="initial" v-tooltip.bottom="'Refresh'" />
@@ -247,7 +206,9 @@ onMounted(async () => {
             </template>
         </Toolbar>
 
+        <div v-if="kelasList.length === 0" class="flex justify-center h-32 items-center"><h5>Tidak ada data</h5></div>
         <DataTable
+            v-else
             ref="dt"
             v-model:selection="selectedKelas"
             stripedRows
@@ -284,7 +245,7 @@ onMounted(async () => {
             </Column>
             <Column field="kurikulum.namaKurikulum" header="Kurikulum"></Column>
             <!-- Jika SMK/MAK Program Keahlian & Kompetensi Keahlian akan muncul-->
-            <div v-if="['smk', 'mak'].includes(bentukPendidikan)">
+            <div v-if="isKejuruan">
                 <Column field="namaJurusanSp" header="Jurusan" sortable></Column>
             </div>
             <Column header="Anggota">

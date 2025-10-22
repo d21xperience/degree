@@ -72,10 +72,23 @@ func (s *ReferensiServiceServer) GetBentukPendidikan(ctx context.Context, req *p
 		BentukPendidikan: res,
 	}, nil
 }
-func (s *ReferensiServiceServer) GetJenjang(ctx context.Context, req *pb.Empty) (*pb.GetJenjangResponse, error) {
-	mod, err := s.repoJenjangPendidikan.FindAll(ctx, "ref", 100, 0)
+func (s *ReferensiServiceServer) GetJenjang(ctx context.Context, req *pb.GetJenjangRequest) (*pb.GetJenjangResponse, error) {
+	conditions := map[string]any{}
+	if req.IsJenjangLembaga {
+		conditions["jenjang_lembaga"] = req.JenjangLembaga
+	}
+	if req.IsJenjangOrang {
+		conditions["jenjang_orang"] = req.JenjangOrang
+	}
+	orderBy := []string{
+		"jenjang_pendidikan_id ASC",
+	}
+	mod, err := s.repoJenjangPendidikan.FindAllByConditions(ctx, "ref", conditions, 100, 0, orderBy)
 	if err != nil {
-		return nil, err
+		return &pb.GetJenjangResponse{
+			Status:  false,
+			Message: "Gagal mendapatkan jenjang",
+		}, nil
 	}
 	res := utils.ConvertModelsToPB(mod, func(re *models.JenjangPendidikan) *pb.Jenjang {
 		return &pb.Jenjang{
@@ -87,6 +100,8 @@ func (s *ReferensiServiceServer) GetJenjang(ctx context.Context, req *pb.Empty) 
 	})
 	return &pb.GetJenjangResponse{
 		Jenjang: res,
+		Status:  true,
+		Message: "Berhasil mendapatkan jenjang",
 	}, nil
 }
 func (s *ReferensiServiceServer) GetTingkatPendidikan(ctx context.Context, req *pb.GetTingkatPendidikanRequest) (*pb.GetTingkatPendidikanResponse, error) {

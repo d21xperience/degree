@@ -35,7 +35,7 @@ onMounted(async () => {
 
 // ==================================
 // =======composable=============
-const selectedGuru = ref();
+const selectedGuru = ref([]);
 const { guruTerdaftarList, fetchGuruTerdaftar, deleteGuruTerdaftar, deleteBatchGuruTerdaftar } = useGuru();
 
 // ==================================
@@ -78,75 +78,55 @@ const loadingAdd = ref(false);
 
 <template>
     <div class="">
-        <div class="">
-            <div class="w-full">
-                <div class=" ">
-                    <div class="mb-2">
-                        <Toolbar>
-                            <template #start>
-                                <div v-show="guruTerdaftarList.length > 0">
-                                    <Button icon="pi pi-pencil" severity="warn" @click="editGuru" :disabled="!selectedGuru || !selectedGuru.length || selectedGuru.length > 1" class="mr-2" v-tooltip.bottom="'Edit Guru'" :loading="loadingEdit" />
-                                    <Button icon="pi pi-trash" severity="danger" class="mr-2 text-lg" @click="deleteGuruDialog = true" :disabled="!selectedGuru || !selectedGuru.length" v-tooltip.bottom="'Hapus Guru'" :loading="loading" />
-                                    <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download Guru'" />
-                                </div>
-
-                                <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="openNew" v-tooltip.bottom="'Tambah Guru Baru'" v-show="initSelectedSemester.semester == 1" :loading="loadingAdd" />
-                                <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Upload Guru'" v-show="initSelectedSemester.semester == 1" />
-                            </template>
-                            <template #end>
-                                <!-- <Button label="Proses" icon="pi pi-send" severity="info"
+        <Toolbar>
+            <template #start>
+                <Button icon="pi pi-pencil" severity="warn" @click="editGuru" :disabled="!selectedGuru || !selectedGuru.length || selectedGuru.length > 1" class="mr-2" v-tooltip.bottom="'Edit Guru'" :loading="loadingEdit" />
+                <Button icon="pi pi-trash" severity="danger" class="mr-2 text-lg" @click="deleteGuruDialog = true" :disabled="!selectedGuru || !selectedGuru.length" v-tooltip.bottom="'Hapus Guru'" :loading="loading" />
+                <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download Guru'" />
+                <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="openNew" v-tooltip.bottom="'Tambah Guru Baru'" :loading="loadingAdd" :disabled="selectedGuru.length" />
+                <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Upload Guru'" />
+            </template>
+            <template #end>
+                <!-- <Button label="Proses" icon="pi pi-send" severity="info"
                                             @click="exportCSV($event)" /> -->
-                                <IconField>
-                                    <InputIcon>
-                                        <i class="pi pi-search" />
-                                    </InputIcon>
-                                    <InputText v-model="filters['global'].value" placeholder="Search..." />
-                                </IconField>
-                            </template>
-                        </Toolbar>
-                    </div>
+                <IconField>
+                    <InputIcon>
+                        <i class="pi pi-search" />
+                    </InputIcon>
+                    <InputText v-model="filters['global'].value" placeholder="Search..." />
+                </IconField>
+            </template>
+        </Toolbar>
 
-                    <!-- <Toolbar>
-                        <template #end>
-                            <IconField>
-                                <InputIcon>
-                                    <i class="pi pi-search" />
-                                </InputIcon>
-                                <InputText v-model="filters['global'].value" placeholder="Search..." />
-                            </IconField>
-                        </template>
-                    </Toolbar> -->
-                </div>
-
-                <DataTable
-                    ref="dt"
-                    v-model:selection="selectedGuru"
-                    stripedRows
-                    size="small"
-                    :value="guruTerdaftarList"
-                    dataKey="ptkTerdaftarId"
-                    :paginator="true"
-                    :rows="10"
-                    :filters="filters"
-                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    :rowsPerPageOptions="[10, 20, 50]"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Guru"
-                >
-                    <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-                    <Column field="ptk.nama" header="Nama" sortable> </Column>
-                    <Column field="ptkPelengkap.gelarBelakang" header="Gelar belakang"> </Column>
-                    <Column field="ptk.jenisKelamin" header="JK"> </Column>
-                    <Column field="ptkPelengkap.nip" header="NIP"> </Column>
-                    <Column field="ptkPelengkap.nuptk" header="NUPTK"> </Column>
-                    <Column field="ptk.tempatLahir" header="Tpt.Lahir"> </Column>
-                    <Column field="ptk.tanggalLahir" header="Tgl.Lahir">
-                        <template #body="slotProps">
-                            {{ formatterDateID(slotProps.data.ptk.tanggalLahir) }}
-                        </template>
-                    </Column>
-                </DataTable>
-            </div>
-        </div>
+        <div v-if="guruTerdaftarList.length === 0" class="flex justify-center h-32 items-center"><h5>Tidak ada data</h5></div>
+        <DataTable
+            v-else
+            ref="dt"
+            v-model:selection="selectedGuru"
+            stripedRows
+            size="small"
+            :value="guruTerdaftarList"
+            dataKey="ptkTerdaftarId"
+            :paginator="true"
+            :rows="10"
+            :filters="filters"
+            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rowsPerPageOptions="[10, 20, 50]"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Guru"
+        >
+            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
+            <Column field="ptk.nama" header="Nama" sortable> </Column>
+            <Column field="ptkPelengkap.gelarBelakang" header="Gelar belakang"> </Column>
+            <Column field="ptk.jenisKelamin" header="JK"> </Column>
+            <Column field="ptkPelengkap.nip" header="NIP"> </Column>
+            <Column field="ptkPelengkap.nuptk" header="NUPTK"> </Column>
+            <Column field="ptk.tempatLahir" header="Tpt.Lahir"> </Column>
+            <Column field="ptk.tanggalLahir" header="Tgl.Lahir">
+                <template #body="slotProps">
+                    {{ formatterDateID(slotProps.data.ptk.tanggalLahir) }}
+                </template>
+            </Column>
+        </DataTable>
 
         <Dialog v-model:visible="deleteGuruDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
@@ -162,10 +142,6 @@ const loadingAdd = ref(false);
             </template>
         </Dialog>
 
-        <!-- import data -->
-        <!-- <DialogImport v-model:visible="dialogImport" @save="saveImport" @cancel="cancelImport" template-type="guru" :schema-name="schemaname" /> -->
         <DialogImport v-model:visible="dialogImport" template-type="guru" @save="afterUpload" />
-
-        <!-- end of import data -->
     </div>
 </template>

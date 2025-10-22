@@ -171,34 +171,20 @@ func local_request_SemesterService_CreateSemester_0(ctx context.Context, marshal
 	return msg, metadata, err
 }
 
-var filter_SemesterService_GetSemester_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-
 func request_SemesterService_GetSemester_0(ctx context.Context, marshaler runtime.Marshaler, client SemesterServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq GetSemesterRequest
+		protoReq Empty
 		metadata runtime.ServerMetadata
 	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SemesterService_GetSemester_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 	msg, err := client.GetSemester(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
 
 func local_request_SemesterService_GetSemester_0(ctx context.Context, marshaler runtime.Marshaler, server SemesterServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq GetSemesterRequest
+		protoReq Empty
 		metadata runtime.ServerMetadata
 	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SemesterService_GetSemester_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 	msg, err := server.GetSemester(ctx, &protoReq)
 	return msg, metadata, err
 }
@@ -1289,11 +1275,11 @@ func local_request_NilaiAkhirService_CreateNilaiAkhir_0(ctx context.Context, mar
 	return msg, metadata, err
 }
 
-var filter_NilaiAkhirService_GetNilaiAkhir_0 = &utilities.DoubleArray{Encoding: map[string]int{"schemaname": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
+var filter_NilaiAkhirService_GetNilaiSiswa_0 = &utilities.DoubleArray{Encoding: map[string]int{"schemaname": 0}, Base: []int{1, 1, 0}, Check: []int{0, 1, 2}}
 
-func request_NilaiAkhirService_GetNilaiAkhir_0(ctx context.Context, marshaler runtime.Marshaler, client NilaiAkhirServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_NilaiAkhirService_GetNilaiSiswa_0(ctx context.Context, marshaler runtime.Marshaler, client NilaiAkhirServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq GetNilaiAkhirRequest
+		protoReq GetNilaiSiswaRequest
 		metadata runtime.ServerMetadata
 		err      error
 	)
@@ -1308,16 +1294,16 @@ func request_NilaiAkhirService_GetNilaiAkhir_0(ctx context.Context, marshaler ru
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_NilaiAkhirService_GetNilaiAkhir_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_NilaiAkhirService_GetNilaiSiswa_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := client.GetNilaiAkhir(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.GetNilaiSiswa(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
 
-func local_request_NilaiAkhirService_GetNilaiAkhir_0(ctx context.Context, marshaler runtime.Marshaler, server NilaiAkhirServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_NilaiAkhirService_GetNilaiSiswa_0(ctx context.Context, marshaler runtime.Marshaler, server NilaiAkhirServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq GetNilaiAkhirRequest
+		protoReq GetNilaiSiswaRequest
 		metadata runtime.ServerMetadata
 		err      error
 	)
@@ -1332,10 +1318,10 @@ func local_request_NilaiAkhirService_GetNilaiAkhir_0(ctx context.Context, marsha
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_NilaiAkhirService_GetNilaiAkhir_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_NilaiAkhirService_GetNilaiSiswa_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := server.GetNilaiAkhir(ctx, &protoReq)
+	msg, err := server.GetNilaiSiswa(ctx, &protoReq)
 	return msg, metadata, err
 }
 
@@ -1478,6 +1464,118 @@ func local_request_NilaiAkhirService_SearchNilaiAkhir_0(ctx context.Context, mar
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	msg, err := server.SearchNilaiAkhir(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_TranskripNilaiService_CreateTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, client TranskripNilaiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq CreateTranskripNilaiRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.CreateTranskripNilai(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_TranskripNilaiService_CreateTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, server TranskripNilaiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq CreateTranskripNilaiRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.CreateTranskripNilai(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+var filter_TranskripNilaiService_GetTranskripNilai_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+
+func request_TranskripNilaiService_GetTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, client TranskripNilaiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetTranskripNilaiRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_TranskripNilaiService_GetTranskripNilai_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.GetTranskripNilai(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_TranskripNilaiService_GetTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, server TranskripNilaiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq GetTranskripNilaiRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_TranskripNilaiService_GetTranskripNilai_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.GetTranskripNilai(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+func request_TranskripNilaiService_UpdateTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, client TranskripNilaiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq UpdateTranskripNilaiRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.UpdateTranskripNilai(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_TranskripNilaiService_UpdateTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, server TranskripNilaiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq UpdateTranskripNilaiRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.UpdateTranskripNilai(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+var filter_TranskripNilaiService_DeleteTranskripNilai_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+
+func request_TranskripNilaiService_DeleteTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, client TranskripNilaiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq DeleteTranskripNilaiRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_TranskripNilaiService_DeleteTranskripNilai_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.DeleteTranskripNilai(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_TranskripNilaiService_DeleteTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, server TranskripNilaiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq DeleteTranskripNilaiRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_TranskripNilaiService_DeleteTranskripNilai_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.DeleteTranskripNilai(ctx, &protoReq)
 	return msg, metadata, err
 }
 
@@ -3029,142 +3127,6 @@ func local_request_IjazahService_DeleteInfoIjazah_0(ctx context.Context, marshal
 	return msg, metadata, err
 }
 
-func request_TranskripNilaiService_CreateTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, client TranskripNilaiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq CreateTranskripNilaiRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := client.CreateTranskripNilai(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_TranskripNilaiService_CreateTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, server TranskripNilaiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq CreateTranskripNilaiRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := server.CreateTranskripNilai(ctx, &protoReq)
-	return msg, metadata, err
-}
-
-var filter_TranskripNilaiService_GetTranskripNilai_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-
-func request_TranskripNilaiService_GetTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, client TranskripNilaiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq GetTranskripNilaiRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_TranskripNilaiService_GetTranskripNilai_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := client.GetTranskripNilai(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_TranskripNilaiService_GetTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, server TranskripNilaiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq GetTranskripNilaiRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_TranskripNilaiService_GetTranskripNilai_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := server.GetTranskripNilai(ctx, &protoReq)
-	return msg, metadata, err
-}
-
-func request_TranskripNilaiService_UpdateTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, client TranskripNilaiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq UpdateTranskripNilaiRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := client.UpdateTranskripNilai(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_TranskripNilaiService_UpdateTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, server TranskripNilaiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq UpdateTranskripNilaiRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := server.UpdateTranskripNilai(ctx, &protoReq)
-	return msg, metadata, err
-}
-
-var filter_TranskripNilaiService_DeleteTranskripNilai_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-
-func request_TranskripNilaiService_DeleteTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, client TranskripNilaiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq DeleteTranskripNilaiRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_TranskripNilaiService_DeleteTranskripNilai_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := client.DeleteTranskripNilai(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_TranskripNilaiService_DeleteTranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, server TranskripNilaiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq DeleteTranskripNilaiRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_TranskripNilaiService_DeleteTranskripNilai_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := server.DeleteTranskripNilai(ctx, &protoReq)
-	return msg, metadata, err
-}
-
-func request_TranskripNilaiService_UploadITranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, client TranskripNilaiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq UploadTranskripNilaiRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := client.UploadITranskripNilai(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
-	return msg, metadata, err
-}
-
-func local_request_TranskripNilaiService_UploadITranskripNilai_0(ctx context.Context, marshaler runtime.Marshaler, server TranskripNilaiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var (
-		protoReq UploadTranskripNilaiRequest
-		metadata runtime.ServerMetadata
-	)
-	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	msg, err := server.UploadITranskripNilai(ctx, &protoReq)
-	return msg, metadata, err
-}
-
 func request_DownloadService_DownloadSekolahService_0(ctx context.Context, marshaler runtime.Marshaler, client DownloadServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq DownloadSekolahRequest
@@ -3239,20 +3201,34 @@ func local_request_ReferensiService_GetBentukPendidikan_0(ctx context.Context, m
 	return msg, metadata, err
 }
 
+var filter_ReferensiService_GetJenjang_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+
 func request_ReferensiService_GetJenjang_0(ctx context.Context, marshaler runtime.Marshaler, client ReferensiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq Empty
+		protoReq GetJenjangRequest
 		metadata runtime.ServerMetadata
 	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ReferensiService_GetJenjang_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
 	msg, err := client.GetJenjang(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
 
 func local_request_ReferensiService_GetJenjang_0(ctx context.Context, marshaler runtime.Marshaler, server ReferensiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq Empty
+		protoReq GetJenjangRequest
 		metadata runtime.ServerMetadata
 	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ReferensiService_GetJenjang_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
 	msg, err := server.GetJenjang(ctx, &protoReq)
 	return msg, metadata, err
 }
@@ -3464,6 +3440,38 @@ func local_request_ReferensiService_GetMapel_0(ctx context.Context, marshaler ru
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 	msg, err := server.GetMapel(ctx, &protoReq)
+	return msg, metadata, err
+}
+
+var filter_ReferensiService_FilterMapel_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+
+func request_ReferensiService_FilterMapel_0(ctx context.Context, marshaler runtime.Marshaler, client ReferensiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq FilterMapelRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ReferensiService_FilterMapel_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := client.FilterMapel(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	return msg, metadata, err
+}
+
+func local_request_ReferensiService_FilterMapel_0(ctx context.Context, marshaler runtime.Marshaler, server ReferensiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var (
+		protoReq FilterMapelRequest
+		metadata runtime.ServerMetadata
+	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ReferensiService_FilterMapel_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	msg, err := server.FilterMapel(ctx, &protoReq)
 	return msg, metadata, err
 }
 
@@ -3889,7 +3897,7 @@ func RegisterSekolahServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.SekolahService/RegistrasiSekolah", runtime.WithHTTPPathPattern("/api/v1/sekolah/registrasi-sekolah"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.SekolahService/RegistrasiSekolah", runtime.WithHTTPPathPattern("/api/v1/ss/sekolah/registrasi-sekolah"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -3909,7 +3917,7 @@ func RegisterSekolahServiceHandlerServer(ctx context.Context, mux *runtime.Serve
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.SekolahService/GetSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/sekolah/sekolah-terdaftar"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.SekolahService/GetSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/ss/sekolah/sekolah-terdaftar"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -4393,25 +4401,25 @@ func RegisterNilaiAkhirServiceHandlerServer(ctx context.Context, mux *runtime.Se
 		}
 		forward_NilaiAkhirService_CreateNilaiAkhir_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodGet, pattern_NilaiAkhirService_GetNilaiAkhir_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodGet, pattern_NilaiAkhirService_GetNilaiSiswa_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.NilaiAkhirService/GetNilaiAkhir", runtime.WithHTTPPathPattern("/api/v1/ss/{schemaname}/nilai-akhir"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.NilaiAkhirService/GetNilaiSiswa", runtime.WithHTTPPathPattern("/api/v1/ss/{schemaname}/nilai-akhir"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_NilaiAkhirService_GetNilaiAkhir_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_NilaiAkhirService_GetNilaiSiswa_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_NilaiAkhirService_GetNilaiAkhir_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_NilaiAkhirService_GetNilaiSiswa_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	mux.Handle(http.MethodPut, pattern_NilaiAkhirService_UpdateNilaiAkhir_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -4472,6 +4480,96 @@ func RegisterNilaiAkhirServiceHandlerServer(ctx context.Context, mux *runtime.Se
 			return
 		}
 		forward_NilaiAkhirService_SearchNilaiAkhir_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+
+	return nil
+}
+
+// RegisterTranskripNilaiServiceHandlerServer registers the http handlers for service TranskripNilaiService to "mux".
+// UnaryRPC     :call TranskripNilaiServiceServer directly.
+// StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterTranskripNilaiServiceHandlerFromEndpoint instead.
+// GRPC interceptors will not work for this type of registration. To use interceptors, you must use the "runtime.WithMiddlewares" option in the "runtime.NewServeMux" call.
+func RegisterTranskripNilaiServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server TranskripNilaiServiceServer) error {
+	mux.Handle(http.MethodPost, pattern_TranskripNilaiService_CreateTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.TranskripNilaiService/CreateTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/ss/trankrip-nilai"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_TranskripNilaiService_CreateTranskripNilai_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TranskripNilaiService_CreateTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodGet, pattern_TranskripNilaiService_GetTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.TranskripNilaiService/GetTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/ss/trankrip-nilai"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_TranskripNilaiService_GetTranskripNilai_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TranskripNilaiService_GetTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPut, pattern_TranskripNilaiService_UpdateTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.TranskripNilaiService/UpdateTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/ss/trankrip-nilai"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_TranskripNilaiService_UpdateTranskripNilai_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TranskripNilaiService_UpdateTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodDelete, pattern_TranskripNilaiService_DeleteTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.TranskripNilaiService/DeleteTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/ss/trankrip-nilai"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_TranskripNilaiService_DeleteTranskripNilai_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TranskripNilaiService_DeleteTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 
 	return nil
@@ -5397,116 +5495,6 @@ func RegisterIjazahServiceHandlerServer(ctx context.Context, mux *runtime.ServeM
 	return nil
 }
 
-// RegisterTranskripNilaiServiceHandlerServer registers the http handlers for service TranskripNilaiService to "mux".
-// UnaryRPC     :call TranskripNilaiServiceServer directly.
-// StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterTranskripNilaiServiceHandlerFromEndpoint instead.
-// GRPC interceptors will not work for this type of registration. To use interceptors, you must use the "runtime.WithMiddlewares" option in the "runtime.NewServeMux" call.
-func RegisterTranskripNilaiServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server TranskripNilaiServiceServer) error {
-	mux.Handle(http.MethodPost, pattern_TranskripNilaiService_CreateTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.TranskripNilaiService/CreateTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/trankrip-nilai"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_TranskripNilaiService_CreateTranskripNilai_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_TranskripNilaiService_CreateTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodGet, pattern_TranskripNilaiService_GetTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.TranskripNilaiService/GetTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/trankrip-nilai"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_TranskripNilaiService_GetTranskripNilai_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_TranskripNilaiService_GetTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodPut, pattern_TranskripNilaiService_UpdateTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.TranskripNilaiService/UpdateTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/trankrip-nilai"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_TranskripNilaiService_UpdateTranskripNilai_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_TranskripNilaiService_UpdateTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodDelete, pattern_TranskripNilaiService_DeleteTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.TranskripNilaiService/DeleteTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/trankrip-nilai"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_TranskripNilaiService_DeleteTranskripNilai_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_TranskripNilaiService_DeleteTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodPost, pattern_TranskripNilaiService_UploadITranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		var stream runtime.ServerTransportStream
-		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.TranskripNilaiService/UploadITranskripNilai", runtime.WithHTTPPathPattern("/api/v1/transkrip/upload"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := local_request_TranskripNilaiService_UploadITranskripNilai_0(annotatedContext, inboundMarshaler, server, req, pathParams)
-		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_TranskripNilaiService_UploadITranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-
-	return nil
-}
-
 // RegisterDownloadServiceHandlerServer registers the http handlers for service DownloadService to "mux".
 // UnaryRPC     :call DownloadServiceServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
@@ -5752,6 +5740,26 @@ func RegisterReferensiServiceHandlerServer(ctx context.Context, mux *runtime.Ser
 			return
 		}
 		forward_ReferensiService_GetMapel_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodGet, pattern_ReferensiService_FilterMapel_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		var stream runtime.ServerTransportStream
+		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/sekolah.ReferensiService/FilterMapel", runtime.WithHTTPPathPattern("/api/v1/ss/ref/mapel/filter"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := local_request_ReferensiService_FilterMapel_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_ReferensiService_FilterMapel_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	mux.Handle(http.MethodGet, pattern_ReferensiService_GetMapelKurikulum_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -6228,7 +6236,7 @@ func RegisterSekolahServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.SekolahService/RegistrasiSekolah", runtime.WithHTTPPathPattern("/api/v1/sekolah/registrasi-sekolah"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.SekolahService/RegistrasiSekolah", runtime.WithHTTPPathPattern("/api/v1/ss/sekolah/registrasi-sekolah"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -6245,7 +6253,7 @@ func RegisterSekolahServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.SekolahService/GetSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/sekolah/sekolah-terdaftar"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.SekolahService/GetSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/ss/sekolah/sekolah-terdaftar"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -6483,8 +6491,8 @@ func RegisterSekolahServiceHandlerClient(ctx context.Context, mux *runtime.Serve
 }
 
 var (
-	pattern_SekolahService_RegistrasiSekolah_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "sekolah", "registrasi-sekolah"}, ""))
-	pattern_SekolahService_GetSekolahTenant_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "sekolah", "sekolah-terdaftar"}, ""))
+	pattern_SekolahService_RegistrasiSekolah_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ss", "sekolah", "registrasi-sekolah"}, ""))
+	pattern_SekolahService_GetSekolahTenant_0              = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ss", "sekolah", "sekolah-terdaftar"}, ""))
 	pattern_SekolahService_CreateSekolah_0                 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "ss", "schemaname", "create"}, ""))
 	pattern_SekolahService_GetSekolah_0                    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "ss", "schemaname", "sekolah"}, ""))
 	pattern_SekolahService_UpdateSekolah_0                 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "ss", "schemaname", "update"}, ""))
@@ -6813,22 +6821,22 @@ func RegisterNilaiAkhirServiceHandlerClient(ctx context.Context, mux *runtime.Se
 		}
 		forward_NilaiAkhirService_CreateNilaiAkhir_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodGet, pattern_NilaiAkhirService_GetNilaiAkhir_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodGet, pattern_NilaiAkhirService_GetNilaiSiswa_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.NilaiAkhirService/GetNilaiAkhir", runtime.WithHTTPPathPattern("/api/v1/ss/{schemaname}/nilai-akhir"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.NilaiAkhirService/GetNilaiSiswa", runtime.WithHTTPPathPattern("/api/v1/ss/{schemaname}/nilai-akhir"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_NilaiAkhirService_GetNilaiAkhir_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_NilaiAkhirService_GetNilaiSiswa_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_NilaiAkhirService_GetNilaiAkhir_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_NilaiAkhirService_GetNilaiSiswa_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	mux.Handle(http.MethodPut, pattern_NilaiAkhirService_UpdateNilaiAkhir_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
@@ -6886,7 +6894,7 @@ func RegisterNilaiAkhirServiceHandlerClient(ctx context.Context, mux *runtime.Se
 
 var (
 	pattern_NilaiAkhirService_CreateNilaiAkhir_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "v1", "ss", "schemaname", "nilai-akhir", "create"}, ""))
-	pattern_NilaiAkhirService_GetNilaiAkhir_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "ss", "schemaname", "nilai-akhir"}, ""))
+	pattern_NilaiAkhirService_GetNilaiSiswa_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4}, []string{"api", "v1", "ss", "schemaname", "nilai-akhir"}, ""))
 	pattern_NilaiAkhirService_UpdateNilaiAkhir_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "v1", "ss", "schemaname", "nilai-akhir", "update"}, ""))
 	pattern_NilaiAkhirService_DeleteNilaiAkhir_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "ss", "v1", "schemaname", "nilai-akhir", "delete"}, ""))
 	pattern_NilaiAkhirService_SearchNilaiAkhir_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3, 2, 4, 2, 5}, []string{"api", "v1", "ss", "schemaname", "nilai-akhir", "search"}, ""))
@@ -6894,10 +6902,131 @@ var (
 
 var (
 	forward_NilaiAkhirService_CreateNilaiAkhir_0 = runtime.ForwardResponseMessage
-	forward_NilaiAkhirService_GetNilaiAkhir_0    = runtime.ForwardResponseMessage
+	forward_NilaiAkhirService_GetNilaiSiswa_0    = runtime.ForwardResponseMessage
 	forward_NilaiAkhirService_UpdateNilaiAkhir_0 = runtime.ForwardResponseMessage
 	forward_NilaiAkhirService_DeleteNilaiAkhir_0 = runtime.ForwardResponseMessage
 	forward_NilaiAkhirService_SearchNilaiAkhir_0 = runtime.ForwardResponseMessage
+)
+
+// RegisterTranskripNilaiServiceHandlerFromEndpoint is same as RegisterTranskripNilaiServiceHandler but
+// automatically dials to "endpoint" and closes the connection when "ctx" gets done.
+func RegisterTranskripNilaiServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+	conn, err := grpc.NewClient(endpoint, opts...)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err != nil {
+			if cerr := conn.Close(); cerr != nil {
+				grpclog.Errorf("Failed to close conn to %s: %v", endpoint, cerr)
+			}
+			return
+		}
+		go func() {
+			<-ctx.Done()
+			if cerr := conn.Close(); cerr != nil {
+				grpclog.Errorf("Failed to close conn to %s: %v", endpoint, cerr)
+			}
+		}()
+	}()
+	return RegisterTranskripNilaiServiceHandler(ctx, mux, conn)
+}
+
+// RegisterTranskripNilaiServiceHandler registers the http handlers for service TranskripNilaiService to "mux".
+// The handlers forward requests to the grpc endpoint over "conn".
+func RegisterTranskripNilaiServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterTranskripNilaiServiceHandlerClient(ctx, mux, NewTranskripNilaiServiceClient(conn))
+}
+
+// RegisterTranskripNilaiServiceHandlerClient registers the http handlers for service TranskripNilaiService
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "TranskripNilaiServiceClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "TranskripNilaiServiceClient"
+// doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
+// "TranskripNilaiServiceClient" to call the correct interceptors. This client ignores the HTTP middlewares.
+func RegisterTranskripNilaiServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client TranskripNilaiServiceClient) error {
+	mux.Handle(http.MethodPost, pattern_TranskripNilaiService_CreateTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.TranskripNilaiService/CreateTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/ss/trankrip-nilai"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_TranskripNilaiService_CreateTranskripNilai_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TranskripNilaiService_CreateTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodGet, pattern_TranskripNilaiService_GetTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.TranskripNilaiService/GetTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/ss/trankrip-nilai"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_TranskripNilaiService_GetTranskripNilai_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TranskripNilaiService_GetTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodPut, pattern_TranskripNilaiService_UpdateTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.TranskripNilaiService/UpdateTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/ss/trankrip-nilai"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_TranskripNilaiService_UpdateTranskripNilai_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TranskripNilaiService_UpdateTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	mux.Handle(http.MethodDelete, pattern_TranskripNilaiService_DeleteTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.TranskripNilaiService/DeleteTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/ss/trankrip-nilai"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_TranskripNilaiService_DeleteTranskripNilai_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_TranskripNilaiService_DeleteTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
+	return nil
+}
+
+var (
+	pattern_TranskripNilaiService_CreateTranskripNilai_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "ss", "trankrip-nilai"}, ""))
+	pattern_TranskripNilaiService_GetTranskripNilai_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "ss", "trankrip-nilai"}, ""))
+	pattern_TranskripNilaiService_UpdateTranskripNilai_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "ss", "trankrip-nilai"}, ""))
+	pattern_TranskripNilaiService_DeleteTranskripNilai_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "ss", "trankrip-nilai"}, ""))
+)
+
+var (
+	forward_TranskripNilaiService_CreateTranskripNilai_0 = runtime.ForwardResponseMessage
+	forward_TranskripNilaiService_GetTranskripNilai_0    = runtime.ForwardResponseMessage
+	forward_TranskripNilaiService_UpdateTranskripNilai_0 = runtime.ForwardResponseMessage
+	forward_TranskripNilaiService_DeleteTranskripNilai_0 = runtime.ForwardResponseMessage
 )
 
 // RegisterKelasServiceHandlerFromEndpoint is same as RegisterKelasServiceHandler but
@@ -7987,146 +8116,6 @@ var (
 	forward_IjazahService_DeleteInfoIjazah_0 = runtime.ForwardResponseMessage
 )
 
-// RegisterTranskripNilaiServiceHandlerFromEndpoint is same as RegisterTranskripNilaiServiceHandler but
-// automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterTranskripNilaiServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
-	conn, err := grpc.NewClient(endpoint, opts...)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		if err != nil {
-			if cerr := conn.Close(); cerr != nil {
-				grpclog.Errorf("Failed to close conn to %s: %v", endpoint, cerr)
-			}
-			return
-		}
-		go func() {
-			<-ctx.Done()
-			if cerr := conn.Close(); cerr != nil {
-				grpclog.Errorf("Failed to close conn to %s: %v", endpoint, cerr)
-			}
-		}()
-	}()
-	return RegisterTranskripNilaiServiceHandler(ctx, mux, conn)
-}
-
-// RegisterTranskripNilaiServiceHandler registers the http handlers for service TranskripNilaiService to "mux".
-// The handlers forward requests to the grpc endpoint over "conn".
-func RegisterTranskripNilaiServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterTranskripNilaiServiceHandlerClient(ctx, mux, NewTranskripNilaiServiceClient(conn))
-}
-
-// RegisterTranskripNilaiServiceHandlerClient registers the http handlers for service TranskripNilaiService
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "TranskripNilaiServiceClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "TranskripNilaiServiceClient"
-// doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "TranskripNilaiServiceClient" to call the correct interceptors. This client ignores the HTTP middlewares.
-func RegisterTranskripNilaiServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client TranskripNilaiServiceClient) error {
-	mux.Handle(http.MethodPost, pattern_TranskripNilaiService_CreateTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.TranskripNilaiService/CreateTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/trankrip-nilai"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_TranskripNilaiService_CreateTranskripNilai_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_TranskripNilaiService_CreateTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodGet, pattern_TranskripNilaiService_GetTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.TranskripNilaiService/GetTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/trankrip-nilai"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_TranskripNilaiService_GetTranskripNilai_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_TranskripNilaiService_GetTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodPut, pattern_TranskripNilaiService_UpdateTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.TranskripNilaiService/UpdateTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/trankrip-nilai"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_TranskripNilaiService_UpdateTranskripNilai_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_TranskripNilaiService_UpdateTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodDelete, pattern_TranskripNilaiService_DeleteTranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.TranskripNilaiService/DeleteTranskripNilai", runtime.WithHTTPPathPattern("/api/v1/trankrip-nilai"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_TranskripNilaiService_DeleteTranskripNilai_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_TranskripNilaiService_DeleteTranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	mux.Handle(http.MethodPost, pattern_TranskripNilaiService_UploadITranskripNilai_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
-		ctx, cancel := context.WithCancel(req.Context())
-		defer cancel()
-		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.TranskripNilaiService/UploadITranskripNilai", runtime.WithHTTPPathPattern("/api/v1/transkrip/upload"))
-		if err != nil {
-			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		resp, md, err := request_TranskripNilaiService_UploadITranskripNilai_0(annotatedContext, inboundMarshaler, client, req, pathParams)
-		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
-		if err != nil {
-			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
-			return
-		}
-		forward_TranskripNilaiService_UploadITranskripNilai_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
-	})
-	return nil
-}
-
-var (
-	pattern_TranskripNilaiService_CreateTranskripNilai_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "trankrip-nilai"}, ""))
-	pattern_TranskripNilaiService_GetTranskripNilai_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "trankrip-nilai"}, ""))
-	pattern_TranskripNilaiService_UpdateTranskripNilai_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "trankrip-nilai"}, ""))
-	pattern_TranskripNilaiService_DeleteTranskripNilai_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"api", "v1", "trankrip-nilai"}, ""))
-	pattern_TranskripNilaiService_UploadITranskripNilai_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "transkrip", "upload"}, ""))
-)
-
-var (
-	forward_TranskripNilaiService_CreateTranskripNilai_0  = runtime.ForwardResponseMessage
-	forward_TranskripNilaiService_GetTranskripNilai_0     = runtime.ForwardResponseMessage
-	forward_TranskripNilaiService_UpdateTranskripNilai_0  = runtime.ForwardResponseMessage
-	forward_TranskripNilaiService_DeleteTranskripNilai_0  = runtime.ForwardResponseMessage
-	forward_TranskripNilaiService_UploadITranskripNilai_0 = runtime.ForwardResponseMessage
-)
-
 // RegisterDownloadServiceHandlerFromEndpoint is same as RegisterDownloadServiceHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
 func RegisterDownloadServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
@@ -8444,6 +8433,23 @@ func RegisterReferensiServiceHandlerClient(ctx context.Context, mux *runtime.Ser
 		}
 		forward_ReferensiService_GetMapel_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
+	mux.Handle(http.MethodGet, pattern_ReferensiService_FilterMapel_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+		ctx, cancel := context.WithCancel(req.Context())
+		defer cancel()
+		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/sekolah.ReferensiService/FilterMapel", runtime.WithHTTPPathPattern("/api/v1/ss/ref/mapel/filter"))
+		if err != nil {
+			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		resp, md, err := request_ReferensiService_FilterMapel_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
+		if err != nil {
+			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
+			return
+		}
+		forward_ReferensiService_FilterMapel_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+	})
 	mux.Handle(http.MethodGet, pattern_ReferensiService_GetMapelKurikulum_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
@@ -8508,6 +8514,7 @@ var (
 	pattern_ReferensiService_GetProgramKeahlian_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ss", "ref", "program-keahlian"}, ""))
 	pattern_ReferensiService_GetJurusan_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ss", "ref", "jurusan"}, ""))
 	pattern_ReferensiService_GetMapel_0             = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ss", "ref", "mapel"}, ""))
+	pattern_ReferensiService_FilterMapel_0          = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"api", "v1", "ss", "ref", "mapel", "filter"}, ""))
 	pattern_ReferensiService_GetMapelKurikulum_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ss", "ref", "mapel-kurikulum"}, ""))
 	pattern_ReferensiService_UpdateMapelKurikulum_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ss", "ref", "mapel-kurikulum"}, ""))
 	pattern_ReferensiService_GetGelarAkademik_0     = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "ss", "ref", "gelar-akademik"}, ""))
@@ -8523,6 +8530,7 @@ var (
 	forward_ReferensiService_GetProgramKeahlian_0   = runtime.ForwardResponseMessage
 	forward_ReferensiService_GetJurusan_0           = runtime.ForwardResponseMessage
 	forward_ReferensiService_GetMapel_0             = runtime.ForwardResponseMessage
+	forward_ReferensiService_FilterMapel_0          = runtime.ForwardResponseMessage
 	forward_ReferensiService_GetMapelKurikulum_0    = runtime.ForwardResponseMessage
 	forward_ReferensiService_UpdateMapelKurikulum_0 = runtime.ForwardResponseMessage
 	forward_ReferensiService_GetGelarAkademik_0     = runtime.ForwardResponseMessage

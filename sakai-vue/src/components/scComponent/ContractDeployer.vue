@@ -15,7 +15,7 @@ const { formatBalance, shortenAddress } = useUtils();
 const { file, status, isProcessing, abiName, binName, compileStatus, handleFileUpload, compileContract, cancelBuildContract, deployContract, deployStatus } = useContractDeployment();
 
 // Wallet Info Logic
-const { isConnected, isWalletInfoAvailable, getWalletDetail, currentWallet, loadWalletInfo } = useWalletInfo();
+const { currentWallet, loadWalletInfo } = useWalletInfo();
 
 // Password Dialog Logic
 const showPasswordDialog = ref(false);

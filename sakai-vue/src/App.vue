@@ -1,10 +1,10 @@
 <script setup>
-import { useStore } from 'vuex';
-
-const store = useStore();
+import LoadingOverlay from '@/components/LoadingOverlay.vue';
+import { isLoading } from '@/router';
 </script>
 
 <template>
+    <LoadingOverlay :visible="isLoading"> Memuat data, harap tunggu... </LoadingOverlay>
     <router-view />
 </template>
 

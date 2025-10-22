@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import api from '../api';
 
 const state = {
@@ -23,7 +24,7 @@ const actions = {
     // ================================================
     // Service Guru
     // ================================================
-    async fetchGuru(payload) {
+    async fetchGuru({ commit }, payload) {
         try {
             const response = await api.get('/ss/ptk', {
                 params: {
@@ -39,7 +40,7 @@ const actions = {
             throw new Error('Gagal menghapus Kategori Mapel:', error);
         }
     },
-    async saveGuru(payload) {
+    async saveGuru({ commit }, payload) {
         try {
             const response = await api.post('/ss/ptk/create', payload);
             return response.data.status;
@@ -48,7 +49,7 @@ const actions = {
         }
     },
 
-    async searchPTKByName(payload) {
+    async searchPTKByName({ commit }, payload) {
         try {
             const response = await api.get('/ss/ptk/search', {
                 params: {
@@ -133,7 +134,7 @@ const actions = {
         }
     },
 
-    async searchPTKTerdaftar(payload) {
+    async searchPTKTerdaftar({ commit }, payload) {
         try {
             // console.log('searchGuruTerdaftar', payload);
             const response = await api.get('/ss/ptk-terdaftar/search', {
@@ -149,9 +150,9 @@ const actions = {
         }
     },
 
-    async addPTKTerdaftar(payload) {
+    async addPTKTerdaftar({ commit }, payload) {
         try {
-            console.log(payload);
+            console.log({ commit }, payload);
             const response = await api.post(`/ss/${payload.schemaname}/ptk-terdaftar/create`, payload);
             return response.data;
         } catch (error) {
@@ -159,9 +160,9 @@ const actions = {
             throw new Error('Gagal menghapus Kategori Mapel:', error);
         }
     },
-    async updatePTKTerdaftar(payload) {
+    async updatePTKTerdaftar({ commit }, payload) {
         try {
-            console.log(payload);
+            console.log({ commit }, payload);
             // return;
             const response = await api.put(`/ss/ptk-terdaftar/update`, payload);
             // console.log(response);

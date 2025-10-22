@@ -258,7 +258,7 @@ const (
 type SemesterServiceClient interface {
 	// CRUD for Semester
 	CreateSemester(ctx context.Context, in *CreateSemesterRequest, opts ...grpc.CallOption) (*CreateSemesterResponse, error)
-	GetSemester(ctx context.Context, in *GetSemesterRequest, opts ...grpc.CallOption) (*GetSemesterResponse, error)
+	GetSemester(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetSemesterResponse, error)
 	GetCurrentSemester(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetCurrentSemesterResponse, error)
 	UpdateSemester(ctx context.Context, in *UpdateSemesterRequest, opts ...grpc.CallOption) (*UpdateSemesterResponse, error)
 	DeleteSemester(ctx context.Context, in *DeleteSemesterRequest, opts ...grpc.CallOption) (*DeleteSemesterResponse, error)
@@ -282,7 +282,7 @@ func (c *semesterServiceClient) CreateSemester(ctx context.Context, in *CreateSe
 	return out, nil
 }
 
-func (c *semesterServiceClient) GetSemester(ctx context.Context, in *GetSemesterRequest, opts ...grpc.CallOption) (*GetSemesterResponse, error) {
+func (c *semesterServiceClient) GetSemester(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetSemesterResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetSemesterResponse)
 	err := c.cc.Invoke(ctx, SemesterService_GetSemester_FullMethodName, in, out, cOpts...)
@@ -328,7 +328,7 @@ func (c *semesterServiceClient) DeleteSemester(ctx context.Context, in *DeleteSe
 type SemesterServiceServer interface {
 	// CRUD for Semester
 	CreateSemester(context.Context, *CreateSemesterRequest) (*CreateSemesterResponse, error)
-	GetSemester(context.Context, *GetSemesterRequest) (*GetSemesterResponse, error)
+	GetSemester(context.Context, *Empty) (*GetSemesterResponse, error)
 	GetCurrentSemester(context.Context, *Empty) (*GetCurrentSemesterResponse, error)
 	UpdateSemester(context.Context, *UpdateSemesterRequest) (*UpdateSemesterResponse, error)
 	DeleteSemester(context.Context, *DeleteSemesterRequest) (*DeleteSemesterResponse, error)
@@ -345,7 +345,7 @@ type UnimplementedSemesterServiceServer struct{}
 func (UnimplementedSemesterServiceServer) CreateSemester(context.Context, *CreateSemesterRequest) (*CreateSemesterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateSemester not implemented")
 }
-func (UnimplementedSemesterServiceServer) GetSemester(context.Context, *GetSemesterRequest) (*GetSemesterResponse, error) {
+func (UnimplementedSemesterServiceServer) GetSemester(context.Context, *Empty) (*GetSemesterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetSemester not implemented")
 }
 func (UnimplementedSemesterServiceServer) GetCurrentSemester(context.Context, *Empty) (*GetCurrentSemesterResponse, error) {
@@ -397,7 +397,7 @@ func _SemesterService_CreateSemester_Handler(srv interface{}, ctx context.Contex
 }
 
 func _SemesterService_GetSemester_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetSemesterRequest)
+	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -409,7 +409,7 @@ func _SemesterService_GetSemester_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: SemesterService_GetSemester_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SemesterServiceServer).GetSemester(ctx, req.(*GetSemesterRequest))
+		return srv.(SemesterServiceServer).GetSemester(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -4440,7 +4440,7 @@ const (
 // =========================================
 type ReferensiServiceClient interface {
 	GetBentukPendidikan(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetBentukPendidikanResponse, error)
-	GetJenjang(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetJenjangResponse, error)
+	GetJenjang(ctx context.Context, in *GetJenjangRequest, opts ...grpc.CallOption) (*GetJenjangResponse, error)
 	GetTingkatPendidikan(ctx context.Context, in *GetTingkatPendidikanRequest, opts ...grpc.CallOption) (*GetTingkatPendidikanResponse, error)
 	GetStatusKepemilikan(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetStatusKepemilikanResponse, error)
 	GetKurikulum(ctx context.Context, in *GetKurikulumRequest, opts ...grpc.CallOption) (*GetKurikulumResponse, error)
@@ -4472,7 +4472,7 @@ func (c *referensiServiceClient) GetBentukPendidikan(ctx context.Context, in *Em
 	return out, nil
 }
 
-func (c *referensiServiceClient) GetJenjang(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*GetJenjangResponse, error) {
+func (c *referensiServiceClient) GetJenjang(ctx context.Context, in *GetJenjangRequest, opts ...grpc.CallOption) (*GetJenjangResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(GetJenjangResponse)
 	err := c.cc.Invoke(ctx, ReferensiService_GetJenjang_FullMethodName, in, out, cOpts...)
@@ -4601,7 +4601,7 @@ func (c *referensiServiceClient) GetGelarAkademik(ctx context.Context, in *GetGe
 // =========================================
 type ReferensiServiceServer interface {
 	GetBentukPendidikan(context.Context, *Empty) (*GetBentukPendidikanResponse, error)
-	GetJenjang(context.Context, *Empty) (*GetJenjangResponse, error)
+	GetJenjang(context.Context, *GetJenjangRequest) (*GetJenjangResponse, error)
 	GetTingkatPendidikan(context.Context, *GetTingkatPendidikanRequest) (*GetTingkatPendidikanResponse, error)
 	GetStatusKepemilikan(context.Context, *Empty) (*GetStatusKepemilikanResponse, error)
 	GetKurikulum(context.Context, *GetKurikulumRequest) (*GetKurikulumResponse, error)
@@ -4626,7 +4626,7 @@ type UnimplementedReferensiServiceServer struct{}
 func (UnimplementedReferensiServiceServer) GetBentukPendidikan(context.Context, *Empty) (*GetBentukPendidikanResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetBentukPendidikan not implemented")
 }
-func (UnimplementedReferensiServiceServer) GetJenjang(context.Context, *Empty) (*GetJenjangResponse, error) {
+func (UnimplementedReferensiServiceServer) GetJenjang(context.Context, *GetJenjangRequest) (*GetJenjangResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetJenjang not implemented")
 }
 func (UnimplementedReferensiServiceServer) GetTingkatPendidikan(context.Context, *GetTingkatPendidikanRequest) (*GetTingkatPendidikanResponse, error) {
@@ -4702,7 +4702,7 @@ func _ReferensiService_GetBentukPendidikan_Handler(srv interface{}, ctx context.
 }
 
 func _ReferensiService_GetJenjang_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
+	in := new(GetJenjangRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -4714,7 +4714,7 @@ func _ReferensiService_GetJenjang_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: ReferensiService_GetJenjang_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReferensiServiceServer).GetJenjang(ctx, req.(*Empty))
+		return srv.(ReferensiServiceServer).GetJenjang(ctx, req.(*GetJenjangRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

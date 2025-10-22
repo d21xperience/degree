@@ -63,7 +63,7 @@ const mutations = {
 };
 
 const actions = {
-    async fetchBCPlatform({ commit }, payload) {
+    async fetchBCPlatform({ commit }) {
         try {
             const { data } = await api.get('/scs/platform');
             data.bcPlatform.find((platform) => {
@@ -73,11 +73,11 @@ const actions = {
             });
             return data;
         } catch (error) {
-            throw error;
+            throw new Error('Gagal mendapatkan BC platform', error);
         }
     },
 
-    async setBCPlatform({ commit }, payload) {
+    async setBCPlatform(payload) {
         // console.log("in vuex: ", payload);
         const py = {
             bc_platform: {
@@ -124,7 +124,8 @@ const actions = {
             const { data } = await api.put('scs/bc-network', payload);
             return data;
         } catch (error) {
-            throw error;
+            console.log(error);
+            throw new Error('Gagal update BC network', error);
         }
     },
 
@@ -166,7 +167,7 @@ const actions = {
             throw error;
         }
     },
-    async createBCAccount({ commit }, payload) {
+    async createBCAccount(payload) {
         let network_name = payload.network_name || 0;
         let user_id = payload.user_id || 0;
         let password = payload.password || 0;
@@ -184,7 +185,8 @@ const actions = {
             // commit("SET_BCNETWORK", response.data);
             return response.data; // Mengembalikan data sekolah
         } catch (error) {
-            throw error;
+            console.log(error);
+            throw new Error('Gagal update BC network', error);
         }
     },
     async importBCAccount({ commit }, payload) {

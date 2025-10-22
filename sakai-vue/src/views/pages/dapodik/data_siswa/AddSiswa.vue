@@ -1,19 +1,11 @@
 <script setup>
-import AgamaComponent from '@/components/AgamaComponent.vue';
-import JKComponent from '@/components/JKComponent.vue';
-import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
+import { useSiswa } from '@/composables/sekolah_composable/useSiswa';
 import router from '@/router';
 import InputText from 'primevue/inputtext';
 import { computed, onMounted, ref } from 'vue';
-const sekolahService = useSekolahService();
-
-// const toast = useToast();
-
-// import router from '@/router';
 import { useRoute } from 'vue-router';
-
 const route = useRoute();
-
+const { searchSiswaAktif } = useSiswa();
 const pesertaDidikId = route.query.pesertaDidikId;
 const isEdit = ref(false);
 
@@ -85,11 +77,11 @@ const tambah = () => {
 };
 
 // Handle Upload Foto
-const onUpload = (event) => {
-    const file = event.files[0];
-    pesertaDidikPelengkap.value.fotoSiswa = URL.createObjectURL(file);
-    toast.add({ severity: 'info', summary: 'Foto Diunggah', detail: file.name, life: 3000 });
-};
+// const onUpload = (event) => {
+//     const file = event.files[0];
+//     pesertaDidikPelengkap.value.fotoSiswa = URL.createObjectURL(file);
+//     toast.add({ severity: 'info', summary: 'Foto Diunggah', detail: file.name, life: 3000 });
+// };
 
 const batal = () => {
     // isLoadingBatal.value = true;
@@ -104,7 +96,7 @@ onMounted(async () => {
     if (pesertaDidikId) {
         isEdit.value = true;
         // console.log(pesertaDidikId);
-        const cek = await sekolahService.searchSiswaAktif(pesertaDidikId);
+        const cek = await searchSiswaAktif(pesertaDidikId);
         console.log(cek);
         Object.assign(pesertaDidik.value, cek);
         Object.assign(pesertaDidikPelengkap.value, cek);
@@ -120,50 +112,78 @@ onMounted(async () => {
         </div>
 
         <section class="mb-8">
-            <h2 class="text-xl font-normal mb-4">Informasi Siswa</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <h2 class="text-xl font-semibold mb-4">Informasi Siswa</h2>
+            <div class="md:grid grid-cols-2 grid-rows-5 gap-x-4 gap-y-2">
                 <div>
                     <label class="block text-gray-700" for="nmSiswa">Nama Lengkap</label>
                     <InputText v-model="pesertaDidik.nmSiswa" fluid name="nmSiswa" id="nmSiswa" placeholder="Masukan nama" :invalid="submitted && pesertaDidik.nmSiswa.trim().length == 0" />
                     <small v-if="submitted && pesertaDidik.nmSiswa.trim().length == 0" class="text-red-500">Nama harus diisi.</small>
                 </div>
-                <div class="w-full">
+                <div class="col-start-1 row-start-2">
                     <label class="block text-gray-700">Jenis Kelamin</label>
                     <JKComponent v-model="pesertaDidik.jenisKelamin" />
                     <small v-if="submitted && !pesertaDidik.jenisKelamin" class="text-red-500">Jenis kelalmin harus diisi.</small>
                 </div>
-                <div>
-                    <div class="md:flex md:space-x-1">
-                        <div class="w-full">
-                            <label class="block text-gray-700" for="tempatLahir">Tpt Lahir</label>
-                            <InputText v-model="pesertaDidik.tempatLahir" fluid name="tempatLahir" id="tempatLahir" placeholder="Masukan tempat lahir" class="w-full md:w-64" :invalid="submitted && pesertaDidik.tempatLahir.trim().length == 0" />
-                            <small v-if="submitted && pesertaDidik.tempatLahir.trim().length == 0" class="text-red-500">Tempat lahir harus diisi.</small>
-                        </div>
-                        <div>
-                            <label class="block text-gray-700">Tgl Lahir</label>
-                            <input
-                                type="date"
-                                placeholder="YYYY-MM-DD"
-                                class="w-full p-2 border border-gray-300 rounded"
-                                v-model="pesertaDidik.tanggalLahir"
-                                :class="{ 'border-red-400': submitted && !pesertaDidik.tanggalLahir, 'text-red-400': submitted && !pesertaDidik.tanggalLahir }"
-                            />
-                            <small v-if="submitted && !pesertaDidik.tanggalLahir" class="text-red-500">Tgl.Lahir harus diisi.</small>
-                        </div>
+                <div class="col-start-1 row-start-3">
+                    <div class="">
+                        <label class="block text-gray-700" for="tempatLahir">Tempat Lahir</label>
+                        <InputText v-model="pesertaDidik.tempatLahir" fluid name="tempatLahir" id="tempatLahir" placeholder="Masukan tempat lahir" class="w-full md:w-64" :invalid="submitted && pesertaDidik.tempatLahir.trim().length == 0" />
+                        <small v-if="submitted && pesertaDidik.tempatLahir.trim().length == 0" class="text-red-500">Tempat lahir harus diisi.</small>
                     </div>
                 </div>
-
-                <div>
+                <div class="col-start-1 row-start-4">
+                    <div>
+                        <label class="block text-gray-700">Tanggal Lahir</label>
+                        <input
+                            type="date"
+                            placeholder="YYYY-MM-DD"
+                            class="w-full p-2 border border-gray-300 rounded"
+                            v-model="pesertaDidik.tanggalLahir"
+                            :class="{ 'border-red-400': submitted && !pesertaDidik.tanggalLahir, 'text-red-400': submitted && !pesertaDidik.tanggalLahir }"
+                        />
+                        <small v-if="submitted && !pesertaDidik.tanggalLahir" class="text-red-500">Tgl.Lahir harus diisi.</small>
+                    </div>
+                </div>
+                <div class="col-start-1 row-start-5">
                     <label class="block text-gray-700">Agama</label>
                     <AgamaComponent v-model="pesertaDidik.agama" />
                 </div>
+                <div class="row-span-5 col-start-2 row-start-1">
+                    <div class="border h-full">
+                        <div>
+                            <label class="block text-gray-700">Foto Siswa</label>
+                            <div class="relative">
+                                <input type="file" class="w-full p-2 border border-gray-300 rounded" />
+                                <i class="fas fa-upload absolute right-3 top-3 text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-gray-700" for="nis">NIS</label>
-                    <InputText v-model="pesertaDidik.nis" fluid name="nis" id="nis" placeholder="Masukan NIS" />
+                    <InputText v-model="pesertaDidik.nis" fluid name="nis" id="nis" placeholder="Kosongkan jika belum ada" />
                 </div>
                 <div>
                     <label class="block text-gray-700" for="nisn">NISN</label>
                     <InputText v-model="pesertaDidik.nisn" fluid name="nisn" id="nisn" placeholder="Masukan NISN" />
+                </div>
+                <div>
+                    <label class="block text-gray-700">Asal Sekolah</label>
+                    <input type="text" placeholder="Masukan asal sekolah" class="w-full p-2 border border-gray-300 rounded" />
+                </div>
+                <div class="flex justify-between space-x-1">
+                    <div class="w-full">
+                        <label class="block text-gray-700">Tgl diterima di sekolah</label>
+                        <input type="date" placeholder="YYYY-MM-DD" class="w-full p-2 border border-gray-300 rounded" v-model="pesertaDidik.diterimaTanggal" />
+                    </div>
+                    <div class="w-full">
+                        <label class="block text-gray-700">Diterima di kelas</label>
+                        <InputNumber placeholder="contoh: 10, 7" fluid />
+                        <!-- <input type="number" placeholder="contoh: 10, 7" class="w-full p-2 border border-gray-300 rounded" /> -->
+                    </div>
                 </div>
             </div>
 
@@ -198,21 +218,7 @@ onMounted(async () => {
                     <label class="block text-gray-700" for="desa">Desa</label>
                     <InputText v-model="alamatLengkap.desa" fluid name="desa" id="desa" placeholder="Masukan nama desa" />
                 </div>
-                <div>
-                    <label class="block text-gray-700">Asal Sekolah</label>
-                    <input type="text" placeholder="Masukan asal sekolah" class="w-full p-2 border border-gray-300 rounded" />
-                </div>
-                <div class="flex justify-between space-x-1">
-                    <div class="w-full">
-                        <label class="block text-gray-700">Tgl diterima di sekolah</label>
-                        <input type="date" placeholder="YYYY-MM-DD" class="w-full p-2 border border-gray-300 rounded" v-model="pesertaDidik.diterimaTanggal" />
-                    </div>
-                    <div class="w-full">
-                        <label class="block text-gray-700">Diterima di kelas</label>
-                        <InputNumber placeholder="contoh: 10, 7" fluid />
-                        <!-- <input type="number" placeholder="contoh: 10, 7" class="w-full p-2 border border-gray-300 rounded" /> -->
-                    </div>
-                </div>
+
                 <!-- <div class="mb-4">
                     <label class="block text-gray-700">Address</label>
                     <textarea placeholder="Enter student's address"
@@ -244,7 +250,7 @@ onMounted(async () => {
                 </div>
                 <div>
                     <label class="block text-gray-700">Pekerjaan Ayah</label>
-                    <InputText placeholder="Enter father's occupation" class="w-full p-2 border border-gray-300 rounded" />
+                    <InputText placeholder="Masukan perkerjaan Ayah" class="w-full p-2 border border-gray-300 rounded" />
                 </div>
                 <div>
                     <label class="block text-gray-700">Nama Ibu Kandung</label>
@@ -252,7 +258,7 @@ onMounted(async () => {
                 </div>
                 <div>
                     <label class="block text-gray-700">Pekerjaan Ibu</label>
-                    <input type="text" placeholder="Enter mother's occupation" class="w-full p-2 border border-gray-300 rounded" />
+                    <input type="text" placeholder="Masukan pekerjaan Ibu" class="w-full p-2 border border-gray-300 rounded" />
                 </div>
             </div>
             <div class="mb-4">
@@ -305,13 +311,6 @@ onMounted(async () => {
                 <div>
                     <label class="block text-gray-700">Anak Ke-</label>
                     <input type="number" placeholder="Masukan anak ke (contoh: 1, 2)" class="w-full p-2 border border-gray-300 rounded" />
-                </div>
-            </div>
-            <div>
-                <label class="block text-gray-700">Foto Siswa</label>
-                <div class="relative">
-                    <input type="file" class="w-full p-2 border border-gray-300 rounded" />
-                    <i class="fas fa-upload absolute right-3 top-3 text-gray-400"></i>
                 </div>
             </div>
         </section>

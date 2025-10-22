@@ -1,4 +1,5 @@
-import api from './api';
+/* eslint-disable no-unused-vars */
+import api from '../api';
 
 const state = {
     tabelNilaiakhir: JSON.parse(localStorage.getItem('tabelNilaiakhir')) || null
@@ -31,7 +32,7 @@ const actions = {
         }
     },
 
-    async searchNilai(payload) {
+    async searchNilai({ commit }, payload) {
         try {
             const { data } = await api.get(`ss/${payload.schemaname}/nilai-akhir/search`, {
                 params: {

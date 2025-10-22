@@ -12,10 +12,11 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./static:/usr/share/nginx/html/static:ro
       - ./certs:/etc/nginx/certs:ro
-    restart: always
+    restart: unless-stopped
     networks:
-      - backend_network
+      - app-network
 
 networks:
-  backend_network:
+  app-network:
     external: true
+    name: app-network

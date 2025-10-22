@@ -8,8 +8,7 @@ export function useTableTenant() {
         try {
             let response = store.getters['sekolahService/getTabeltenant'];
             if (!response) {
-                await store.dispatch('sekolahService/fetchTabeltenant');
-                response = store.getters['sekolahService/getTabeltenant'];
+                response = await store.dispatch('sekolahService/fetchTabeltenant');
             }
             return response;
         } catch (error) {

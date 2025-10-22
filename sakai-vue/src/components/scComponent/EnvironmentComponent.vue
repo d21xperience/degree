@@ -20,13 +20,14 @@ watch(
 watch(
     () => props.architecture,
     async (newVal) => {
-        console.log('EnvComponent', newVal);
+        // console.log('EnvComponent', newVal);
         if (newVal) {
             if (newVal.name.toLowerCase() == 'hyperledger fabric') {
                 environmentOptions.value = await scService.fetchBCNetworks('NONEVM');
             } else {
-                console.log(newVal);
                 environmentOptions.value = await scService.fetchBCNetworks('EVM');
+                // console.log(environmentOptions.value);
+                internalValue.value = environmentOptions.value.find((item) => item.Activate == true);
             }
         }
     }
@@ -37,5 +38,5 @@ watch(internalValue, (newVal) => {
 </script>
 
 <template>
-    <Select v-model="internalValue" :options="environmentOptions" fluid placeholder="Pilih Environment" :option-label="handleLabelOption" />
+    <Select v-model="internalValue" :options="environmentOptions" fluid placeholder="Pilih Environment" :option-label="handleLabelOption" :show-clear="true" :checkmark="true" />
 </template>

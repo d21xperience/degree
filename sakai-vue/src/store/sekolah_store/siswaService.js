@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import api from '../api';
 
 const state = {
@@ -16,7 +17,7 @@ const actions = {
     // ==================================
     // SISWA
     // ==================================
-    async createBanyakSiswa(payload) {
+    async createBanyakSiswa({ commit }, payload) {
         try {
             const response = await api.post(`/ss/${payload.schemaname}/siswa/create-banyak`, payload);
             console.log(response.data);
@@ -25,7 +26,7 @@ const actions = {
             return null;
         }
     },
-    async fetchSiswa(payload) {
+    async fetchSiswa({ commit }, payload) {
         try {
             const response = await api.get(`/ss/${payload.schemaname}/siswa`, {
                 params: {
@@ -78,7 +79,7 @@ const actions = {
     // throw new Error('Gagal menghapus Kategori Mapel:', error);
     //     }
     // },
-    async searchSiswaAktifById(payload) {
+    async searchSiswaAktifById({ commit }, payload) {
         try {
             const response = await api.get(`/ss/${payload.schemaname}/siswa/search`, {
                 params: {
@@ -93,7 +94,7 @@ const actions = {
         }
     },
 
-    async fetchBanyakSiswaByTingkatId(payload) {
+    async fetchBanyakSiswaByTingkatId({ commit }, payload) {
         try {
             const response = await api.get(`/ss/${payload.schemaname}/anggota-kelas/filter`, {
                 params: {
@@ -108,7 +109,7 @@ const actions = {
             throw new Error('Gagal menghapus Kategori Mapel:', error);
         }
     },
-    async fetchBanyakSiswaByRombelId(payload) {
+    async fetchBanyakSiswaByRombelId({ commit }, payload) {
         try {
             const response = await api.get(`/ss/${payload.schemaname}/anggota-kelas/filter`, {
                 params: {

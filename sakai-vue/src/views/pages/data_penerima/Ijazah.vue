@@ -1,26 +1,25 @@
 <script setup>
+import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
 import IssueDegreeButton from '@/components/IssueDegreeButton.vue';
-import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
+import { useDns } from '@/composables/sekolah_composable/useDns';
+import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
+import { useSemester } from '@/composables/sekolah_composable/useSemester';
 import { useUtils } from '@/composables/useUtils';
+import router from '@/router';
 import { FilterMatchMode } from '@primevue/core/api';
-import Column from 'primevue/column';
-import DataTable from 'primevue/datatable';
-import IconField from 'primevue/iconfield';
-import InputIcon from 'primevue/inputicon';
-import InputText from 'primevue/inputtext';
-import Toolbar from 'primevue/toolbar';
 import { computed, onMounted, ref, watch } from 'vue';
 const { formatterDateID } = useUtils();
+
+const { initSelectedTahunAjaran } = useSemester();
+const { getDns, deleteDns } = useDns();
+const { fetchSekolah } = useSekolah();
 const visible = ref(false);
-const tingkatPendidikanOptions = ref();
 const selectedSiswa = ref();
 const siswa = ref([]);
-const bentukPendidikan = ref('smk');
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     'kelas.nmKelas': { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
-const { getDns, deleteDns, initSelectedTahunAjaran, fetchSekolah } = useSekolahService();
 const tahunAjaranId = computed(() => initSelectedTahunAjaran.value.tahunAjaranId);
 watch(initSelectedTahunAjaran, async (e) => {
     // console.log(`${e.tahunAjaranId}`)
@@ -29,16 +28,13 @@ watch(initSelectedTahunAjaran, async (e) => {
 });
 
 // ==================================
-const scData = ref({
-    degreeData: null,
-    sekolah: null,
-    ipfsUrl: null,
-    transcript: null
-});
+// const scData = ref({
+//     degreeData: null,
+//     sekolah: null,
+//     ipfsUrl: null,
+//     transcript: null
+// });
 // const selectedJurusan = ref()
-import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
-import UploadIjazah from '@/components/UploadIjazah.vue';
-import router from '@/router';
 // Dummy data (bisa kamu ambil dari API atau input form)
 // const degreeData = ref({
 //     nama: '',
@@ -56,14 +52,14 @@ const transcript = ref({
 });
 const contract = null;
 
-watch(selectedSiswa, (newVal) => {
-    // if (newVal.length === 1) {
-    //     console.log(newVal[0].pesertaDidik.nmSiswa)
-    //     degreeData.value.nama = newVal[0].pesertaDidik.nmSiswa
-    //     degreeData.value.nisn = newVal[0].pesertaDidik.nisn
-    //     degreeData.value.tahun_lulus = 2023
-    // }
-});
+// watch(selectedSiswa, (newVal) => {
+//     // if (newVal.length === 1) {
+//     //     console.log(newVal[0].pesertaDidik.nmSiswa)
+//     //     degreeData.value.nama = newVal[0].pesertaDidik.nmSiswa
+//     //     degreeData.value.nisn = newVal[0].pesertaDidik.nisn
+//     //     degreeData.value.tahun_lulus = 2023
+//     // }
+// });
 const namaKelas = ref();
 
 const getNmKelas = (data) => {
@@ -183,20 +179,10 @@ onMounted(async () => {
                 </template>
             </Column>
             <Column field="namaOrtuWali" header="Nama Wali"></Column>
-            <!-- <Column field="cidUrl" header="CID Ijazah"></Column> -->
-            <!-- <Column field="nomorIjazah" header="No. Ijazah"></Column> -->
-            <!-- <Column field="nis" header="NIS"></Column> -->
-            <!-- <Column field="" header="Status">
-                <template #body="slotProps">
-                    <span :class="{ 'text-red-600': !slotProps.data.isComplete }">{{ slotProps.data.isComplete ? '✔' : 'X' }}</span>
-                </template>
-            </Column> -->
         </DataTable>
         <!-- <Dialog v-model:visible="visible" modal header="Data ijazah" :style="{ width: '60rem', height: '100rem' }">
             <DialogIjazah :peserta-didik="selectedSiswa" :visible="visible" />
         </Dialog>  -->
         <DialogConfirmDelete message="Apakah data ini akan dihapus?" v-model:visible="visible" @confirm="deleteData" @closeDialog="closeDialog" />
-
-        <UploadIjazah />
     </div>
 </template>

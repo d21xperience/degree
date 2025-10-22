@@ -1,34 +1,29 @@
 <script setup>
-import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useStore } from 'vuex';
 const store = useStore();
 const route = useRoute();
-// Dialog
-import Dialog from 'primevue/dialog';
-import Select from 'primevue/select';
 
 // const { selectedTahunAjaran, initSelectedTahunAjaran, listTahunAjaran } = useSekolahService();
-const sekolahService = useSekolahService();
 const platformsActivate = ref({});
 const platforms = ref(null);
 
 const dialogSelectplatforms = ref(false);
 const selectedPlatform = ref();
-const fetchPlatforms = async () => {
-    payload.schemaname = store.getters['sekolahService/getTabeltenant']?.schemaname;
+// const fetchPlatforms = async () => {
+//     payload.schemaname = store.getters['sekolahService/getTabeltenant']?.schemaname;
 
-    const res = await store.dispatch('scService/fetchBCPlatform', payload);
-    // console.log(res)
-    platforms.value = res.bcPlatform;
-    platforms.value.filter((platform) => {
-        if (platform.active) {
-            selectedPlatform.value = platform.name;
-            platformsActivate.value = platform;
-        }
-    });
-};
+//     const res = await store.dispatch('scService/fetchBCPlatform', payload);
+//     // console.log(res)
+//     platforms.value = res.bcPlatform;
+//     platforms.value.filter((platform) => {
+//         if (platform.active) {
+//             selectedPlatform.value = platform.name;
+//             platformsActivate.value = platform;
+//         }
+//     });
+// };
 let payload = {};
 // Fungsi untuk mengubah platform yang aktif
 const setPlatform = async () => {
@@ -62,31 +57,31 @@ const saveSelection = async () => {
     await setPlatform();
 };
 // Set diaktive current Blockchain network
-const platformDiactive = async () => {
-    if (!platformsActivate.value) return;
+// const platformDiactive = async () => {
+//     if (!platformsActivate.value) return;
 
-    // Set semua platform ke `false`
-    platforms.value.forEach((platform) => (platform.active = false));
+//     // Set semua platform ke `false`
+//     platforms.value.forEach((platform) => (platform.active = false));
 
-    // Pastikan platform yang aktif diubah menjadi false
-    platformsActivate.value.active = false;
+//     // Pastikan platform yang aktif diubah menjadi false
+//     platformsActivate.value.active = false;
 
-    console.log('🚀 Sebelum mengirim ke backend:', JSON.stringify(platformsActivate.value));
+//     console.log('🚀 Sebelum mengirim ke backend:', JSON.stringify(platformsActivate.value));
 
-    // Kirim perubahan ke backend
+//     // Kirim perubahan ke backend
 
-    await setPlatform();
+//     await setPlatform();
 
-    // Pastikan platform ter-reset setelah update sukses
-    platformsActivate.value = {};
-    selectedPlatform.value = '';
-};
-const listTahunAjaran = ref([]);
+//     // Pastikan platform ter-reset setelah update sukses
+//     platformsActivate.value = {};
+//     selectedPlatform.value = '';
+// };
+// const listTahunAjaran = ref([]);
 // const selectedTahunAjaran = ref();
 onMounted(async () => {
-    await sekolahService.fetchTahunAjaran();
-    listTahunAjaran.value = sekolahService.listTahunAjaran.value._rawValue;
-    sekolahService.selectedTahunAjaran.value = sekolahService.initSelectedTahunAjaran.value;
+    // await fetchTahunAjaran();
+    // listTahunAjaran.value = listTahunAjaran.value._rawValue;
+    // selectedTahunAjaran.value = initSelectedTahunAjaran.value;
     // // await fetchPlatforms();
     // await fetchSemester();
 });
@@ -115,22 +110,22 @@ onMounted(async () => {
 //     }
 // };
 
-const getTahunAjaran = (semesterArray) => {
-    const unique = new Set();
-    // console.log(semesterArray)
-    return semesterArray
-        .filter((item) => {
-            if (!unique.has(item.tahunAjaranId)) {
-                unique.add(item.tahunAjaranId);
-                return true;
-            }
-            return false;
-        })
-        .map((item) => ({
-            label: item.tahunAjaranId,
-            value: item.tahunAjaranId + '2'
-        }));
-};
+// const getTahunAjaran = (semesterArray) => {
+//     const unique = new Set();
+//     // console.log(semesterArray)
+//     return semesterArray
+//         .filter((item) => {
+//             if (!unique.has(item.tahunAjaranId)) {
+//                 unique.add(item.tahunAjaranId);
+//                 return true;
+//             }
+//             return false;
+//         })
+//         .map((item) => ({
+//             label: item.tahunAjaranId,
+//             value: item.tahunAjaranId + '2'
+//         }));
+// };
 
 // watch(selectedTahunAjaran, (val) => {
 //     // tetapkan tahun ajaran yang dipilih
@@ -154,7 +149,7 @@ const isDisabled = computed(() => route.meta.disableSelect);
                 <div class="md:flex md:items-center md:space-x-2">
                     <label class="text-slate-500 md:text-base text-sm">Tahun Pelajaran</label>
                     <div>
-                        <Select v-model="sekolahService.selectedTahunAjaran" :options="listTahunAjaran" optionLabel="nama" placeholder="Tahun Pelajaran" class="w-full md:w-52 mr-2" :disabled="isDisabled" />
+                        <Select v-model="selectedTahunAjaran" :options="listTahunAjaran" optionLabel="nama" placeholder="Tahun Pelajaran" class="w-full md:w-52 mr-2" :disabled="isDisabled" />
                     </div>
                 </div>
             </div>

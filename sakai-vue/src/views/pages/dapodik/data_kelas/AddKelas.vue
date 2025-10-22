@@ -4,14 +4,12 @@ import { debounce } from 'lodash-es';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 const route = useRoute();
-
+const { searchKelas, addKelas } = useKelas();
 const kelasId = route.query.kelasId;
 
-import JurusanComponent from '@/components/JurusanComponent.vue';
-import TingkatComponent from '@/components/TingkatComponent.vue';
-import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
-import { useStore } from 'vuex';
-const store = useStore();
+import JurusanComponent from '@/components/sekolah_components/JurusanComponent.vue';
+import TingkatComponent from '@/components/sekolah_components/TingkatComponent.vue';
+import { useKelas } from '@/composables/sekolah_composable/useKelas';
 
 const isEdit = ref(false);
 const submitted = ref(false);
@@ -31,12 +29,11 @@ const rombel = ref({
 });
 
 const jurusanTerpilih = ref(null);
-const sekolahService = useSekolahService();
 const kelas = ref();
 onMounted(async () => {
     if (kelasId) {
         isEdit.value = true;
-        kelas.value = await sekolahService.searchKelas(kelasId);
+        kelas.value = await searchKelas(kelasId);
         console.log(kelas.value);
         if (kelas.value) {
             Object.assign(rombel.value, kelas.value);
@@ -81,7 +78,7 @@ const tambah = debounce(async () => {
         return;
     }
     isLoadingTambah.value = true; // return;
-    const tes = await sekolahService.addKelas(rombel);
+    const tes = await addKelas(rombel);
     if (tes) {
         isLoadingTambah.value = false;
         router.push({ name: 'infoKelas' });

@@ -13,12 +13,12 @@ export function useSiswa() {
                 schemaname: schemaname.value,
                 semesterId: semesterId || initSelectedSemester.value.semesterId
             };
-            const cachedData = await store.getters['sekolahService/getSiswaAktif'];
+            const cachedData = await store.getters['siswaService/getSiswaAktif'];
             const shouldFetchNewData = !cachedData || !cachedData?.peserta_didik?.length || cachedData.semester_id !== requestData.semesterId;
 
             let studentData = cachedData;
             if (shouldFetchNewData) {
-                studentData = await store.dispatch('sekolahService/fetchSiswaAktif', requestData);
+                studentData = await store.dispatch('siswaService/fetchSiswaAktif', requestData);
             }
 
             // Update reactive data
@@ -37,7 +37,7 @@ export function useSiswa() {
                 schemaname: schemaname.value,
                 anggota_rombel_id: anggotaRombelId
             };
-            const response = await store.dispatch('sekolahService/createAnggotaKelas', payload);
+            const response = await store.dispatch('siswaService/createAnggotaKelas', payload);
             return response;
         } catch (error) {
             console.log(error);
@@ -50,7 +50,7 @@ export function useSiswa() {
                 schemaname: schemaname.value,
                 anggota_rombel_id: anggotaRombelIds
             };
-            const response = await store.dispatch('sekolahService/deleteBatchAnggotaKelas', payload);
+            const response = await store.dispatch('siswaService/deleteBatchAnggotaKelas', payload);
             return response;
         } catch (error) {
             console.log(error);
@@ -63,7 +63,7 @@ export function useSiswa() {
     //             schemaname: schemaname.value,
     //             anggota_rombel_id: anggotaRombelIds
     //         };
-    //         const response = await store.dispatch('sekolahService/deleteBatchAnggotaKelas', payload);
+    //         const response = await store.dispatch('siswaService/deleteBatchAnggotaKelas', payload);
     //         if (response.status) {
     //             toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
     //         }
@@ -73,7 +73,7 @@ export function useSiswa() {
     // };
     const searchSiswaAktif = async (pesertaDidikId) => {
         try {
-            const response = await store.getters['sekolahService/getSiswaAktif'];
+            const response = await store.getters['siswaService/getSiswaAktif'];
             if (response) {
                 const siswa = response.peserta_didik.find((item) => item.pesertaDidikId.includes(pesertaDidikId));
                 return siswa;
@@ -90,7 +90,7 @@ export function useSiswa() {
                 semester_id: `${initSelectedTahunAjaran.value?.tahunAjaranId}2`,
                 tingkat_pendidikan_id: tingkatPendidikanId
             };
-            const res = await store.dispatch('sekolahService/fetchBanyakSiswaByTingkatId', payload);
+            const res = await store.dispatch('siswaService/fetchBanyakSiswaByTingkatId', payload);
             // console.log(res);
 
             return res;
@@ -107,7 +107,7 @@ export function useSiswa() {
                 rombongan_belajar_id: rombelId
             };
             // return
-            const res = await store.dispatch('sekolahService/fetchBanyakSiswaByRombelId', payload);
+            const res = await store.dispatch('siswaService/fetchBanyakSiswaByRombelId', payload);
 
             return res;
         } catch (error) {

@@ -2,11 +2,9 @@
 import { useToast } from 'primevue/usetoast';
 
 import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
-import LoadingOverlay from '@/components/LoadingOverlay.vue';
 import { useSemester } from '@/composables/sekolah_composable/useSemester';
 import { useUtils } from '@/composables/useUtils';
 import { FilterMatchMode } from '@primevue/core/api';
-import { InputNumber } from 'primevue';
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 
 const { deleteSemester, updateSemester, fetchSemester } = useSemester();
@@ -23,8 +21,8 @@ const semester = reactive({
     namaSemester: '',
     semester: '',
     periodeAktif: '',
-    tanggalMulai: new Date(),
-    tanggalSelesai: new Date()
+    tanggalMulai: '',
+    tanggalSelesai: ''
 });
 const semesterList = ref([]);
 const selectedSemester = ref();
@@ -41,9 +39,9 @@ const handleCreateSemester = () => {
                 tahunAjaranId: semester.tahunAjaranId,
                 semester: semester.semester,
                 periodeAktif: 1,
-                semesterId: semester.semesterId,
-                tanggalMulai: semester.tanggalMulai.toISOString().split('T')[0],
-                tanggalSelesai: semester.tanggalSelesai.toISOString().split('T')[0]
+                semesterId: semester.semesterId
+                // tanggalMulai: semester.tanggalMulai.toISOString().split('T')[0],
+                // tanggalSelesai: semester.tanggalSelesai.toISOString().split('T')[0]
             };
 
             console.log(newSemester);
@@ -142,9 +140,14 @@ const initial = async () => {
     isLoading.value = true;
     try {
         semesterList.value = await fetchSemester();
-        // console.log(semesterList.value);
     } catch (error) {
-        alert('error');
+        console.log('Error saat inisialisasi:', error);
+        toast.add({
+            severity: 'error',
+            summary: 'Failed',
+            detail: `Failed: ${error}`,
+            life: 3000
+        });
     } finally {
         isLoading.value = false;
     }
@@ -190,8 +193,8 @@ const setDefaultTanggal = (tahun) => {
 watch(
     () => semester.semester,
     () => {
-        // console.log(newVal);
-        if (isEdit.value && semester.tahunAjaranId) {
+        console.log(semester.semester);
+        if (!isEdit.value && semester.tahunAjaranId) {
             const year = new Date(semester.tahunAjaranId).getFullYear();
             setDefaultTanggal(year);
         }
@@ -289,6 +292,7 @@ onMounted(async () => {
                     <ToggleButton :modelValue="getActive(slotProps.data.periodeAktif)" @update:modelValue="setActive(slotProps.data, $event)" class="w-24" onLabel="On" offLabel="Off" />
                 </template>
             </Column>
+            <!-- <Column header="Selected"></Column> -->
         </DataTable>
 
         <!-- Dialog Tambah dan edit semester -->
@@ -350,9 +354,6 @@ onMounted(async () => {
                 <Button v-else label="Tambah" icon="pi pi-save" @click="handleCreateSemester" />
             </template>
         </Dialog>
-
-        <!-- end of import data -->
-        <LoadingOverlay :visible="isLoading"> Memuat data, harap tunggu... </LoadingOverlay>
 
         <DialogConfirmDelete message="data ini akan dihapus?" v-model:visible="isDeleteDialog" @confirm="handleDeleteSemester" @closeDialog="handleCloseDialog" judul="Hapus semester" />
     </div>

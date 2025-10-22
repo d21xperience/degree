@@ -1,14 +1,16 @@
 <script setup>
 import IpfsInterface from '@/components/scComponent/IpfsInterface.vue';
-import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
 import router from '@/router';
 import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-const sekolahService = useSekolahService();
 // ============toast============
+import { useDns } from '@/composables/sekolah_composable/useDns';
+import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
 import Toast from 'primevue/toast';
 const route = useRoute();
+const { fetchSekolah } = useSekolah();
+const { updateDns, searchDnsLokal } = useDns();
 // ========================
 const pesertaDidikId = route.query.pesertaDidikId;
 // const selectedjenisKelaminOptions = ref();
@@ -95,11 +97,11 @@ const dns = ref({
 });
 const isLoading = ref(false);
 const isLoadingSave = ref(false);
-// const sekolah = computed(() => sekolahService.fetchSekolah());
+// const sekolah = computed(() => fetchSekolah());
 // const nmSekolah = sekolah?.nama.toLowerCase().replace(/\s+/g, '');
 const cancel = async () => {
     isLoading.value = true;
-    const sekolah = await sekolahService.fetchSekolah();
+    const sekolah = await fetchSekolah();
     const nmSekolah = sekolah.sekolah?.nama.toLowerCase().replace(/\s+/g, '');
     setTimeout(() => {
         isLoading.value = false;
@@ -110,11 +112,11 @@ const cancel = async () => {
 const save = async () => {
     isLoadingSave.value = true;
     // kirim ke server
-    const response = await sekolahService.updateDns(dns.value);
+    const response = await updateDns(dns.value);
     if (response) {
         isLoading.value = false;
         // return
-        const sekolah = await sekolahService.fetchSekolah();
+        const sekolah = await fetchSekolah();
         const nmSekolah = sekolah.sekolah?.nama.toLowerCase().replace(/\s+/g, '');
         setTimeout(() => {
             isLoadingSave.value = false;
@@ -125,7 +127,7 @@ const save = async () => {
 };
 
 onMounted(async () => {
-    const cek = await sekolahService.searchDnsLokal(pesertaDidikId);
+    const cek = await searchDnsLokal(pesertaDidikId);
     console.log(cek);
     console.log(cek.jenisKelamin);
     if (cek) {

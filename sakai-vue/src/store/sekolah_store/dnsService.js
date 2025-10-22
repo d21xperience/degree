@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import api from '../api';
 
 const state = {
@@ -17,7 +18,7 @@ const actions = {
     // =============================================
     //  DNS
     // =============================================
-    async createDns(payload) {
+    async createDns({ commit }, payload) {
         try {
             const response = await api.post(`ss/ijazah/data-nominasi_sementara`, payload);
             return response.data;
@@ -27,7 +28,8 @@ const actions = {
             throw new Error('Gagal menghapus Kategori Mapel:', error);
         }
     },
-    async updateDns(payload) {
+    // eslint-disable-next-line no-unused-vars
+    async updateDns({ commit }, payload) {
         try {
             const response = await api.put(`ss/ijazah/data-nominasi_sementara/update`, payload);
 
@@ -65,7 +67,7 @@ const actions = {
             throw new Error('Gagal menghapus Kategori Mapel:', error);
         }
     },
-    async searchDns(payload) {
+    async searchDns({ commit }, payload) {
         try {
             const response = await api.get('/ss/data-nominasi_sementara/search', {
                 params: {

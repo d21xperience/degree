@@ -1,6 +1,6 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
-import { onBeforeMount, ref, watch } from 'vue';
+import { onBeforeMount, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
@@ -37,6 +37,13 @@ onBeforeMount(() => {
     isActiveMenu.value = activeItem === itemKey.value || activeItem ? activeItem.startsWith(itemKey.value + '-') : false;
 });
 
+// 🔹 Tambahan: cek route saat mount
+onMounted(() => {
+    if (props.item.to && route.path === props.item.to) {
+        setActiveMenuItem(itemKey.value);
+        isActiveMenu.value = true;
+    }
+});
 watch(
     () => layoutState.activeMenuItem,
     (newVal) => {

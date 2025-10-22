@@ -1,16 +1,16 @@
 <script setup>
 import DialogSignOut from '@/components/DialogSignOut.vue';
+import LoadingOverlay from '@/components/LoadingOverlay.vue';
 import router from '@/router';
 import { useAuth } from '@/views/pages/auth/composables/auth';
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import AppMenuItem from './AppMenuItem.vue';
-
-import { Network as NetworkText } from 'lucide-vue-next';
-import { shallowRef } from 'vue';
-const icons = shallowRef({
-    NetworkText
-});
+// import { Network as NetworkText } from 'lucide-vue-next';
+// import { shallowRef } from 'vue';
+// const icons = shallowRef({
+//     NetworkText
+// });
 const route = useRoute();
 const sekolah = computed(() => route.params.sekolah);
 const { user, onLogout } = useAuth(); // pastikan 'user' ada dan reactive
@@ -65,11 +65,6 @@ const model = computed(() => {
                     icon: 'pi pi-fw pi-building-columns',
                     items: [
                         {
-                            label: 'Semester',
-                            icon: 'pi pi-fw pi-bookmark',
-                            to: `/${sekolahPath}/data-dapodik/info-semester`
-                        },
-                        {
                             label: 'Data Sekolah',
                             icon: 'pi pi-fw pi-bookmark',
                             to: `/${sekolahPath}/data-dapodik/info-sekolah`
@@ -98,6 +93,22 @@ const model = computed(() => {
                             label: 'Data Nilai',
                             icon: 'pi pi-fw pi-book',
                             to: `/${sekolahPath}/data-dapodik/info-nilai`
+                        },
+                        {
+                            label: 'Kenaikan & Kelulusan',
+                            icon: 'pi pi-fw pi-building-columns',
+                            items: [
+                                {
+                                    label: 'Kenaikan',
+                                    icon: 'pi pi-fw pi-building-columns',
+                                    to: `/${sekolahPath}/data-dapodik/status-kenaikan`
+                                },
+                                {
+                                    label: 'Kelulusan',
+                                    icon: 'pi pi-fw pi-building-columns',
+                                    to: `/${sekolahPath}/data-dapodik/status-kenaikan`
+                                }
+                            ]
                         }
                     ]
                 },
@@ -166,10 +177,32 @@ const model = computed(() => {
                     to: '/su/dashboard'
                 },
                 {
-                    label: 'Daftar sekolah',
-                    icon: 'pi pi-fw pi-building-columns',
-                    to: '/su/daftar-sekolah'
+                    label: 'Master Data Akademik',
+                    icon: 'pi pi-fw pi-bookmark',
+                    items: [
+                        {
+                            label: 'Semester',
+                            icon: 'pi pi-fw pi-bookmark',
+                            to: `/su/info-semester`
+                        },
+                        {
+                            label: 'Kurikulum',
+                            icon: 'pi pi-fw pi-bookmark',
+                            to: `/su/info-kurikulum`
+                        },
+                        {
+                            label: 'Kelompok Mapel',
+                            icon: 'pi pi-fw pi-bookmark',
+                            to: '/su/daftar-sekolah'
+                        },
+                        {
+                            label: 'Daftar sekolah',
+                            icon: 'pi pi-fw pi-building-columns',
+                            to: '/su/daftar-sekolah'
+                        }
+                    ]
                 },
+
                 {
                     label: 'Blockchain',
                     icon: 'pi pi-fw pi-box',
@@ -264,6 +297,19 @@ const getProfile = (newValue) => {
 // onMounted(() => {
 //     console.log(role.value);
 // });
+const isLoading = ref(false);
+const logout = async () => {
+    isLoading.value = true;
+    try {
+        isDialogSignOut.value = false;
+        await onLogout();
+        router.push({ name: 'landing' });
+    } catch (error) {
+        console.log(error);
+    } finally {
+        isLoading.value = false;
+    }
+};
 </script>
 
 <template>
@@ -274,5 +320,6 @@ const getProfile = (newValue) => {
         </template>
     </ul>
 
-    <DialogSignOut v-model:visible="isDialogSignOut" @confirm="onLogout" />
+    <DialogSignOut v-model:visible="isDialogSignOut" @confirm="logout" />
+    <LoadingOverlay :visible="isLoading"> Memuat data, harap tunggu... </LoadingOverlay>
 </template>

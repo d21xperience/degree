@@ -6,6 +6,7 @@ const internalValue = ref();
 const platformOptions = ref();
 const props = defineProps(['modelValue']);
 const emit = defineEmits(['update:modelValue']);
+
 watch(
     () => props.modelValue,
     (newVal) => {
@@ -16,11 +17,13 @@ watch(
 watch(internalValue, (newVal) => {
     emit('update:modelValue', newVal);
 });
+
 onMounted(async () => {
     platformOptions.value = await scService.fetchNetworkPlatform();
+    internalValue.value = platformOptions.value.find((item) => item.active == true);
 });
 </script>
 
 <template>
-    <Select v-model="internalValue" :options="platformOptions" fluid placeholder="Pilih platform" option-label="name" />
+    <Select v-model="internalValue" :options="platformOptions" fluid placeholder="Pilih platform" option-label="name" :show-clear="true" :checkmark="true" />
 </template>

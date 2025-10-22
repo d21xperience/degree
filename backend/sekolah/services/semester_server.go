@@ -69,18 +69,14 @@ func (s *SemesterServiceServer) CreateSemester(ctx context.Context, req *pb.Crea
 }
 
 // **GetSemester**
-func (s *SemesterServiceServer) GetSemester(ctx context.Context, req *pb.GetSemesterRequest) (*pb.GetSemesterResponse, error) {
+func (s *SemesterServiceServer) GetSemester(ctx context.Context, req *pb.Empty) (*pb.GetSemesterResponse, error) {
 	conditions := make(map[string]any)
 	orderBy := []string{"tahun_ajaran_id DESC", "semester DESC"}
-	if req.SemesterId != "" {
-		conditions["semester_id"] = req.SemesterId
-	}
-	SemesterModels, err := s.repo.FindAllByConditions(ctx, "ref", conditions, 100, 0, orderBy)
+	SemesterModels, err := s.repo.FindAllByConditions(ctx, "ref", conditions, 500, 0, orderBy)
 	if err != nil {
-		log.Printf("[ERROR] Gagal menemukan tahun ajaran di schema '%s': %v", "ref", err)
 		return &pb.GetSemesterResponse{
 			Status:  false,
-			Message: fmt.Sprintf("gagal menemukan tahun ajaran di schema '%s': %v", "ref", err),
+			Message: fmt.Sprintf("gagal mendapatkan data semester pada schema '%s': %v", "ref", err),
 		}, nil
 	}
 	// Konversi hasil ke response protobuf

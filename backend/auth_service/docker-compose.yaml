@@ -1,25 +1,24 @@
+# auth_service/docker-compose.yaml
 services:
-  # auth_service:
-  #   build:
-  #     context: .  # Menggunakan path lokal (karena file ini ada di auth_service/)
-  #     dockerfile: Dockerfile
-  #   container_name: auth_service
-  #   environment:
-  #     - DB_HOST=${AUTHDB_HOST}
-  #     - DB_PORT=${AUTHDB_PORT}
-  #     - DB_USER=${AUTHDB_USER}
-  #     - DB_PASSWORD=${AUTHDB_PASSWORD}
-  #     - DB_NAME=${AUTHDB_DB}
-  #     - REDIS_HOST=${AUTHREDIS_HOST}
-  #     - REDIS_PORT=${AUTHREDIS_PORT}
-  #   ports:
-  #     - "50051:50051"
-  #   depends_on:
-  #     - auth_db
-  #     - auth_redis
-  #   volumes:
-  #     - .:/app  # Mount kode agar bisa berubah tanpa rebuild container
-  #   command: ["air"]  # Jalankan dengan hot reload
+  auth_service:
+    build: .
+    container_name: auth_service_container
+    environment:
+      - DB_HOST=auth_db_container
+      - DB_PORT=5432
+      - DB_USER=${AUTHDB_USER}
+      - DB_PASSWORD=${AUTHDB_PASSWORD}
+      - DB_NAME=${AUTHDB_DB}
+      - REDIS_HOST=auth_redis_container
+      - REDIS_PORT=6379
+    ports:
+      - "8182:8182"
+      - "50052:50052"
+    networks:
+      - app-network
+    depends_on:
+      - auth_db
+      - auth_redis
 
   auth_db:
     image: postgres:15-alpine
@@ -34,6 +33,8 @@ services:
     volumes:
       - auth_db_data:/var/lib/postgresql/data
       - ./db-init:/docker-entrypoint-initdb.d
+    networks:
+      - app-network
 
   auth_redis:
     image: redis:alpine
@@ -41,6 +42,13 @@ services:
     restart: always
     ports:
       - "${AUTHREDIS_PORT}:6379"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true
+    name: app-network
 
 volumes:
-  auth_db_data: # auth_redis_data:
+  auth_db_data:

@@ -13,10 +13,11 @@ export function useKategoriSekolah() {
                 schemaname: schemaname.value,
                 tahun_ajaran_id: initSelectedSemester.value?.tahunAjaranId
             };
+            console.log(payload);
             const response = await store.dispatch('sekolahService/fetchKategoriSekolah', payload);
             kategoriSekolahList.value = response.kategoriSekolah;
+            return response.kategoriSekolah;
         } catch (error) {
-            console.log(error);
             throw new Error('Gagal mendapatkan Kategori Sekolah:', error);
         }
     };
@@ -88,7 +89,6 @@ export function useKategoriSekolah() {
             const response = await store.dispatch('sekolahService/createKategoriSekolah', payload);
             return response.kategoriSekolah;
         } catch (error) {
-            console.log(error);
             throw new Error('Gagal membuat Kategori Sekolah:', error);
         }
     };
@@ -101,7 +101,6 @@ export function useKategoriSekolah() {
             const response = await store.dispatch('sekolahService/updateKategoriSekolah', payload);
             return response.kategoriSekolah;
         } catch (error) {
-            console.log(error);
             throw new Error('Gagal update Kategori Sekolah:', error);
         }
     };
@@ -116,7 +115,6 @@ export function useKategoriSekolah() {
 
             return response.kategoriSekolah;
         } catch (error) {
-            console.log(error);
             throw new Error('Gagal menghapus Kategori Sekolah:', error);
         }
     };
@@ -130,7 +128,6 @@ export function useKategoriSekolah() {
             const response = await store.dispatch('sekolahService/deleteKategoriSekolahKurikulum', payload);
             return response.kategoriSekolah;
         } catch (error) {
-            console.log(error);
             throw new Error('Gagal menghapus Kategori Kurikulum Sekolah:', error);
         }
     };
@@ -143,7 +140,6 @@ export function useKategoriSekolah() {
             const response = await store.dispatch('sekolahService/createProsesKelas', payload);
             return response.kategoriSekolah;
         } catch (error) {
-            console.log(error);
             throw new Error('Gagal membuat Kategori Sekolah:', error);
         }
     };
@@ -159,7 +155,6 @@ export function useKategoriSekolah() {
             const response = await store.dispatch('sekolahService/fetchKategoriMapel', payload);
             return response.kategoriMapel;
         } catch (error) {
-            console.log(error);
             throw new Error('Gagal mendapatkan Kategori Mapel:', error);
         }
     };
@@ -176,7 +171,6 @@ export function useKategoriSekolah() {
             return response;
             // return response.kategoriSekolah;
         } catch (error) {
-            console.log(error);
             throw new Error('Gagal menghapus Kategori Mapel:', error);
         }
     };
@@ -193,7 +187,6 @@ export function useKategoriSekolah() {
             return response;
             // return response.kategoriSekolah;
         } catch (error) {
-            console.log(error);
             throw new Error('Gagal menghapus Kategori Mapel:', error);
         }
     };

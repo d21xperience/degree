@@ -16,7 +16,7 @@ export function useNilai() {
         if (pesertaDidikId) {
             payload.peserta_didik_id = pesertaDidikId;
         }
-        const results = await store.dispatch('sekolahService/fetchNilaiSiswa', payload);
+        const results = await store.dispatch('nilaiService/fetchNilaiSiswa', payload);
         // console.log(results)
         return results;
         // siswaList.value = results;
@@ -34,7 +34,7 @@ export function useNilai() {
                 schemaname: schemaname.value,
                 pesertaDidikId: pesertaDidikId
             };
-            const results = await store.dispatch('sekolahService/searchNilai', payload);
+            const results = await store.dispatch('nilaiService/searchNilai', payload);
             if (results.status) {
                 return results;
             }

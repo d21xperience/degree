@@ -1,15 +1,10 @@
 <script setup>
-import { ref, computed } from 'vue';
-defineProps(['username']); // Parameter username dari route diterima sebagai props
-import PanelMenu from 'primevue/panelmenu';
-// import router from "@/router";
-// import store from "@/store";
 import 'primeicons/primeicons.css';
-import Dialog from 'primevue/dialog';
-import Button from 'primevue/button';
+import { computed, ref } from 'vue';
+import { useStore } from 'vuex';
+defineProps(['username']); // Parameter username dari route diterima sebagai props
 // import { useRouter } from "vue-router";
 const store = useStore();
-import { useStore } from 'vuex';
 // const router = useRouter();
 import router from '@/router';
 const userRole = ref(store.state.authService.userRole); // Ambil role user dari Vuex

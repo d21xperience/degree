@@ -15,7 +15,7 @@ export function useDns() {
             };
             // console.log(payload);
             // return;
-            const response = await store.dispatch('sekolahService/createDns', payload);
+            const response = await store.dispatch('dnsService/createDns', payload);
             return response;
         } catch (error) {
             console.log(error);
@@ -29,14 +29,14 @@ export function useDns() {
                 tahun_ajaran_id: `${initSelectedSemester.value?.tahunAjaranId}`,
                 data_nominasi_sementara: dns
             };
-            const response = await store.dispatch('sekolahService/updateDns', payload);
+            const response = await store.dispatch('dnsService/updateDns', payload);
             if (response.status) {
-                const dnsTabel = store.getters['sekolahService/getDns'];
+                const dnsTabel = store.getters['dnsService/getDns'];
                 const dns = dnsTabel.dataNominasiSementara.find((item) => item.pesertaDidikId == payload.data_nominasi_sementara.pesertaDidikId);
                 if (dns) {
                     Object.assign(dns, payload.data_nominasi_sementara);
                 }
-                store.commit('sekolahService/SET_TABELDNS', dnsTabel);
+                store.commit('dnsService/SET_TABELDNS', dnsTabel);
                 return true;
             }
         } catch (error) {
@@ -46,7 +46,7 @@ export function useDns() {
     };
     const getDns = async (tahunAjaranId) => {
         try {
-            let response = await store.getters['sekolahService/getDns'];
+            let response = await store.getters['dnsService/getDns'];
             // console.log(response)
             if (!response || !Array.isArray(response.dataNominasiSementara) || response.dataNominasiSementara.length === 0 || response.tahun_ajaran_id != tahunAjaranId) {
                 const payload = {
@@ -54,7 +54,7 @@ export function useDns() {
                     tahun_ajaran_id: tahunAjaranId,
                     is_complete: false
                 };
-                response = await store.dispatch('sekolahService/fetchDns', payload);
+                response = await store.dispatch('dnsService/fetchDns', payload);
                 console.log(response);
                 if (response) {
                     return response.dataNominasiSementara;
@@ -77,7 +77,7 @@ export function useDns() {
             };
             // console.log(payload);
             // return;
-            const response = await store.dispatch('sekolahService/searchDns', payload);
+            const response = await store.dispatch('dnsService/searchDns', payload);
             return response.dataNominasiSementara;
         } catch (error) {
             console.log(error);
@@ -86,7 +86,7 @@ export function useDns() {
     };
     const searchDnsLokal = async (pesertaDidikId) => {
         try {
-            const dnsTabel = store.getters['sekolahService/getDns'];
+            const dnsTabel = store.getters['dnsService/getDns'];
             const dns = dnsTabel.dataNominasiSementara.find((item) => item.pesertaDidikId == pesertaDidikId);
             // console.log(dns);
             // return
@@ -104,7 +104,7 @@ export function useDns() {
                 peserta_didik_id: pesertaDidikId
             };
             console.log(payload);
-            const response = await store.dispatch('sekolahService/deleteDns', payload);
+            const response = await store.dispatch('dnsService/deleteDns', payload);
             return response;
         } catch (error) {
             console.log(error);
@@ -120,7 +120,7 @@ export function useDns() {
     //             schemaname: schemaname.value,
     //             anggota_rombel_id: anggotaRombelIds
     //         };
-    //         const response = await store.dispatch('sekolahService/deleteBatchAnggotaKelas', payload);
+    //         const response = await store.dispatch('dnsService/deleteBatchAnggotaKelas', payload);
     //         if (response.status) {
     //             toast.add({ severity: 'success', summary: 'Successful', detail: `${response.message}`, life: 3000 });
     //         }

@@ -1,11 +1,12 @@
 <script setup>
 import LoadingOverlay from '@/components/LoadingOverlay.vue';
 import KelasComponent from '@/components/sekolah_components/KelasComponent.vue';
-import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
+import { useKelas } from '@/composables/sekolah_composable/useKelas';
+import { useNilai } from '@/composables/sekolah_composable/useNilai';
+import { useSemester } from '@/composables/sekolah_composable/useSemester';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
 import { computed, ref, watch } from 'vue';
-const sekolahService = useSekolahService();
 const pembelajaran = ref({});
 const dataNilaiSiswa = ref([]);
 const kelasSelected = ref(null);
@@ -14,6 +15,9 @@ const expandedRows = ref();
 //     // console.log(newVal)
 //     dataNilaiSiswa.value = await fetchNilaiSiswa();
 // });
+const { searchNilai } = useNilai();
+const { initSelectedSemester } = useSemester();
+const { fetchAnggotaKelas } = useKelas();
 
 const isLoading = ref(false);
 const toast = useToast();
@@ -71,7 +75,7 @@ const resetSiswa = () => {
 };
 const onRowExpand = async (event) => {
     try {
-        const res = await sekolahService.searchNilai(event.data.pesertaDidikId);
+        const res = await searchNilai(event.data.pesertaDidikId);
         if (res.status) {
             Object.assign(siswa.value, res.nilai);
             jenjang = siswa.value.jenjang;
@@ -102,8 +106,8 @@ watch(kelasSelected, (newVal) => {
 const loadSiswaAktif = async () => {
     isLoading.value = true;
     try {
-        dataNilaiSiswa.value = await sekolahService.fetchAnggotaKelas(kelasSelected.value?.rombonganBelajarId, sekolahService.initSelectedSemester.value?.semesterId);
-        console.log(dataNilaiSiswa.value);
+        dataNilaiSiswa.value = await fetchAnggotaKelas(kelasSelected.value?.rombonganBelajarId, initSelectedSemester.value?.semesterId);
+        // console.log(dataNilaiSiswa.value);
     } catch (error) {
         toast.add({ severity: 'error', summary: 'Failled', detail: 'Gagal mendapatkan nilai siswa', life: 3000 });
     } finally {

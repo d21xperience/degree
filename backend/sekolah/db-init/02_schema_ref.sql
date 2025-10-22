@@ -186,3 +186,17 @@ CREATE TABLE ref.mata_pelajaran_kurikulum (
 	last_sync TIMESTAMP NOT NULL DEFAULT '1901-01-01 00:00:00',
 	PRIMARY KEY (kurikulum_id, mata_pelajaran_id, tingkat_pendidikan_id)
 );
+
+CREATE TABLE ref.kelompok_mapel (
+    id SERIAL PRIMARY KEY,
+    kurikulum_id INT NOT NULL REFERENCES kurikulum(id) ON DELETE CASCADE,
+    nama VARCHAR(150) NOT NULL,
+    deskripsi TEXT
+);
+CREATE TABLE ref.kelompok_mapel_detail (
+    id SERIAL PRIMARY KEY,
+    kelompok_id INT NOT NULL REFERENCES kelompok_mapel(id) ON DELETE CASCADE,
+    mapel_id INT NOT NULL REFERENCES mata_pelajaran(mata_pelajaran_id) ON DELETE CASCADE,
+    tingkat VARCHAR(50),
+    keterangan TEXT
+);

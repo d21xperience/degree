@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import api from '../api';
 
 const state = {
@@ -16,9 +17,9 @@ const actions = {
     // =======================================
     // ANGGOTA KELAS
     // =======================================
-    async searchAnggotaKelas(payload) {
+    async searchAnggotaKelas({ commit }, payload) {
         try {
-            // console.log(payload);
+            // console.log({commit}, payload);
             const response = await api.get(`/ss/${payload.schemaname}/anggota-kelas/search`, {
                 params: {
                     semester_id: payload.semester_id,
@@ -35,7 +36,7 @@ const actions = {
             return null;
         }
     },
-    async fetchAnggotaKelas(payload) {
+    async fetchAnggotaKelas({ commit }, payload) {
         try {
             const response = await api.get(`/ss/${payload.schemaname}/anggota-kelas`, {
                 params: {
@@ -96,7 +97,7 @@ const actions = {
         }
     },
 
-    async createAnggotaKelas(payload) {
+    async createAnggotaKelas({ commit }, payload) {
         try {
             const response = await api.post(`/ss/${payload.schemaname}/anggota-kelas/delete`, payload);
 

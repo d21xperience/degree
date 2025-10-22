@@ -1,26 +1,26 @@
 <script setup>
 import router from '@/router';
 import { debounce } from 'lodash-es';
-import InputText from 'primevue/inputtext';
-import Toast from 'primevue/toast';
 import { onMounted, ref, watch } from 'vue';
 
 // ================================
 // composable
-import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
 import { useFormOptions } from '@/composables/useFormOptions';
-const sekolahService = useSekolahService();
 // ================================
 const { fetchGelarAkademik, selectedGelarAkademikDepan, selectedGelarAkademikBelakang, searchGelar, gelarAkademikDepanOptions, gelarAkademikBelakangOptions } = useFormOptions();
 
-import AgamaComponent from '@/components/AgamaComponent.vue';
-import JKComponent from '@/components/JKComponent.vue';
+import AgamaComponent from '@/components/general/AgamaComponent.vue';
+import JKComponent from '@/components/general/JKComponent.vue';
+import { useGuru } from '@/composables/sekolah_composable/useGuru';
+import { useSemester } from '@/composables/sekolah_composable/useSemester';
 import { useRoute } from 'vue-router';
+const { initSelectedTahunAjaran } = useSemester();
+const { searchGuruTerdaftar, updateGuruTerdaftar, addGuruTerdaftar, guruTerdaftarLoading } = useGuru();
 // Model Peserta Didik Pelengkap
 const tabel_ptk_terdaftar = ref({
     ptk_terdaftar_id: '',
     ptk_id: '',
-    tahun_ajaran_id: `${sekolahService.initSelectedTahunAjaran.value?.tahunAjaranId}`,
+    tahun_ajaran_id: `${initSelectedTahunAjaran.value?.tahunAjaranId}`,
     jenis_keluar_id: '',
     ptk: {
         ptk_id: '',
@@ -58,10 +58,88 @@ const route = useRoute();
 const ptkTerdaftarId = route.query.ptkTerdaftarId;
 const isEdit = ref(false);
 onMounted(async () => {
+    await initial();
+});
+// Opsi Dropdown
+// watch(selectedJenisKelamin, () => (tabel_ptk_terdaftar.value.ptk.jenis_kelamin = selectedJenisKelamin.value.value));
+watch(selectedGelarAkademikBelakang, (newVal) => {
+    tabel_ptk_terdaftar.value.ptk_pelengkap.gelar_belakang = newVal?.map((el) => el.kode).join(', ') || '';
+});
+watch(selectedGelarAkademikDepan, (newVal) => {
+    tabel_ptk_terdaftar.value.ptk_pelengkap.gelar_depan = newVal?.map((el) => el.kode).join(', ') || '';
+});
+
+const loadingUpdate = ref(false);
+const update = debounce(async () => {
+    submitted.value = true;
+    loadingUpdate.value = true;
+    if (isValidate()) {
+        alert('Data harus diisi!');
+        return;
+    }
+
+    await updateGuruTerdaftar(tabel_ptk_terdaftar);
+    // setTimeout(() => {
+    loadingUpdate.value = false;
+    router.push({ name: 'infoGuru' });
+    // }, 2000);
+}, 250);
+
+const isValidate = () => {
+    if (
+        !tabel_ptk_terdaftar.value.ptk.jenis_kelamin ||
+        !tabel_ptk_terdaftar.value.ptk.agama ||
+        !tabel_ptk_terdaftar.value.ptk.tanggal_lahir ||
+        tabel_ptk_terdaftar.value.ptk.nama.trim().length == 0 ||
+        tabel_ptk_terdaftar.value.ptk.tempat_lahir.trim().length == 0
+    ) {
+        return false;
+    } else {
+        return true;
+    }
+};
+
+const tambah = async () => {
+    // alert("tambah")
+    // return
+    submitted.value = true;
+    if (!isValidate()) {
+        alert('Data harus diisi!');
+        return;
+    }
+    const tes = await addGuruTerdaftar(tabel_ptk_terdaftar);
+    if (tes) {
+        router.push({ name: 'infoGuru' });
+    }
+};
+
+const batal = () => {
+    loadingBatal.value = true;
+    router.push({ name: 'infoGuru' });
+};
+const submitted = ref(false);
+const loadingBatal = ref(false);
+const ptkModel = ref();
+
+const messageInfo = ref('');
+const isDialogMessageInfo = ref(false);
+watch(ptkModel, (newVal) => {
+    // console.log(typeof newVal);
+    if (typeof newVal == 'object') {
+        messageInfo.value = `PTK a.n. ${newVal.nama} sudah ada di sistem! Apakah ptk tersebut akan ditambahkan untuk tahun pelajaran ini?`;
+        isDialogMessageInfo.value = true;
+    } else if (typeof newVal == 'string') {
+        tabel_ptk_terdaftar.value.ptk.nama = newVal || '';
+    }
+    // }
+});
+
+const initial = async () => {
     if (ptkTerdaftarId) {
         isEdit.value = true;
 
-        const ptkTerdaftar = await sekolahService.searchGuruTerdaftar(ptkTerdaftarId);
+        const ptkTerdaftar = await searchGuruTerdaftar(ptkTerdaftarId);
+        console.log(ptkTerdaftar);
         const ptkPelengkap = ptkTerdaftar.ptkPelengkap;
         const guru = ptkTerdaftar.ptk;
         // if (guru.jenisKelamin === 'L') {
@@ -95,140 +173,51 @@ onMounted(async () => {
         // }
     }
     fetchGelarAkademik();
-});
-// Opsi Dropdown
-// watch(selectedJenisKelamin, () => (tabel_ptk_terdaftar.value.ptk.jenis_kelamin = selectedJenisKelamin.value.value));
-watch(selectedGelarAkademikBelakang, (newVal) => {
-    tabel_ptk_terdaftar.value.ptk_pelengkap.gelar_belakang = newVal?.map((el) => el.kode).join(', ') || '';
-});
-watch(selectedGelarAkademikDepan, (newVal) => {
-    tabel_ptk_terdaftar.value.ptk_pelengkap.gelar_depan = newVal?.map((el) => el.kode).join(', ') || '';
-});
-
-const loadingUpdate = ref(false);
-const update = debounce(async () => {
-    submitted.value = true;
-    loadingUpdate.value = true;
-    if (isValidate()) {
-        alert('Data harus diisi!');
-        return;
-    }
-
-    await sekolahService.updateGuruTerdaftar(tabel_ptk_terdaftar);
-    // setTimeout(() => {
-    loadingUpdate.value = false;
-    router.push({ name: 'infoGuru' });
-    // }, 2000);
-}, 250);
-
-const isValidate = () => {
-    if (
-        !tabel_ptk_terdaftar.value.ptk.jenis_kelamin ||
-        !tabel_ptk_terdaftar.value.ptk.agama ||
-        !tabel_ptk_terdaftar.value.ptk.tanggal_lahir ||
-        tabel_ptk_terdaftar.value.ptk.nama.trim().length == 0 ||
-        tabel_ptk_terdaftar.value.ptk.tempat_lahir.trim().length == 0
-    ) {
-        return false;
-    } else {
-        return true;
-    }
 };
-
-const tambah = async () => {
-    // alert("tambah")
-    // return
-    submitted.value = true;
-    if (!isValidate()) {
-        alert('Data harus diisi!');
-        return;
-    }
-    const tes = await sekolahService.addGuruTerdaftar(tabel_ptk_terdaftar);
-    if (tes) {
-        router.push({ name: 'infoGuru' });
-    }
-};
-
-const batal = () => {
-    loadingBatal.value = true;
-    router.push({ name: 'infoGuru' });
-};
-const submitted = ref(false);
-const loadingBatal = ref(false);
-const ptkModel = ref();
-
-const messageInfo = ref('');
-const isDialogMessageInfo = ref(false);
-watch(ptkModel, (newVal) => {
-    // console.log(typeof newVal);
-    if (typeof newVal == 'object') {
-        messageInfo.value = `PTK a.n. ${newVal.nama} sudah ada di sistem! Apakah ptk tersebut akan ditambahkan untuk tahun pelajaran ini?`;
-        isDialogMessageInfo.value = true;
-    } else if (typeof newVal == 'string') {
-        tabel_ptk_terdaftar.value.ptk.nama = newVal || '';
-    }
-    // }
-});
-
 const tambahPTKTerdaftar = () => {};
 </script>
 <template>
     <div class="">
         <div class="flex justify-between items-center mb-1">
             <h1 class="text-2xl font-bold mb-2">{{ isEdit ? 'Form Edit Guru' : 'Form Tambah Guru' }}</h1>
-            <Button icon="pi pi-times" severity="danger" @click="batal" :loading="loadingBatal" rounded size="small" v-tooltip.bottom="'Batal'" />
+            <Button icon="pi pi-refresh" severity="help" class="!rounded-lg" @click="initial" v-tooltip.bottom="'Refresh'" />
+            <!-- <Button icon="pi pi-times" severity="danger" @click="batal" :loading="loadingBatal" rounded size="small" v-tooltip.bottom="'Batal'" /> -->
         </div>
         <section class="mb-2">
             <h2 class="text-xl font-normal mb-4">Informasi Guru</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 md:gap-4 mb-4">
-                <div class="md:flex md:justify-between md:space-x-2 items-center">
-                    <div class="w-full mb-2 md:mb-0">
-                        Nama Lengkap
-                        <div v-if="isEdit">
-                            <InputText v-model="tabel_ptk_terdaftar.ptk.nama" fluid name="nmGuru" id="nmGuru" placeholder="Masukan nama" :invalid="submitted && !tabel_ptk_terdaftar.ptk.nama" />
-                            <small v-if="submitted && !tabel_ptk_terdaftar.ptk.nama" class="text-red-500">Nama harus diisi.</small>
-                        </div>
-                        <ptk-component v-model="ptkModel" v-else :invalid="submitted && !ptkModel" />
-                        <small v-if="submitted && !ptkModel" class="text-red-500">Nama harus diisi.</small>
+            <div class="grid grid-cols-2 grid-rows-5 gap-x-2 gap-y-2">
+                <div>
+                    Nama Lengkap
+                    <div v-if="isEdit">
+                        <InputText v-model="tabel_ptk_terdaftar.ptk.nama" fluid name="nmGuru" id="nmGuru" placeholder="Masukan nama" :invalid="submitted && !tabel_ptk_terdaftar.ptk.nama" />
+                        <small v-if="submitted && !tabel_ptk_terdaftar.ptk.nama" class="text-red-500">Nama harus diisi.</small>
+                    </div>
+                    <ptk-component v-model="ptkModel" v-else :invalid="submitted && !ptkModel" />
+                    <small v-if="submitted && !ptkModel" class="text-red-500">Nama harus diisi.</small>
+                </div>
+                <div class="col-start-1 row-start-2">
+                    <div class="w-full">
+                        Jenis Kelamin <small v-if="submitted && !tabel_ptk_terdaftar.ptk.jenis_kelamin" class="text-red-500">harus diisi.</small>
+                        <JKComponent :modelValue="tabel_ptk_terdaftar.ptk.jenis_kelamin" />
                     </div>
                 </div>
-                <div class="w-full">
-                    Gelar Dpn
-                    <AutoComplete v-model="selectedGelarAkademikDepan" :suggestions="gelarAkademikDepanOptions" optionLabel="kode" optionValue="kode" placeholder="Gelar dpn" dropdown multiple @complete="searchGelar(1, $event)" fluid />
-                </div>
-                <div class="w-full">
-                    Gelar Blk
-                    <AutoComplete v-model="selectedGelarAkademikBelakang" :suggestions="gelarAkademikBelakangOptions" optionLabel="kode" placeholder="Gelar blk" dropdown multiple @complete="searchGelar(2, $event)" fluid />
-                </div>
-                <div class="md:flex justify-between items-center md:space-x-2">
+                <div class="col-start-1 row-start-3">
                     <div class="w-full">
-                        Jenis Kelamin <small v-if="submitted && !tabel_ptk_terdaftar.ptk.jenis_kelamin" class="text-red-500">Jenis kelamin harus diisi.</small>
-                        <JKComponent />
-                        <!-- <Select
-                            v-model="tabel_ptk_terdaftar.ptk.jenis_kelamin"
-                            :options="jenisKelaminOptions"
-                            optionLabel="label"
-                            option-value="value"
-                            class="w-full"
-                            placeholder="Pilih jenis kelamin"
-                            :invalid="submitted && !tabel_ptk_terdaftar.ptk.jenis_kelamin"
-                            fluid
-                        /> -->
+                        Tpt Lahir
+                        <InputText v-model="tabel_ptk_terdaftar.ptk.tempat_lahir" fluid name="tempatLahir" id="tempatLahir" placeholder="Masukan tempat lahir" :invalid="submitted && tabel_ptk_terdaftar.ptk.tempat_lahir.trim().length == 0" />
+                        <small v-if="submitted && tabel_ptk_terdaftar.ptk.tempat_lahir.trim().length == 0" class="text-red-500">Tpt.Lahir harus diisi.</small>
                     </div>
+                </div>
+                <div class="col-start-1 row-start-4">
                     <div class="w-full">
-                        Agama <small v-if="submitted && !tabel_ptk_terdaftar.ptk.agama" class="text-red-500">Agama harus diisi.</small>
-                        <AgamaComponent />
+                        Agama <small v-if="submitted && !tabel_ptk_terdaftar.ptk.agama" class="text-red-500">harus diisi.</small>
+                        <AgamaComponent :modelValue="tabel_ptk_terdaftar.ptk.agama" />
                         <!-- <Select v-model="tabel_ptk_terdaftar.ptk.agama" :options="agamaOptions" placeholder="Pilih Agama" optionLabel="label" class="w-full" :invalid="submitted && !tabel_ptk_terdaftar.ptk.agama" optionValue="value" /> -->
                     </div>
                 </div>
-                <div>
+                <div class="col-start-1 row-start-5">
                     <div class="md:flex md:space-x-2">
-                        <div class="md:w-[70%] w-full">
-                            Tpt Lahir
-                            <InputText v-model="tabel_ptk_terdaftar.ptk.tempat_lahir" fluid name="tempatLahir" id="tempatLahir" placeholder="Masukan tempat lahir" :invalid="submitted && tabel_ptk_terdaftar.ptk.tempat_lahir.trim().length == 0" />
-                            <small v-if="submitted && tabel_ptk_terdaftar.ptk.tempat_lahir.trim().length == 0" class="text-red-500">Tpt.Lahir harus diisi.</small>
-                        </div>
-                        <div class="md:w-[30%] w-full">
+                        <div class="w-full">
                             Tgl Lahir
                             <input
                                 type="date"
@@ -241,24 +230,30 @@ const tambahPTKTerdaftar = () => {};
                         </div>
                     </div>
                 </div>
-                <div class="md:flex md:space-x-2">
-                    <div class="md:w-[80%]">
+                <div class="row-span-5 col-start-2 row-start-1">6</div>
+            </div>
+
+            <div class="grid grid-cols-2 grid-rows-5 gap-2 mt-2">
+                <div class="col-start-1">
+                    <div class="">
                         Alamat Jalan
                         <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.alamat_jalan" fluid name="alamat-jalan" id="alamat-jalan" placeholder="Masukan alamat" />
                     </div>
-                    <div class="md:flex md:space-x-2">
-                        <div>
-                            RT
-                            <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.rt" fluid name="rt" id="rt" />
-                        </div>
-                        <div>
-                            RW
-                            <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.rw" fluid name="rw" id="rw" />
+                    <div class="col-start-2 row-start-1">
+                        <div class="md:flex md:space-x-2">
+                            <div>
+                                RT
+                                <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.rt" fluid name="rt" id="rt" />
+                            </div>
+                            <div>
+                                RW
+                                <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.rw" fluid name="rw" id="rw" />
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex justify-between space-x-2">
+                <div class="col-start-1 row-start-2">
                     <div>
                         Provinsi
                         <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.propinsi" fluid name="prov" id="prov" />
@@ -302,7 +297,7 @@ const tambahPTKTerdaftar = () => {};
         </section>
         <div class="flex justify-end mt-8 space-x-4">
             <Button label="Update" severity="success" @click="update" :loading="loadingUpdate" class="min-w-28" icon="pi pi-save" v-if="isEdit" />
-            <Button label="Tambah" severity="success" @click="tambah" :loading="sekolahService.guruTerdaftarLoading.value" class="min-w-28" icon="pi pi-save" v-else />
+            <Button label="Tambah" severity="success" @click="tambah" :loading="guruTerdaftarLoading" class="min-w-28" icon="pi pi-save" v-else />
             <Button label="Batal" severity="secondary" @click="batal" class="min-w-28" />
         </div>
         <Toast />

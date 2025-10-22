@@ -15,14 +15,14 @@ export function useGuru() {
                 tahunAjaranId: initSelectedSemester.value?.tahunAjaranId,
                 schemaname: schemaname.value
             };
-            let res = await store.getters['sekolahService/getPTKTerdaftar'];
-            // console.log('useSekolahService/fetchGuruTerdaftar', res);
+            let res = await store.getters['guruService/getPTKTerdaftar'];
+            // console.log('useguruService/fetchGuruTerdaftar', res);
             if (!res || res.length == 0) {
                 // console.log(payload);
-                res = await store.dispatch('sekolahService/fetchPTKTerdaftar', payload);
+                res = await store.dispatch('guruService/fetchPTKTerdaftar', payload);
             } else {
                 if (res.tahun_ajaran_id != initSelectedSemester.value?.tahunAjaranId) {
-                    res = await store.dispatch('sekolahService/fetchPTKTerdaftar', payload);
+                    res = await store.dispatch('guruService/fetchPTKTerdaftar', payload);
                 }
             }
             guruTerdaftarList.value = res.ptkTerdaftar;
@@ -38,7 +38,7 @@ export function useGuru() {
                 schemaname: schemaname.value,
                 ptk_terdaftar_id: ptkTerdaftarId
             };
-            const response = await store.dispatch('sekolahService/searchPTKTerdaftar', payload);
+            const response = await store.dispatch('guruService/searchPTKTerdaftar', payload);
             return response.ptkTerdaftar;
         } catch (error) {
             console.log(error);
@@ -52,8 +52,8 @@ export function useGuru() {
                 ptk_terdaftar_id: ptkTerdaftarId
             };
 
-            // console.log('useSekolahService', payload);
-            const response = await store.dispatch('sekolahService/deletePTKTerdaftar', payload);
+            // console.log('useguruService', payload);
+            const response = await store.dispatch('guruService/deletePTKTerdaftar', payload);
             return response;
         } catch (error) {
             console.error('Gagal menghapus data guru:', error);
@@ -66,8 +66,8 @@ export function useGuru() {
                 ptk_terdaftar_id: ptkTerdaftarId
             };
 
-            // console.log('useSekolahService', payload);
-            const response = await store.dispatch('sekolahService/deleteBatchPTKTerdaftar', payload);
+            // console.log('useguruService', payload);
+            const response = await store.dispatch('guruService/deleteBatchPTKTerdaftar', payload);
             return response;
         } catch (error) {
             console.log(error);
@@ -80,9 +80,9 @@ export function useGuru() {
                 schemaname: schemaname.value,
                 ptk_terdaftar: [ptkTerdaftar._rawValue]
             };
-            const response = await store.dispatch('sekolahService/updatePTKTerdaftar', payload);
+            const response = await store.dispatch('guruService/updatePTKTerdaftar', payload);
 
-            await store.dispatch('sekolahService/fetchPTKTerdaftar', { tahunAjaranId: initSelectedSemester.value?.tahunAjaranId, schemaname: schemaname.value });
+            await store.dispatch('guruService/fetchPTKTerdaftar', { tahunAjaranId: initSelectedSemester.value?.tahunAjaranId, schemaname: schemaname.value });
             return response;
         } catch (error) {
             console.log(error);
@@ -98,8 +98,8 @@ export function useGuru() {
                 ptk_terdaftar: ptkTerdaftar._rawValue
             };
             // console.log(payload);
-            const response = await store.dispatch('sekolahService/addPTKTerdaftar', payload);
-            await store.dispatch('sekolahService/fetchPTKTerdaftar', { tahunAjaranId: initSelectedSemester.value?.tahunAjaranId, schemaname: schemaname.value });
+            const response = await store.dispatch('guruService/addPTKTerdaftar', payload);
+            await store.dispatch('guruService/fetchPTKTerdaftar', { tahunAjaranId: initSelectedSemester.value?.tahunAjaranId, schemaname: schemaname.value });
             // toast.add({ severity: 'success', summary: 'Success', detail: 'Berhasil menambah data guru', life: 3000 });
 
             return response;
@@ -119,7 +119,7 @@ export function useGuru() {
             if (ptkId) {
                 payload.ptk_id = ptkId;
             }
-            const response = await store.dispatch('sekolahService/fetchGuru', payload);
+            const response = await store.dispatch('guruService/fetchGuru', payload);
             guruList.value = response;
         } catch (error) {
             console.error('Gagal mengambil data guru:', error);

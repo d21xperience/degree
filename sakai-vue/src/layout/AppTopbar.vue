@@ -1,6 +1,6 @@
 <script setup>
 import DialogSignOut from '@/components/DialogSignOut.vue';
-import { useSCService } from '@/composables/useSCService';
+// import { useSCService } from '@/composables/useSCService';
 import { useUtils } from '@/composables/useUtils';
 import { useWalletInfo } from '@/composables/useWalletInfo';
 import AppConfigurator from '@/layout/AppConfigurator.vue';
@@ -8,7 +8,7 @@ import { useLayout } from '@/layout/composables/layout';
 import router from '@/router';
 import { useAuth } from '@/views/pages/auth/composables/auth';
 import { useToast } from 'primevue';
-import { computed, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 const util = useUtils();
 const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
 const isDialogSignOut = ref(false);
@@ -24,15 +24,15 @@ const cek = () => {
     }
     router.push({ name: 'userProfile' });
 };
-const scService = useSCService();
-const isMetamask = computed(() => scService.getMetamaskConnected());
-const isSignerDialog = ref(false);
+// const scService = useSCService();
+// const isMetamask = computed(() => scService.getMetamaskConnected());
+// const isSignerDialog = ref(false);
 
-const signerDialog = async () => {
-    isSignerDialog.value = true;
-    // currentWallet.value = await scService.loadWalletInfo();
-    // console.log(currentWallet.value);
-};
+// const signerDialog = async () => {
+//     isSignerDialog.value = true;
+//     // currentWallet.value = await scService.loadWalletInfo();
+//     // console.log(currentWallet.value);
+// };
 const isWallet = ref(false);
 const selectedWallet = ref(null);
 const isSelectedWallet = ref(false);

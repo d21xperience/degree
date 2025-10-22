@@ -41,8 +41,8 @@ export function useAuth() {
                     await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
                     await fetchSekolah();
                     // Ambil tahun ajaran
-                    await store.dispatch('sekolahService/fetchTahunAjaran');
-                    await store.dispatch('sekolahService/fetchSemester');
+                    await store.dispatch('semesterService/fetchTahunAjaran');
+                    await store.dispatch('semesterService/fetchSemester');
 
                     const namaSekolah = response?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
                     await router.push({ name: 'dashboard', params: { sekolah: namaSekolah } });
@@ -59,12 +59,12 @@ export function useAuth() {
     };
 
     const onLogout = async () => {
-        try {
-            await store.dispatch('authService/logout');
-            await store.dispatch('sekolahService/resetState');
-        } finally {
-            router.push({ name: 'landing' });
-        }
+        // try {
+        await store.dispatch('authService/logout');
+        await store.dispatch('sekolahService/resetState');
+        // } finally {
+        // router.push({ name: 'landing' });
+        // }
     };
     return {
         onLogin,

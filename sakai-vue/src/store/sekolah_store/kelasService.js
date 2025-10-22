@@ -1,4 +1,5 @@
-import api from './api';
+/* eslint-disable no-unused-vars */
+import api from '../api';
 
 const state = {
     tabelKelas: JSON.parse(localStorage.getItem('tabelKelas')) || null
@@ -39,7 +40,7 @@ const actions = {
         }
     },
 
-    async createKelas(payload) {
+    async createKelas({ commit }, payload) {
         try {
             const response = await api.post(`/ss/${payload.schemaname}/tambah-kelas`, payload);
             console.log('sekolahService/createKelas', response);
@@ -50,7 +51,7 @@ const actions = {
             throw new Error('Gagal menghapus Kategori Mapel:', error);
         }
     },
-    async editKelas(payload) {
+    async editKelas({ commit }, payload) {
         try {
             const response = await api.put(`/ss/${payload.schemaname}/kelas`, payload);
             // console.log(response.data);

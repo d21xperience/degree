@@ -84,7 +84,7 @@ export function useSCService() {
     const fetchBCNetworks = async (payload = '') => {
         try {
             let response = store.getters['scService/getBCNETWORK'](payload);
-            console.log(response);
+            // console.log(response);
             if (!response || !Array.isArray(response) || response.length == 0) {
                 response = await store.dispatch('scService/fetchBlockchainNetworks', payload);
                 return response.network;

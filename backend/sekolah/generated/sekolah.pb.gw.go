@@ -171,34 +171,20 @@ func local_request_SemesterService_CreateSemester_0(ctx context.Context, marshal
 	return msg, metadata, err
 }
 
-var filter_SemesterService_GetSemester_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-
 func request_SemesterService_GetSemester_0(ctx context.Context, marshaler runtime.Marshaler, client SemesterServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq GetSemesterRequest
+		protoReq Empty
 		metadata runtime.ServerMetadata
 	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SemesterService_GetSemester_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 	msg, err := client.GetSemester(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
 
 func local_request_SemesterService_GetSemester_0(ctx context.Context, marshaler runtime.Marshaler, server SemesterServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq GetSemesterRequest
+		protoReq Empty
 		metadata runtime.ServerMetadata
 	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SemesterService_GetSemester_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
-	}
 	msg, err := server.GetSemester(ctx, &protoReq)
 	return msg, metadata, err
 }
@@ -3215,20 +3201,34 @@ func local_request_ReferensiService_GetBentukPendidikan_0(ctx context.Context, m
 	return msg, metadata, err
 }
 
+var filter_ReferensiService_GetJenjang_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+
 func request_ReferensiService_GetJenjang_0(ctx context.Context, marshaler runtime.Marshaler, client ReferensiServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq Empty
+		protoReq GetJenjangRequest
 		metadata runtime.ServerMetadata
 	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ReferensiService_GetJenjang_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
 	msg, err := client.GetJenjang(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
 
 func local_request_ReferensiService_GetJenjang_0(ctx context.Context, marshaler runtime.Marshaler, server ReferensiServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq Empty
+		protoReq GetJenjangRequest
 		metadata runtime.ServerMetadata
 	)
+	if err := req.ParseForm(); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_ReferensiService_GetJenjang_0); err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
 	msg, err := server.GetJenjang(ctx, &protoReq)
 	return msg, metadata, err
 }

@@ -13,10 +13,10 @@ const BCNetworks = ref([]);
 const selectedBCNetwork = ref([]);
 const editingItem = reactive({});
 const BCNetworkDialog = ref(false);
-const activeBCNetworkDialog = ref(false);
+// const activeBCNetworkDialog = ref(false);
 const deleteDialog = ref(false);
 const BCPlatformSelected = computed(() => scService.getNetowrkPlatform());
-watch(BCPlatformSelected, (newVal) => {
+watch(BCPlatformSelected, () => {
     // console.log(newVal);
     filters.value['architecture'];
 });
@@ -177,15 +177,16 @@ const architecture = ref([
     <!-- EDIT BCNETWORK DIALOG -->
     <Dialog v-model:visible="BCNetworkDialog" :header="headerTitle" :modal="true" :style="{ width: '450px' }">
         <div class="flex flex-col gap-4">
-            <label class="font-bold">Nama Jaringan</label>
-            <InputText v-model.trim="editingItem.Name" required />
-
-            <label class="font-bold">Jaringan</label>
-            <Select :options="architecture" option-label="name" />
+            <label class="font-bold">Arsitektur</label>
+            <Select :options="architecture" option-label="name" placeholder="Pilih EVM atau Non EVM" />
 
             <label class="font-bold">Tipe Jaringan</label>
             <!-- <InputText v-model.trim="editingItem.Type" required /> -->
             <NetworkTypeComponent v-model:modelValue="editingItem.Type" :initialValue="editingItem.Type" />
+
+            <label class="font-bold">Nama Jaringan</label>
+            <InputText v-model.trim="editingItem.Name" required />
+
             <label class="font-bold">RPC URL</label>
             <div class="flex justify-between space-x-2">
                 <div class="w-full">

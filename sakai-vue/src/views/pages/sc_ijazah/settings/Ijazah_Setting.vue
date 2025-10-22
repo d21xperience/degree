@@ -1,13 +1,13 @@
 <script setup>
+import { useGuru } from '@/composables/sekolah_composable/useGuru';
+import { useSemester } from '@/composables/sekolah_composable/useSemester';
 import { useFormOptions } from '@/composables/useFormOptions';
-import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
-import InputText from 'primevue/inputtext';
 import { useToast } from 'primevue/usetoast';
 import { onMounted, ref } from 'vue';
-const { listTahunAjaran, selectedTahunAjaran, initSelectedTahunAjaran, createInfoIjazah, fetchGuruTerdaftar, guruTerdaftarList } = useSekolahService();
+const { guruTerdaftarList, fetchGuruTerdaftar } = useGuru();
+const { initSelectedTahunAjaran, selectedTahunAjaran } = useSemester();
 const { handleKeydown } = useFormOptions();
-const loading = ref(false);
-const isLoading = ref(false);
+// const isLoading = ref(false);
 const selectedPtk = ref();
 const ptk = ref();
 const ptkList = ref();
@@ -19,27 +19,27 @@ const ijazahParam = ref({
     kop_sekolah_url: ''
 });
 onMounted(async () => {
-    selectedTahunAjaran.value = initSelectedTahunAjaran.value;
-    await fetchGuruTerdaftar();
-    ptkList.value = guruTerdaftarList.value.map((item) => item.ptk);
+    // selectedTahunAjaran.value = initSelectedTahunAjaran.value;
+    // await fetchGuruTerdaftar();
+    // ptkList.value = guruTerdaftarList.value.map((item) => item.ptk);
     // console.log(tes)
     // console.log(ptk.value);
 });
 
 const toast = useToast();
-const fileupload = ref();
+// const fileupload = ref();
 
-function upload() {
-    fileupload.value.upload();
-}
+// function upload() {
+//     fileupload.value.upload();
+// }
 
 function onUpload() {
     toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
 }
 
-const save = () => {
-    createInfoIjazah(ijazahParam.value);
-};
+// const save = () => {
+//     createInfoIjazah(ijazahParam.value);
+// };
 const batal = () => {};
 const getPtk = (event) => {
     setTimeout(() => {
@@ -57,10 +57,10 @@ const getPtk = (event) => {
         <div class="lg:flex lg:justify-between">
             <h4>Seting Pengisian Ijazah & Transkrip Nilai</h4>
             <div class="md:flex md:items-center md:space-x-2">
-                <label class="text-slate-500 md:text-base text-sm">Tahun Ajaran</label>
+                <!-- <label class="text-slate-500 md:text-base text-sm">Tahun Ajaran</label>
                 <div>
                     <Select v-model="selectedTahunAjaran" :options="listTahunAjaran" optionLabel="nama" placeholder="Tahun Pelajaran" class="w-full md:w-52 mr-2" />
-                </div>
+                </div> -->
             </div>
         </div>
         <section class="lg:mt-0 mt-10">

@@ -24,7 +24,7 @@ export function useKelas() {
             if (tingkatPendidikanId) {
                 payload.tingkat_pendidikan_id = tingkatPendidikanId;
             }
-            const response = await store.dispatch('sekolahService/fetchKelas', payload);
+            const response = await store.dispatch('kelasService/fetchKelas', payload);
             return response;
         } catch (error) {
             throw new Error(`Gagal mengambil kelas: ${error.message}`);
@@ -32,11 +32,10 @@ export function useKelas() {
     };
     const getKelas = async () => {
         try {
-            let response = store.getters['sekolahService/getKelas'];
+            let response = store.getters['kelasService/getKelas'];
             if (!response || Array.isArray(response.kelas) || response.kelas.length == 0 || initSelectedSemester.value?.semesterId != response?.semesterId) {
                 response = await fetchKelas();
             }
-
             kelasList.value = response.kelas;
             return response;
         } catch (error) {
@@ -46,14 +45,14 @@ export function useKelas() {
 
     const searchKelas = async (kelasId = null) => {
         try {
-            let response = store.getters['sekolahService/getKelas'];
+            let response = store.getters['kelasService/getKelas'];
 
             if (!response || response.kelas.length == 0 || initSelectedSemester.value?.semesterId != response?.semesterId) {
                 const payload = {
                     schemaname: schemaname.value,
                     semester_id: initSelectedSemester.value?.semesterId
                 };
-                response = await store.dispatch('sekolahService/fetchKelas', payload);
+                response = await store.dispatch('kelasService/fetchKelas', payload);
             }
             const result = response.kelas.find((item) => item.rombonganBelajarId == kelasId);
             return result;
@@ -70,11 +69,30 @@ export function useKelas() {
                 anggota_kelas: anggotaKelas
             };
             console.log(payload);
-            const response = await store.dispatch('sekolahService/createKelas', payload);
+            const response = await store.dispatch('kelasService/createKelas', payload);
             return response;
         } catch (error) {
             console.log(error);
             throw new Error('Gagal menambhkan kelas:', error);
+        }
+    };
+
+    /**
+     *
+     * @param {String} rombonganBelajarId
+     * @param {String} semesterId
+     * @returns
+     */
+    const fetchAnggotaKelas = async (rombonganBelajarId = '', semesterId = '') => {
+        try {
+            const cachedData = await store.getters['siswaService/getSiswaAktif'];
+            if (cachedData.semester_id === semesterId) {
+                const anggotaKelas = cachedData.peserta_didik.filter((val) => val.rombonganBelajarId === rombonganBelajarId);
+                return anggotaKelas;
+            }
+            return null;
+        } catch (error) {
+            console.error('Gagal mengambil data kelas:', error);
         }
     };
 
@@ -83,6 +101,7 @@ export function useKelas() {
         getKelas,
         addKelas,
         searchKelas,
-        kelasList
+        kelasList,
+        fetchAnggotaKelas
     };
 }

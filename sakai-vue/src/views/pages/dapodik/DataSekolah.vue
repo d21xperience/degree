@@ -1,18 +1,18 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue';
-import { useStore } from 'vuex';
-const store = useStore();
-
-import KategoriSekolahComponent from '@/components/KategoriSekolahComponent.vue';
+import KategoriSekolahComponent from '@/components/sekolah_components/KategoriSekolahComponent.vue';
 import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
 import { useSemester } from '@/composables/sekolah_composable/useSemester';
-const { initSelectedSemester } = useSemester();
-const { fetchSekolah, fetchTingkat, updateSekolah } = useSekolah();
-const fetchRefTable = async () => {
-    bentukPendidikan.value = await store.dispatch('sekolahService/fetchBentukPendidikan');
-    jenjangPendidikan.value = await store.dispatch('sekolahService/fetchJenjangPendidikan');
-};
+import { useTableTenant } from '@/composables/sekolah_composable/useTableTenant';
 
+import { computed, onMounted, ref, watch } from 'vue';
+const { initSelectedSemester } = useSemester();
+const { fetchBentukPendidikan, fetchJenjangPendidikan, fetchSekolah, fetchTingkat, updateSekolah } = useSekolah();
+const fetchRefTable = async () => {
+    bentukPendidikan.value = await fetchBentukPendidikan(); //getBentukPendidikan();
+    jenjangPendidikan.value = await fetchJenjangPendidikan(); //getJenjangPendidikan();
+    console.log(jenjangPendidikan.value);
+};
+const { schemaname } = useTableTenant();
 // Evaluasi variabel di bawah ini:
 const jenjangPendidikanFiltered = computed(() => {
     return jenjangPendidikan.value.filter((item) => item.jenjangLembaga === 1);
@@ -57,6 +57,9 @@ const isEdit = ref(false);
 const editSekolah = () => {
     isEdit.value = !isEdit.value;
 };
+
+const bentukPendidikan = ref([]);
+const jenjangPendidikan = ref([]);
 watch(isEdit, async (newVal) => {
     if (newVal) {
         await fetchRefTable();
@@ -64,9 +67,6 @@ watch(isEdit, async (newVal) => {
         selectedJenjangPendidikan.value = jenjangPendidikan.value.find((item) => item.nama === sekolah.value.jenjangPendidikanStr);
     }
 });
-
-const bentukPendidikan = ref([]);
-const jenjangPendidikan = ref([]);
 const getWebsiteUrl = (url) => {
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
         return `https://${url}`; // Tambahkan https jika belum ada
@@ -76,17 +76,21 @@ const getWebsiteUrl = (url) => {
 const loadingUpdate = ref(false);
 const updateData = async () => {
     loadingUpdate.value = true;
-    // console.log(sekolah.value);
-    const payload = {
-        schemaname: store.getters['sekolahService/getTabeltenant']?.schemaname,
-        sekolah: sekolah.value.sekolah,
-        bentukPendidikanStr: selectedBentukPendidikan.value.nama,
-        jenjangPendidikanStr: selectedJenjangPendidikan.value.nama
-    };
-    await updateSekolah(payload);
-    selectedBentukPendidikan.value = null;
-    loadingUpdate.value = false;
-    isEdit.value = false;
+    try {
+        const payload = {
+            schemaname: schemaname.value,
+            sekolah: sekolah.value.sekolah,
+            bentukPendidikanStr: selectedBentukPendidikan.value.nama,
+            jenjangPendidikanStr: selectedJenjangPendidikan.value.nama
+        };
+        await updateSekolah(payload);
+        selectedBentukPendidikan.value = null;
+    } catch (error) {
+        console.log(error);
+    } finally {
+        loadingUpdate.value = false;
+        isEdit.value = false;
+    }
 };
 </script>
 
@@ -196,8 +200,6 @@ const updateData = async () => {
                     <Button class="bg-blue-800 text-white px-4 py-2 rounded flex items-center" @click="updateData" label="Update Data" icon="pi pi-save" :loading="loadingUpdate" />
                 </div>
             </div>
-
-            <Toast />
         </div>
         <!-- Informasi sekolah -->
         <div>

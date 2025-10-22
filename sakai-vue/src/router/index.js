@@ -1,8 +1,9 @@
 import AppLayout from '@/layout/AppLayout.vue';
 import { createRouter, createWebHistory } from 'vue-router';
 
+import { ref } from 'vue';
 import { authGuard, redirectIfAuthenticated } from './guards/authGuard';
-
+export const isLoading = ref(false); // state loading global
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
@@ -98,12 +99,7 @@ const router = createRouter({
                             meta: { title: 'Info Sekolah', namaRoute: 'Sekolah' },
                             component: () => import('@/views/pages/dapodik/DataSekolah.vue')
                         },
-                        {
-                            path: 'info-semester',
-                            name: 'infoSemester',
-                            meta: { title: 'Info Semester', namaRoute: 'Semester' },
-                            component: () => import('@/views/pages/dapodik/DataSemester.vue')
-                        },
+
                         {
                             path: 'info-guru',
                             name: 'infoGuru',
@@ -121,7 +117,7 @@ const router = createRouter({
                             path: 'edit-guru',
                             name: 'editGuru',
                             props: true,
-                            meta: { disableSelect: true, title: 'Edit Guru' },
+                            meta: { disableSelect: true, title: 'Edit Guru', namaRoute: 'Guru' },
                             component: () => import('@/views/pages/dapodik/data_guru/AddGuru.vue')
                         },
 
@@ -187,6 +183,12 @@ const router = createRouter({
                             props: true,
                             meta: { disableSelect: true, title: 'Edit Siswa' },
                             component: () => import('@/views/pages/dapodik/data_siswa/AddSiswa.vue')
+                        },
+                        {
+                            path: 'status-kenaikan',
+                            name: 'infoKenaikan',
+                            meta: { title: 'Info Kenaikan', namaRoute: 'Kelas' },
+                            component: () => import('@/views/pages/dapodik/KenaikanDanKelulusan.vue')
                         }
                     ]
                 },
@@ -212,10 +214,10 @@ const router = createRouter({
                     name: 'settings',
                     meta: { role: 'admin' },
                     children: [
-                        {
-                            path: 'blockchain',
-                            component: () => import('@/views/pages/sc_ijazah/settings/BlockchainSetting.vue')
-                        },
+                        // {
+                        //     path: 'blockchain',
+                        //     component: () => import('@/views/pages/sc_ijazah/settings/BlockchainSetting.vue')
+                        // },
                         // {
                         //     path: 'ipfs',
                         //     component: () => import('@/views/pages/sc_ijazah/settings/Client_IPFS.vue')
@@ -282,6 +284,21 @@ const router = createRouter({
                     component: () => import('@/views/pages/super_admin/Dashboard.vue')
                 },
                 {
+                    path: 'info-semester',
+                    name: 'infoSemester',
+                    meta: { title: 'Info Semester', namaRoute: 'Semester' },
+                    component: () => import('@/views/pages/dapodik/DataSemester.vue')
+                },
+                // {
+
+                // },
+                {
+                    path: 'info-kurikulum',
+                    name: 'infoKurikulum',
+                    meta: { title: 'Info Kurikulum', namaRoute: 'Kurikulum' },
+                    component: () => import('@/views/pages/dapodik/DataKurikulum.vue')
+                },
+                {
                     path: 'daftar-sekolah',
                     name: 'daftarSekolah',
                     component: () => import('@/views/pages/super_admin/Dashboard.vue')
@@ -340,10 +357,16 @@ const router = createRouter({
     ]
 });
 
+// Saat mulai navigasi → tampilkan loading
+router.beforeEach((to, from, next) => {
+    isLoading.value = true;
+    next();
+});
 // Tambahkan afterEach untuk update title
 router.afterEach((to) => {
     const defaultTitle = 'Verfikasi Ijazah';
     document.title = to.meta.title ? `${to.meta.title}` : defaultTitle;
+    isLoading.value = false;
 });
 
 export default router;

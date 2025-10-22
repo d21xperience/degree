@@ -2,11 +2,11 @@ import { computed, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 export function useSemester() {
     const store = useStore();
-    const listTahunAjaran = computed(() => rawlistTahunAjaran.value || []);
     const rawlistTahunAjaran = ref();
     const listSemester = store.getters['semesterService/getSemester'];
-    const initSelectedSemester = computed(() => store.getters['semesterService/getSelectedSemester']);
     const selectedSemester = ref();
+    const listTahunAjaran = computed(() => rawlistTahunAjaran.value || []);
+    const initSelectedSemester = computed(() => store.getters['semesterService/getSelectedSemester']);
     const initSelectedTahunAjaran = computed(() => store.getters['semesterService/getSelectedTahunAjaran']);
     const selectedTahunAjaran = ref();
     const fetchSemester = async () => {
