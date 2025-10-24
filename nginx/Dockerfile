@@ -54,11 +54,11 @@ FROM ubuntu:22.04
 # Install minimal runtime dependencies
 RUN apt update && \
     apt install -y \
-        libssl-dev \
-        libxml2 \
-        zlib1g \
-        libpcre3 \
-        && apt clean && rm -rf /var/lib/apt/lists/*
+    libssl-dev \
+    libxml2 \
+    zlib1g \
+    libpcre3 \
+    && apt clean && rm -rf /var/lib/apt/lists/*
 
 # Copy binaries and config from builder
 COPY --from=builder /usr/sbin/nginx /usr/sbin/nginx
@@ -75,6 +75,7 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY certs/ /etc/nginx/certs/
 
 # Expose ports
+EXPOSE 80
 EXPOSE 443
 EXPOSE 50001
 

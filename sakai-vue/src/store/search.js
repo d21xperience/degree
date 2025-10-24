@@ -1,4 +1,3 @@
-import axios from 'axios';
 import SekolahRefService from '@/service/CountryService';
 const state = {
     sekolahList: [],

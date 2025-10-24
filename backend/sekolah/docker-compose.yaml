@@ -1,23 +1,59 @@
 services:
   sekolah_db:
-    image: postgres:15-alpine
-    container_name: sekolah_db_container
-    restart: always
-    environment:
-      POSTGRES_USER: ${SEKOLAH_USER}
-      POSTGRES_PASSWORD: ${SEKOLAH_PASSWORD}
-      POSTGRES_DB: ${SEKOLAH_DB}
-    ports:
-      - "${SEKOLAH_PORT}:5432"
-    volumes:
-      - sekolah_db_data:/var/lib/postgresql/data
-      - ./db-init:/docker-entrypoint-initdb.d
+      image: postgres:15-alpine
+      container_name: sekolah_db
+      restart: always
+      environment:
+        POSTGRES_USER: ${DB_USER}
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
+        POSTGRES_DB: ${DB_NAME}
+      ports:
+        - "${DB_PORT}:5432"
+      volumes:
+        - sekolah_db_data:/var/lib/postgresql/data
+        - ./db-init:/docker-entrypoint-initdb.d
+      networks:
+        - app-network
   sekolah_redis:
     image: redis:alpine
-    container_name: sekolah_redis_container
+    container_name: sekolah_redis
     restart: always
     ports:
-      - "${SEKOLAHREDIS_PORT}:6379"
+      - "${REDIS_PORT}:6379"
+    networks:
+      - app-network
+  sekolah_service:
+    build: .
+    image: sc-sekolah_service:1.0.0
+    container_name: sekolah_service
+    environment:
+      - DB_HOST=sekolah_db
+      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - REDIS_HOST=sekolah_redis
+      - REDIS_PORT=6379
+          # App Configuration
+      # - GRPC_HOST=0.0.0.0
+      - GRPC_PORT=50052
+      - HTTP_PORT=8183
+    ports:
+      - "8183:8183"
+      - "50052:50052"
+    networks:
+      - app-network
+    depends_on:
+      - sekolah_db
+      - sekolah_redis
+
+
+
+
+networks:
+  app-network:
+    external: true
+    name: app-network
 
 volumes:
   sekolah_db_data:

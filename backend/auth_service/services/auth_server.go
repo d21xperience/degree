@@ -490,26 +490,53 @@ func (s *AuthServiceServer) GetUsers(ctx context.Context, req *pb.GetUsersReques
 
 // }
 // ✔ Digunakan
+// func (s *AuthServiceServer) GetSekolah(ctx context.Context, req *pb.GetSekolahRequest) (*pb.GetSekolahResponse, error) {
+// 	// Debugging: Cek nilai request yang diterima
+// 	log.Printf("Received Sekolah data request: %+v\n", req)
+// 	// Daftar field yang wajib diisi
+// 	requiredFields := []string{"Npsn"}
+// 	// Validasi request
+// 	err := utils.ValidateFields(req, requiredFields)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	sekolah, err := s.repoSekolah.GetSekolahByNPSN(req.GetNpsn())
+// 	if err != nil {
+// 		if errors.Is(err, repositories.ErrRecordNotFound) {
+// 			log.Printf("Error fetching school data: %v", err)
+// 			return nil, errors.New("failed to retrieve school data")
+// 		}
+// 		return nil, err
+// 	}
+
+//		return &pb.GetSekolahResponse{
+//			Nama: sekolah.NamaSekolah,
+//			SekolahData: &pb.SekolahTenant{
+//				Id:            &sekolah.ID,
+//				EnkripId:      &sekolah.EnkripID,
+//				Kecamatan:     sekolah.Kecamatan,
+//				Kabupaten:     sekolah.Kabupaten,
+//				Propinsi:      sekolah.Propinsi,
+//				KodeKecamatan: sekolah.Kecamatan,
+//				AlamatJalan:   sekolah.AlamatJalan,
+//				KodeKab:       sekolah.KodeKab,
+//				KodeProp:      sekolah.KodeProp,
+//				NamaSekolah:   sekolah.NamaSekolah,
+//				Npsn:          sekolah.NPSN,
+//			},
+//		}, nil
+//	}
 func (s *AuthServiceServer) GetSekolah(ctx context.Context, req *pb.GetSekolahRequest) (*pb.GetSekolahResponse, error) {
-	// Debugging: Cek nilai request yang diterima
-	log.Printf("Received Sekolah data request: %+v\n", req)
-	// Daftar field yang wajib diisi
-	requiredFields := []string{"Npsn"}
-	// Validasi request
-	err := utils.ValidateFields(req, requiredFields)
-	if err != nil {
-		return nil, err
-	}
 
 	sekolah, err := s.repoSekolah.GetSekolahByNPSN(req.GetNpsn())
 	if err != nil {
+		log.Printf("Error fetching sekolah: %v", err)
 		if errors.Is(err, repositories.ErrRecordNotFound) {
-			log.Printf("Error fetching school data: %v", err)
-			return nil, errors.New("failed to retrieve school data")
+			return nil, status.Error(codes.NotFound, "school not found")
 		}
-		return nil, err
+		return nil, status.Error(codes.Internal, "internal error while fetching data")
 	}
-
 	return &pb.GetSekolahResponse{
 		Nama: sekolah.NamaSekolah,
 		SekolahData: &pb.SekolahTenant{

@@ -104,6 +104,7 @@ const actions = {
         }
     },
     async registerAdmin({ commit }, payload) {
+        console.log(payload);
         try {
             const response = await api.post('/as/auth/register', payload);
             console.log('authService/registerAdmin', response);
@@ -116,22 +117,25 @@ const actions = {
             // console.log('from Register:', response.data);
             return response.data;
         } catch (error) {
+            console.log(error);
             throw error.response.data;
         }
     },
     // Fitur baru ceknpsn
     async ceknpsn({ commit }, npsn) {
+        // console.log(npsn);
         try {
             const response = await api.get(`/as/sekolah`, {
                 params: {
                     npsn: npsn
                 }
             });
+            // console.log(response);
             commit('SET_SEKOLAH', response.data);
             return response.data; // Mengembalikan data sekolah
         } catch (error) {
-            console.log(error);
-            throw new Error('Gagal mendapatkan profile user', error);
+            // console.log(error);
+            throw new Error('Sekolah tidak ditemukan', error);
         }
     },
     async getSekolahByID({ commit }, sekolahId) {

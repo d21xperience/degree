@@ -66,10 +66,38 @@ export function useAuth() {
         // router.push({ name: 'landing' });
         // }
     };
+
+    const cekSekolahByNPSN = async (npsn) => {
+        try {
+            const response = await store.dispatch('authService/ceknpsn', npsn);
+            if (response.status) {
+                return response;
+            }
+            return false;
+        } catch (e) {
+            console.log(e);
+            return true;
+        }
+    };
+    const onRegisterAdmin = async (dataReg) => {
+        try {
+            const response = await store.dispatch('authService/registerAdmin', dataReg);
+            console.log('onRegisterAdmin =>', response);
+            // if (response.status) {
+            //     return response;
+            // }
+            return false;
+        } catch (e) {
+            console.log(e);
+            return true;
+        }
+    };
     return {
         onLogin,
         onLogout,
         currentUser,
-        user
+        user,
+        cekSekolahByNPSN,
+        onRegisterAdmin
     };
 }

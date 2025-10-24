@@ -13,11 +13,11 @@ RUN go mod tidy
 # Copy seluruh kode sumber ke dalam container
 COPY . .
 
-# Install Air untuk hot reload
-RUN go install github.com/cosmtrek/air@v1.45.0
+# # Install Air untuk hot reload
+# RUN go install github.com/cosmtrek/air@v1.45.0
 
 # Expose port gRPC
 EXPOSE 50051
 
-# Jalankan aplikasi dengan Air untuk hot reload
-CMD ["air"]
+# # Jalankan aplikasi dengan Air untuk hot reload
+# CMD ["air"]

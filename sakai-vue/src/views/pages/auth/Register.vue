@@ -1,66 +1,41 @@
 <script setup>
+import { ref } from 'vue';
+// import { useStore } from 'vuex';
+// const store = useStore();
+import SekolahComponent from '@/components/sekolah_components/SekolahComponent.vue';
 import router from '@/router';
-import SekolahService from '@/service/SekolahService';
-// import { useAuth } from '@/views/pages/auth/composables/auth';
-// const {  } = useAuth();
-import Dialog from 'primevue/dialog';
-import { onMounted, ref } from 'vue';
-import { useStore } from 'vuex';
-const store = useStore();
-
+import { useAuth } from '@/views/pages/auth/composables/auth';
+const { cekSekolahByNPSN, onRegisterAdmin } = useAuth();
 const email = ref('');
 const password = ref('');
 const loading = ref(false);
-const sekolah = ref();
-onMounted(() => {
-    SekolahService.getSekolah().then((data) => (sekolah.value = data));
-});
+// const sekolah = ref();
+// onMounted(() => {
+//     SekolahService.getSekolah().then((data) => (sekolah.value = data));
+// });
 
 const statusSekolahTerdaftar = ref(false);
 const searchTerm = ref('');
-const filteredsekolah = ref();
-const search = (event) => {
-    setTimeout(() => {
-        if (!event.query.trim().length) {
-            filteredsekolah.value = [...sekolah.value];
-        } else {
-            filteredsekolah.value = sekolah.value.filter((country) => country.nama_sekolah.toLowerCase().includes(event.query.toLowerCase()));
-        }
-    }, 250);
-};
-const handleKeydown = (event) => {
-    if (event.key === ' ') {
-        searchTerm.value += ' '; // Menambahkan spasi ke query
-    }
-};
+// const filteredsekolah = ref();
+// const search = (event) => {
+//     setTimeout(() => {
+//         if (!event.query.trim().length) {
+//             filteredsekolah.value = [...sekolah.value];
+//         } else {
+//             filteredsekolah.value = sekolah.value.filter((country) => country.nama_sekolah.toLowerCase().includes(event.query.toLowerCase()));
+//         }
+//     }, 250);
+// };
+// const handleKeydown = (event) => {
+//     if (event.key === ' ') {
+//         searchTerm.value += ' '; // Menambahkan spasi ke query
+//     }
+// };
 // const npsn = ref();
 // const error = ref();
 const cekSekolah = async () => {
-    loading.value = true;
-    let cek = false;
-    // npsn.value = searchTerm.value?.npsn;
-    try {
-        sekolah.value = null; // Reset data sekolah
-        // Panggil fungsi ceknpsn dari Vuex storex
-        const data = await store.dispatch('authService/ceknpsn', searchTerm.value.npsn);
-        console.log(data);
-        if (data) {
-            dialogInfo.value = true;
-            // searchTerm.value = null
-        }
-    } catch (e) {
-        // console.error('error:', e.response.data.message);
-        if (e.response.data.message === 'failed to retrieve school data') {
-            cek = true;
-        }
-        // error.value = 'Terjadi kesalahan saat mengambil data sekolah.';
-    } finally {
-        if (cek) {
-            // sekolah.value = data; //Tampilkan data sekolah
-            statusSekolahTerdaftar.value = true;
-        }
-        loading.value = false;
-    }
+    // loading.value = true;
+    statusSekolahTerdaftar.value = cekSekolahByNPSN(searchTerm.value?.npsn);
 };
 // Fungsi handler submit form
 const handleSubmit = async () => {
@@ -85,32 +60,30 @@ const handleSubmit = async () => {
             alamat_jalan: searchTerm.value.alamat_jalan
         }
     };
-    // if (valid) {
     try {
         dataReg.sekolah = formatValues(dataReg.sekolah);
-        const response = await store.dispatch('authService/registerAdmin', dataReg);
-        // console.log(response);
+        const response = await onRegisterAdmin(dataReg);
+        //     // console.log(response);
         // Jika sukses, arahkan ke beranda
         if (response.ok) {
-            // const result = resp?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
+            // const result = response?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
             // router.push({ name: 'dashboard', params: { sekolah: result } });
-            await store.dispatch('sekolahService/fetchTahunAjaran');
-            await store.dispatch('sekolahService/fetchSemester');
-            const result = response?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
-            await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
-            await router.push({ name: 'dashboard', params: { sekolah: result } });
+            // await store.dispatch('sekolahService/fetchTahunAjaran');
+            // await store.dispatch('sekolahService/fetchSemester');
+            // const result = response?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
+            // await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
+            // await router.push({ name: 'dashboard', params: { sekolah: result } });
         }
-        // success.value = 'Admin registered successfully!';
+        //     // success.value = 'Admin registered successfully!';
     } catch (error) {
-        errorDialog.value = true;
-        errorInfo.value = error?.message;
-        console.error(error);
-        // error.value = err.error || 'Registration failed';
+        //     errorDialog.value = true;
+        //     errorInfo.value = error?.message;
+        //     console.error(error);
+        //     // error.value = err.error || 'Registration failed';
     } finally {
         loading.value = false;
     }
     // return { name, email, password, schoolName, register, error, success };
-    // }
 };
 
 // Fungsi untuk menghapus spasi dan konversi ke string
@@ -140,13 +113,7 @@ const errorInfo = ref();
                     <div class="my-6">
                         <div class="flex justify-between items-center space-x-8">
                             <div class="w-full">
-                                <FloatLabel variant="on">
-                                    <IconField>
-                                        <AutoComplete optionLabel="nama_sekolah" v-model="searchTerm" :suggestions="filteredsekolah" @complete="search" fluid @keydown.space.prevent="handleKeydown" :disabled="loading" />
-                                        <InputIcon class="pi pi-building-columns" />
-                                    </IconField>
-                                    <label>NPSN/Nama Sekolah</label>
-                                </FloatLabel>
+                                <SekolahComponent v-model:modelValue="searchTerm" />
                             </div>
                             <div>
                                 <Button label="Cek" class="w-24" @click="cekSekolah" :loading="loading" :disabled="searchTerm.length <= 0"></Button>
@@ -167,20 +134,33 @@ const errorInfo = ref();
             <div v-else class="flex flex-col items-center justify-center">
                 <!-- <h2>Register</h2> -->
                 <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
-                    <div class="text-center mb-8">
-                        <!-- <div class="text-surface-900 dark:text-surface-0 text-3xl font-medium mb-4">Welcome to PrimeLand!</div> -->
-                        <!-- <span class="text-muted-color font-medium">Sign in to continue</span> -->
-                    </div>
+                    <!-- <div class="text-center mb-8"> 
+                    </div> -->
 
-                    <div>
+                    <!-- <div>
                         <label for="sekolah" class="block text-surface-900 dark:text-surface-0 text-lg font-medium">Sekolah</label>
-                        <InputText id="sekolah" name="sekolah" type="text" placeholder="Masukan sekolah" class="w-full md:w-[30rem] mb-3" v-model="filteredsekolah[0].nama_sekolah" disabled />
+                        <InputText id="sekolah" name="sekolah" type="text" placeholder="Masukan sekolah" class="w-full md:w-[30rem] mb-3" v-model="searchTerm.nama_sekolah" disabled />
                         <label for="email1" class="block text-surface-900 dark:text-surface-0 text-lg font-medium">Email</label>
                         <InputText id="email1" name="email1" type="text" placeholder="Masukan email" class="w-full md:w-[30rem] mb-3" v-model="email" />
                         <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-lg">Password</label>
                         <Password id="password1" v-model="password" placeholder="Password" :toggleMask="true" class="mb-4" fluid :feedback="false"></Password>
                         <Button label="Sign Up" class="w-full" @click="handleSubmit" :loading="loading"></Button>
-                    </div>
+                    </div> -->
+
+                    <form @submit.prevent="handleSubmit">
+                        <div>
+                            <label for="sekolah" class="block text-surface-900 dark:text-surface-0 text-lg font-medium">Sekolah</label>
+                            <InputText id="sekolah" name="sekolah" type="text" placeholder="Masukan sekolah" class="w-full md:w-[30rem] mb-3" v-model="searchTerm.nama_sekolah" disabled />
+
+                            <label for="email1" class="block text-surface-900 dark:text-surface-0 text-lg font-medium">Email</label>
+                            <InputText id="email1" name="email1" type="email" placeholder="Masukan email" class="w-full md:w-[30rem] mb-3" v-model="email" />
+
+                            <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-lg">Password</label>
+                            <Password id="password1" name="password1" v-model="password" placeholder="Password" :toggleMask="true" class="mb-4" fluid :feedback="false" autocomplete="new-password"></Password>
+
+                            <Button type="submit" label="Sign Up" class="w-full" :loading="loading"></Button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

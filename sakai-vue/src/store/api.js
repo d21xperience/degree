@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+import store from '.';
+let refreshPromise = null;
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
     withCredentials: true,
@@ -7,11 +9,22 @@ const api = axios.create({
     headers: { 'Content-Type': 'application/json' }
 });
 
-let refreshPromise = null;
+// Tambahkan request interceptor untuk logging
+api.interceptors.request.use(
+    (config) => {
+        console.log(`Making ${config.method?.toUpperCase()} request to: ${config.url}`);
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
 api.interceptors.response.use(
     (res) => res,
     async (err) => {
+        // console.error('API Error:', err.response?.status, err.config?.url);
+
         const cfg = err.config || {};
         if (err.response?.status === 401 && !cfg._retry) {
             cfg._retry = true;
@@ -23,9 +36,8 @@ api.interceptors.response.use(
             }
             try {
                 await refreshPromise;
-                return api(cfg); // retry original request
+                return api(cfg);
             } catch (_) {
-                // refresh gagal → logout sudah ditangani di authService.refresh()
                 return Promise.reject(err);
             }
         }

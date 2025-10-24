@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Nama network yang digunakan
-NETWORK_NAME="backend_network"
+NETWORK_NAME="app-network"
 COMPOSE_FILE="docker-compose.yml"
 
 echo "📡 Memeriksa Docker network: $NETWORK_NAME..."

@@ -189,14 +189,14 @@ CREATE TABLE ref.mata_pelajaran_kurikulum (
 
 CREATE TABLE ref.kelompok_mapel (
     id SERIAL PRIMARY KEY,
-    kurikulum_id INT NOT NULL REFERENCES kurikulum(id) ON DELETE CASCADE,
+    kurikulum_id INT NOT NULL REFERENCES ref.kurikulum(kurikulum_id) ON DELETE CASCADE,
     nama VARCHAR(150) NOT NULL,
     deskripsi TEXT
 );
 CREATE TABLE ref.kelompok_mapel_detail (
     id SERIAL PRIMARY KEY,
-    kelompok_id INT NOT NULL REFERENCES kelompok_mapel(id) ON DELETE CASCADE,
-    mapel_id INT NOT NULL REFERENCES mata_pelajaran(mata_pelajaran_id) ON DELETE CASCADE,
+    kelompok_id INT NOT NULL REFERENCES ref.kelompok_mapel(id) ON DELETE CASCADE,
+    mapel_id INT NOT NULL REFERENCES ref.mata_pelajaran(mata_pelajaran_id) ON DELETE CASCADE,
     tingkat VARCHAR(50),
     keterangan TEXT
 );

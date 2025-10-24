@@ -19,7 +19,6 @@ import (
 )
 
 func StartGRPCServer() {
-	// Menggunakan environment variable untuk fleksibilitas
 	grpcHost := os.Getenv("GRPC_HOST")
 	if grpcHost == "" {
 		grpcHost = "localhost"
@@ -37,38 +36,36 @@ func StartGRPCServer() {
 
 	frontend := os.Getenv("FRONTEND")
 	if frontend == "" {
-		frontend = "http://localhost:5173"
+		frontend = "http://localhost:3000"
 	}
 
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	// Menangani signal dari OS (Ctrl+C, SIGTERM)
+
+	// Tangani sinyal OS
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
-	// gRPC Gateway
-	// =========================================
-	// Jalankan server gRPC dan gateway
-	// gRPC Listener
+
+	// =========================================================
+	// Jalankan gRPC server
 	listener, err := net.Listen("tcp", ":"+gRPCPort)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
-	grpcServer := RunGRPCServer() // gRPC di port 50052
-	// HTTP Gateway
-	// =========================================
-	// Inisialisasi mux untuk HTTP Gateway
-	// cookieCfg := utils.CookieCfg{
-	// 	Domain: os.Getenv("COOKIE_DOMAIN"), // ".myapp.com" atau ""
-	// 	Secure: os.Getenv("ENV") == "production",
-	// }
+	grpcServer := RunGRPCServer()
+	// =========================================================
 
+	// Inisialisasi HTTP mux (gRPC-Gateway)
+	mux := runtime.NewServeMux()
+
+	// Daftarkan handler custom HTTP (bukan gRPC)
 	handlerHTTP := handler.NewHandlerHttp()
-	loginHandler := handlerHTTP.HandlerLoginHTTP() // ambil handler
+	loginHandler := handlerHTTP.HandlerLoginHTTP()
 	refreshHandler := handlerHTTP.HandlerRefreshToken()
 	logoutHandler := handlerHTTP.HandlerLogout()
 	authMeHandler := handlerHTTP.HandlerAuthMe()
-	mux := runtime.NewServeMux()
+
+	// === Manual route (non gRPC Gateway) ===
 	method, pattern := utils.CreatePattern("POST", "api", "v1", "as", "auth", "web", "login")
 	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		loginHandler(w, r)
@@ -79,79 +76,72 @@ func StartGRPCServer() {
 		logoutHandler(w, r)
 	})
 
-	method, pattern = utils.CreatePattern("GET", "api", "v1", "as", "auth", "web", "me")
-	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-		authMeHandler(w, r)
-	})
 	method, pattern = utils.CreatePattern("POST", "api", "v1", "as", "auth", "web", "refresh")
 	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		refreshHandler(w, r)
 	})
+
+	method, pattern = utils.CreatePattern("GET", "api", "v1", "as", "auth", "web", "me")
+	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+		authMeHandler(w, r)
+	})
+
+	// Middleware Chain
 	combinedHandler := middleware.Chain(
-		mux,                      // handler paling dalam
-		middleware.SecureHeaders, // ↓ urutan eksekusi
+		mux,
+		middleware.SecureHeaders,
 		middleware.Logging,
-		middleware.RateLimit(5, 10),  // 5 req/detik, burst 10
-		middleware.JWTAuthMiddleware, // cek token
-		middleware.CORS(frontend),    // harus paling luar
+		middleware.RateLimit(5, 10),
+		middleware.JWTAuthMiddleware, // hanya untuk /auth/*
+		middleware.CORS(frontend),
 	)
-	grpcServerEndpoint := fmt.Sprintf("%s:%s", grpcHost, gRPCPort)
-	RunHTTPGateway(ctx, mux, grpcServerEndpoint, httpPort) // HTTP gateway di port 8080
-	// HTTP Listener
+
 	httpListener, err := net.Listen("tcp", ":"+httpPort)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
 
-	// Sync WaitGroup
+	// =========================================================
+	// Jalankan server
 	var wg sync.WaitGroup
-	// wg.Add(2)
 	wg.Add(2)
 
-	// Menjalankan gRPC server dalam Goroutine
 	go func() {
 		defer wg.Done()
-		log.Printf("gRPC server berjalan di :%s", gRPCPort)
+		log.Printf("🚀 gRPC server running on :%s", gRPCPort)
 		if err := grpcServer.Serve(listener); err != nil {
 			log.Fatalf("Failed to serve gRPC: %v", err)
 		}
 	}()
+	// Tunggu sedikit agar gRPC server benar-benar siap
+	time.Sleep(500 * time.Millisecond)
+	// =========================================================
+	// Daftarkan gRPC-Gateway (otomatis)
+	grpcServerEndpoint := fmt.Sprintf("%s:%s", grpcHost, gRPCPort)
+	RunHTTPGateway(ctx, mux, grpcServerEndpoint, httpPort)
+	// =========================================================
 
-	// Menjalankan HTTP Gateway dalam Goroutine
 	go func() {
 		defer wg.Done()
-		log.Printf("HTTP gateway berjalan di :%s", httpPort)
+		log.Printf("🌐 HTTP Gateway running on :%s", httpPort)
 		if err := http.Serve(httpListener, combinedHandler); err != nil {
 			log.Fatalf("Failed to serve HTTP Gateway: %v", err)
 		}
 	}()
 
-	// Menunggu sinyal shutdown
-	wg.Add(1) // Tambahkan WaitGroup untuk shutdown goroutine
+	wg.Add(1)
 	go func() {
-		defer wg.Done() // Pastikan WaitGroup diberi tahu setelah selesai
+		defer wg.Done()
 		<-signalChan
-		fmt.Println("\nShutting down servers...")
+		log.Println("🛑 Shutting down servers...")
 
-		// Timeout shutdown dalam 5 detik
-		_, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer shutdownCancel()
-
-		// Matikan server gRPC
 		grpcServer.GracefulStop()
-
-		// Matikan HTTP Gateway
-		if err := httpListener.Close(); err != nil {
-			log.Printf("Error while closing HTTP listener: %v", err)
-		}
-
-		// Batalkan context utama agar semua operasi berhenti
+		httpListener.Close()
 		cancel()
 	}()
 
-	// Menunggu semua Goroutine selesai
 	wg.Wait()
-	fmt.Println("Server shutdown complete")
+	log.Println("✅ Server shutdown complete")
 }
 
 // func corsMiddleware(h http.Handler) http.Handler {

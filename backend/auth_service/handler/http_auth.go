@@ -219,3 +219,9 @@ func (h *handlerHTTP) HandlerAuthMe() http.HandlerFunc {
 		})
 	}
 }
+
+func (h *handlerHTTP)HandlerSekolah() http.HandlerFunc{
+	return func(w http.ResponseWriter, r *http.Request) {
+		
+	}
+}

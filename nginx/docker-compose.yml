@@ -6,6 +6,7 @@ services:
     image: grpc-nginx-proxy:latest
     container_name: grpc-nginx
     ports:
+      - "80:80"
       - "443:443"
       - "50001:50001"
     volumes:

@@ -14,7 +14,7 @@ var RDB *redis.Client
 
 func InitDatabase(cfg Config) {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
-		cfg.Host, cfg.User, cfg.Password, cfg.DBName, cfg.Port)
+		cfg.DBHost, cfg.DBUser, cfg.DBPassword, cfg.DBName, cfg.DBPort)
 
 	var err error
 	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
