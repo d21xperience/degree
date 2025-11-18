@@ -80,15 +80,17 @@ export function useFormOptions() {
 
     const fetchKurikulum = async () => {
         try {
-            let response = kurikulumList; //await store.getters['sekolahService/getKurikulum'];
-            if (!response.value || response.value.length == 0) {
-                response.value = await store.dispatch('sekolahService/fetchKurikulum', { jenjangPendidikanId: sekolah.value?.sekolah.jenjangPendidikanId, jenjangPendidikanStr: sekolah.value?.bentukPendidikanStr });
+            // let response = kurikulumList; //await store.getters['sekolahService/getKurikulum'];
+            if (!kurikulumList.value || kurikulumList.value.length == 0) {
+                const response = await store.dispatch('kurikulumService/fetchKurikulum', { jenjangPendidikanId: sekolah.value?.sekolah.jenjangPendidikanId, jenjangPendidikanStr: sekolah.value?.bentukPendidikanStr });
                 // if (response.value.status) {
                 //     toast.add({ severity: 'success', summary: 'Successful', detail: `${response.value.message}`, life: 3000 });
                 //     return response.value.kurikulum;
                 // }
+                return response;
+            } else {
+                return kurikulumList.value;
             }
-            return response;
         } catch (error) {
             console.log(error);
             throw new Error('Gagal mendapatkan kurikulum', error);

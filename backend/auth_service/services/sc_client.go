@@ -2,6 +2,7 @@ package services
 
 import (
 	"auth_service/models"
+	"auth_service/utils"
 	"context"
 	"fmt"
 	"time"
@@ -39,7 +40,9 @@ type BCNetwork struct {
 }
 
 func NewSCServiceClient() (*SCServiceClient, error) {
-	conn, err := grpc.NewClient("localhost:50054", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	utils.LoadEnvFiles()
+	scClient := utils.GetEnv("GRPC_SC_HOST", "localhost:50053")
+	conn, err := grpc.NewClient(scClient, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("gagal terhubung ke sc-service: %w", err)
 	}

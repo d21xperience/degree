@@ -38,13 +38,13 @@ func (r *RedisEnqueue) EnqueueInitSekolahTask(sekolahModel models.SekolahTenant)
 
 type InitTaskPayload struct {
 	Sekolah models.SekolahTenant `json:"sekolah"`
-	UserID  uint64               `json:"user_id"`
+	UserID  int64                `json:"user_id"`
 }
 
-func (r *RedisEnqueue) EnqueueInitSCTask(sekolahModel models.SekolahTenant, userId uint64) error {
+func (r *RedisEnqueue) EnqueueInitSCTask(sekolahModel models.SekolahTenant, userId int64) error {
 	payload := struct {
 		Sekolah models.SekolahTenant `json:"sekolah"`
-		UserID  uint64               `json:"user_id"`
+		UserID  int64                `json:"user_id"`
 	}{
 		Sekolah: sekolahModel,
 		UserID:  userId,

@@ -40,24 +40,30 @@ const mutations = {
 const actions = {
     async login({ commit }, credentials) {
         try {
-            const { data } = await api.post('/as/auth/web/login', credentials);
-            const { status, user, sekolahTenant } = data;
-            if (status) {
-                commit('SET_USER', user);
-                commit('SET_USER_ROLE', user.role);
-                commit('SET_SEKOLAH', sekolahTenant);
-                return {
-                    status: true,
-                    userRole: user.role,
-                    user,
-                    sekolahTenant
-                };
-            } else {
-                throw new Error(status.message || 'Login gagal');
-            }
+            const cek = await api.post('/as/auth/web/login', credentials).then((a) => console.log(a));
+
+            // if (cek.status) {
+
+            // }
+            console.log('cek', cek.status);
+            // const { data } = await api.post('/as/auth/web/login', credentials);
+            // const { status, user, sekolahTenant } = data;
+            // if (status) {
+            //     commit('SET_USER', user);
+            //     commit('SET_USER_ROLE', user.role);
+            //     commit('SET_SEKOLAH', sekolahTenant);
+            //     return {
+            //         status: true,
+            //         userRole: user.role,
+            //         user,
+            //         sekolahTenant
+            //     };
+            // }
         } catch (error) {
+            alert('error');
             console.log(error);
-            throw error.response?.data || error;
+            // throw error.response?.data || error;
+            throw error;
         }
     },
     async refreshToken() {
@@ -125,14 +131,16 @@ const actions = {
     async ceknpsn({ commit }, npsn) {
         // console.log(npsn);
         try {
-            const response = await api.get(`/as/sekolah`, {
+            const { data } = await api.get(`/as/sekolah`, {
                 params: {
                     npsn: npsn
                 }
             });
-            // console.log(response);
-            commit('SET_SEKOLAH', response.data);
-            return response.data; // Mengembalikan data sekolah
+            // console.log(data);
+            if (data.status) {
+                commit('SET_SEKOLAH', data.sekolahData);
+            }
+            return data; // Mengembalikan data sekolah
         } catch (error) {
             // console.log(error);
             throw new Error('Sekolah tidak ditemukan', error);

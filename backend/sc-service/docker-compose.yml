@@ -11,7 +11,7 @@ services:
     container_name: ${GRPC_HOST}
     ports:
       - "8184:8184"
-      - "50054:50054"
+      - "50053:50053"
     env_file:
       - .env.prod
     environment: 

@@ -7,10 +7,18 @@ const username = ref('');
 const password = ref('');
 const checked = ref(false);
 const loading = ref(false);
+const dialogError = ref(false);
+const messageError = ref('');
 // Fungsi handler submit form
 const handleSubmit = async () => {
     loading.value = true;
     try {
+        // Cek apakah username dan password diisi
+        if (username.value == '' || password.value == '') {
+            messageError.value = 'Username dan password tidak boleh kosong';
+            dialogError.value = true;
+            return;
+        }
         // Kirim data form ke onLogin
         await onLogin({
             values: {
@@ -20,7 +28,9 @@ const handleSubmit = async () => {
             }
         });
     } catch (error) {
-        alert(error?.message);
+        alert('gagal');
+        // messageError.value = error?.message;
+        // dialogError.value = true;
     } finally {
         // setTimeout(() => (loading.value[index] = false), 1000);
         loading.value = false;
@@ -63,6 +73,10 @@ const handleSubmit = async () => {
                 </div>
             </div>
         </div>
+
+        <Dialog v-model:visible="dialogError" :style="{ width: '450px' }" header="Warning" :modal="true" position="top">
+            <p>{{ messageError }}</p>
+        </Dialog>
     </div>
 </template>
 

@@ -45,37 +45,37 @@ watch(selectedWallet, (newVal) => {
         isSelectedWallet.value = false;
     }
 });
-const saveWallet = async () => {
-    try {
-        console.log('Selected Wallet', selectedWallet.value);
-        const res = await fetchWalletInfo({ public_address: selectedWallet.value.address });
-        console.log(res);
-        if (res) {
-            updateWalletInStore(res?.walletData);
-            Object.assign(currentWallet.value, res?.walletData);
-            toast.add({
-                severity: 'success',
-                summary: 'Fetch success',
-                detail: `Address ${selectedWallet.value?.address} \n selected`,
-                life: 3000
-            });
-        }
-    } catch (error) {
-        toast.add({
-            severity: 'error',
-            summary: 'Fetch failed',
-            detail: `Error ${error}`,
-            life: 3000
-        });
-    } finally {
-        isWallet.value = false;
-    }
-};
+// const saveWallet = async () => {
+//     try {
+//         console.log('Selected Wallet', selectedWallet.value);
+//         const res = await fetchWalletInfo({ public_address: selectedWallet.value.address });
+//         console.log(res);
+//         if (res) {
+//             updateWalletInStore(res?.walletData);
+//             Object.assign(currentWallet.value, res?.walletData);
+//             toast.add({
+//                 severity: 'success',
+//                 summary: 'Fetch success',
+//                 detail: `Address ${selectedWallet.value?.address} \n selected`,
+//                 life: 3000
+//             });
+//         }
+//     } catch (error) {
+//         toast.add({
+//             severity: 'error',
+//             summary: 'Fetch failed',
+//             detail: `Error ${error}`,
+//             life: 3000
+//         });
+//     } finally {
+//         isWallet.value = false;
+//     }
+// };
 onMounted(async () => {
-    const res = await loadWalletInfo();
-    if (res) {
-        Object.assign(currentWallet.value, res);
-    }
+    // const res = await loadWalletInfo();
+    // if (res) {
+    //     Object.assign(currentWallet.value, res);
+    // }
 });
 
 const handleWalletInfo = (e) => {
@@ -209,18 +209,18 @@ const handleWalletInfo = (e) => {
             </div>
         </Dialog> -->
 
-        <Dialog v-model:visible="isWallet" style="width: 23rem" position="top" header="Wallet">
+        <!-- <Dialog v-model:visible="isWallet" style="width: 23rem" position="top" header="Wallet">
             <div>
                 <label for="wallet">Pilih wallet</label>
                 <AccountComponent v-model="selectedWallet" @walletInfo="handleWalletInfo" />
             </div>
             <template #footer>
                 <div class="space-x-2">
-                    <!-- <Button icon="pi pi-plus" label="New Wallet" @click="saveWallet" /> -->
+                    <Button icon="pi pi-plus" label="New Wallet" @click="saveWallet" />
                     <Button icon="pi pi-save" label="Set Wallet" @click="saveWallet" severity="info" :disabled="!isSelectedWallet" />
                 </div>
             </template>
-        </Dialog>
+        </Dialog> -->
     </div>
 </template>
 

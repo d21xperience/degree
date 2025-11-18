@@ -3,7 +3,7 @@ package models
 import "time"
 
 type User struct {
-	ID                uint64     `gorm:"primaryKey;autoIncrement;column:id"`
+	ID                int64      `gorm:"primaryKey;autoIncrement;column:id"`
 	SekolahTenantID   uint32     `gorm:"column:sekolah_tenant_id"`
 	Username          string     `gorm:"column:username;not null;uniqueIndex:uni_users_username"`
 	Email             string     `gorm:"column:email;not null;uniqueIndex:uni_users_email"`

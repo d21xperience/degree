@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"time"
 
 	"auth_service/config"
@@ -16,9 +15,7 @@ import (
 
 	"auth_service/utils"
 
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 )
@@ -32,11 +29,12 @@ type AuthServiceServer struct {
 	repoProfile repositories.GenericRepository[models.UserProfile]
 	repoUser    repositories.UserRepository
 	rQueue      queue.RedisEnqueue
+	priv        any
 }
 
-func NewAuthServiceServer() *AuthServiceServer {
+func NewAuthServiceServer(pvKey string) *AuthServiceServer {
 	repoAuth := repositories.NewUserRepository(config.DB)
-	authService := NewAuthService(repoAuth)
+	authService := NewAuthService(repoAuth, pvKey)
 	repoSekolah := repositories.NewSekolahRepository(config.DB)
 	repoProfile := repositories.NewUserProfileRepository(config.DB)
 	repoUser := repositories.NewUserRepository(config.DB)
@@ -54,65 +52,7 @@ type SchoolRegistration struct {
 	SchoolName string `json:"school_name"`
 	AdminEmail string `json:"admin_email"`
 }
-
-// func (s *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
-// 	// log.Printf("Received Sekolah data request: %+v\n", req)
-// 	username := req.GetUsername()
-// 	email := req.GetEmail()
-// 	password := req.Password
-// 	var resp *models.User
-// 	var err error
-// 	if email != "" {
-// 		resp, err = s.authService.Login(email, password)
-// 		if err != nil {
-// 			return nil, err
-// 		}
-// 	}
-// 	if username != "" {
-// 		resp, err = s.authService.Login(username, password)
-// 		if err != nil {
-// 			log.Printf("Error username/password salah : %v", err)
-// 			return nil, err
-// 		}
-// 	}
-// 	// Generate JWT
-// 	accessToken, _ := utils.GenerateJWT(resp, 15*time.Minute)
-// 	refreshToken, _ := utils.GenerateJWT(resp, 7*24*time.Hour)
-// 	// if err != nil {
-// 	// 	return nil, errors.New("failed to generate token")
-// 	// }
-
-// 	// Set cookie via grpc-gateway
-// 	if md, ok := runtime.ServerMetadataFromContext(ctx); ok {
-// 		if vals := md.HeaderMD.Get("grpc-gateway-ctx-http-response"); len(vals) > 0 {
-// 			if w, ok := vals[0].(http.ResponseWriter); ok {
-// 				s.authService.SetAuthCookies(w, accessToken, refreshToken)
-// 			}
-// 		}
-// 	}
-// 	user := &pb.User{
-// 		Id:              resp.ID,
-// 		Username:        resp.Username,
-// 		Email:           resp.Email,
-// 		Role:            resp.Role,
-// 		SekolahTenantId: resp.SekolahTenantID,
-// 	}
-
-// 	// Ambil data sekolah
-// 	sekolahModel, err := s.repoSekolah.GetSekolahByTenantId(resp.SekolahTenantID)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return &pb.LoginResponse{
-// 		// Token: token,
-// 		Ok:   true,
-// 		User: user,
-// 		SekolahTenant: &pb.SekolahTenant{
-// 			NamaSekolah: sekolahModel.NamaSekolah,
-// 			Npsn:        sekolahModel.NPSN,
-// 		},
-// 	}, nil
-// }
+ 
 
 func (s *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	username := req.GetUsername()
@@ -137,94 +77,56 @@ func (s *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*p
 		return nil, status.Error(codes.Unauthenticated, "Username/email atau password salah")
 	}
 
-	// Generate access & refresh tokens
-	accessToken, err := utils.GenerateJWT(user, 15*time.Minute)
+	token, exp, err := utils.GenerateTokenRS256(s.priv, user.ID)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "Gagal membuat access token")
+		return nil, fmt.Errorf("token gen error")
 	}
-
-	refreshToken, err := utils.GenerateJWT(user, 7*24*time.Hour)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Gagal membuat refresh token")
-	}
-
-	// Simpan token di metadata untuk disetel nanti di http response
-	var cek runtime.ServerTransportStream
-	cek.SetHeader(metadata.Pairs(
-		"Set-Cookie", buildCookieHeader("access_token", accessToken, 15*60),
-		"Set-Cookie", buildCookieHeader("refresh_token", refreshToken, 7*24*60*60),
-	))
-	// )); err != nil {
-	// 	log.Printf("Failed to set cookies via metadata: %v", err)
-	// }
-	// Ambil data sekolah
-	sekolahModel, err := s.repoSekolah.GetSekolahByTenantId(user.SekolahTenantID)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "Gagal ambil data sekolah")
-	}
-
 	return &pb.LoginResponse{
-		Ok: true,
-		User: &pb.User{
-			Id:              user.ID,
-			Username:        user.Username,
-			Email:           user.Email,
-			Role:            user.Role,
-			SekolahTenantId: user.SekolahTenantID,
-		},
-		SekolahTenant: &pb.SekolahTenant{
-			NamaSekolah: sekolahModel.NamaSekolah,
-			Npsn:        sekolahModel.NPSN,
-		},
+		AccessToken: token,
+		ExpiresAt:   exp,
 	}, nil
+	// // Generate access & refresh tokens
+	// accessToken, err := utils.GenerateJWT(user, 15*time.Minute)
+	// if err != nil {
+	// 	return nil, status.Error(codes.Internal, "Gagal membuat access token")
+	// }
+
+	// refreshToken, err := utils.GenerateJWT(user, 7*24*time.Hour)
+	// if err != nil {
+	// 	return nil, status.Error(codes.Internal, "Gagal membuat refresh token")
+	// }
+
+	// // Simpan token di metadata untuk disetel nanti di http response
+	// var cek runtime.ServerTransportStream
+	// cek.SetHeader(metadata.Pairs(
+	// 	"Set-Cookie", buildCookieHeader("access_token", accessToken, 15*60),
+	// 	"Set-Cookie", buildCookieHeader("refresh_token", refreshToken, 7*24*60*60),
+	// ))
+	// // )); err != nil {
+	// // 	log.Printf("Failed to set cookies via metadata: %v", err)
+	// // }
+	// // Ambil data sekolah
+	// sekolahModel, err := s.repoSekolah.GetSekolahByTenantId(user.SekolahTenantID)
+	// if err != nil {
+	// 	return nil, status.Error(codes.Internal, "Gagal ambil data sekolah")
+	// }
+
+	// return &pb.LoginResponse{
+	// 	Ok: true,
+
+	// 	User: &pb.User{
+	// 		Id:              user.ID,
+	// 		Username:        user.Username,
+	// 		Email:           user.Email,
+	// 		Role:            user.Role,
+	// 		SekolahTenantId: user.SekolahTenantID,
+	// 	},
+	// 	SekolahTenant: &pb.SekolahTenant{
+	// 		NamaSekolah: sekolahModel.NamaSekolah,
+	// 		Npsn:        sekolahModel.NPSN,
+	// 	},
+	// }, nil
 }
-
-func buildCookieHeader(name, value string, maxAge int) string {
-	return (&http.Cookie{
-		Name:     name,
-		Value:    value,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   true, // Aktifkan untuk production
-		MaxAge:   maxAge,
-		SameSite: http.SameSiteStrictMode,
-	}).String()
-}
-
-// 1. Endpoint HTTP-only Cookie untuk Web
-// func (s *AuthServiceServer) LoginWeb(w http.ResponseWriter, r *http.Request) {
-// 	var req LoginRequest
-// 	_ = json.NewDecoder(r.Body).Decode(&req)
-
-// 	token, err := s.authService.Login(req.Username, req.Password)
-// 	if err != nil {
-// 		http.Error(w, "unauthorized", http.StatusUnauthorized)
-// 		return
-// 	}
-
-// 	// Generate access & refresh tokens
-// 	accessToken, err := utils.GenerateJWT(user, 15*time.Minute)
-// 	if err != nil {
-// 		return nil, status.Error(codes.Internal, "Gagal membuat access token")
-// 	}
-
-// 	refreshToken, err := utils.GenerateJWT(user, 7*24*time.Hour)
-// 	if err != nil {
-// 		return nil, status.Error(codes.Internal, "Gagal membuat refresh token")
-// 	}
-
-// 	http.SetCookie(w, &http.Cookie{
-// 		Name:     "access_token",
-// 		Value:    token,
-// 		HttpOnly: true,
-// 		Secure:   true,
-// 		SameSite: http.SameSiteStrictMode,
-// 		Path:     "/",
-// 		MaxAge:   3600,
-// 	})
-
-// 	w.WriteHeader(http.StatusOK)
-// }
 
 func (s *AuthServiceServer) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	// Debugging: Cek nilai request yang diterima
@@ -477,68 +379,28 @@ func (s *AuthServiceServer) GetUsers(ctx context.Context, req *pb.GetUsersReques
 
 }
 
-// func (s *AuthServiceServer) GenerateStudentUsername(ctx context.Context, req *pb.GenerateStudentUsernameRequest) (*pb.GenerateStudentUsernameResponse, error) {
-// 	// Debugging: Cek nilai request yang diterima
-// 	log.Printf("Received Sekolah data request: %+v\n", req)
-// 	// Daftar field yang wajib diisi
-// 	requiredFields := []string{"SekolahId", "PesertaDidikId"}
-// 	// Validasi request
-// 	err := utils.ValidateFields(req, requiredFields)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// }
-// ✔ Digunakan
-// func (s *AuthServiceServer) GetSekolah(ctx context.Context, req *pb.GetSekolahRequest) (*pb.GetSekolahResponse, error) {
-// 	// Debugging: Cek nilai request yang diterima
-// 	log.Printf("Received Sekolah data request: %+v\n", req)
-// 	// Daftar field yang wajib diisi
-// 	requiredFields := []string{"Npsn"}
-// 	// Validasi request
-// 	err := utils.ValidateFields(req, requiredFields)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	sekolah, err := s.repoSekolah.GetSekolahByNPSN(req.GetNpsn())
-// 	if err != nil {
-// 		if errors.Is(err, repositories.ErrRecordNotFound) {
-// 			log.Printf("Error fetching school data: %v", err)
-// 			return nil, errors.New("failed to retrieve school data")
-// 		}
-// 		return nil, err
-// 	}
-
-//		return &pb.GetSekolahResponse{
-//			Nama: sekolah.NamaSekolah,
-//			SekolahData: &pb.SekolahTenant{
-//				Id:            &sekolah.ID,
-//				EnkripId:      &sekolah.EnkripID,
-//				Kecamatan:     sekolah.Kecamatan,
-//				Kabupaten:     sekolah.Kabupaten,
-//				Propinsi:      sekolah.Propinsi,
-//				KodeKecamatan: sekolah.Kecamatan,
-//				AlamatJalan:   sekolah.AlamatJalan,
-//				KodeKab:       sekolah.KodeKab,
-//				KodeProp:      sekolah.KodeProp,
-//				NamaSekolah:   sekolah.NamaSekolah,
-//				Npsn:          sekolah.NPSN,
-//			},
-//		}, nil
-//	}
 func (s *AuthServiceServer) GetSekolah(ctx context.Context, req *pb.GetSekolahRequest) (*pb.GetSekolahResponse, error) {
-
 	sekolah, err := s.repoSekolah.GetSekolahByNPSN(req.GetNpsn())
 	if err != nil {
 		log.Printf("Error fetching sekolah: %v", err)
 		if errors.Is(err, repositories.ErrRecordNotFound) {
-			return nil, status.Error(codes.NotFound, "school not found")
+			// return nil, status.Error(codes.NotFound, "school not found")
+			return &pb.GetSekolahResponse{
+				Status:  false,
+				Message: "Sekolah tidak ditemukan",
+			}, nil
+
 		}
-		return nil, status.Error(codes.Internal, "internal error while fetching data")
+		// return nil, status.Error(codes.Internal, "internal error while fetching data")
+		return &pb.GetSekolahResponse{
+			Status:  false,
+			Message: "Terjadi kesalah pada database",
+		}, status.Error(codes.Internal, "internal error while fetching data")
 	}
 	return &pb.GetSekolahResponse{
-		Nama: sekolah.NamaSekolah,
+		Status:  true,
+		Message: "Sekolah sudah terdaftar",
+		Nama:    sekolah.NamaSekolah,
 		SekolahData: &pb.SekolahTenant{
 			Id:            &sekolah.ID,
 			EnkripId:      &sekolah.EnkripID,
@@ -554,35 +416,3 @@ func (s *AuthServiceServer) GetSekolah(ctx context.Context, req *pb.GetSekolahRe
 		},
 	}, nil
 }
-
-// func (s *AuthService) Refresh(ctx context.Context, _ *authpb.RefreshRequest) (*authpb.RefreshResponse, error) {
-// 	var refreshToken string
-// 	if md, ok := runtime.ServerMetadataFromContext(ctx); ok {
-// 		if vals := md.HeaderMD.Get("grpc-gateway-ctx-http-request"); len(vals) > 0 {
-// 			if r, ok := vals[0].(*http.Request); ok {
-// 				cookie, err := r.Cookie("refresh_token")
-// 				if err == nil {
-// 					refreshToken = cookie.Value
-// 				}
-// 			}
-// 		}
-// 	}
-
-// 	userID, err := ValidateJWT(refreshToken)
-// 	if err != nil {
-// 		return nil, status.Errorf(codes.Unauthenticated, "invalid refresh token")
-// 	}
-
-// 	accessToken, _ := GenerateJWT(userID, 15*time.Minute)
-// 	newRefreshToken, _ := GenerateJWT(userID, 7*24*time.Hour)
-
-// 	if md, ok := runtime.ServerMetadataFromContext(ctx); ok {
-// 		if vals := md.HeaderMD.Get("grpc-gateway-ctx-http-response"); len(vals) > 0 {
-// 			if w, ok := vals[0].(http.ResponseWriter); ok {
-// 				SetAuthCookies(w, accessToken, newRefreshToken)
-// 			}
-// 		}
-// 	}
-
-// 	return &authpb.RefreshResponse{Message: "refreshed"}, nil
-// }

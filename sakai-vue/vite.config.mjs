@@ -57,7 +57,8 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         assetsDir: 'assets',
-        sourcemap: false, // Nonaktifkan sourcemap untuk production
+        sourcemap: true, // Nonaktifkan sourcemap untuk production
+        // sourcemap: false, // Nonaktifkan sourcemap untuk production
         // Optimasi untuk production
         minify: 'esbuild',
         rollupOptions: {

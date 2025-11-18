@@ -8,7 +8,7 @@ import (
 
 type UserProfile struct {
 	ID          uint64         `gorm:"primaryKey;autoIncrement;column:id"`
-	UserID      uint64         `gorm:"column:user_id"`
+	UserID      int64          `gorm:"column:user_id"`
 	Nama        string         `gorm:"column:nama;size:100"`
 	JK          string         `gorm:"column:jk;size:100"`
 	Phone       *string        `gorm:"column:phone;size:100"`

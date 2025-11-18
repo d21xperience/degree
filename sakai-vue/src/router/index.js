@@ -22,12 +22,6 @@ const router = createRouter({
             name: 'blog',
             component: () => import('@/views/pages/blog/Main.vue'),
             children: [
-                // {
-                //     path: '',
-                //     name:'',
-                //     // component:'',
-                //     // component: () => import('@/views/pages/blog/artikel/Cek.vue')
-                // },
                 {
                     path: '',
                     name: 'cek',
@@ -62,7 +56,6 @@ const router = createRouter({
         {
             path: '/:sekolah/',
             component: AppLayout,
-            // name: 'main',
             props: true,
             beforeEnter: authGuard,
             meta: { requiresAuth: true },
@@ -178,13 +171,6 @@ const router = createRouter({
                             component: () => import('@/views/pages/dapodik/data_siswa/AddSiswa.vue')
                         },
                         {
-                            path: 'edit-siswa',
-                            name: 'editSiswa',
-                            props: true,
-                            meta: { disableSelect: true, title: 'Edit Siswa' },
-                            component: () => import('@/views/pages/dapodik/data_siswa/AddSiswa.vue')
-                        },
-                        {
                             path: 'status-kenaikan',
                             name: 'infoKenaikan',
                             meta: { title: 'Info Kenaikan', namaRoute: 'Kelas' },
@@ -192,39 +178,15 @@ const router = createRouter({
                         }
                     ]
                 },
-                // {
-                //     path: 'blockhain',
-                //     name: 'blockhain',
-                //     component: () => import('@/views/super_admin/Main.vue'),
-                //     children: [
-                //         {
-                //             path: 'sc-ijazah',
-                //             name: 'scIjazah',
-                //             component: () => import('@/views/pages/sc_ijazah/SCIjazah.vue')
-                //         },
-                //         {
-                //             path: 'daftar-trx',
-                //             name: 'daftarTrx',
-                //             component: () => import('@/views/pages/sc_ijazah/ListTrx.vue')
-                //         }
-                //     ]
-                // },
                 {
                     path: 'settings',
                     name: 'settings',
                     meta: { role: 'admin' },
                     children: [
-                        // {
-                        //     path: 'blockchain',
-                        //     component: () => import('@/views/pages/sc_ijazah/settings/BlockchainSetting.vue')
-                        // },
-                        // {
-                        //     path: 'ipfs',
-                        //     component: () => import('@/views/pages/sc_ijazah/settings/Client_IPFS.vue')
-                        // },
                         {
                             path: 'ijazah',
-                            component: () => import('@/views/pages/sc_ijazah/settings/Ijazah_Setting.vue')
+                            component: () => import('@/views/pages/sc_ijazah/settings/Ijazah_Setting.vue'),
+                            name: 'ijazah'
                         }
                     ]
                 },

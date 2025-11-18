@@ -15,7 +15,7 @@ type UserRepository interface {
 	FindUserByRoleAndSchoolID(role string, schoolID uint32) (*models.User, error)
 	Save(user *models.User) error
 	EmailExists(email string) (bool, error)
-	UpdateLastLogin(userID uint64) error
+	UpdateLastLogin(userID int64) error
 	GetUsers(role string, schoolID uint32) ([]models.User, error)
 }
 
@@ -77,7 +77,7 @@ func (r *userRepositoryImpl) EmailExists(email string) (bool, error) {
 	return count > 0, nil
 }
 
-func (r *userRepositoryImpl) UpdateLastLogin(userID uint64) error {
+func (r *userRepositoryImpl) UpdateLastLogin(userID int64) error {
 	return r.db.Model(&models.User{}).Where("id = ?", userID).Update("last_login", time.Now()).Error
 }
 

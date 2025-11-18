@@ -46,7 +46,7 @@ func JWTAuthMiddleware(next http.Handler) http.Handler {
 		protectedPaths := []string{
 			"/api/v1/as/auth/web/me",
 			"/api/v1/as/auth/web/refresh",
-			"/api/v1/as/auth/web/logout",
+			// "/api/v1/as/auth/web/logout",
 		}
 
 		// Jika path tidak ada dalam daftar yang dilindungi → langsung lewat

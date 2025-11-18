@@ -1,12 +1,8 @@
 package config
 
 import (
-	"log"
-	"os"
-	"strconv"
+	"auth_service/utils"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -29,59 +25,26 @@ type Config struct {
 
 func LoadConfig() Config {
 	// Load environment variables
-	loadEnvFiles()
-
+	utils.LoadEnvFiles()
 	return Config{
 		// Redis
-		RedisHost:     getEnv("REDIS_HOST", "localhost"),
-		RedisPort:     getIntEnv("REDIS_PORT", 6379),
-		RedisPassword: getEnv("REDIS_PASSWORD", ""),
-		RedisDBName:   getIntEnv("REDIS_DB", 0),
+		RedisHost:     utils.GetEnv("REDIS_HOST", "localhost"),
+		RedisPort:     utils.GetIntEnv("REDIS_PORT", 6379),
+		RedisPassword: utils.GetEnv("REDIS_PASSWORD", ""),
+		RedisDBName:   utils.GetIntEnv("REDIS_DB", 0),
 		// Database
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getIntEnv("DB_PORT", 5432),
-		DBUser:     getEnv("DB_USER", "postgres"),
-		DBPassword: getEnv("DB_PASSWORD", ""),
-		DBName:     getEnv("DB_NAME", "authdb"),
+		DBHost:     utils.GetEnv("DB_HOST", "localhost"),
+		DBPort:     utils.GetIntEnv("DB_PORT", 5432),
+		DBUser:     utils.GetEnv("DB_USER", "postgres"),
+		DBPassword: utils.GetEnv("DB_PASSWORD", ""),
+		DBName:     utils.GetEnv("DB_NAME", "authdb"),
 		// Connection Pool
-		MaxIdleConns:    getIntEnv("MAX_IDLE_CONNS", 10),
-		MaxOpenConns:    getIntEnv("MAX_OPEN_CONNS", 100),
-		ConnMaxLifetime: time.Duration(getIntEnv("CONN_MAX_LIFETIME_MINUTES", 30)) * time.Minute,
-
+		MaxIdleConns:    utils.GetIntEnv("MAX_IDLE_CONNS", 10),
+		MaxOpenConns:    utils.GetIntEnv("MAX_OPEN_CONNS", 100),
+		ConnMaxLifetime: time.Duration(utils.GetIntEnv("CONN_MAX_LIFETIME_MINUTES", 30)) * time.Minute,
 		// App
-		GRPCHost: getEnv("GRPC_HOST", "0.0.0.0"),
-		GRPCPort: getIntEnv("GRPC_PORT", 50052),
-		HTTPPort: getIntEnv("HTTP_PORT", 8182),
+		GRPCHost: utils.GetEnv("GRPC_HOST", "localhost"),
+		GRPCPort: utils.GetIntEnv("GRPC_PORT", 50051),
+		HTTPPort: utils.GetIntEnv("HTTP_PORT", 8182),
 	}
-}
-
-func loadEnvFiles() {
-	envFiles := []string{".env.local", ".env"}
-
-	for _, envFile := range envFiles {
-		err := godotenv.Load(envFile)
-		if err == nil {
-			log.Printf("Loaded environment from: %s", envFile)
-			return
-		}
-	}
-
-	log.Println("No .env files found, using OS environment variables")
-}
-
-// Helper functions
-func getEnv(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
-}
-
-func getIntEnv(key string, defaultValue int) int {
-	if value := os.Getenv(key); value != "" {
-		if intVal, err := strconv.Atoi(value); err == nil {
-			return intVal
-		}
-	}
-	return defaultValue
 }

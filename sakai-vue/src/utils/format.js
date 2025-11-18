@@ -152,7 +152,21 @@ export function formatApiEndpoint(endpoint) {
     // Hide sensitive parts of the endpoint if needed
     return endpoint.replace('http://', '').replace('https://', '').replace('/api/v0', '');
 }
+/**
+ *
+ * @param {String} val
+ * @returns {Boolean}
+ */
 
+export function isObject(val) {
+    if (val !== null && typeof val === 'object' && !Array.isArray(val)) {
+        // console.log('searchTerm adalah objek');
+        return true;
+    } else {
+        // console.log('searchTerm bukan objek');
+        return false;
+    }
+}
 export default {
     formatBytes,
     formatDate,
@@ -163,5 +177,6 @@ export default {
     formatError,
     formatYesNo,
     formatNumber,
-    formatApiEndpoint
+    formatApiEndpoint,
+    isObject
 };

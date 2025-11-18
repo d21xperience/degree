@@ -19,7 +19,7 @@ type SekolahTenant struct {
 }
 
 type UserLoggedIn struct {
-	ID              uint64 `json:"id"`
+	ID              int64  `json:"id"`
 	SekolahTenantID uint32 `json:"sekolahTenantId"`
 	Username        string `json:"username"`
 	Email           string `json:"email"`
@@ -220,8 +220,8 @@ func (h *handlerHTTP) HandlerAuthMe() http.HandlerFunc {
 	}
 }
 
-func (h *handlerHTTP)HandlerSekolah() http.HandlerFunc{
+func (h *handlerHTTP) HandlerSekolah() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		
+
 	}
 }

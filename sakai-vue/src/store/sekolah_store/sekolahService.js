@@ -316,6 +316,10 @@ const actions = {
     },
 
     async fetchKategoriSekolah({ commit }, payload) {
+        console.log('payload fetchKategoriSekolah', payload);
+        if (!payload) {
+            return;
+        }
         try {
             const response = await api.get(`/ss/${payload.schemaname}/kategori-sekolah`, {
                 params: {

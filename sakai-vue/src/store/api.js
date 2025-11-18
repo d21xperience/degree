@@ -23,7 +23,7 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (res) => res,
     async (err) => {
-        // console.error('API Error:', err.response?.status, err.config?.url);
+        console.error('API Error:', err.response?.status, err.config?.url);
 
         const cfg = err.config || {};
         if (err.response?.status === 401 && !cfg._retry) {

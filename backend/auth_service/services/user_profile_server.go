@@ -110,7 +110,7 @@ func (s *UserProfileServiceServer) UpdateUserProfile(ctx context.Context, req *p
 	// profile.NamaIbu = req.UserProfile.NamaIbu
 
 	// Simpan perubahan ke database
-	userId := strconv.FormatUint(profile.UserID, 10)
+	userId := strconv.FormatInt(profile.UserID, 10)
 
 	err = s.repo.Update(ctx, profile, "public", "user_id", userId)
 	if err != nil {

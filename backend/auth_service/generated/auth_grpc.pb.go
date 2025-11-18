@@ -27,6 +27,8 @@ const (
 	AuthService_CreateUsers_FullMethodName             = "/auth.AuthService/CreateUsers"
 	AuthService_GetUsers_FullMethodName                = "/auth.AuthService/GetUsers"
 	AuthService_GenerateStudentUsername_FullMethodName = "/auth.AuthService/GenerateStudentUsername"
+	AuthService_PublicKey_FullMethodName               = "/auth.AuthService/PublicKey"
+	AuthService_Refresh_FullMethodName                 = "/auth.AuthService/Refresh"
 )
 
 // AuthServiceClient is the client API for AuthService service.
@@ -41,6 +43,8 @@ type AuthServiceClient interface {
 	CreateUsers(ctx context.Context, in *CreateUsersRequest, opts ...grpc.CallOption) (*CreateUsersResponse, error)
 	GetUsers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*GetUsersResponse, error)
 	GenerateStudentUsername(ctx context.Context, in *GenerateStudentUsernameRequest, opts ...grpc.CallOption) (*GenerateStudentUsernameResponse, error)
+	PublicKey(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*PublicKeyResponse, error)
+	Refresh(ctx context.Context, in *RefreshRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 }
 
 type authServiceClient struct {
@@ -131,6 +135,26 @@ func (c *authServiceClient) GenerateStudentUsername(ctx context.Context, in *Gen
 	return out, nil
 }
 
+func (c *authServiceClient) PublicKey(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*PublicKeyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PublicKeyResponse)
+	err := c.cc.Invoke(ctx, AuthService_PublicKey_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authServiceClient) Refresh(ctx context.Context, in *RefreshRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(LoginResponse)
+	err := c.cc.Invoke(ctx, AuthService_Refresh_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AuthServiceServer is the server API for AuthService service.
 // All implementations must embed UnimplementedAuthServiceServer
 // for forward compatibility.
@@ -143,6 +167,8 @@ type AuthServiceServer interface {
 	CreateUsers(context.Context, *CreateUsersRequest) (*CreateUsersResponse, error)
 	GetUsers(context.Context, *GetUsersRequest) (*GetUsersResponse, error)
 	GenerateStudentUsername(context.Context, *GenerateStudentUsernameRequest) (*GenerateStudentUsernameResponse, error)
+	PublicKey(context.Context, *Empty) (*PublicKeyResponse, error)
+	Refresh(context.Context, *RefreshRequest) (*LoginResponse, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -176,6 +202,12 @@ func (UnimplementedAuthServiceServer) GetUsers(context.Context, *GetUsersRequest
 }
 func (UnimplementedAuthServiceServer) GenerateStudentUsername(context.Context, *GenerateStudentUsernameRequest) (*GenerateStudentUsernameResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GenerateStudentUsername not implemented")
+}
+func (UnimplementedAuthServiceServer) PublicKey(context.Context, *Empty) (*PublicKeyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PublicKey not implemented")
+}
+func (UnimplementedAuthServiceServer) Refresh(context.Context, *RefreshRequest) (*LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Refresh not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
 func (UnimplementedAuthServiceServer) testEmbeddedByValue()                     {}
@@ -342,6 +374,42 @@ func _AuthService_GenerateStudentUsername_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AuthService_PublicKey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).PublicKey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_PublicKey_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).PublicKey(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AuthService_Refresh_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RefreshRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AuthServiceServer).Refresh(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AuthService_Refresh_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AuthServiceServer).Refresh(ctx, req.(*RefreshRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AuthService_ServiceDesc is the grpc.ServiceDesc for AuthService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -380,6 +448,14 @@ var AuthService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GenerateStudentUsername",
 			Handler:    _AuthService_GenerateStudentUsername_Handler,
+		},
+		{
+			MethodName: "PublicKey",
+			Handler:    _AuthService_PublicKey_Handler,
+		},
+		{
+			MethodName: "Refresh",
+			Handler:    _AuthService_Refresh_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

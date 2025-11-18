@@ -16,8 +16,16 @@ const dashboard = ref({
     }
 });
 onMounted(async () => {
-    dashboard.value = await fetchDashboard();
-    alert('hello');
+    try {
+        dashboard.value = await fetchDashboard();
+    } catch (error) {
+        alert(error);
+    } finally {
+        dashboard.value.data.countGuru = 0;
+        dashboard.value.data.countKelas = 0;
+        dashboard.value.data.countSiswa = 0;
+    }
+    // alert('hello');
 });
 </script>
 
@@ -26,7 +34,7 @@ onMounted(async () => {
         <div class="flex justify-between items-center">
             <div>
                 Selamat datang
-                <h3>{{ sekolah.sekolah.nama }}!</h3>
+                <!-- <h3>{{ sekolah.sekolah.nama }}!</h3> -->
             </div>
             <h4>T.A. {{ initSelectedSemester?.namaSemester }}</h4>
         </div>

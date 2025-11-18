@@ -24,8 +24,7 @@ export function useDashboard() {
 
             return response;
         } catch (error) {
-            console.error(error);
-            // throw new Error('Gagal medapatkan Dashboard:', error);
+            throw new Error('Gagal medapatkan nilai untuk Dashboard');
         }
     };
 

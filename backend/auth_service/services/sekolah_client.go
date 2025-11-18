@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"google.golang.org/grpc"
@@ -19,7 +18,8 @@ type SekolahServiceClient struct {
 }
 
 func NewSekolahServiceClient() (*SekolahServiceClient, error) {
-	sekolahClient := os.Getenv("GRPC_SEKOLAHURI")
+	utils.LoadEnvFiles()
+	sekolahClient := utils.GetEnv("GRPC_SEKOLAH_HOST", "localhost:50052")
 	conn, err := grpc.NewClient(sekolahClient, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, fmt.Errorf("gagal terhubung ke sekolah_service: %w", err)

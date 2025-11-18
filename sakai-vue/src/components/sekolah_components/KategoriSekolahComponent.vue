@@ -371,5 +371,6 @@ onMounted(async () => {
         <DialogConfirmDelete :message="messageDelete" v-model:visible="isDialogVisible.deleteKategoriSekolah" @confirm="deleteKategoriSekolah(selectedItemToDelete)" />
         <DialogConfirmDelete :message="messageDelete" v-model:visible="isDialogVisible.deleteKategoriKelas" @confirm="deleteKelas(selectedItemToDelete)" />
         <DialogConfirmDelete :message="messageDelete" v-model:visible="isDialogVisible.prosesKurikulum" @confirm="addProsesKurikulum(selectedItemToDelete)" />
+        <!-- <Dialog :visible="true">"hello"</Dialog> -->
     </div>
 </template>

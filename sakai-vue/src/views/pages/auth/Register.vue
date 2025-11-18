@@ -2,41 +2,35 @@
 import { ref } from 'vue';
 // import { useStore } from 'vuex';
 // const store = useStore();
+
 import SekolahComponent from '@/components/sekolah_components/SekolahComponent.vue';
-import router from '@/router';
+import { isObject } from '@/utils/format';
 import { useAuth } from '@/views/pages/auth/composables/auth';
 const { cekSekolahByNPSN, onRegisterAdmin } = useAuth();
 const email = ref('');
 const password = ref('');
 const loading = ref(false);
-// const sekolah = ref();
-// onMounted(() => {
-//     SekolahService.getSekolah().then((data) => (sekolah.value = data));
-// });
 
+const dialogInfo = ref(false);
+const errorDialog = ref(false);
+const errorInfo = ref();
 const statusSekolahTerdaftar = ref(false);
 const searchTerm = ref('');
-// const filteredsekolah = ref();
-// const search = (event) => {
-//     setTimeout(() => {
-//         if (!event.query.trim().length) {
-//             filteredsekolah.value = [...sekolah.value];
-//         } else {
-//             filteredsekolah.value = sekolah.value.filter((country) => country.nama_sekolah.toLowerCase().includes(event.query.toLowerCase()));
-//         }
-//     }, 250);
-// };
-// const handleKeydown = (event) => {
-//     if (event.key === ' ') {
-//         searchTerm.value += ' '; // Menambahkan spasi ke query
-//     }
-// };
 // const npsn = ref();
 // const error = ref();
-const cekSekolah = async () => {
-    // loading.value = true;
-    statusSekolahTerdaftar.value = cekSekolahByNPSN(searchTerm.value?.npsn);
+const resetSearchTerm = () => {
+    searchTerm.value = '';
+    dialogInfo.value = false;
 };
+
+const cekSekolah = async () => {
+    statusSekolahTerdaftar.value = await cekSekolahByNPSN(searchTerm.value?.npsn);
+    if (!statusSekolahTerdaftar.value) {
+        // console.log(statusSekolahTerdaftar.value);
+        dialogInfo.value = true;
+    }
+};
+
 // Fungsi handler submit form
 const handleSubmit = async () => {
     loading.value = true;
@@ -90,10 +84,6 @@ const handleSubmit = async () => {
 const formatValues = (obj) => {
     return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, String(value).trim()]));
 };
-
-const dialogInfo = ref(false);
-const errorDialog = ref(false);
-const errorInfo = ref();
 </script>
 
 <template>
@@ -116,7 +106,7 @@ const errorInfo = ref();
                                 <SekolahComponent v-model:modelValue="searchTerm" />
                             </div>
                             <div>
-                                <Button label="Cek" class="w-24" @click="cekSekolah" :loading="loading" :disabled="searchTerm.length <= 0"></Button>
+                                <Button label="Cek" class="w-24" @click="cekSekolah" :loading="loading" :disabled="!isObject(searchTerm)"></Button>
                             </div>
                         </div>
                     </div>
@@ -170,10 +160,11 @@ const errorInfo = ref();
     <Dialog v-model:visible="dialogInfo" :style="{ width: '450px' }" header="Warning" :modal="true" position="top">
         <div class="flex items-center gap-4">
             <i class="pi pi-exclamation-triangle !text-3xl" />
-            <span class="font-semibold">{{ searchTerm?.nama_sekolah }}</span> sudah terdaftar
+            <span class="font-semibold">{{ searchTerm?.nama_sekolah }}</span
+            >sudah terdaftar!!
         </div>
         <template #footer>
-            <Button label="Ok" icon="pi pi-times" @click="dialogInfo = false" severity="warn" />
+            <Button label="Ok" icon="pi pi-times" @click="resetSearchTerm" severity="warn" />
         </template>
     </Dialog>
 

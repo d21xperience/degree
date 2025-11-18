@@ -9,11 +9,11 @@ import (
 
 // var UploadService *services.UploadServiceServer
 
-func RunGRPCServer() *grpc.Server {
+func RunGRPCServer(pvKey string) *grpc.Server {
 	// gRPC Server
 	grpcServer := grpc.NewServer()
 	// Register gRPC services
-	authServiceServer := services.NewAuthServiceServer()
+	authServiceServer := services.NewAuthServiceServer(pvKey)
 	pb.RegisterAuthServiceServer(grpcServer, authServiceServer)
 
 	userProfileServiceServer := services.NewUserProfileServiceServer()

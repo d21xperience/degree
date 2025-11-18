@@ -3,7 +3,9 @@ package utils
 import (
 	"encoding/hex"
 	"net/http"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -51,4 +53,28 @@ func GenerateRefreshToken(randRead func([]byte) (int, error)) (string, error) {
 		return "", err
 	}
 	return hex.EncodeToString(bytes), nil
+}
+
+func LoadPrivateKey(path string) (any, error) {
+	b, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	priv, err := jwt.ParseRSAPrivateKeyFromPEM(b)
+	if err != nil {
+		return nil, err
+	}
+	return priv, nil
+}
+
+func GenerateTokenRS256(priv any, userID int64) (string, int64, error) {
+	now := time.Now().UTC()
+	exp := now.Add(2 * time.Hour)
+	claims := jwt.MapClaims{
+		"user_id": userID,
+		"exp":     exp.Unix(),
+	}
+	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	s, err := t.SignedString(priv)
+	return s, exp.Unix(), err
 }

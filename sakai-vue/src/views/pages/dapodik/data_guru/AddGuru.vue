@@ -7,7 +7,7 @@ import { onMounted, ref, watch } from 'vue';
 // composable
 import { useFormOptions } from '@/composables/useFormOptions';
 // ================================
-const { fetchGelarAkademik, selectedGelarAkademikDepan, selectedGelarAkademikBelakang, searchGelar, gelarAkademikDepanOptions, gelarAkademikBelakangOptions } = useFormOptions();
+const { fetchGelarAkademik, selectedGelarAkademikDepan, selectedGelarAkademikBelakang } = useFormOptions();
 
 import AgamaComponent from '@/components/general/AgamaComponent.vue';
 import JKComponent from '@/components/general/JKComponent.vue';
@@ -230,7 +230,7 @@ const tambahPTKTerdaftar = () => {};
                         </div>
                     </div>
                 </div>
-                <div class="row-span-5 col-start-2 row-start-1">6</div>
+                <!-- <div class="row-span-5 col-start-2 row-start-1">6</div> -->
             </div>
 
             <div class="grid grid-cols-2 grid-rows-5 gap-2 mt-2">

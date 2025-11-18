@@ -26,7 +26,7 @@ export function useAuth() {
         if (isEmail(username)) {
             loginIdentifier = 'email';
         } else if (!isValidUsername(username)) {
-            alert('Username atau email tidak valid.');
+            alert('Username atau email tidak boleh kosong.');
             return;
         }
         try {
@@ -38,11 +38,11 @@ export function useAuth() {
 
             if (response.status) {
                 if (response.userRole != 'superadmin') {
-                    await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
-                    await fetchSekolah();
-                    // Ambil tahun ajaran
-                    await store.dispatch('semesterService/fetchTahunAjaran');
-                    await store.dispatch('semesterService/fetchSemester');
+                    // await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
+                    // await fetchSekolah();
+                    // // Ambil tahun ajaran
+                    // await store.dispatch('semesterService/fetchTahunAjaran');
+                    // await store.dispatch('semesterService/fetchSemester');
 
                     const namaSekolah = response?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
                     await router.push({ name: 'dashboard', params: { sekolah: namaSekolah } });
@@ -51,10 +51,11 @@ export function useAuth() {
                 }
             }
         } catch (error) {
+            // throw new Error('Gagal login, periksa kembali user dan password anda');
             console.error('Login gagal:', error);
             alert('Login gagal. Silakan periksa kembali informasi Anda.');
-            store.dispatch('authService/logout');
-            return; // pastikan keluar supaya finally tidak berjalan seolah login sukses
+            // store.dispatch('authService/logout');
+            // return; // pastikan keluar supaya finally tidak berjalan seolah login sukses
         }
     };
 
@@ -70,10 +71,11 @@ export function useAuth() {
     const cekSekolahByNPSN = async (npsn) => {
         try {
             const response = await store.dispatch('authService/ceknpsn', npsn);
+            console.log(response);
             if (response.status) {
-                return response;
+                return false;
             }
-            return false;
+            return true;
         } catch (e) {
             console.log(e);
             return true;

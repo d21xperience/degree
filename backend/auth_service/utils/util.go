@@ -308,7 +308,7 @@ func IsEmail(input string) bool {
 
 // customClaims bisa kamu tambah field lain (role, tenant‑id, dsb.)
 type customClaims struct {
-	UserID uint64 //`json:"uid"`
+	UserID int64  //`json:"uid"`
 	Role   string `json:"role,omitempty"`
 	jwt.RegisteredClaims
 }
@@ -325,7 +325,7 @@ func GenerateJWT(user *models.User, ttl time.Duration) (string, error) {
 		UserID: user.ID,
 		Role:   user.Role,
 		RegisteredClaims: jwt.RegisteredClaims{
-			Subject:   strconv.FormatUint(user.ID, 10),
+			Subject:   strconv.FormatInt(user.ID, 10),
 			IssuedAt:  jwt.NewNumericDate(now),
 			ExpiresAt: jwt.NewNumericDate(now.Add(ttl)),
 			Issuer:    "auth_service",

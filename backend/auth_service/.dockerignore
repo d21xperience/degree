@@ -1,0 +1,101 @@
+# ======================
+# GOLANG SPECIFIC
+# ======================
+
+# Binary dan cache Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+pkg/
+
+# Test binaries
+*.test
+*.out
+
+# Go workspace files
+go.work
+go.work.sum
+
+# Dependency cache (akan di-download ulang)
+vendor/  # Jika tidak menggunakan vendor
+
+# ======================
+# DEVELOPMENT FILES
+# ======================
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE dan editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ======================
+# PROJECT FILES YANG TIDAK DIPERLUKAN
+# ======================
+
+# Documentation
+README.md
+DOCS/
+docs/
+*.txt
+
+# Log files
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+
+# Backup files
+*.bak
+*.backup
+
+# ======================
+# VERSION CONTROL
+# ======================
+.git/
+.gitignore
+.github/
+
+# ======================
+# DOCKER FILES
+# ======================
+Dockerfile
+docker-compose.yml
+docker-compose.*.yml
+.docker/
+
+# ======================
+# SPECIFIC TOOLS
+# ======================
+
+# Air untuk hot reload (development only)
+air.toml
+.air.toml
+
+# Coverage files
+coverage.txt
+coverage.out
+
+# Profiling data
+*.prof
+*.trace

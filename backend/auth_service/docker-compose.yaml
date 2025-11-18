@@ -41,6 +41,12 @@ services:
       # - GRPC_HOST=0.0.0.0
       - GRPC_PORT=50051
       - HTTP_PORT=8182
+      - GRPC_SEKOLAH_HOST="sekolah_service:50052"
+      - GRPC_SC_HOST="sc_service:50053"
+      - SMTP_HOST=smtp.gmail.com
+      - SMTP_PORT=587
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
     ports:
       - "8182:8182"
       - "50051:50051"
