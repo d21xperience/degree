@@ -1,7 +1,6 @@
 package server
 
 import (
-	"auth_service/handler"
 	"auth_service/middleware"
 	"auth_service/utils"
 	"context"
@@ -22,7 +21,7 @@ func StartGRPCServer() {
 	utils.LoadEnvFiles()
 	gRPCPort := utils.GetIntEnv("GRPC_PORT", 50051)
 	httpPort := utils.GetIntEnv("HTTP_PORT", 8182)
-	frontend := utils.GetEnv("FRONTEND", "http://localhost:3000")
+	// frontend := utils.GetEnv("FRONTEND", "http://localhost:3000")
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -48,41 +47,41 @@ func StartGRPCServer() {
 	mux := runtime.NewServeMux()
 
 	// Daftarkan handler custom HTTP (bukan gRPC)
-	handlerHTTP := handler.NewHandlerHttp()
-	loginHandler := handlerHTTP.HandlerLoginHTTP()
-	refreshHandler := handlerHTTP.HandlerRefreshToken()
-	// logoutHandler := handlerHTTP.HandlerLogout()
-	authMeHandler := handlerHTTP.HandlerAuthMe()
+	// handlerHTTP := handler.NewHandlerHttp()
+	// loginHandler := handlerHTTP.HandlerLoginHTTP()
+	// refreshHandler := handlerHTTP.HandlerRefreshToken()
+	// // logoutHandler := handlerHTTP.HandlerLogout()
+	// authMeHandler := handlerHTTP.HandlerAuthMe()
 
-	// === Manual route (non gRPC Gateway) ===
-	method, pattern := utils.CreatePattern("POST", "api", "v1", "as", "auth", "web", "login")
-	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-		loginHandler(w, r)
-	})
-
-	// method, pattern = utils.CreatePattern("POST", "api", "v1", "as", "auth", "web", "logout")
+	// // === Manual route (non gRPC Gateway) ===
+	// method, pattern := utils.CreatePattern("POST", "api", "v1", "as", "auth", "web", "login")
 	// mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-	// 	logoutHandler(w, r)
+	// 	loginHandler(w, r)
 	// })
 
-	method, pattern = utils.CreatePattern("POST", "api", "v1", "as", "auth", "web", "refresh")
-	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-		refreshHandler(w, r)
-	})
+	// // method, pattern = utils.CreatePattern("POST", "api", "v1", "as", "auth", "web", "logout")
+	// // mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+	// // 	logoutHandler(w, r)
+	// // })
 
-	method, pattern = utils.CreatePattern("GET", "api", "v1", "as", "auth", "web", "me")
-	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-		authMeHandler(w, r)
-	})
+	// method, pattern = utils.CreatePattern("POST", "api", "v1", "as", "auth", "web", "refresh")
+	// mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+	// 	refreshHandler(w, r)
+	// })
+
+	// method, pattern = utils.CreatePattern("GET", "api", "v1", "as", "auth", "web", "me")
+	// mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+	// 	authMeHandler(w, r)
+	// })
 
 	// Middleware Chain
 	combinedHandler := middleware.Chain(
 		mux,
-		middleware.SecureHeaders,
-		middleware.Logging,
-		middleware.RateLimit(5, 10),
-		middleware.JWTAuthMiddleware, // hanya untuk /auth/*
-		middleware.CORS(frontend),
+		// middleware.SecureHeaders,
+		// middleware.Logging,
+		// middleware.RateLimit(5, 10),
+		// middleware.JWTAuthMiddleware, // hanya untuk /auth/*
+		// middleware.CORS(frontend),
 	)
 
 	httpListener, err := net.Listen("tcp", fmt.Sprintf(":%d", httpPort))

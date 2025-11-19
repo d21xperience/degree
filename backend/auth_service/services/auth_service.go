@@ -7,9 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"gorm.io/gorm"
 )
 
@@ -18,7 +16,7 @@ type AuthService interface {
 	Register(user *models.User) error
 	RegisterAdmin(user *models.User) error
 	Login(username, password string) (*models.User, error)
-	GenerateToken(userID int, role string) (string, error)
+	// GenerateToken(userID int, role string) (string, error)
 	GetUserByID(userId int64) (*models.User, error)
 	// SetAuthCookies(w http.ResponseWriter, accessToken, refreshToken string)
 	// ClearAuthCookies(w http.ResponseWriter)
@@ -26,12 +24,12 @@ type AuthService interface {
 
 // AuthServiceImpl is the implementation of AuthService
 type authServiceImpl struct {
-	repo      repositories.UserRepository
-	secretKey any
+	repo repositories.UserRepository
+	// secretKey any
 }
 
-func NewAuthService(as repositories.UserRepository, pvKey any) AuthService {
-	return &authServiceImpl{repo: as, secretKey: pvKey}
+func NewAuthService(as repositories.UserRepository) AuthService {
+	return &authServiceImpl{repo: as}
 }
 
 // IsAdminExists cek apakah admin sudah adah ada pada sekolah
@@ -153,16 +151,16 @@ func (s *authServiceImpl) Login(identifier, password string) (*models.User, erro
 	return user, nil
 }
 
-func (as *authServiceImpl) GenerateToken(userID int, role string) (string, error) {
-	claims := jwt.MapClaims{
-		"userID": userID,
-		"role":   role,
-		"exp":    time.Now().Add(24 * time.Hour).Unix(),
-	}
+// func (as *authServiceImpl) GenerateToken(userID int, role string) (string, error) {
+// 	claims := jwt.MapClaims{
+// 		"userID": userID,
+// 		"role":   role,
+// 		"exp":    time.Now().Add(24 * time.Hour).Unix(),
+// 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(as.secretKey))
-}
+// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+// 	return token.SignedString([]byte(as.secretKey))
+// }
 
 func (s *authServiceImpl) GetUserByID(userId int64) (*models.User, error) {
 	cekUser, err := s.repo.FindByID(strconv.FormatInt(userId, 10))

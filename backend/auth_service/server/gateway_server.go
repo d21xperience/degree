@@ -34,9 +34,4 @@ func RunHTTPGateway(ctx context.Context, gatewayMux *runtime.ServeMux, grpcServe
 		log.Fatalf("Failed to register User profile service gRPC Gateway: %v", err)
 	}
 
-	err = pb.RegisterSekolahIndonesiaServiceHandlerFromEndpoint(ctx, gatewayMux, grpcServerEndpoint, opts)
-	if err != nil {
-		log.Fatalf("Failed to register User profile service gRPC Gateway: %v", err)
-	}
-
 }

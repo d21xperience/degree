@@ -9,17 +9,23 @@ import (
 
 // var UploadService *services.UploadServiceServer
 
-func RunGRPCServer(pvKey string) *grpc.Server {
+func RunGRPCServer(pvKey any) *grpc.Server {
 	// gRPC Server
 	grpcServer := grpc.NewServer()
 	// Register gRPC services
 	authServiceServer := services.NewAuthServiceServer(pvKey)
 	pb.RegisterAuthServiceServer(grpcServer, authServiceServer)
 
+	// User
+	userServiceServer := services.NewUserUserServiceServer()
+	pb.RegisterUserServiceServer(grpcServer, userServiceServer)
+
+	// User Profile
 	userProfileServiceServer := services.NewUserProfileServiceServer()
 	pb.RegisterUserProfileServiceServer(grpcServer, userProfileServiceServer)
-	sekolahIndonesiaServer := services.NewSekolahIndonesiaServer()
-	pb.RegisterSekolahIndonesiaServiceServer(grpcServer, sekolahIndonesiaServer)
+
+	// sekolahIndonesiaServer := services.NewSekolahIndonesiaServer()
+	// pb.RegisterSekolahServiceServer(grpcServer, sekolahIndonesiaServer)
 
 	return grpcServer
 }

@@ -65,7 +65,7 @@ func (r *GenericRepository[T]) Save(ctx context.Context, entity *T, schemaName s
 	})
 }
 
-func (r *GenericRepository[T]) FindByID(ctx context.Context, id string, schemaName, idColumn string) (*T, error) {
+func (r *GenericRepository[T]) FindByID(ctx context.Context, id int64, schemaName, idColumn string) (*T, error) {
 	var entity T
 	if err := r.db.WithContext(ctx).Exec(fmt.Sprintf("SET search_path TO %s", strings.ToLower(schemaName))).Error; err != nil {
 		return nil, fmt.Errorf("failed to set schema: %w", err)
