@@ -3,7 +3,7 @@ package models
 import "time"
 
 type SekolahTenant struct {
-	ID            uint32     `gorm:"primaryKey;autoIncrement;column:id"`
+	ID            int32      `gorm:"primaryKey;autoIncrement;column:id"`
 	SekolahID     *string    `gorm:"column:sekolah_id"`
 	NamaSekolah   string     `gorm:"column:nama_sekolah;not null"`
 	NPSN          string     `gorm:"column:npsn;size:8;uniqueIndex:uni_sekolahs_npsn"`

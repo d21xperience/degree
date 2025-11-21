@@ -1,6 +1,6 @@
 <template>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 507.83 470.86">
-        <defs></defs>
+        <defs />
         <title>metamask</title>
         <polygon class="a" points="482.09 0.5 284.32 147.38 320.9 60.72 482.09 0.5" />
         <polygon class="b" points="25.54 0.5 221.72 148.77 186.93 60.72 25.54 0.5" />

@@ -126,7 +126,7 @@ const subscribe = () => {
                 <h2 class="text-2xl font-bold text-gray-800 mb-2">Subscribe to our Newsletter</h2>
                 <p class="text-gray-600 mb-6">Get the latest articles and news delivered to your inbox.</p>
                 <div class="flex flex-col sm:flex-row gap-2">
-                    <input type="email" placeholder="Enter your email" class="flex-grow px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" v-model="email" />
+                    <input v-model="email" type="email" placeholder="Enter your email" class="flex-grow px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
                     <button class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition" @click="subscribe">Subscribe</button>
                 </div>
             </div>

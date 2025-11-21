@@ -1,7 +1,7 @@
 package server
 
 import (
-	"auth_service/middleware"
+	"auth_service/jwks"
 	"auth_service/utils"
 	"context"
 	"fmt"
@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"sync"
 	"syscall"
 	"time"
@@ -35,6 +36,10 @@ func StartGRPCServer() {
 	if err != nil {
 		log.Fatal("failed load private key:", err)
 	}
+	pub, kid, err := jwks.ParseKeyFile(os.Getenv("JWT_PRIVATE_PATH"))
+	if err != nil {
+		panic(err)
+	}
 	// Jalankan gRPC server
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", gRPCPort))
 	if err != nil {
@@ -44,45 +49,9 @@ func StartGRPCServer() {
 	// =========================================================
 
 	// Inisialisasi HTTP mux (gRPC-Gateway)
-	mux := runtime.NewServeMux()
-
-	// Daftarkan handler custom HTTP (bukan gRPC)
-	// handlerHTTP := handler.NewHandlerHttp()
-	// loginHandler := handlerHTTP.HandlerLoginHTTP()
-	// refreshHandler := handlerHTTP.HandlerRefreshToken()
-	// // logoutHandler := handlerHTTP.HandlerLogout()
-	// authMeHandler := handlerHTTP.HandlerAuthMe()
-
-	// // === Manual route (non gRPC Gateway) ===
-	// method, pattern := utils.CreatePattern("POST", "api", "v1", "as", "auth", "web", "login")
-	// mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-	// 	loginHandler(w, r)
-	// })
-
-	// // method, pattern = utils.CreatePattern("POST", "api", "v1", "as", "auth", "web", "logout")
-	// // mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-	// // 	logoutHandler(w, r)
-	// // })
-
-	// method, pattern = utils.CreatePattern("POST", "api", "v1", "as", "auth", "web", "refresh")
-	// mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-	// 	refreshHandler(w, r)
-	// })
-
-	// method, pattern = utils.CreatePattern("GET", "api", "v1", "as", "auth", "web", "me")
-	// mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
-	// 	authMeHandler(w, r)
-	// })
-
-	// Middleware Chain
-	combinedHandler := middleware.Chain(
-		mux,
-		// middleware.SecureHeaders,
-		// middleware.Logging,
-		// middleware.RateLimit(5, 10),
-		// middleware.JWTAuthMiddleware, // hanya untuk /auth/*
-		// middleware.CORS(frontend),
-	)
+	gwmux := runtime.NewServeMux()
+	method, pattern := createPattern("GET", ".well-known", "jwks.json")
+	gwmux.Handle(method, pattern, jwks.JWKSHandler(pub, kid))
 
 	httpListener, err := net.Listen("tcp", fmt.Sprintf(":%d", httpPort))
 	if err != nil {
@@ -106,12 +75,12 @@ func StartGRPCServer() {
 	// =========================================================
 	// Daftarkan gRPC-Gateway (otomatis)
 	grpcServerEndpoint := fmt.Sprintf("%s:%d", "localhost", gRPCPort)
-	RunHTTPGateway(ctx, mux, grpcServerEndpoint, fmt.Sprintf("%d", httpPort))
+	RunHTTPGateway(ctx, gwmux, grpcServerEndpoint, fmt.Sprintf("%d", httpPort))
 	// =========================================================
 	go func() {
 		defer wg.Done()
 		log.Printf("🌐 HTTP Gateway running on :%d", httpPort)
-		if err := http.Serve(httpListener, combinedHandler); err != nil {
+		if err := http.Serve(httpListener, gwmux); err != nil {
 			log.Fatalf("Failed to serve HTTP Gateway: %v", err)
 		}
 	}()
@@ -129,4 +98,29 @@ func StartGRPCServer() {
 
 	wg.Wait()
 	log.Println("✅ Server shutdown complete")
+}
+
+func CustomHeaderMatcher(header string) (string, bool) {
+	switch strings.ToLower(header) {
+	case "authorization":
+		return header, true
+	default:
+		return header, false
+	}
+}
+
+func createPattern(method string, pathSegments ...string) (string, runtime.Pattern) {
+	pattern := runtime.MustPattern(
+		runtime.NewPattern(1, generatePatternIndexes(len(pathSegments)), pathSegments, ""),
+	)
+	return method, pattern
+}
+
+// generatePatternIndexes membantu membuat pola angka yang sesuai dengan jumlah segment
+func generatePatternIndexes(segmentCount int) []int {
+	indexes := []int{}
+	for i := 0; i < segmentCount; i++ {
+		indexes = append(indexes, 2, i)
+	}
+	return indexes
 }

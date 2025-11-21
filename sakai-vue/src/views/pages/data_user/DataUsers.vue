@@ -1,18 +1,16 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 // STORE
 import { useStore } from 'vuex';
 const store = useStore();
 // ===========================
 // ========================
 // PRIMEVUE
-import Toolbar from 'primevue/toolbar';
-import Button from 'primevue/button';
 import Select from 'primevue/select';
-import Dialog from 'primevue/dialog';
-import Tabs from 'primevue/tabs';
-import TabList from 'primevue/tablist';
 import Tab from 'primevue/tab';
+import TabList from 'primevue/tablist';
+import Tabs from 'primevue/tabs';
+import Toolbar from 'primevue/toolbar';
 // ========================
 const items = ref([
     // { route: { name: 'usersAdmin' }, label: 'Administrator', icon: 'pi pi-users' },
@@ -25,6 +23,9 @@ const items = ref([
 // =======SEMESTER=============
 const selectedSemester = ref(null);
 const semester = ref(null);
+onMounted(() => {
+    fetchSemester();
+});
 const fetchSemester = async () => {
     try {
         semester.value = await store.getters['sekolahService/getSemester'];
@@ -44,9 +45,7 @@ const fetchSemester = async () => {
 watch(selectedSemester, () => {
     store.commit('sekolahService/SET_SELECTEDSEMESTER', selectedSemester.value);
 });
-onMounted(() => {
-    fetchSemester();
-});
+
 // ==================================
 </script>
 
@@ -57,7 +56,7 @@ onMounted(() => {
                 <h2 class="text-xl mb-2 font-bold">Data Users</h2>
             </template>
             <template #end>
-                <Select v-model="selectedSemester" :options="semester" optionLabel="namaSemester" placeholder="Tahun Pelajaran" class="w-full md:w-52 mr-2" />
+                <Select v-model="selectedSemester" :options="semester" option-label="namaSemester" placeholder="Tahun Pelajaran" class="w-full md:w-52 mr-2" />
             </template>
         </Toolbar>
         <div class="card">
@@ -65,8 +64,8 @@ onMounted(() => {
                 <TabList>
                     <Tab v-for="(tab, index) in items" :key="index" :value="tab.value">
                         <router-link v-if="tab.route" v-slot="{ href, navigate }" :to="tab.route" custom>
-                            <a v-ripple :href="href" @click="navigate" class="flex items-center gap-2 text-inherit">
-                                <i :class="tab.icon" />
+                            <a v-ripple :href="href" class="flex items-center gap-2 text-inherit" @click="navigate">
+                                <i :class="tab.icon"></i>
                                 <span>{{ tab.label }}</span>
                             </a>
                         </router-link>
@@ -74,7 +73,7 @@ onMounted(() => {
                 </TabList>
             </Tabs>
         </div>
-        <router-view></router-view>
+        <router-view />
     </div>
 </template>
 

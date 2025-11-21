@@ -5,10 +5,14 @@ export function useSekolah() {
     const store = useStore();
     const { schemaname } = useTableTenant();
     const sekolah = computed(() => {
-        const tes = store.getters['sekolahService/getSekolah'];
-        const response = tes;
-        response.uri = response?.sekolah.nama.toLowerCase().replace(/\s+/g, '');
-        return response;
+        try {
+            const tes = store.getters['sekolahService/getSekolah'];
+            const response = tes;
+            response.uri = response?.sekolah.nama.toLowerCase().replace(/\s+/g, '');
+            return response;
+        } catch (error) {
+            return null;
+        }
     });
 
     const fetchSekolah = async () => {

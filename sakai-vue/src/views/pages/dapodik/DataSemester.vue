@@ -229,26 +229,26 @@ onMounted(async () => {
             <template #start>
                 <div>
                     <Button
+                        v-tooltip.bottom="'Tambah Semester'"
                         icon="pi pi-plus"
                         severity="success"
                         class="mr-2 text-lg"
-                        @click="isAddSemester = true"
-                        v-tooltip.bottom="'Tambah Semester'"
                         :disabled="selectedSemester && !(Array.isArray(selectedSemester) && selectedSemester.length === 0)"
+                        @click="isAddSemester = true"
                     />
 
-                    <Button icon="pi pi-pencil" severity="warn" @click="editDialog" :disabled="!selectedSemester || !selectedSemester.length || selectedSemester.length > 1" class="mr-2" v-tooltip.bottom="'Edit Semester'" />
-                    <Button icon="pi pi-trash" severity="danger" class="mr-2 text-lg" @click="isDeleteDialog = true" :disabled="!selectedSemester || !selectedSemester.length" v-tooltip.bottom="'Hapus Semester'" />
+                    <Button v-tooltip.bottom="'Edit Semester'" icon="pi pi-pencil" severity="warn" :disabled="!selectedSemester || !selectedSemester.length || selectedSemester.length > 1" class="mr-2" @click="editDialog" />
+                    <Button v-tooltip.bottom="'Hapus Semester'" icon="pi pi-trash" severity="danger" class="mr-2 text-lg" :disabled="!selectedSemester || !selectedSemester.length" @click="isDeleteDialog = true" />
                 </div>
             </template>
             <template #end>
                 <IconField class="mr-2">
                     <InputIcon>
-                        <i class="pi pi-search" />
+                        <i class="pi pi-search"></i>
                     </InputIcon>
                     <InputText v-model="filters['global'].value" placeholder="Search..." :disabled="Array.isArray(semesterList) && semesterList.length === 0" />
                 </IconField>
-                <Button icon="pi pi-refresh" severity="help" class="mr-2 text-lg" @click="initial" v-tooltip.bottom="'Refresh'" />
+                <Button v-tooltip.bottom="'Refresh'" icon="pi pi-refresh" severity="help" class="mr-2 text-lg" @click="initial" />
             </template>
         </Toolbar>
         <div v-if="!semesterList || (Array.isArray(semesterList) && semesterList.length === 0)">
@@ -260,21 +260,21 @@ onMounted(async () => {
             v-else
             ref="dt"
             v-model:selection="selectedSemester"
-            stripedRows
+            striped-rows
             size="small"
             :value="semesterList"
-            dataKey="semesterId"
+            data-key="semesterId"
             :paginator="true"
             :rows="10"
             :filters="filters"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rowsPerPageOptions="[10, 20, 50]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Semester"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rows-per-page-options="[10, 20, 50]"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} Semester"
         >
-            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-            <Column field="namaSemester" header="Nama"> </Column>
-            <Column field="tahunAjaranId" header="Tahun Ajaran" sortable> </Column>
-            <Column field="semester" header="Semester"> </Column>
+            <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
+            <Column field="namaSemester" header="Nama" />
+            <Column field="tahunAjaranId" header="Tahun Ajaran" sortable />
+            <Column field="semester" header="Semester" />
             <Column field="tanggalMulai" header="Tanggal Mulai">
                 <template #body="slotProps">
                     {{ formatterDateID(slotProps.data.tanggalMulai) }}
@@ -289,7 +289,7 @@ onMounted(async () => {
             </Column>
             <Column field="periodeAktif" header="Status">
                 <template #body="slotProps">
-                    <ToggleButton :modelValue="getActive(slotProps.data.periodeAktif)" @update:modelValue="setActive(slotProps.data, $event)" class="w-24" onLabel="On" offLabel="Off" />
+                    <ToggleButton :model-value="getActive(slotProps.data.periodeAktif)" class="w-24" on-label="On" off-label="Off" @update:model-value="setActive(slotProps.data, $event)" />
                 </template>
             </Column>
             <!-- <Column header="Selected"></Column> -->
@@ -300,27 +300,27 @@ onMounted(async () => {
             <div class="grid gap-y-2">
                 <div>
                     <label for="thn-ajaran">Tahun Ajaran</label>
-                    <DatePicker v-model="semester.tahunAjaranId" view="year" dateFormat="yy" :inline="false" fluid @update:modelValue="onTahunAjaranChange" />
+                    <DatePicker v-model="semester.tahunAjaranId" view="year" date-format="yy" :inline="false" fluid @update:model-value="onTahunAjaranChange" />
                 </div>
                 <div v-if="isEdit == true" class="grid gap-y-2">
-                    <div class="" v-show="isEdit == true">
+                    <div v-show="isEdit == true" class="">
                         <label for="mata-pelajaran">Nama </label>
-                        <InputText fluid v-model="semester.namaSemester" />
+                        <InputText v-model="semester.namaSemester" fluid />
                         <!-- <small v-if="submitted && !selectedMapel" class="text-red-500">Subject is required.</small> -->
                     </div>
                     <div>
                         <label for="mata-pelajaran">Semester</label>
-                        <InputNumber fluid :min="1" :max="2" v-model="semester.semester" />
+                        <InputNumber v-model="semester.semester" fluid :min="1" :max="2" />
                         <!-- <small v-if="submitted && !selectedSemester" class="text-red-500">Teacher is required.</small> -->
                     </div>
                     <div>
                         <label for="tgl-mulai">Tanggal Mulai</label>
-                        <DatePicker v-model="semester.tanggalMulai" showIcon iconDisplay="input" class="block" fluid dateFormat="dd-mm-yy" :invalid="submitted && !semester.tanggalMulai" />
+                        <DatePicker v-model="semester.tanggalMulai" show-icon icon-display="input" class="block" fluid date-format="dd-mm-yy" :invalid="submitted && !semester.tanggalMulai" />
                         <small v-if="submitted && !semester.tanggalMulai" class="text-red-500">Tanggal mulai harus diisi.</small>
                     </div>
                     <div>
                         <label for="tgl-mulai">Tanggal Selesai</label>
-                        <DatePicker v-model="semester.tanggalSelesai" showIcon iconDisplay="input" class="block" fluid dateFormat="dd-mm-yy" :invalid="submitted && !semester.tanggalSelesai" />
+                        <DatePicker v-model="semester.tanggalSelesai" show-icon icon-display="input" class="block" fluid date-format="dd-mm-yy" :invalid="submitted && !semester.tanggalSelesai" />
                         <small v-if="submitted && !semester.tanggalSelesai" class="text-red-500">Tanggal selesai harus diisi.</small>
                     </div>
                 </div>
@@ -328,22 +328,22 @@ onMounted(async () => {
                     <div class="flex space-x-2">
                         <div class="w-full">
                             Semester
-                            <Select :options="semesterOptions" optionLabel="label" optionValue="value" fluid :disabled="isTahunAjaranAvailable" v-model:modelValue="semester.semester" />
+                            <Select v-model:modelValue="semester.semester" :options="semesterOptions" option-label="label" option-value="value" fluid :disabled="isTahunAjaranAvailable" />
                         </div>
                         <div class="w-full">
                             Nama
-                            <InputText fluid :disabled="isTahunAjaranAvailable" v-model:modelValue="semester.namaSemester" />
+                            <InputText v-model:modelValue="semester.namaSemester" fluid :disabled="isTahunAjaranAvailable" />
                         </div>
                     </div>
                     <div class="flex space-x-2">
                         <div>
                             <label for="tgl-mulai">Tanggal Mulai</label>
-                            <DatePicker v-model="semester.tanggalMulai" showIcon iconDisplay="input" class="block" fluid dateFormat="dd-mm-yy" :invalid="submitted && !semester.tanggalMulai" :disabled="isTahunAjaranAvailable" />
+                            <DatePicker v-model="semester.tanggalMulai" show-icon icon-display="input" class="block" fluid date-format="dd-mm-yy" :invalid="submitted && !semester.tanggalMulai" :disabled="isTahunAjaranAvailable" />
                             <small v-if="submitted && !semester.tanggalMulai" class="text-red-500">Tanggal mulai harus diisi.</small>
                         </div>
                         <div>
                             <label for="tgl-mulai">Tanggal Selesai</label>
-                            <DatePicker v-model="semester.tanggalSelesai" showIcon iconDisplay="input" class="block" fluid dateFormat="dd-mm-yy" :invalid="submitted && !semester.tanggalSelesai" :disabled="isTahunAjaranAvailable" />
+                            <DatePicker v-model="semester.tanggalSelesai" show-icon icon-display="input" class="block" fluid date-format="dd-mm-yy" :invalid="submitted && !semester.tanggalSelesai" :disabled="isTahunAjaranAvailable" />
                             <small v-if="submitted && !semester.tanggalSelesai" class="text-red-500">Tanggal selesai harus diisi.</small>
                         </div>
                     </div>
@@ -355,6 +355,6 @@ onMounted(async () => {
             </template>
         </Dialog>
 
-        <DialogConfirmDelete message="data ini akan dihapus?" v-model:visible="isDeleteDialog" @confirm="handleDeleteSemester" @closeDialog="handleCloseDialog" judul="Hapus semester" />
+        <DialogConfirmDelete v-model:visible="isDeleteDialog" message="data ini akan dihapus?" judul="Hapus semester" @confirm="handleDeleteSemester" @close-dialog="handleCloseDialog" />
     </div>
 </template>

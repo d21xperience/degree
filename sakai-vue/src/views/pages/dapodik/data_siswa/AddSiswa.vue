@@ -108,7 +108,7 @@ onMounted(async () => {
     <div class="">
         <div class="flex justify-between items-center mb-1">
             <h1 class="text-2xl font-bold mb-2">{{ isEdit ? 'Form Edit Siswa' : 'Form Tambah Siswa' }}</h1>
-            <Button icon="pi pi-times" severity="danger" @click="batal" :loading="isLoadingBatal" rounded size="small" />
+            <Button icon="pi pi-times" severity="danger" :loading="isLoadingBatal" rounded size="small" @click="batal" />
         </div>
 
         <section class="mb-8">
@@ -116,7 +116,7 @@ onMounted(async () => {
             <div class="md:grid grid-cols-2 grid-rows-5 gap-x-4 gap-y-2">
                 <div>
                     <label class="block text-gray-700" for="nmSiswa">Nama Lengkap</label>
-                    <InputText v-model="pesertaDidik.nmSiswa" fluid name="nmSiswa" id="nmSiswa" placeholder="Masukan nama" :invalid="submitted && pesertaDidik.nmSiswa.trim().length == 0" />
+                    <InputText id="nmSiswa" v-model="pesertaDidik.nmSiswa" fluid name="nmSiswa" placeholder="Masukan nama" :invalid="submitted && pesertaDidik.nmSiswa.trim().length == 0" />
                     <small v-if="submitted && pesertaDidik.nmSiswa.trim().length == 0" class="text-red-500">Nama harus diisi.</small>
                 </div>
                 <div class="col-start-1 row-start-2">
@@ -127,7 +127,7 @@ onMounted(async () => {
                 <div class="col-start-1 row-start-3">
                     <div class="">
                         <label class="block text-gray-700" for="tempatLahir">Tempat Lahir</label>
-                        <InputText v-model="pesertaDidik.tempatLahir" fluid name="tempatLahir" id="tempatLahir" placeholder="Masukan tempat lahir" class="w-full md:w-64" :invalid="submitted && pesertaDidik.tempatLahir.trim().length == 0" />
+                        <InputText id="tempatLahir" v-model="pesertaDidik.tempatLahir" fluid name="tempatLahir" placeholder="Masukan tempat lahir" class="w-full md:w-64" :invalid="submitted && pesertaDidik.tempatLahir.trim().length == 0" />
                         <small v-if="submitted && pesertaDidik.tempatLahir.trim().length == 0" class="text-red-500">Tempat lahir harus diisi.</small>
                     </div>
                 </div>
@@ -135,10 +135,10 @@ onMounted(async () => {
                     <div>
                         <label class="block text-gray-700">Tanggal Lahir</label>
                         <input
+                            v-model="pesertaDidik.tanggalLahir"
                             type="date"
                             placeholder="YYYY-MM-DD"
                             class="w-full p-2 border border-gray-300 rounded"
-                            v-model="pesertaDidik.tanggalLahir"
                             :class="{ 'border-red-400': submitted && !pesertaDidik.tanggalLahir, 'text-red-400': submitted && !pesertaDidik.tanggalLahir }"
                         />
                         <small v-if="submitted && !pesertaDidik.tanggalLahir" class="text-red-500">Tgl.Lahir harus diisi.</small>
@@ -164,11 +164,11 @@ onMounted(async () => {
             <div class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-gray-700" for="nis">NIS</label>
-                    <InputText v-model="pesertaDidik.nis" fluid name="nis" id="nis" placeholder="Kosongkan jika belum ada" />
+                    <InputText id="nis" v-model="pesertaDidik.nis" fluid name="nis" placeholder="Kosongkan jika belum ada" />
                 </div>
                 <div>
                     <label class="block text-gray-700" for="nisn">NISN</label>
-                    <InputText v-model="pesertaDidik.nisn" fluid name="nisn" id="nisn" placeholder="Masukan NISN" />
+                    <InputText id="nisn" v-model="pesertaDidik.nisn" fluid name="nisn" placeholder="Masukan NISN" />
                 </div>
                 <div>
                     <label class="block text-gray-700">Asal Sekolah</label>
@@ -177,7 +177,7 @@ onMounted(async () => {
                 <div class="flex justify-between space-x-1">
                     <div class="w-full">
                         <label class="block text-gray-700">Tgl diterima di sekolah</label>
-                        <input type="date" placeholder="YYYY-MM-DD" class="w-full p-2 border border-gray-300 rounded" v-model="pesertaDidik.diterimaTanggal" />
+                        <input v-model="pesertaDidik.diterimaTanggal" type="date" placeholder="YYYY-MM-DD" class="w-full p-2 border border-gray-300 rounded" />
                     </div>
                     <div class="w-full">
                         <label class="block text-gray-700">Diterima di kelas</label>
@@ -190,33 +190,33 @@ onMounted(async () => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-gray-700" for="alamat-siswa">Alamat Jalan</label>
-                    <InputText v-model="alamatLengkap.alamatJalan" fluid name="alamat-siswa" id="alamat-siswa" placeholder="Masukan nama" />
+                    <InputText id="alamat-siswa" v-model="alamatLengkap.alamatJalan" fluid name="alamat-siswa" placeholder="Masukan nama" />
                 </div>
                 <div class="flex space-x-1">
                     <div class="w-1/2">
                         <label class="block text-gray-700" for="rt">RT</label>
-                        <InputText v-model="alamatLengkap.rt" fluid name="rt" id="rt" placeholder="Masukan RT" />
+                        <InputText id="rt" v-model="alamatLengkap.rt" fluid name="rt" placeholder="Masukan RT" />
                     </div>
                     <div class="w-1/2">
                         <label class="block text-gray-700" for="rw">RW</label>
-                        <InputText v-model="alamatLengkap.rw" fluid name="rw" id="rw" placeholder="Masukan RW" />
+                        <InputText id="rw" v-model="alamatLengkap.rw" fluid name="rw" placeholder="Masukan RW" />
                     </div>
                 </div>
                 <div>
                     <label class="block text-gray-700" for="prov">Prov.</label>
-                    <InputText v-model="alamatLengkap.prov" fluid name="prov" id="prov" placeholder="Masukan nama" />
+                    <InputText id="prov" v-model="alamatLengkap.prov" fluid name="prov" placeholder="Masukan nama" />
                 </div>
                 <div>
                     <label class="block text-gray-700" for="kab">Kab</label>
-                    <InputText v-model="alamatLengkap.kab" fluid name="kab" id="kab" placeholder="Masukan nama" />
+                    <InputText id="kab" v-model="alamatLengkap.kab" fluid name="kab" placeholder="Masukan nama" />
                 </div>
                 <div>
                     <label class="block text-gray-700" for="kec">Kecamatan</label>
-                    <InputText v-model="alamatLengkap.kec" fluid name="kec" id="kec" placeholder="Masukan nama kecamatan" />
+                    <InputText id="kec" v-model="alamatLengkap.kec" fluid name="kec" placeholder="Masukan nama kecamatan" />
                 </div>
                 <div>
                     <label class="block text-gray-700" for="desa">Desa</label>
-                    <InputText v-model="alamatLengkap.desa" fluid name="desa" id="desa" placeholder="Masukan nama desa" />
+                    <InputText id="desa" v-model="alamatLengkap.desa" fluid name="desa" placeholder="Masukan nama desa" />
                 </div>
 
                 <!-- <div class="mb-4">
@@ -246,7 +246,7 @@ onMounted(async () => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-gray-700" for="nmAyah">Nama Ayah Kandung</label>
-                    <InputText v-model="pesertaDidik.nmAyah" fluid name="nmAyah" id="nmAyah" placeholder="Masukan nama" />
+                    <InputText id="nmAyah" v-model="pesertaDidik.nmAyah" fluid name="nmAyah" placeholder="Masukan nama" />
                 </div>
                 <div>
                     <label class="block text-gray-700">Pekerjaan Ayah</label>
@@ -254,7 +254,7 @@ onMounted(async () => {
                 </div>
                 <div>
                     <label class="block text-gray-700">Nama Ibu Kandung</label>
-                    <InputText placeholder="Isi nama ibu kandung" v-model="pesertaDidik.nmIbu" fluid />
+                    <InputText v-model="pesertaDidik.nmIbu" placeholder="Isi nama ibu kandung" fluid />
                 </div>
                 <div>
                     <label class="block text-gray-700">Pekerjaan Ibu</label>
@@ -316,9 +316,9 @@ onMounted(async () => {
         </section>
 
         <div class="flex justify-end space-x-2">
-            <Button label="Update" severity="success" @click="update" :loading="isLoadingUpdate" class="min-w-28" icon="pi pi-save" v-if="isEdit" />
-            <Button label="Tambah" severity="success" @click="tambah" :loading="isLoadingTambah" class="min-w-28" icon="pi pi-save" v-else />
-            <Button class="w-32" @click="batal" label="Batal" :loading="isLoadingBatal" />
+            <Button v-if="isEdit" label="Update" severity="success" :loading="isLoadingUpdate" class="min-w-28" icon="pi pi-save" @click="update" />
+            <Button v-else label="Tambah" severity="success" :loading="isLoadingTambah" class="min-w-28" icon="pi pi-save" @click="tambah" />
+            <Button class="w-32" label="Batal" :loading="isLoadingBatal" @click="batal" />
         </div>
     </div>
 </template>

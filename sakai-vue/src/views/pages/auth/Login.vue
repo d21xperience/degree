@@ -51,20 +51,20 @@ const handleSubmit = async () => {
 
                     <div>
                         <label for="email1" class="block text-surface-900 dark:text-surface-0 text-xl font-medium mb-2">Email atau Username</label>
-                        <InputText id="email1" name="email1" type="text" placeholder="Masukan email atau username" class="w-full md:w-[30rem] mb-8" v-model="username" />
+                        <InputText id="email1" v-model="username" name="email1" type="text" placeholder="Masukan email atau username" class="w-full md:w-[30rem] mb-8" />
 
                         <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-xl mb-2">Password</label>
-                        <Password id="password1" v-model="password" placeholder="Password" :toggleMask="true" class="mb-4" fluid :feedback="false"></Password>
+                        <Password id="password1" v-model="password" placeholder="Password" :toggle-mask="true" class="mb-4" fluid :feedback="false" />
 
                         <div class="flex items-center justify-between mt-2 mb-8 gap-8">
                             <div class="flex items-center">
-                                <Checkbox v-model="checked" id="rememberme1" binary class="mr-2" name="rememberme1"></Checkbox>
+                                <Checkbox id="rememberme1" v-model="checked" binary class="mr-2" name="rememberme1" />
                                 <label for="rememberme1">Remember me</label>
                             </div>
                             <span class="font-medium no-underline ml-2 text-right cursor-pointer text-primary">Forgot password?</span>
                         </div>
                         <!-- <Button label="Sign In" class="w-full" as="router-link" to="/"></Button> -->
-                        <Button label="Sign In" class="w-full" @click="handleSubmit" :loading="loading"></Button>
+                        <Button label="Sign In" class="w-full" :loading="loading" @click="handleSubmit" />
                     </div>
                     <div class="mt-6 flex justify-between">
                         <div><router-link to="/" class="text-blue-600 hover:underline">Kembali</router-link></div>

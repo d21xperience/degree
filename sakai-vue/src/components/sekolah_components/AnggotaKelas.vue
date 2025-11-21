@@ -390,12 +390,12 @@ const downloadTemplate = async () => {
             <Toolbar class="mb-1">
                 <template #start>
                     <Button label="New" icon="pi pi-plus" class="mr-2" @click="openNew" />
-                    <Button label="Delete" icon="pi pi-trash" severity="danger" outlined @click="confirmDeleteSelected" :disabled="!selectedSiswa || !selectedSiswa.length" class="mr-2" />
+                    <Button label="Delete" icon="pi pi-trash" severity="danger" outlined :disabled="!selectedSiswa || !selectedSiswa.length" class="mr-2" @click="confirmDeleteSelected" />
                     <Button label="Cari semua siswa" icon="pi pi-search" severity="info" @click="semuaSiswaOpen" />
                 </template>
 
                 <template #end>
-                    <a href="#" @click.prevent="downloadTemplate" class="text-indigo-600 hover:text-indigo-500 mr-2">Download template</a>
+                    <a href="#" class="text-indigo-600 hover:text-indigo-500 mr-2" @click.prevent="downloadTemplate">Download template</a>
                     <!-- <FileUpload mode="basic" accept="image/*" :maxFileSize="1000000" label="Import" customUpload
                         chooseLabel="Import" class="mr-2" auto :chooseButtonProps="{ severity: 'secondary' }" /> -->
                     <input type="file" @change="handleFileUpload" />
@@ -408,34 +408,34 @@ const downloadTemplate = async () => {
                 ref="dt"
                 v-model:selection="selectedSiswa"
                 :value="anggotaKelasList"
-                dataKey="anggotaRombelId"
+                data-key="anggotaRombelId"
                 :paginator="true"
                 :rows="10"
                 :filters="filters"
-                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                :rowsPerPageOptions="[5, 10, 25]"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} siswa"
+                paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                :rows-per-page-options="[5, 10, 25]"
+                current-page-report-template="Showing {first} to {last} of {totalRecords} siswa"
             >
                 <template #header>
                     <div class="flex flex-wrap gap-2 items-center justify-end">
                         <IconField>
                             <InputIcon>
-                                <i class="pi pi-search" />
+                                <i class="pi pi-search"></i>
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Search..." />
                         </IconField>
                     </div>
                 </template>
 
-                <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-                <Column field="nmSiswa" header="Nama" sortable style="min-width: 16rem"></Column>
-                <Column field="pesertaDidik.jenisKelamin" header="JK" sortable style="min-width: 6rem"></Column>
-                <Column field="pesertaDidik.tempatLahir" header="Tpt Lahir" style="min-width: 12rem"></Column>
-                <Column field="pesertaDidik.tanggalLahir" header="Tgl Lahir" style="min-width: 12rem"></Column>
-                <Column field="pesertaDidik.agama" header="Agama" style="min-width: 12rem"></Column>
-                <Column field="pesertaDidik.nis" header="NISN" style="min-width: 12rem"></Column>
-                <Column field="pesertaDidik.nisn" header="NISN" style="min-width: 12rem"></Column>
-                <Column field="pesertaDidik.sekolahAsal" header="Asal sekolah" style="min-width: 16rem"></Column>
+                <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
+                <Column field="nmSiswa" header="Nama" sortable style="min-width: 16rem" />
+                <Column field="pesertaDidik.jenisKelamin" header="JK" sortable style="min-width: 6rem" />
+                <Column field="pesertaDidik.tempatLahir" header="Tpt Lahir" style="min-width: 12rem" />
+                <Column field="pesertaDidik.tanggalLahir" header="Tgl Lahir" style="min-width: 12rem" />
+                <Column field="pesertaDidik.agama" header="Agama" style="min-width: 12rem" />
+                <Column field="pesertaDidik.nis" header="NISN" style="min-width: 12rem" />
+                <Column field="pesertaDidik.nisn" header="NISN" style="min-width: 12rem" />
+                <Column field="pesertaDidik.sekolahAsal" header="Asal sekolah" style="min-width: 16rem" />
             </DataTable>
         </div>
 
@@ -444,24 +444,24 @@ const downloadTemplate = async () => {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-gray-700" for="nmSiswa">Nama</label>
-                        <InputText v-model="pesertaDidik.nmSiswa" fluid name="nmSiswa" id="nmSiswa" placeholder="Masukan nama" :invalid="submitted && !pesertaDidik.nmSiswa" />
+                        <InputText id="nmSiswa" v-model="pesertaDidik.nmSiswa" fluid name="nmSiswa" placeholder="Masukan nama" :invalid="submitted && !pesertaDidik.nmSiswa" />
                         <small v-if="submitted && !pesertaDidik.nmSiswa" class="text-red-500">Name is required.</small>
                     </div>
                     <div class="w-full">
                         <label class="block text-gray-700">Jenis Kelamin</label>
-                        <Select v-model="selectedjenisKelaminOptions" :options="jenisKelaminOptions" placeholder="Pilih jenis kelamin" optionLabel="label" class="w-full" :invalid="submitted && !pesertaDidik.jenisKelamin" />
+                        <Select v-model="selectedjenisKelaminOptions" :options="jenisKelaminOptions" placeholder="Pilih jenis kelamin" option-label="label" class="w-full" :invalid="submitted && !pesertaDidik.jenisKelamin" />
                         <small v-if="submitted && !pesertaDidik.jenisKelamin" class="text-red-500">Gender is required.</small>
                     </div>
                     <div>
                         <div class="md:flex md:space-x-1">
                             <div class="w-full">
                                 <label class="block text-gray-700" for="tempatLahir">Tpt Lahir</label>
-                                <InputText v-model="pesertaDidik.tempatLahir" fluid name="tempatLahir" id="tempatLahir" placeholder="Masukan tempat lahir" class="w-full md:w-64" :invalid="submitted && !pesertaDidik.tempatLahir" />
+                                <InputText id="tempatLahir" v-model="pesertaDidik.tempatLahir" fluid name="tempatLahir" placeholder="Masukan tempat lahir" class="w-full md:w-64" :invalid="submitted && !pesertaDidik.tempatLahir" />
                                 <small v-if="submitted && !pesertaDidik.tempatLahir" class="text-red-500">Place of birth is required.</small>
                             </div>
                             <div>
                                 <label class="block text-gray-700">Tgl Lahir</label>
-                                <input type="date" placeholder="DD-MM-YYYY" class="w-full p-2 border border-gray-300 rounded" v-model="pesertaDidik.tanggalLahir" />
+                                <input v-model="pesertaDidik.tanggalLahir" type="date" placeholder="DD-MM-YYYY" class="w-full p-2 border border-gray-300 rounded" />
                                 <small v-if="submitted && !pesertaDidik.tanggalLahir" class="text-red-500">Date of birth is required.</small>
                             </div>
                         </div>
@@ -469,34 +469,34 @@ const downloadTemplate = async () => {
 
                     <div>
                         <label class="block text-gray-700">Agama</label>
-                        <Select v-model="selectedAgamaOptions" :options="agamaOptions" placeholder="Pilih Agama" optionLabel="label" fluid class="w-full" :invalid="submitted && !selectedAgamaOptions" />
+                        <Select v-model="selectedAgamaOptions" :options="agamaOptions" placeholder="Pilih Agama" option-label="label" fluid class="w-full" :invalid="submitted && !selectedAgamaOptions" />
                         <small v-if="submitted && !selectedAgamaOptions" class="text-red-500">Religion is required.</small>
                     </div>
                     <div class="flex space-x-2">
                         <div>
                             <label class="block text-gray-700" for="nis">NIS</label>
-                            <InputText v-model="pesertaDidik.nis" fluid name="nis" id="nis" placeholder="Masukan NIS" :invalid="submitted && !pesertaDidik.nis" />
+                            <InputText id="nis" v-model="pesertaDidik.nis" fluid name="nis" placeholder="Masukan NIS" :invalid="submitted && !pesertaDidik.nis" />
                             <small v-if="submitted && !pesertaDidik.nis" class="text-red-500">NIS is required.</small>
                         </div>
                         <div>
                             <label class="block text-gray-700" for="nisn">NISN</label>
-                            <InputText v-model="pesertaDidik.nisn" fluid name="nisn" id="nisn" placeholder="Masukan NISN" :invalid="submitted && !pesertaDidik.nisn" />
+                            <InputText id="nisn" v-model="pesertaDidik.nisn" fluid name="nisn" placeholder="Masukan NISN" :invalid="submitted && !pesertaDidik.nisn" />
                             <small v-if="submitted && !pesertaDidik.nisn" class="text-red-500">NISN is required.</small>
                         </div>
                     </div>
                     <div>
                         <label class="block text-gray-700" for="asal-sekolah">Asal sekolah</label>
-                        <InputText v-model="pesertaDidikPelengkap.sekolahAsal" fluid name="asal-sekolah" id="asal-sekolah" placeholder="Masukan asal sekolah" :invalid="submitted && !pesertaDidikPelengkap.sekolahAsal" />
+                        <InputText id="asal-sekolah" v-model="pesertaDidikPelengkap.sekolahAsal" fluid name="asal-sekolah" placeholder="Masukan asal sekolah" :invalid="submitted && !pesertaDidikPelengkap.sekolahAsal" />
                         <small v-if="submitted && !pesertaDidikPelengkap.sekolahAsal" class="text-red-500">Asal sekolah is required.</small>
                     </div>
                     <div>
                         <label class="block text-gray-700" for="nm-ibu">Nama Ibu Kandung</label>
-                        <InputText v-model="pesertaDidik.nm_ibu" fluid name="nm-ibu" id="nm-ibu" placeholder="Masukan nama" :invalid="submitted && !pesertaDidik.nm_ibu" />
+                        <InputText id="nm-ibu" v-model="pesertaDidik.nm_ibu" fluid name="nm-ibu" placeholder="Masukan nama" :invalid="submitted && !pesertaDidik.nm_ibu" />
                         <small v-if="submitted && !selectedAgamaOptions" class="text-red-500">Mother name is required.</small>
                     </div>
                     <div>
                         <label class="block text-gray-700" for="nm-ayah">Nama Ayah Kandung</label>
-                        <InputText v-model="pesertaDidik.nm_ayah" fluid name="nm-ayah" id="nm-ayah" placeholder="Masukan nama" :invalid="submitted && !pesertaDidik.nm_ayah" />
+                        <InputText id="nm-ayah" v-model="pesertaDidik.nm_ayah" fluid name="nm-ayah" placeholder="Masukan nama" :invalid="submitted && !pesertaDidik.nm_ayah" />
                         <small v-if="submitted && !selectedAgamaOptions" class="text-red-500">Father name is required.</small>
                     </div>
                 </div>
@@ -504,33 +504,33 @@ const downloadTemplate = async () => {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <label class="block text-gray-700" for="alamatJln">Alamat Jalan</label>
-                        <InputText v-model="alamatLengkap.alamatJalan" fluid name="alamatJln" id="alamatJln" placeholder="contoh: Dusun Antah berantah; Perum.Antah berantah" />
+                        <InputText id="alamatJln" v-model="alamatLengkap.alamatJalan" fluid name="alamatJln" placeholder="contoh: Dusun Antah berantah; Perum.Antah berantah" />
                     </div>
                     <div class="flex space-x-1">
                         <div class="w-1/2">
                             <label class="block text-gray-700" for="rt">RT</label>
-                            <InputText v-model="alamatLengkap.rt" fluid name="rt" id="rt" placeholder="Masukan RT" />
+                            <InputText id="rt" v-model="alamatLengkap.rt" fluid name="rt" placeholder="Masukan RT" />
                         </div>
                         <div class="w-1/2">
                             <label class="block text-gray-700" for="rw">RW</label>
-                            <InputText v-model="alamatLengkap.rw" fluid name="rw" id="rw" placeholder="Masukan RW" />
+                            <InputText id="rw" v-model="alamatLengkap.rw" fluid name="rw" placeholder="Masukan RW" />
                         </div>
                     </div>
                     <div>
                         <label class="block text-gray-700" for="prov">Prov.</label>
-                        <InputText v-model="alamatLengkap.prov" fluid name="prov" id="prov" placeholder="Masukan nama" />
+                        <InputText id="prov" v-model="alamatLengkap.prov" fluid name="prov" placeholder="Masukan nama" />
                     </div>
                     <div>
                         <label class="block text-gray-700" for="kab">Kab</label>
-                        <InputText v-model="alamatLengkap.kab" fluid name="kab" id="kab" placeholder="Masukan nama" />
+                        <InputText id="kab" v-model="alamatLengkap.kab" fluid name="kab" placeholder="Masukan nama" />
                     </div>
                     <div>
                         <label class="block text-gray-700" for="kec">Kecamatan</label>
-                        <InputText v-model="alamatLengkap.kec" fluid name="kec" id="kec" placeholder="Masukan nama kecamatan" />
+                        <InputText id="kec" v-model="alamatLengkap.kec" fluid name="kec" placeholder="Masukan nama kecamatan" />
                     </div>
                     <div>
                         <label class="block text-gray-700" for="desa">Desa</label>
-                        <InputText v-model="alamatLengkap.desa" fluid name="desa" id="desa" placeholder="Masukan nama desa" />
+                        <InputText id="desa" v-model="alamatLengkap.desa" fluid name="desa" placeholder="Masukan nama desa" />
                     </div>
                 </div>
             </section>
@@ -542,7 +542,7 @@ const downloadTemplate = async () => {
 
         <Dialog v-model:visible="deleteSiswasDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="selectedSiswa">Yakin akan dihapus?</span>
             </div>
             <template #footer>
@@ -556,19 +556,19 @@ const downloadTemplate = async () => {
             <div>
                 <IconField>
                     <InputIcon>
-                        <i class="pi pi-search" />
+                        <i class="pi pi-search"></i>
                     </InputIcon>
                     <InputText v-model="pesertaDidikQuery" placeholder="Cari berdasarkan nama..." class="w-full" fluid />
                 </IconField>
-                <DataTable v-model:selection="pesertaDidikSelected" :value="resultsQuerySiswa" dataKey="pesertaDidikId">
-                    <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-                    <Column field="nmSiswa" header="Nama" sortable style="min-width: 16rem"></Column>
-                    <Column field="jenisKelamin" header="JK" sortable style="min-width: 3rem"></Column>
-                    <Column field="tempatLahir" header="Tpt Lahir" style="min-width: 8rem"></Column>
-                    <Column field="tanggalLahir" header="Tgl Lahir" style="min-width: 3rem"></Column>
-                    <Column field="nis" header="NISN" style="min-width: 6rem"></Column>
-                    <Column field="nisn" header="NISN" style="min-width: 6rem"></Column>
-                    <Column field="sekolahAsal" header="Asal sekolah" style="min-width: 16rem"></Column>
+                <DataTable v-model:selection="pesertaDidikSelected" :value="resultsQuerySiswa" data-key="pesertaDidikId">
+                    <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
+                    <Column field="nmSiswa" header="Nama" sortable style="min-width: 16rem" />
+                    <Column field="jenisKelamin" header="JK" sortable style="min-width: 3rem" />
+                    <Column field="tempatLahir" header="Tpt Lahir" style="min-width: 8rem" />
+                    <Column field="tanggalLahir" header="Tgl Lahir" style="min-width: 3rem" />
+                    <Column field="nis" header="NISN" style="min-width: 6rem" />
+                    <Column field="nisn" header="NISN" style="min-width: 6rem" />
+                    <Column field="sekolahAsal" header="Asal sekolah" style="min-width: 16rem" />
                 </DataTable>
             </div>
             <template #footer>

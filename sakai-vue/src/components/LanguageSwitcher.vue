@@ -31,14 +31,14 @@ watch(locale, (newVal) => {
 <template>
     <div class="language-switcher">
         <!-- Tombol untuk ganti ke Bahasa Inggris -->
-        <button v-if="currentLang === 'id'" @click="switchTo('en')" class="flex items-center space-x-2 px-4 py-2 hover:bg-gray-50 border-none transition-all duration-200 text-sm font-medium text-gray-700">
+        <button v-if="currentLang === 'id'" class="flex items-center space-x-2 px-4 py-2 hover:bg-gray-50 border-none transition-all duration-200 text-sm font-medium text-gray-700" @click="switchTo('en')">
             <!-- Bendera Indonesia → Inggris -->
             <span class="text-lg" aria-label="UK flag">🇬🇧</span>
             <span>English</span>
         </button>
 
         <!-- Tombol untuk ganti ke Bahasa Indonesia -->
-        <button v-else @click="switchTo('id')" class="flex items-center space-x-2 px-4 py-2 hover:bg-gray-50 border-none transition-all duration-200 outline-none focus:ring-2 text-sm font-medium text-gray-700">
+        <button v-else class="flex items-center space-x-2 px-4 py-2 hover:bg-gray-50 border-none transition-all duration-200 outline-none focus:ring-2 text-sm font-medium text-gray-700" @click="switchTo('id')">
             <!-- Bendera Inggris → Indonesia -->
             <span class="text-lg" aria-label="Indonesia flag">🇮🇩</span>
             <span>Indonesia</span>

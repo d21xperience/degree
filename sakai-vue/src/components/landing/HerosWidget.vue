@@ -22,7 +22,7 @@ const verificationNow = () => {
             <div class="blockchain-pattern"></div>
         </section>
 
-        <Dialog header="Verifikasi Ijazah" v-model:visible="showDialog" style="width: 32rem">
+        <Dialog v-model:visible="showDialog" header="Verifikasi Ijazah" style="width: 32rem">
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-9 px-4 py-3">
                 <div>NISN</div>
                 <div class="w-full">

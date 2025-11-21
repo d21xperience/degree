@@ -30,5 +30,5 @@ const handleKeydown = (event) => {
 </script>
 
 <template>
-    <AutoComplete v-model="internalValue" :suggestions="ptkOptions" optionLabel="nama" @complete="ptkSearch" @keydown.space.prevent="handleKeydown" placeholder="Masukan nama..." class="w-full" fluid :loading="ptkLoading" />
+    <AutoComplete v-model="internalValue" :suggestions="ptkOptions" option-label="nama" placeholder="Masukan nama..." class="w-full" fluid :loading="ptkLoading" @complete="ptkSearch" @keydown.space.prevent="handleKeydown" />
 </template>

@@ -250,18 +250,18 @@ const onLogout = async () => {
     </nav> -->
     <div class="">
         <div class="container mt-2">
-            <RouterView></RouterView>
+            <RouterView />
         </div>
     </div>
 
     <!-- Dialog start -->
     <Dialog v-model:visible="dialogSignOut" :style="{ width: '450px' }" header="Keluar" :modal="true" position="top">
         <div class="flex items-center gap-4">
-            <i class="pi pi-exclamation-triangle !text-3xl" />
+            <i class="pi pi-exclamation-triangle !text-3xl"></i>
             <span>Yakin akan keluar?</span>
         </div>
         <template #footer>
-            <Button label="Tidak" icon="pi pi-times" text @click="dialogSignOut = false" severity="warn" />
+            <Button label="Tidak" icon="pi pi-times" text severity="warn" @click="dialogSignOut = false" />
             <Button label="Ya" icon="pi pi-check" text @click="signOut" />
         </template>
     </Dialog>

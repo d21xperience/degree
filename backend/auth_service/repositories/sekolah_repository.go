@@ -12,7 +12,7 @@ type SekolahRepository interface {
 	CreateSekolah(*models.SekolahTenant) error
 	// GetSekolah(query SekolahQuery) (*models.SekolahTenant, error)
 	GetSekolahByNPSN(npsn string) (*models.SekolahTenant, error)
-	GetSekolahByTenantId(tenantId uint32) (*models.SekolahTenant, error)
+	GetSekolahByTenantId(tenantId int32) (*models.SekolahTenant, error)
 }
 
 type sekolahRepositoryImpl struct {
@@ -89,7 +89,7 @@ func (sri *sekolahRepositoryImpl) GetSekolahByNPSN(npsn string) (*models.Sekolah
 
 	return &sekolah, nil
 }
-func (sri *sekolahRepositoryImpl) GetSekolahByTenantId(tenantId uint32) (*models.SekolahTenant, error) {
+func (sri *sekolahRepositoryImpl) GetSekolahByTenantId(tenantId int32) (*models.SekolahTenant, error) {
 	// Validasi: Pastikan minimal satu parameter ada
 	var sekolah models.SekolahTenant
 	dbQuery := sri.DB

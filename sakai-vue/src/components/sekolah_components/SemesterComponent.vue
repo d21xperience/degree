@@ -33,5 +33,5 @@ onMounted(async () => {
 </script>
 
 <template>
-    <Select v-model="internalValue" :options="semesterOptions" optionLabel="namaSemester" placeholder="Tahun Pelajaran" fluid checkmark :disabled="props.isDisabled" />
+    <Select v-model="internalValue" :options="semesterOptions" option-label="namaSemester" placeholder="Tahun Pelajaran" fluid checkmark :disabled="props.isDisabled" />
 </template>

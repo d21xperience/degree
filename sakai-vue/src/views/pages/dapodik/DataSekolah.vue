@@ -100,7 +100,7 @@ const updateData = async () => {
             <div class="flex justify-between items-center mb-2">
                 <h5>Data Sekolah</h5>
                 <div>
-                    <Button icon="pi pi-pencil" @click="editSekolah" :style="isEdit ? 'background-color:blue;border:none' : 'background-color:gray;border:none'" v-tooltip.bottom="'Edit data sekolah'" size="small" rounded="" />
+                    <Button v-tooltip.bottom="'Edit data sekolah'" icon="pi pi-pencil" :style="isEdit ? 'background-color:blue;border:none' : 'background-color:gray;border:none'" size="small" rounded="" @click="editSekolah" />
                 </div>
             </div>
             <div>
@@ -114,20 +114,20 @@ const updateData = async () => {
                             <div>
                                 <div v-if="!isEdit">{{ sekolah?.jenjangPendidikanStr }}</div>
                                 <div v-else>
-                                    <Select v-model="selectedJenjangPendidikan" filter :options="jenjangPendidikanFiltered" optionLabel="nama" placeholder="Pilih jenjang pendidikan" fluid showClear class="w-full md:w-56" />
+                                    <Select v-model="selectedJenjangPendidikan" filter :options="jenjangPendidikanFiltered" option-label="nama" placeholder="Pilih jenjang pendidikan" fluid show-clear class="w-full md:w-56" />
                                 </div>
                             </div>
                             <div>Bentuk Pendidikan</div>
                             <div>
                                 <div v-if="!isEdit">{{ sekolah?.bentukPendidikanStr }}</div>
                                 <div v-else>
-                                    <Select v-model="selectedBentukPendidikan" :options="bentukPendidikan" filter optionLabel="nama" placeholder="Pilih bentuk pendidikan" fluid showClear class="w-full md:w-56" />
+                                    <Select v-model="selectedBentukPendidikan" :options="bentukPendidikan" filter option-label="nama" placeholder="Pilih bentuk pendidikan" fluid show-clear class="w-full md:w-56" />
                                 </div>
                             </div>
                             <div>NSS</div>
                             <div>
                                 <div v-if="!isEdit">{{ sekolah?.sekolah.nss }}</div>
-                                <div v-else><InputText type="text" placeholder="Masukan NSS" v-model="sekolah.sekolah.nss" fluid /></div>
+                                <div v-else><InputText v-model="sekolah.sekolah.nss" type="text" placeholder="Masukan NSS" fluid /></div>
                             </div>
                             <div>NPSN</div>
                             <div>{{ sekolah?.sekolah.npsn }}</div>
@@ -141,7 +141,7 @@ const updateData = async () => {
                             <div>Desa/Kelurahan</div>
                             <div>
                                 <div v-if="!isEdit">{{ sekolah?.sekolah.kelurahan }}</div>
-                                <InputText v-model="sekolah.sekolah.kelurahan" placeholder="Masukan nama Desa/Kelurahan" fluid v-else />
+                                <InputText v-else v-model="sekolah.sekolah.kelurahan" placeholder="Masukan nama Desa/Kelurahan" fluid />
                             </div>
                             <div>Kecamatan</div>
                             <div>{{ sekolah?.sekolah.kecamatan }}</div>
@@ -157,17 +157,17 @@ const updateData = async () => {
                                 <div v-if="!isEdit">{{ sekolah?.sekolah.telepon }}/{{ sekolah?.sekolah.telepon }}</div>
                                 <div v-else class="space-y-2">
                                     Telp.
-                                    <InputText type="text" placeholder="Masukan no.tlp" v-model="sekolah.sekolah.telepon" fluid />
+                                    <InputText v-model="sekolah.sekolah.telepon" type="text" placeholder="Masukan no.tlp" fluid />
                                     <div>
                                         Fax.
-                                        <InputText type="text" placeholder="Masukan no.fax" v-model="sekolah.sekolah.fax" fluid />
+                                        <InputText v-model="sekolah.sekolah.fax" type="text" placeholder="Masukan no.fax" fluid />
                                     </div>
                                 </div>
                             </div>
                             <div>email</div>
                             <div>
                                 <div v-if="!isEdit">{{ sekolah?.sekolah.email }}</div>
-                                <div v-else><InputText type="text" placeholder="Masukan alamat email" v-model="sekolah.sekolah.email" fluid /></div>
+                                <div v-else><InputText v-model="sekolah.sekolah.email" type="text" placeholder="Masukan alamat email" fluid /></div>
                             </div>
                             <div>website</div>
                             <div>
@@ -176,7 +176,7 @@ const updateData = async () => {
                                         {{ sekolah?.sekolah.website }}
                                     </a>
                                 </div>
-                                <div v-else><InputText type="text" placeholder="Masukan alamat website" v-model="sekolah.sekolah.website" fluid /></div>
+                                <div v-else><InputText v-model="sekolah.sekolah.website" type="text" placeholder="Masukan alamat website" fluid /></div>
                             </div>
                         </div>
                     </div>
@@ -196,8 +196,8 @@ const updateData = async () => {
                         </div>
                     </div>
                 </div>
-                <div class="flex justify-end" v-show="isEdit">
-                    <Button class="bg-blue-800 text-white px-4 py-2 rounded flex items-center" @click="updateData" label="Update Data" icon="pi pi-save" :loading="loadingUpdate" />
+                <div v-show="isEdit" class="flex justify-end">
+                    <Button class="bg-blue-800 text-white px-4 py-2 rounded flex items-center" label="Update Data" icon="pi pi-save" :loading="loadingUpdate" @click="updateData" />
                 </div>
             </div>
         </div>

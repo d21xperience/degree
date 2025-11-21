@@ -136,7 +136,7 @@ onMounted(async () => {
             <p class="">Step 1: Compile Contract</p>
             <div>Compiler: {{ solcVersion ? solcVersion : '' }}</div>
             <input type="file" accept=".sol" @change="handleFileUpload" />
-            <Button icon="pi pi-refresh" @click="handleCompile" :disabled="isProcessing || !file" :label="isProcessing ? 'Memproses...' : 'Compile Contract'" />
+            <Button icon="pi pi-refresh" :disabled="isProcessing || !file" :label="isProcessing ? 'Memproses...' : 'Compile Contract'" @click="handleCompile" />
             <p v-if="status">{{ status }}</p>
         </div>
         <div v-else>
@@ -147,11 +147,11 @@ onMounted(async () => {
                         <p class="text-green-600">Contract Detail:</p>
                         <div>
                             Name:
-                            <InputText fluid placeholder="Isi nama kontrak" v-model="contractRequest.name" />
+                            <InputText v-model="contractRequest.name" fluid placeholder="Isi nama kontrak" />
                         </div>
                         <div class="my-1">
                             Owner:
-                            <InputText fluid placeholder="Masukan nama pemilik kontrak" v-model="contractRequest.contract_owner" />
+                            <InputText v-model="contractRequest.contract_owner" fluid placeholder="Masukan nama pemilik kontrak" />
                         </div>
                         <!-- <div class="my-1">
                             Address:
@@ -196,7 +196,7 @@ onMounted(async () => {
                         Value:
                         <div class="flex space-x-1">
                             <InputText fluid default-value="0" />
-                            <Select :options="unitOptions" option-label="nama" option-value="nama" v-model="unitSelected" />
+                            <Select v-model="unitSelected" :options="unitOptions" option-label="nama" option-value="nama" />
                         </div>
                     </div>
                     <div class="flex justify-between space-x-1 flex-col">
@@ -211,10 +211,10 @@ onMounted(async () => {
             </div>
             <div class="flex space-x-1 justify-end">
                 <div>
-                    <Button label="Batal" @click="handleReset" class="w-32" />
+                    <Button label="Batal" class="w-32" @click="handleReset" />
                 </div>
                 <div>
-                    <Button label="Deploy" severity="warn" @click="handleDeploy" class="w-32" />
+                    <Button label="Deploy" severity="warn" class="w-32" @click="handleDeploy" />
                     <!-- <Button v-if="!password" label="Berikutnya" severity="warn" @click="handleForward" :disabled="!isWalletInfoAvailable" class="w-32" />
                     <Button v-else label="Deploy" severity="info" @click="handleDeploy" class="w-32" /> -->
                 </div>

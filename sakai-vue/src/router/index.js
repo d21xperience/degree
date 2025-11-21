@@ -75,6 +75,13 @@ const router = createRouter({
                     props: true
                 },
                 {
+                    path: 'manajemen-user',
+                    name: 'manajemenUser',
+                    meta: { requiresAuth: true, title: 'Manajemen User' },
+                    component: () => import('@/views/pages/data_user/MajemenUser.vue'),
+                    props: true
+                },
+                {
                     path: 'data-dapodik',
                     component: () => import('@/views/pages/dapodik/Main.vue'),
                     meta: { role: 'admin' },

@@ -178,19 +178,19 @@ onMounted(async () => {
             <template #start>
                 <div v-show="kelasList?.length > 0">
                     <!-- <Button icon="pi pi-plus" severity="success" class="mr-2" @click="openNew" v-tooltip.bottom="'Tambah data'" v-show="selectedSemester.semester == 1" /> -->
-                    <Button icon="pi pi-pencil" severity="warn" @click="editKelas" :disabled="!selectedKelas || !selectedKelas.length || selectedKelas.length > 1" class="mr-2" v-tooltip.bottom="'Edit data'" />
-                    <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!selectedKelas || !selectedKelas.length" v-tooltip.bottom="'Hapus data'" />
+                    <Button v-tooltip.bottom="'Edit data'" icon="pi pi-pencil" severity="warn" :disabled="!selectedKelas || !selectedKelas.length || selectedKelas.length > 1" class="mr-2" @click="editKelas" />
+                    <Button v-tooltip.bottom="'Hapus data'" icon="pi pi-trash" severity="danger" class="mr-2" :disabled="!selectedKelas || !selectedKelas.length" @click="confirmDeleteSelected" />
                     <!-- <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2" v-tooltip.bottom="'Upload'" v-show="selectedSemester.semester == 1" /> -->
-                    <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2" v-tooltip.bottom="'Download'" />
+                    <Button v-tooltip.bottom="'Download'" icon="pi pi-download" severity="help" class="mr-2" @click="exportCSV($event)" />
 
                     <Button
                         v-show="selectedSemester?.semester == 2"
+                        v-tooltip.bottom="'Pilih tingkat tertinggi'"
                         label="Lulus"
                         severity="help"
                         class="mr-2 text-sm"
-                        @click="isDialogKelulusan = true"
                         :disabled="!isLulus || !selectedKelas.length || selectedKelas.length > 1"
-                        v-tooltip.bottom="'Pilih tingkat tertinggi'"
+                        @click="isDialogKelulusan = true"
                     />
                 </div>
             </template>
@@ -200,7 +200,7 @@ onMounted(async () => {
                         <TingkatComponent v-model:model-value="filters['tingkatPendidikanId'].value" />
                     </div>
                     <div>
-                        <Button icon="pi pi-refresh" severity="help" class="mr-2 text-lg" @click="initial" v-tooltip.bottom="'Refresh'" />
+                        <Button v-tooltip.bottom="'Refresh'" icon="pi pi-refresh" severity="help" class="mr-2 text-lg" @click="initial" />
                     </div>
                 </div>
             </template>
@@ -211,24 +211,24 @@ onMounted(async () => {
             v-else
             ref="dt"
             v-model:selection="selectedKelas"
-            stripedRows
+            striped-rows
             size="small"
             :value="kelasList"
             scrollable
-            scrollHeight="400px"
-            dataKey="rombonganBelajarId"
+            scroll-height="400px"
+            data-key="rombonganBelajarId"
             :paginator="true"
             :rows="10"
             :filters="filters"
-            tableStyle="min-width: 50rem"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rowsPerPageOptions="[10, 20, 30]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} kelas"
+            table-style="min-width: 50rem"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rows-per-page-options="[10, 20, 30]"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} kelas"
             class="mt-2"
         >
             <!-- <template #empty> No customers found. </template> -->
             <!-- <template #loading> Loading customers data. Please wait. </template> -->
-            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
+            <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
             <Column field="nmKelas" header="Nama" style="width: 7rem">
                 <template #loading>
                     <div class="flex items-center" :style="{ height: '17px', 'flex-grow': '1', overflow: 'hidden' }">
@@ -243,27 +243,27 @@ onMounted(async () => {
                     </div>
                 </template>
             </Column>
-            <Column field="kurikulum.namaKurikulum" header="Kurikulum"></Column>
+            <Column field="kurikulum.namaKurikulum" header="Kurikulum" />
             <!-- Jika SMK/MAK Program Keahlian & Kompetensi Keahlian akan muncul-->
             <div v-if="isKejuruan">
-                <Column field="namaJurusanSp" header="Jurusan" sortable></Column>
+                <Column field="namaJurusanSp" header="Jurusan" sortable />
             </div>
             <Column header="Anggota">
                 <template #body="slotProps">
                     <Button icon="pi pi-bullseye" outlined rounded class="mr-2" @click="dialogAnggotaRombel(slotProps.data)" />
                 </template>
             </Column>
-            <Column field="jumlahAnggota" header="Jml."></Column>
+            <Column field="jumlahAnggota" header="Jml." />
         </DataTable>
 
         <DialogImport v-model:visible="dialogImport" template-type="kelas" />
-        <DialogConfirmDelete v-model:visible="deleteKelasDialog" message="Apakah kelas tersebut akan dihapus?" @confirm="deleteKelas" @closeDialog="closeDialog" />
+        <DialogConfirmDelete v-model:visible="deleteKelasDialog" message="Apakah kelas tersebut akan dihapus?" @confirm="deleteKelas" @close-dialog="closeDialog" />
         <Dialog v-model:visible="showAnggotaKelas" style="width: 450px; height: max-content" header="Anggota Kelas" close-icon="pi pi-times" maximizable>
             <AnggotaKelas :rombongan-belajar-id="rombonganBelajarId" />
         </Dialog>
         <Dialog v-model:visible="isDialogKelulusan">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 Apakah
                 <template v-if="selectedKelas.length == 1"> kelas {{ selectedKelas[0]?.nmKelas }} </template>
                 <template v-else> semua kelas </template>

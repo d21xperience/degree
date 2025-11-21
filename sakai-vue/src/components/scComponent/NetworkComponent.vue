@@ -28,5 +28,5 @@ onMounted(async () => {
 </script>
 
 <template>
-    <Select v-model="internalValue" :options="tingkatPendidikanOptions" optionLabel="nama" optionValue="kode" placeholder="Pilih tingkat..." fluid checkmark />
+    <Select v-model="internalValue" :options="tingkatPendidikanOptions" option-label="nama" option-value="kode" placeholder="Pilih tingkat..." fluid checkmark />
 </template>

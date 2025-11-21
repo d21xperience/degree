@@ -61,7 +61,7 @@ func (s *SCServiceClient) RegistrasiSekolahTenant(sekolah *models.SekolahTenant,
 		SekolahTenant: &pb.SekolahTenant{
 			NamaSekolah:     sekolah.NamaSekolah,
 			Schemaname:      fmt.Sprintf("tabel_%s", sekolah.EnkripID),
-			SekolahTenantId: sekolah.ID,
+			SekolahTenantId: uint32(sekolah.ID),
 			UserId:          userId,
 		},
 	})

@@ -7,15 +7,20 @@ import AppConfigurator from '@/layout/AppConfigurator.vue';
 import { useLayout } from '@/layout/composables/layout';
 import router from '@/router';
 import { useAuth } from '@/views/pages/auth/composables/auth';
-import { useToast } from 'primevue';
-import { onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 const util = useUtils();
 const { toggleMenu, toggleDarkMode, isDarkTheme } = useLayout();
 const isDialogSignOut = ref(false);
 const { onLogout, currentUser } = useAuth();
-const { currentWallet, loadWalletInfo, updateWalletInStore, fetchWalletInfo } = useWalletInfo();
+const { currentWallet } = useWalletInfo();
+onMounted(async () => {
+    // const res = await loadWalletInfo();
+    // if (res) {
+    //     Object.assign(currentWallet.value, res);
+    // }
+});
 
-const toast = useToast();
+// const toast = useToast();
 const cek = () => {
     // console.log(currentUser)
     if (currentUser.value.username == 'superadmin') {
@@ -45,6 +50,9 @@ watch(selectedWallet, (newVal) => {
         isSelectedWallet.value = false;
     }
 });
+const displayName = computed(() => {
+    return (currentUser.value?.username || 'Your Account').toUpperCase();
+});
 // const saveWallet = async () => {
 //     try {
 //         console.log('Selected Wallet', selectedWallet.value);
@@ -71,12 +79,6 @@ watch(selectedWallet, (newVal) => {
 //         isWallet.value = false;
 //     }
 // };
-onMounted(async () => {
-    // const res = await loadWalletInfo();
-    // if (res) {
-    //     Object.assign(currentWallet.value, res);
-    // }
-});
 
 const handleWalletInfo = (e) => {
     console.log(e);
@@ -113,7 +115,7 @@ const handleWalletInfo = (e) => {
         </div>
         <div class="layout-topbar-actions">
             <div class="layout-config-menu">
-                <div class="flex justify-center items-center" v-show="currentUser?.username == 'superadmin'">
+                <div v-show="currentUser?.username == 'superadmin'" class="flex justify-center items-center">
                     <span v-show="currentWallet.address != ''" class="layout-menuitem-text" :class="currentWallet ? 'text-green-400' : ''">{{ util.shortenAddress(currentWallet?.address) || '' }}</span>
                     <button type="button" class="layout-topbar-action" @click="isWallet = true">
                         <i class="pi pi-wallet layout-menuitem-icon"></i>
@@ -122,8 +124,8 @@ const handleWalletInfo = (e) => {
 
                 <div class="relative">
                     <button
-                        type="button"
                         v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
+                        type="button"
                         class="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 hover:bg-slate-200 layout-topbar-action"
                     >
                         <i class="pi pi-palette"></i>
@@ -152,15 +154,15 @@ const handleWalletInfo = (e) => {
             </div>
 
             <button
-                class="layout-topbar-menu-button layout-topbar-action"
                 v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }"
+                class="layout-topbar-menu-button layout-topbar-action"
             >
                 <i class="pi pi-ellipsis-v"></i>
             </button>
 
             <div class="layout-topbar-menu hidden lg:block">
                 <div class="layout-topbar-menu-content">
-                    <!-- <h4 class="sm:block  hidden"><span class="font-normal">Helo</span>, {{ currentUser?.username }} !</h4> -->
+                    <!-- <h4 class="sm:block hidden"><span class="font-normal">Helo</span>, {{ currentUser?.username }} !</h4> -->
                     <!-- <button type="button" class="layout-topbar-action">
                         <i class="pi pi-calendar"></i>
                         <span>Calendar</span>
@@ -185,11 +187,11 @@ const handleWalletInfo = (e) => {
                         <div
                             class="config-panel hidden absolute top-[3.25rem] right-0 w-64 p-4 bg-surface-0 dark:bg-surface-900 border border-surface rounded-border origin-top shadow-[0px_3px_5px_rgba(0,0,0,0.02),0px_0px_2px_rgba(0,0,0,0.05),0px_1px_4px_rgba(0,0,0,0.08)]"
                         >
-                            <p class="font-semibold">Hello, {{ currentUser?.username.toUpperCase() ?? 'Your Account' }}</p>
-                            <div class="w-full hover:bg-primary hover:text-surface-100 p-2 cursor-pointer" @click="isDialogSignOut = true">
+                            <p v-show="currentUser" class="font-semibold">Hello, {{ displayName }}</p>
+                            <!-- <div class="w-full hover:bg-primary hover:text-surface-100 p-2 cursor-pointer" @click="isDialogSignOut = true">
                                 <i class="pi pi-fw pi-sign-out"></i>
                                 Sign out
-                            </div>
+                            </div> -->
                             <div class="w-full hover:bg-primary hover:text-surface-100 p-2 cursor-pointer" @click="cek">
                                 <i class="pi pi-fw pi-user"></i>
                                 Profile

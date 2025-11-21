@@ -66,8 +66,8 @@ const gatewayUrl = (cid) => {
     <!-- Upload Section -->
     <div class="section">
         <h3>Upload File</h3>
-        <input type="file" @change="handleFileChange" ref="fileInput" />
-        <button @click="uploadFile" :disabled="!selectedFile || isUploading">
+        <input ref="fileInput" type="file" @change="handleFileChange" />
+        <button :disabled="!selectedFile || isUploading" @click="uploadFile">
             {{ isUploading ? 'Uploading...' : 'Upload to IPFS' }}
         </button>
         <div v-if="uploadResult" class="result">

@@ -55,7 +55,7 @@ onMounted(async () => {
                     <Button icon="pi pi-plus" size="small" severity="secondary" @click="handleAddDialog" />
                 </div>
             </div>
-            <button @click="loadsmartContracts" :disabled="state.loadingsmartContracts" class="px-4 py-2 hover:bg-gray-200 rounded-lg text-sm font-medium">
+            <button :disabled="state.loadingsmartContracts" class="px-4 py-2 hover:bg-gray-200 rounded-lg text-sm font-medium" @click="loadsmartContracts">
                 {{ state.loadingsmartContracts ? 'Loading...' : 'Refresh' }}
             </button>
         </div>
@@ -76,7 +76,7 @@ onMounted(async () => {
                         <div class="font-mono text-sm text-gray-600 mb-1">Owner Address: {{ smartContract?.ownerAddress }}</div>
                         <!-- <div class="text-xs text-gray-500">Created: {{ formatDate(smartContract.createdAt) }} | Filename: {{ smartContract.filename }}</div> -->
                     </div>
-                    <button @click="downloadKeystore(smartContract.id, smartContract.filename)" class="ml-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition">Activate</button>
+                    <button class="ml-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition" @click="downloadKeystore(smartContract.id, smartContract.filename)">Activate</button>
                 </div>
             </div>
         </div>

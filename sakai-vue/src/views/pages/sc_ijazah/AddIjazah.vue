@@ -44,15 +44,15 @@ const submitForm = () => {
     <div class="max-w-4xl mx-auto p-6 bg-white rounded shadow-md">
         <h2 class="text-2xl font-semibold mb-6 text-gray-800">Form Data Peserta</h2>
 
-        <form @submit.prevent="submitForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form class="grid grid-cols-1 md:grid-cols-2 gap-4" @submit.prevent="submitForm">
             <div v-for="field in fields" :key="field.name" class="flex flex-col gap-1">
                 <label :for="field.name" class="font-medium text-gray-700">
                     {{ field.label }}
                 </label>
 
-                <InputText v-if="field.type === 'text'" v-model="form[field.name]" :id="field.name" class="p-inputtext-sm w-full" />
+                <InputText v-if="field.type === 'text'" :id="field.name" v-model="form[field.name]" class="p-inputtext-sm w-full" />
 
-                <DatePicker v-else-if="field.type === 'date'" v-model="form[field.name]" :id="field.name" dateFormat="yy-mm-dd" showIcon class="p-inputtext-sm w-full" />
+                <DatePicker v-else-if="field.type === 'date'" :id="field.name" v-model="form[field.name]" date-format="yy-mm-dd" show-icon class="p-inputtext-sm w-full" />
             </div>
 
             <div class="col-span-1 md:col-span-2 mt-4">

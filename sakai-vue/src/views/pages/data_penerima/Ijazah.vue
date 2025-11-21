@@ -20,6 +20,15 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     'kelas.nmKelas': { value: null, matchMode: FilterMatchMode.CONTAINS }
 });
+onMounted(async () => {
+    siswa.value = await getDns(initSelectedTahunAjaran.value?.tahunAjaranId);
+    // console.log(siswa.value)
+    namaKelas.value = [...new Set(siswa.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
+        nama: nm,
+        value: nm.toLowerCase()
+    }));
+    // namaKelas.value = getNmKelas(siswa)
+});
 const tahunAjaranId = computed(() => initSelectedTahunAjaran.value.tahunAjaranId);
 watch(initSelectedTahunAjaran, async (e) => {
     // console.log(`${e.tahunAjaranId}`)
@@ -102,16 +111,6 @@ const onSubmitIjazah = () => {
     deleteData();
 };
 // ==================================
-
-onMounted(async () => {
-    siswa.value = await getDns(initSelectedTahunAjaran.value?.tahunAjaranId);
-    // console.log(siswa.value)
-    namaKelas.value = [...new Set(siswa.value.map((item) => item.kelas?.nmKelas).filter((nm) => nm))].map((nm) => ({
-        nama: nm,
-        value: nm.toLowerCase()
-    }));
-    // namaKelas.value = getNmKelas(siswa)
-});
 </script>
 
 <template>
@@ -122,15 +121,15 @@ onMounted(async () => {
                     <template #start>
                         <!-- <Button icon="pi pi-plus" severity="success" class="mr-2" @click="visible = true"
                             v-tooltip.bottom="'Tambah data'" /> -->
-                        <Button icon="pi pi-pencil" severity="warn" @click="editIjazah" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 1" class="mr-2" v-tooltip.bottom="'Edit data'" />
-                        <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!selectedSiswa || !selectedSiswa.length" v-tooltip.bottom="'Delete data'" />
+                        <Button v-tooltip.bottom="'Edit data'" icon="pi pi-pencil" severity="warn" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 1" class="mr-2" @click="editIjazah" />
+                        <Button v-tooltip.bottom="'Delete data'" icon="pi pi-trash" severity="danger" class="mr-2" :disabled="!selectedSiswa || !selectedSiswa.length" @click="confirmDeleteSelected" />
                         <!-- <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2" v-tooltip.bottom="'Download data'" /> -->
                         <IssueDegreeButton
-                            :degreeData="selectedSiswa"
+                            :degree-data="selectedSiswa"
                             :sekolah="sekolah"
-                            :ipfsUrl="ipfsUrl"
+                            :ipfs-url="ipfsUrl"
                             :transcript="transcript"
-                            :tahunAjaranId="`${tahunAjaranId}`"
+                            :tahun-ajaran-id="`${tahunAjaranId}`"
                             :contract="contract"
                             class="bg-blue-600 p-3 rounded-lg text-white"
                             :disabled="!selectedSiswa"
@@ -139,13 +138,13 @@ onMounted(async () => {
                         />
                     </template>
                     <template #end>
-                        <Select v-model="filters['kelas.nmKelas'].value" :options="namaKelas" optionLabel="nama" optionValue="value" placeholder="Kelas" class="w-full md:w-48 md:mr-2" checkmark show-clear />
+                        <Select v-model="filters['kelas.nmKelas'].value" :options="namaKelas" option-label="nama" option-value="value" placeholder="Kelas" class="w-full md:w-48 md:mr-2" checkmark show-clear />
 
                         <IconField>
                             <InputIcon>
-                                <i class="pi pi-search" />
+                                <i class="pi pi-search"></i>
                             </InputIcon>
-                            <InputText v-model="filters['global'].value" placeholder="Search..." name="search" id="search" />
+                            <InputText id="search" v-model="filters['global'].value" placeholder="Search..." name="search" />
                         </IconField>
                     </template>
                 </Toolbar>
@@ -154,35 +153,35 @@ onMounted(async () => {
         <DataTable
             ref="dt"
             v-model:selection="selectedSiswa"
-            stripedRows
+            striped-rows
             size="small"
             :value="siswa"
             scrollable
-            scrollHeight="29rem"
-            dataKey="pesertaDidikId"
+            scroll-height="29rem"
+            data-key="pesertaDidikId"
             :paginator="true"
             :rows="10"
             :filters="filters"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rowsPerPageOptions="[10, 20, 50]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} siswa"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rows-per-page-options="[10, 20, 50]"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} siswa"
         >
-            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-            <Column field="kelas.nmKelas" header="Kelas" style="width: 5rem"></Column>
-            <Column field="nisn" header="NISN"></Column>
-            <Column field="nama" header="Nama" sortable></Column>
-            <Column field="nomorIjazah" header="No Ijazah"></Column>
-            <Column field="tempatLahir" header="Tpt. Lahir"></Column>
+            <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
+            <Column field="kelas.nmKelas" header="Kelas" style="width: 5rem" />
+            <Column field="nisn" header="NISN" />
+            <Column field="nama" header="Nama" sortable />
+            <Column field="nomorIjazah" header="No Ijazah" />
+            <Column field="tempatLahir" header="Tpt. Lahir" />
             <Column field="" header="Tgl. Lahir">
                 <template #body="slotProps">
                     {{ formatterDateID(slotProps.data.tanggalLahir) }}
                 </template>
             </Column>
-            <Column field="namaOrtuWali" header="Nama Wali"></Column>
+            <Column field="namaOrtuWali" header="Nama Wali" />
         </DataTable>
         <!-- <Dialog v-model:visible="visible" modal header="Data ijazah" :style="{ width: '60rem', height: '100rem' }">
             <DialogIjazah :peserta-didik="selectedSiswa" :visible="visible" />
         </Dialog>  -->
-        <DialogConfirmDelete message="Apakah data ini akan dihapus?" v-model:visible="visible" @confirm="deleteData" @closeDialog="closeDialog" />
+        <DialogConfirmDelete v-model:visible="visible" message="Apakah data ini akan dihapus?" @confirm="deleteData" @close-dialog="closeDialog" />
     </div>
 </template>

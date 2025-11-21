@@ -1,30 +1,3 @@
-// import { fileURLToPath, URL } from 'node:url';
-
-// import { PrimeVueResolver } from '@primevue/auto-import-resolver';
-// import vue from '@vitejs/plugin-vue';
-// import Components from 'unplugin-vue-components/vite';
-// import { defineConfig } from 'vite';
-
-// // https://vitejs.dev/config/
-// export default defineConfig({
-//     optimizeDeps: {
-//         noDiscovery: true
-//     },
-//     plugins: [
-//         vue(),
-//         Components({
-//             resolvers: [PrimeVueResolver()]
-//         })
-//     ],
-//     resolve: {
-//         alias: {
-//             '@': fileURLToPath(new URL('./src', import.meta.url))
-//         }
-//     }
-//     // server: {
-//     //     https: true // Aktifkan HTTPS dengan sertifikat self-signed
-//     // }
-// });
 import { fileURLToPath, URL } from 'node:url';
 
 import { PrimeVueResolver } from '@primevue/auto-import-resolver';
@@ -34,13 +7,14 @@ import { defineConfig } from 'vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    optimizeDeps: {
-        noDiscovery: true
-    },
+    // optimizeDeps: {
+    //     noDiscovery: true
+    // },
     plugins: [
         vue(),
         Components({
-            resolvers: [PrimeVueResolver()]
+            resolvers: [PrimeVueResolver()],
+            dts: false
         })
     ],
     resolve: {
@@ -57,7 +31,7 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         assetsDir: 'assets',
-        sourcemap: true, // Nonaktifkan sourcemap untuk production
+        sourcemap: false, // Nonaktifkan sourcemap untuk production
         // sourcemap: false, // Nonaktifkan sourcemap untuk production
         // Optimasi untuk production
         minify: 'esbuild',

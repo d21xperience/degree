@@ -76,15 +76,15 @@ const getPtk = (event) => {
                 </div> -->
                 <div>
                     <label class="block" for="tpt-ijazah">Tempat Penerbitan</label>
-                    <InputText v-model="ijazahParam.tempat_dikeluarkan_ijazah" fluid name="tpt-ijazah" id="tpt-ijazah" placeholder="Masukan nama" />
+                    <InputText id="tpt-ijazah" v-model="ijazahParam.tempat_dikeluarkan_ijazah" fluid name="tpt-ijazah" placeholder="Masukan nama" />
                 </div>
                 <div>
                     <label class="block" for="tgl-dikelurkan-ijazah">Tgl. Penerbitan</label>
-                    <input type="date" placeholder="YYYY-MM-DD" class="w-full p-2 border border-gray-300 rounded" v-model="ijazahParam.tgl_dikeluarkan_ijazah" />
+                    <input v-model="ijazahParam.tgl_dikeluarkan_ijazah" type="date" placeholder="YYYY-MM-DD" class="w-full p-2 border border-gray-300 rounded" />
                 </div>
                 <div>
                     <label class="block" for="ptk-id">Kepala Sekolah</label>
-                    <AutoComplete v-model="selectedPtk" dropdown :suggestions="ptk" optionLabel="nama" fluid @complete="getPtk($event)" @keydown.space.prevent="handleKeydown" />
+                    <AutoComplete v-model="selectedPtk" dropdown :suggestions="ptk" option-label="nama" fluid @complete="getPtk($event)" @keydown.space.prevent="handleKeydown" />
                 </div>
             </div>
         </section>
@@ -93,7 +93,7 @@ const getPtk = (event) => {
             <div class="flex flex-col mb-2 card border-2 space-x-2">
                 <div class="w-full">
                     <label class="block" for="prov">Kop Sekolah</label>
-                    <FileUpload name="demo[]" @uploader="onUpload" :multiple="true" accept="image/*" :maxFileSize="1000000" customUpload />
+                    <FileUpload name="demo[]" :multiple="true" accept="image/*" :max-file-size="1000000" custom-upload @uploader="onUpload" />
                 </div>
                 <div class="w-full">
                     <p>Preview</p>
@@ -132,8 +132,8 @@ const getPtk = (event) => {
             </div>
         </section>
         <div class="flex justify-end space-x-4">
-            <Button label="Simpan" severity="success" @click="save" :loading="isLoading" class="min-w-28" />
-            <Button label="Batal" severity="secondary" @click="batal" class="min-w-28" />
+            <Button label="Simpan" severity="success" :loading="isLoading" class="min-w-28" @click="save" />
+            <Button label="Batal" severity="secondary" class="min-w-28" @click="batal" />
         </div>
     </div>
 </template>

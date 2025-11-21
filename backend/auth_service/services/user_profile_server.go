@@ -9,7 +9,6 @@ import (
 	"context"
 	"errors"
 	"log"
-	"strconv"
 )
 
 type UserProfileServiceServer struct {
@@ -67,53 +66,53 @@ func (s *UserProfileServiceServer) GetProfile(ctx context.Context, req *pb.GetPr
 // }
 
 // UpdateProfile - Memperbarui profil pengguna berdasarkan UserID
-func (s *UserProfileServiceServer) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) (*pb.UserProfile, error) {
-	// Debugging: Cek nilai request yang diterima
-	log.Printf("Received UpdateProfile request: %+v\n", req)
+// func (s *UserProfileServiceServer) UpdateProfile(ctx context.Context, req *pb.UpdateProfileRequest) (*pb.UserProfile, error) {
+// 	// Debugging: Cek nilai request yang diterima
+// 	log.Printf("Received UpdateProfile request: %+v\n", req)
 
-	// Cek apakah req atau req.UserProfile kosong
-	if req == nil {
-		log.Println("Request is nil")
-		return nil, errors.New("invalid request: request is nil")
-	}
+// 	// Cek apakah req atau req.UserProfile kosong
+// 	if req == nil {
+// 		log.Println("Request is nil")
+// 		return nil, errors.New("invalid request: request is nil")
+// 	}
 
-	if req.UserProfile == nil {
-		log.Println("UserProfile is nil in request")
-		return nil, errors.New("invalid request: user profile is nil")
-	}
+// 	if req.UserProfile == nil {
+// 		log.Println("UserProfile is nil in request")
+// 		return nil, errors.New("invalid request: user profile is nil")
+// 	}
 
-	profile, err := s.repo.FindByID(ctx, UserId, "public", "profile")
-	if err != nil {
-		log.Printf("Error fetching user profile: %v", err)
-		return nil, errors.New("user profile not found")
-	}
-	// profi := req.GetProfile()
-	// log.Println(profi)
-	// Perbarui data profil berdasarkan input
-	profile.Nama = req.UserProfile.Nama
-	profile.JK = req.UserProfile.Jk
-	// profile.Phone = req.UserProfile.Phone
-	// profile.TptLahir = req.UserProfile.TptLahir
-	// profile.AlamatJalan = req.UserProfile.AlamatJalan
-	// profile.KotaKab = req.UserProfile.KotaKab
-	// profile.Prov = req.UserProfile.Prov
-	// profile.KodePos = req.UserProfile.KodePos
-	// profile.NamaAyah = req.UserProfile.NamaAyah
-	// profile.NamaIbu = req.UserProfile.NamaIbu
+// 	profile, err := s.repo.FindByID(ctx, UserId, "public", "profile")
+// 	if err != nil {
+// 		log.Printf("Error fetching user profile: %v", err)
+// 		return nil, errors.New("user profile not found")
+// 	}
+// 	// profi := req.GetProfile()
+// 	// log.Println(profi)
+// 	// Perbarui data profil berdasarkan input
+// 	profile.Nama = req.UserProfile.Nama
+// 	profile.JK = req.UserProfile.Jk
+// 	// profile.Phone = req.UserProfile.Phone
+// 	// profile.TptLahir = req.UserProfile.TptLahir
+// 	// profile.AlamatJalan = req.UserProfile.AlamatJalan
+// 	// profile.KotaKab = req.UserProfile.KotaKab
+// 	// profile.Prov = req.UserProfile.Prov
+// 	// profile.KodePos = req.UserProfile.KodePos
+// 	// profile.NamaAyah = req.UserProfile.NamaAyah
+// 	// profile.NamaIbu = req.UserProfile.NamaIbu
 
-	// Simpan perubahan ke database
-	userId := strconv.FormatInt(profile.UserID, 10)
+// 	// Simpan perubahan ke database
+// 	userId := strconv.FormatInt(profile.UserID, 10)
 
-	err = s.repo.Update(ctx, profile, "public", "user_id", userId)
-	if err != nil {
-		log.Printf("Error updating user profile: %v", err)
-		return nil, errors.New("failed to update user profile")
-	}
+// 	err = s.repo.Update(ctx, profile, "public", "user_id", userId)
+// 	if err != nil {
+// 		log.Printf("Error updating user profile: %v", err)
+// 		return nil, errors.New("failed to update user profile")
+// 	}
 
-	return &pb.UserProfile{
-		Message: "Updated",
-	}, nil
-}
+// 	return &pb.UserProfile{
+// 		Message: "Updated",
+// 	}, nil
+// }
 
 // Implementasi UploadFile
 // func (s *UserProfileServiceServer) UploadUserPhotoProfile(stream pb.UserProfileServiceServer) error {

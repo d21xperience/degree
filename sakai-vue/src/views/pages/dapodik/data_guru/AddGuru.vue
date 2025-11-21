@@ -180,7 +180,7 @@ const tambahPTKTerdaftar = () => {};
     <div class="">
         <div class="flex justify-between items-center mb-1">
             <h1 class="text-2xl font-bold mb-2">{{ isEdit ? 'Form Edit Guru' : 'Form Tambah Guru' }}</h1>
-            <Button icon="pi pi-refresh" severity="help" class="!rounded-lg" @click="initial" v-tooltip.bottom="'Refresh'" />
+            <Button v-tooltip.bottom="'Refresh'" icon="pi pi-refresh" severity="help" class="!rounded-lg" @click="initial" />
             <!-- <Button icon="pi pi-times" severity="danger" @click="batal" :loading="loadingBatal" rounded size="small" v-tooltip.bottom="'Batal'" /> -->
         </div>
         <section class="mb-2">
@@ -189,29 +189,29 @@ const tambahPTKTerdaftar = () => {};
                 <div>
                     Nama Lengkap
                     <div v-if="isEdit">
-                        <InputText v-model="tabel_ptk_terdaftar.ptk.nama" fluid name="nmGuru" id="nmGuru" placeholder="Masukan nama" :invalid="submitted && !tabel_ptk_terdaftar.ptk.nama" />
+                        <InputText id="nmGuru" v-model="tabel_ptk_terdaftar.ptk.nama" fluid name="nmGuru" placeholder="Masukan nama" :invalid="submitted && !tabel_ptk_terdaftar.ptk.nama" />
                         <small v-if="submitted && !tabel_ptk_terdaftar.ptk.nama" class="text-red-500">Nama harus diisi.</small>
                     </div>
-                    <ptk-component v-model="ptkModel" v-else :invalid="submitted && !ptkModel" />
+                    <ptk-component v-else v-model="ptkModel" :invalid="submitted && !ptkModel" />
                     <small v-if="submitted && !ptkModel" class="text-red-500">Nama harus diisi.</small>
                 </div>
                 <div class="col-start-1 row-start-2">
                     <div class="w-full">
                         Jenis Kelamin <small v-if="submitted && !tabel_ptk_terdaftar.ptk.jenis_kelamin" class="text-red-500">harus diisi.</small>
-                        <JKComponent :modelValue="tabel_ptk_terdaftar.ptk.jenis_kelamin" />
+                        <JKComponent :model-value="tabel_ptk_terdaftar.ptk.jenis_kelamin" />
                     </div>
                 </div>
                 <div class="col-start-1 row-start-3">
                     <div class="w-full">
                         Tpt Lahir
-                        <InputText v-model="tabel_ptk_terdaftar.ptk.tempat_lahir" fluid name="tempatLahir" id="tempatLahir" placeholder="Masukan tempat lahir" :invalid="submitted && tabel_ptk_terdaftar.ptk.tempat_lahir.trim().length == 0" />
+                        <InputText id="tempatLahir" v-model="tabel_ptk_terdaftar.ptk.tempat_lahir" fluid name="tempatLahir" placeholder="Masukan tempat lahir" :invalid="submitted && tabel_ptk_terdaftar.ptk.tempat_lahir.trim().length == 0" />
                         <small v-if="submitted && tabel_ptk_terdaftar.ptk.tempat_lahir.trim().length == 0" class="text-red-500">Tpt.Lahir harus diisi.</small>
                     </div>
                 </div>
                 <div class="col-start-1 row-start-4">
                     <div class="w-full">
                         Agama <small v-if="submitted && !tabel_ptk_terdaftar.ptk.agama" class="text-red-500">harus diisi.</small>
-                        <AgamaComponent :modelValue="tabel_ptk_terdaftar.ptk.agama" />
+                        <AgamaComponent :model-value="tabel_ptk_terdaftar.ptk.agama" />
                         <!-- <Select v-model="tabel_ptk_terdaftar.ptk.agama" :options="agamaOptions" placeholder="Pilih Agama" optionLabel="label" class="w-full" :invalid="submitted && !tabel_ptk_terdaftar.ptk.agama" optionValue="value" /> -->
                     </div>
                 </div>
@@ -220,10 +220,10 @@ const tambahPTKTerdaftar = () => {};
                         <div class="w-full">
                             Tgl Lahir
                             <input
+                                v-model="tabel_ptk_terdaftar.ptk.tanggal_lahir"
                                 type="date"
                                 placeholder="YYYY-MM-DD"
                                 class="w-full p-2 border border-gray-300 rounded"
-                                v-model="tabel_ptk_terdaftar.ptk.tanggal_lahir"
                                 :class="{ 'border-red-400': submitted && !tabel_ptk_terdaftar.ptk.tanggal_lahir, 'text-red-400': submitted && !tabel_ptk_terdaftar.ptk.tanggal_lahir }"
                             />
                             <small v-if="submitted && !tabel_ptk_terdaftar.ptk.tanggal_lahir" class="text-red-500">Tgl.Lahir harus diisi.</small>
@@ -237,17 +237,17 @@ const tambahPTKTerdaftar = () => {};
                 <div class="col-start-1">
                     <div class="">
                         Alamat Jalan
-                        <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.alamat_jalan" fluid name="alamat-jalan" id="alamat-jalan" placeholder="Masukan alamat" />
+                        <InputText id="alamat-jalan" v-model="tabel_ptk_terdaftar.ptk_pelengkap.alamat_jalan" fluid name="alamat-jalan" placeholder="Masukan alamat" />
                     </div>
                     <div class="col-start-2 row-start-1">
                         <div class="md:flex md:space-x-2">
                             <div>
                                 RT
-                                <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.rt" fluid name="rt" id="rt" />
+                                <InputText id="rt" v-model="tabel_ptk_terdaftar.ptk_pelengkap.rt" fluid name="rt" />
                             </div>
                             <div>
                                 RW
-                                <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.rw" fluid name="rw" id="rw" />
+                                <InputText id="rw" v-model="tabel_ptk_terdaftar.ptk_pelengkap.rw" fluid name="rw" />
                             </div>
                         </div>
                     </div>
@@ -256,31 +256,31 @@ const tambahPTKTerdaftar = () => {};
                 <div class="col-start-1 row-start-2">
                     <div>
                         Provinsi
-                        <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.propinsi" fluid name="prov" id="prov" />
+                        <InputText id="prov" v-model="tabel_ptk_terdaftar.ptk_pelengkap.propinsi" fluid name="prov" />
                     </div>
                     <div>
                         Kab/Kota
-                        <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.kab_kota" fluid name="kab" id="kab" />
+                        <InputText id="kab" v-model="tabel_ptk_terdaftar.ptk_pelengkap.kab_kota" fluid name="kab" />
                     </div>
                 </div>
                 <div class="flex justify-between space-x-2">
                     <div>
                         Kecamatan
-                        <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.kec" placeholder="Kecamatan" fluid name="kec" id="kec" />
+                        <InputText id="kec" v-model="tabel_ptk_terdaftar.ptk_pelengkap.kec" placeholder="Kecamatan" fluid name="kec" />
                     </div>
                     <div>
                         Desa/Kel
-                        <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.desa_kelurahan" placeholder="Desa" fluid name="desa" id="desa" />
+                        <InputText id="desa" v-model="tabel_ptk_terdaftar.ptk_pelengkap.desa_kelurahan" placeholder="Desa" fluid name="desa" />
                     </div>
                 </div>
                 <div class="flex justify-between space-x-2">
                     <div>
                         NUPTK
-                        <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.nuptk" fluid name="nuptk" id="nuptk" />
+                        <InputText id="nuptk" v-model="tabel_ptk_terdaftar.ptk_pelengkap.nuptk" fluid name="nuptk" />
                     </div>
                     <div>
                         NIP
-                        <InputText v-model="tabel_ptk_terdaftar.ptk_pelengkap.nip" fluid name="nip" id="nip" />
+                        <InputText id="nip" v-model="tabel_ptk_terdaftar.ptk_pelengkap.nip" fluid name="nip" />
                     </div>
                 </div>
                 <!-- <div class="flex justify-between space-x-2">
@@ -296,9 +296,9 @@ const tambahPTKTerdaftar = () => {};
             </div>
         </section>
         <div class="flex justify-end mt-8 space-x-4">
-            <Button label="Update" severity="success" @click="update" :loading="loadingUpdate" class="min-w-28" icon="pi pi-save" v-if="isEdit" />
-            <Button label="Tambah" severity="success" @click="tambah" :loading="guruTerdaftarLoading" class="min-w-28" icon="pi pi-save" v-else />
-            <Button label="Batal" severity="secondary" @click="batal" class="min-w-28" />
+            <Button v-if="isEdit" label="Update" severity="success" :loading="loadingUpdate" class="min-w-28" icon="pi pi-save" @click="update" />
+            <Button v-else label="Tambah" severity="success" :loading="guruTerdaftarLoading" class="min-w-28" icon="pi pi-save" @click="tambah" />
+            <Button label="Batal" severity="secondary" class="min-w-28" @click="batal" />
         </div>
         <Toast />
 
@@ -306,7 +306,7 @@ const tambahPTKTerdaftar = () => {};
             <div><span></span>{{ messageInfo }}</div>
             <div class="flex justify-self-end mt-10">
                 <Button icon="pi pi-check" label="Ya" severity="info" class="w-32 mr-2" @click="tambahPTKTerdaftar" />
-                <Button icon="pi pi-times" label="Tidak" @click="isDialogMessageInfo = false" class="w-32" />
+                <Button icon="pi pi-times" label="Tidak" class="w-32" @click="isDialogMessageInfo = false" />
             </div>
         </Dialog>
     </div>

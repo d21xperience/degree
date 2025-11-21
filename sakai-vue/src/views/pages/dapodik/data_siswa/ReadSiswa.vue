@@ -97,19 +97,19 @@ watch(initSelectedSemester, async () => {
         <Toolbar>
             <template #start>
                 <div v-show="siswa.length > 0">
-                    <Button icon="pi pi-pencil" severity="warn" @click="editSiswa" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 2" class="mr-2" v-tooltip.bottom="'Edit siswa'" :loading="loadingEdit" />
-                    <Button icon="pi pi-trash" severity="danger" class="mr-2 text-lg" @click="deleteSiswaDialog = true" :disabled="!selectedSiswa || !selectedSiswa.length" v-tooltip.bottom="'Hapus siswa'" />
-                    <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download siswa'" />
+                    <Button v-tooltip.bottom="'Edit siswa'" icon="pi pi-pencil" severity="warn" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 2" class="mr-2" :loading="loadingEdit" @click="editSiswa" />
+                    <Button v-tooltip.bottom="'Hapus siswa'" icon="pi pi-trash" severity="danger" class="mr-2 text-lg" :disabled="!selectedSiswa || !selectedSiswa.length" @click="deleteSiswaDialog = true" />
+                    <Button v-tooltip.bottom="'Download siswa'" icon="pi pi-download" severity="help" class="mr-2 text-sm" @click="exportCSV($event)" />
                 </div>
-                <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="openNew" v-tooltip.bottom="'Tambah Siswa'" :loading="isOpenNew" />
-                <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Upload siswa'" v-show="initSelectedSemester?.semester == 1" />
+                <Button v-tooltip.bottom="'Tambah Siswa'" icon="pi pi-plus" severity="success" class="mr-2 text-lg" :loading="isOpenNew" @click="openNew" />
+                <Button v-show="initSelectedSemester?.semester == 1" v-tooltip.bottom="'Upload siswa'" icon="pi pi-upload" severity="info" class="mr-2 text-sm" @click="dialogImport = true" />
             </template>
             <template #end>
                 <div class="flex space-x-1">
                     <TingkatComponent v-model:model-value="filters['tingkatPendidikanId'].value" />
                     <IconField>
                         <InputIcon>
-                            <i class="pi pi-search" />
+                            <i class="pi pi-search"></i>
                         </InputIcon>
                         <InputText v-model="filters['global'].value" placeholder="Search..." class="md:w-48" />
                     </IconField>
@@ -122,41 +122,41 @@ watch(initSelectedSemester, async () => {
             v-else
             ref="dt"
             v-model:selection="selectedSiswa"
-            stripedRows
+            striped-rows
             :value="siswa"
             scrollable
-            scrollHeight="450px"
-            dataKey="pesertaDidikId"
+            scroll-height="450px"
+            data-key="pesertaDidikId"
             :paginator="true"
             :rows="10"
             :filters="filters"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rowsPerPageOptions="[10, 20, 50]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} siswa"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rows-per-page-options="[10, 20, 50]"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} siswa"
         >
             <template #empty>
                 <p class="text-xl flex justify-center font-bold text-red-500">Siswa tidak ditemukan</p>
             </template>
 
-            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-            <Column field="nmSiswa" header="Nama" sortable></Column>
-            <Column field="jenisKelamin" header="JK"></Column>
-            <Column field="nisn" header="NISN"></Column>
-            <Column field="nis" header="NIS" sortable></Column>
-            <Column field="agama" header="Agama"></Column>
-            <Column field="tempatLahir" header="Tpt Lahir"></Column>
+            <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
+            <Column field="nmSiswa" header="Nama" sortable />
+            <Column field="jenisKelamin" header="JK" />
+            <Column field="nisn" header="NISN" />
+            <Column field="nis" header="NIS" sortable />
+            <Column field="agama" header="Agama" />
+            <Column field="tempatLahir" header="Tpt Lahir" />
             <Column field="tanggalLahir" header="Tgl Lahir">
                 <template #body="slotProps">
                     {{ formatterDateID(slotProps.data.tanggalLahir) }}
                 </template>
             </Column>
-            <Column field="tingkatPendidikanId" header="Tingkat" sortable></Column>
-            <Column field="nmKelas" header="Rombel" sortable></Column>
+            <Column field="tingkatPendidikanId" header="Tingkat" sortable />
+            <Column field="nmKelas" header="Rombel" sortable />
         </DataTable>
 
-        <DialogImport v-model:visible="dialogImport" @save="saveImport" @cancel="cancelImport" template-type="siswa" />
+        <DialogImport v-model:visible="dialogImport" template-type="siswa" @save="saveImport" @cancel="cancelImport" />
 
         <!-- end of import data -->
-        <DialogConfirmDelete v-model:visible="deleteSiswaDialog" message="Apakah siswa tersebut akan dihapus?" @confirm="deleteSiswa" @closeDialog="closeDialog" />
+        <DialogConfirmDelete v-model:visible="deleteSiswaDialog" message="Apakah siswa tersebut akan dihapus?" @confirm="deleteSiswa" @close-dialog="closeDialog" />
     </div>
 </template>

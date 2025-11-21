@@ -108,15 +108,15 @@ const batal = () => {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-gray-700" for="nama_mata_pelajaran">Nama Mata pelajaran</label>
-                    <InputText v-model="mapel.nama_mata_pelajaran" fluid name="nama_mata_pelajaran" id="nama_mata_pelajaran" placeholder="Masukan nama" />
+                    <InputText id="nama_mata_pelajaran" v-model="mapel.nama_mata_pelajaran" fluid name="nama_mata_pelajaran" placeholder="Masukan nama" />
                 </div>
                 <div class="w-full">
                     <label class="block text-gray-700">Guru</label>
-                    <Select v-model="selectedjenisKelaminOptions" :options="jenisKelaminOptions" placeholder="Pilih Guru" optionLabel="label" class="w-full" />
+                    <Select v-model="selectedjenisKelaminOptions" :options="jenisKelaminOptions" placeholder="Pilih Guru" option-label="label" class="w-full" />
                 </div>
                 <div class="w-full">
                     <label class="block text-gray-700">Kelas</label>
-                    <Select v-model="selectedjenisKelaminOptions" :options="jenisKelaminOptions" placeholder="Pilih Guru" optionLabel="label" class="w-full" />
+                    <Select v-model="selectedjenisKelaminOptions" :options="jenisKelaminOptions" placeholder="Pilih Guru" option-label="label" class="w-full" />
                 </div>
             </div>
         </section>

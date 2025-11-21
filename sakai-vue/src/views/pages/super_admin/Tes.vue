@@ -40,7 +40,7 @@ const BCPlatform = ref([
 
 <template>
     <div class="py-2">
-        <div v-for="tes in BCPlatform[0].accounts" class="flex items-center justify-between bg-blue-50 p-3 rounded-lg mb-4 cursor-pointer">
+        <div v-for="(tes, index) in BCPlatform[0].accounts" :key="index" class="flex items-center justify-between bg-blue-50 p-3 rounded-lg mb-4 cursor-pointer">
             <div class="flex items-center">
                 <img alt="Account icon" class="w-10 h-10 rounded-full mr-3" height="40" src="https://storage.googleapis.com/a1aa/image/Xiq2NrsXBGrZHx49nxfacliC5jqcSqfWysyee9U6IhxvsfreE.jpg" width="40" />
                 <div>

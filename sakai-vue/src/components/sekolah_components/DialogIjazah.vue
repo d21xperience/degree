@@ -61,69 +61,69 @@ const selectedBCNetwork = computed(() => store.getters['scService/getBCPlatformS
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="block text-gray-700" for="nmSiswa">Nama</label>
-                                    <InputText v-model="pesertaDidik[0].pesertaDidik.nmSiswa" fluid name="nmSiswa" id="nmSiswa" placeholder="Masukan nama" disabled="" />
+                                    <InputText id="nmSiswa" v-model="pesertaDidik[0].pesertaDidik.nmSiswa" fluid name="nmSiswa" placeholder="Masukan nama" disabled="" />
                                 </div>
                                 <div class="w-full">
                                     <label class="block text-gray-700">Jenis Kelamin</label>
-                                    <Select v-model="pesertaDidik[0].pesertaDidik.jenisKelamin" :options="jenisKelaminOptions" placeholder="Pilih jenis kelamin" optionLabel="label" option-value="value" class="w-full" />
+                                    <Select v-model="pesertaDidik[0].pesertaDidik.jenisKelamin" :options="jenisKelaminOptions" placeholder="Pilih jenis kelamin" option-label="label" option-value="value" class="w-full" />
                                 </div>
                                 <div>
                                     <div class="md:flex md:space-x-1">
                                         <div class="w-full">
                                             <label class="block text-gray-700" for="tempatLahir">Tpt Lahir</label>
-                                            <InputText v-model="pesertaDidik[0].pesertaDidik.tempatLahir" fluid name="tempatLahir" id="tempatLahir" placeholder="Masukan tempat lahir" class="w-full md:w-64" disabled />
+                                            <InputText id="tempatLahir" v-model="pesertaDidik[0].pesertaDidik.tempatLahir" fluid name="tempatLahir" placeholder="Masukan tempat lahir" class="w-full md:w-64" disabled />
                                         </div>
                                         <div>
                                             <label class="block text-gray-700">Tgl Lahir</label>
-                                            <input type="date" placeholder="YYYY-MM-DD" class="w-full p-2 border border-gray-300 rounded" v-model="pesertaDidik[0].pesertaDidik.tanggalLahir" />
+                                            <input v-model="pesertaDidik[0].pesertaDidik.tanggalLahir" type="date" placeholder="YYYY-MM-DD" class="w-full p-2 border border-gray-300 rounded" />
                                         </div>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="nmWali">Nama Wali</label>
-                                    <InputText v-model="pesertaDidik[0].namaOrtuWali" fluid name="nmSiswa" id="nmSiswa" placeholder="Masukan nama" />
+                                    <InputText id="nmSiswa" v-model="pesertaDidik[0].namaOrtuWali" fluid name="nmSiswa" placeholder="Masukan nama" />
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="nis">NIS</label>
-                                    <InputText v-model="pesertaDidik[0].pesertaDidik.nis" fluid name="nis" id="nis" placeholder="Masukan NIS" />
+                                    <InputText id="nis" v-model="pesertaDidik[0].pesertaDidik.nis" fluid name="nis" placeholder="Masukan NIS" />
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="nisn">NISN</label>
-                                    <InputText v-model="pesertaDidik[0].pesertaDidik.nisn" fluid name="nisn" id="nisn" placeholder="Masukan NISN" />
+                                    <InputText id="nisn" v-model="pesertaDidik[0].pesertaDidik.nisn" fluid name="nisn" placeholder="Masukan NISN" />
                                 </div>
                             </div>
                             <h2 class="text-xl font-semibold mb-4">Informasi Sekolah</h2>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="block text-gray-700" for="prov">Prov.</label>
-                                    <InputText v-model="alamatLengkap.prov" fluid name="prov" id="prov" placeholder="Masukan nama" />
+                                    <InputText id="prov" v-model="alamatLengkap.prov" fluid name="prov" placeholder="Masukan nama" />
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="kab">Kab</label>
-                                    <InputText v-model="alamatLengkap.kab" fluid name="kab" id="kab" placeholder="Masukan nama" />
+                                    <InputText id="kab" v-model="alamatLengkap.kab" fluid name="kab" placeholder="Masukan nama" />
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="no-ijazah">No. Ijazah</label>
-                                    <InputText v-model="pesertaDidik[0].nomorIjazah" fluid name="no-ijazah" id="no-ijazah" placeholder="Masukan no ijazah" />
+                                    <InputText id="no-ijazah" v-model="pesertaDidik[0].nomorIjazah" fluid name="no-ijazah" placeholder="Masukan no ijazah" />
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="tpt-ijazah">Tempat Ijazah</label>
-                                    <InputText v-model="pesertaDidik[0].tempatIjazah" fluid name="tpt-ijazah" id="tpt-ijazah" placeholder="Masukan nama" />
+                                    <InputText id="tpt-ijazah" v-model="pesertaDidik[0].tempatIjazah" fluid name="tpt-ijazah" placeholder="Masukan nama" />
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="tgl-dikelurkan-ijazah">Tgl dikeluarkan Ijazah</label>
-                                    <input type="date" placeholder="YYYY-MM-DD" class="w-full p-2 border border-gray-300 rounded" v-model="pesertaDidik[0].tanggalIjazah" />
+                                    <input v-model="pesertaDidik[0].tanggalIjazah" type="date" placeholder="YYYY-MM-DD" class="w-full p-2 border border-gray-300 rounded" />
                                 </div>
                             </div>
                             <h2 class="text-xl font-semibold mb-4">Informasi Blockhain</h2>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="block text-gray-700" for="cid-uri">CID URL</label>
-                                    <FileUpload ref="uploadedFiles" mode="basic" name="file" accept=".jpg" :maxFileSize="2000000" :customUpload="true" severity="secondary" />
+                                    <FileUpload ref="uploadedFiles" mode="basic" name="file" accept=".jpg" :max-file-size="2000000" :custom-upload="true" severity="secondary" />
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="blockhain-type">Blockhain Type</label>
-                                    <InputText v-model="selectedBCNetwork.name" fluid name="blockhain-type" id="blockhain-type" placeholder="Masukan nama" disabled />
+                                    <InputText id="blockhain-type" v-model="selectedBCNetwork.name" fluid name="blockhain-type" placeholder="Masukan nama" disabled />
                                 </div>
                             </div>
                         </section>

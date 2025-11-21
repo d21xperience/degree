@@ -53,10 +53,10 @@ const sendToBlockchain = async () => {
 
 <template>
     <div class="p-4 space-y-4">
-        <input type="file" @change="onFileChange" accept="application/pdf" />
+        <input type="file" accept="application/pdf" @change="onFileChange" />
         <input v-model="sekolah" placeholder="Nama Sekolah" class="border p-2" />
-        <button @click="uploadAndHash" :disabled="!pdfFile">1. Upload & Hash</button>
-        <button @click="sendToBlockchain" :disabled="!fileHash">2. Simpan ke Blockchain</button>
+        <button :disabled="!pdfFile" @click="uploadAndHash">1. Upload & Hash</button>
+        <button :disabled="!fileHash" @click="sendToBlockchain">2. Simpan ke Blockchain</button>
         <div v-if="txHash">✅ Transaksi berhasil: {{ txHash }}</div>
     </div>
 </template>

@@ -47,7 +47,7 @@ const addMapel = () => {
 onMounted(async () => {});
 </script>
 <template>
-    <AutoComplete v-model="internalValue" :suggestions="mapelOptions" option-label="nama" @complete="filterMapel" @keydown.space.prevent="handleKeydown" placeholder="Cari mapel..." fluid :loading="isLoading" />
+    <AutoComplete v-model="internalValue" :suggestions="mapelOptions" option-label="nama" placeholder="Cari mapel..." fluid :loading="isLoading" @complete="filterMapel" @keydown.space.prevent="handleKeydown" />
     <div class="flex justify-end mt-6">
         <!-- <Button label="Batal" icon="pi pi-times" text severity="warn" /> -->
         <Button label="Tambah" icon="pi pi-check" text @click="addMapel" />

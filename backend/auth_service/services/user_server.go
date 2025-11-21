@@ -3,37 +3,62 @@ package services
 import (
 	"auth_service/config"
 	pb "auth_service/generated"
+	"auth_service/models"
 	"auth_service/repositories"
+	"auth_service/utils"
 	"context"
 	"errors"
 	"log"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type UserServer struct {
 	pb.UnimplementedUserServiceServer
-	repo repositories.UserRepository
+	repo        repositories.UserRepository
+	repoSekolah repositories.SekolahRepository
 }
 
 func NewUserUserServiceServer() *UserServer {
 	repoUser := repositories.NewUserRepository(config.DB)
+	repoSekolah := repositories.NewSekolahRepository(config.DB)
 	return &UserServer{
-		repo: repoUser,
+		repo:        repoUser,
+		repoSekolah: repoSekolah,
 	}
 }
 
 // GetUser - Mengambil pengguna berdasarkan UserID
 func (s *UserServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.User, error) {
-	userID := req.GetId()
+	userID, ok := utils.UserIDFromContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "no user")
+	}
+	roles, _ := utils.RolesFromContext(ctx)
+	if !(utils.Contains(roles, models.RoleAdmin) || utils.Contains(roles, models.RoleSiswa) || utils.Contains(roles, models.RoleSuperadmin)) {
+		return nil, status.Error(codes.PermissionDenied, "role tidak diizinkan")
+	}
 	user, err := s.repo.FindByID(userID)
 	if err != nil {
 		log.Printf("Error fetching user: %v", err)
 		return nil, errors.New("failed to retrieve user")
 	}
-
+	asalSekolah, err := s.repoSekolah.GetSekolahByTenantId(user.SekolahTenantID)
+	if err != nil {
+		log.Printf("Error fetching user: %v", err)
+		return nil, errors.New("failed to retrieve user")
+	}
 	return &pb.User{
-		Username: user.Username,
 		Id:       user.ID,
-		Role:     user.Role,
+		Username: user.Username,
+		SekolahAsal: &pb.Sekolah{
+			Id:          asalSekolah.ID,
+			NamaSekolah: asalSekolah.NamaSekolah,
+			EnkripId:    asalSekolah.EnkripID,
+		},
+		Role:  user.Role,
+		Email: user.Email,
 	}, nil
 }
 

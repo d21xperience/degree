@@ -135,7 +135,7 @@ const importPrivateKey = async () => {
                 <div class="p-4 bg-green-50 rounded-lg border border-green-200">
                     <div class="flex justify-between items-start mb-2">
                         <h4 class="font-medium text-green-800">Wallet Address</h4>
-                        <button @click="copyToClipboard(state.walletData.address)" class="text-green-600 hover:text-green-800 text-sm">Copy</button>
+                        <button class="text-green-600 hover:text-green-800 text-sm" @click="copyToClipboard(state.walletData.address)">Copy</button>
                     </div>
                     <p class="font-mono text-green-700 break-all">{{ state.walletData.address }}</p>
                 </div>
@@ -144,7 +144,7 @@ const importPrivateKey = async () => {
                     <h4 class="font-medium text-blue-800 mb-2">Keystore File</h4>
                     <p class="text-blue-700 mb-3">Filename: {{ state.walletData.filename }}</p>
                     <p class="text-blue-700 mb-3">Created: {{ formatDate(state.walletData.createdAt) }}</p>
-                    <button @click="downloadKeystore(state.walletData.id, state.walletData.filename)" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition">Download Keystore</button>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition" @click="downloadKeystore(state.walletData.id, state.walletData.filename)">Download Keystore</button>
                 </div>
             </div>
 
@@ -168,7 +168,7 @@ const importPrivateKey = async () => {
                         <Button icon="pi pi-plus" size="small" severity="secondary" @click="isAddDialog = true" />
                     </div>
                 </div>
-                <button @click="loadWallets" :disabled="state.loadingWallets" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium">
+                <button :disabled="state.loadingWallets" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium" @click="loadWallets">
                     {{ state.loadingWallets ? 'Loading...' : 'Refresh' }}
                 </button>
             </div>
@@ -186,14 +186,14 @@ const importPrivateKey = async () => {
                             <div class="font-mono text-sm text-gray-600 mb-1">{{ wallet?.address }}</div>
                             <div class="text-xs text-gray-500">Created: {{ formatDate(wallet.createdAt) }} | Filename: {{ wallet.filename }}</div>
                         </div>
-                        <button @click="downloadKeystore(wallet.id, wallet.filename)" class="ml-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition">Download</button>
+                        <button class="ml-4 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-3 rounded-lg transition" @click="downloadKeystore(wallet.id, wallet.filename)">Download</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <Dialog v-model:visible="isAddDialog" header="New Wallet" position="top" :modal="true" style="width: 24rem">
-            <form ref="form" @submit.prevent="generateWallet" class="space-y-6">
+            <form ref="form" class="space-y-6" @submit.prevent="generateWallet">
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-2"> Password </label>
                     <input
@@ -227,20 +227,20 @@ const importPrivateKey = async () => {
                 <button type="submit" :disabled="state.isGenerating" class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-3 px-6 rounded-lg transition duration-200 flex items-center justify-center">
                     <span v-if="state.isGenerating" class="mr-2">
                         <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                         </svg>
                     </span>
                     {{ state.isGenerating ? 'Generating...' : 'Generate Wallet' }}
                 </button>
                 <div class="flex justify-center text-sm">Or</div>
-                <Button label="Import Private Key" fluid @click="importDialog" severity="secondary" />
+                <Button label="Import Private Key" fluid severity="secondary" @click="importDialog" />
             </form>
         </Dialog>
 
         <!-- Privatekey -->
-        <Dialog header="Import Private Key" v-model:visible="isImportPvK" style="width: 24rem" position="top">
-            <InputText placeholder="masukan private key" fluid v-model="pvKey" />
+        <Dialog v-model:visible="isImportPvK" header="Import Private Key" style="width: 24rem" position="top">
+            <InputText v-model="pvKey" placeholder="masukan private key" fluid />
             <div class="mt-2">
                 <Button label="Import" icon="pi pi-upload" fluid @click="importPrivateKey" />
             </div>

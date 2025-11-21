@@ -255,18 +255,18 @@ onMounted(async () => {
         <Toolbar>
             <template #start>
                 <div v-show="kategoriMapelList.length > 0">
-                    <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="isVisible = !isVisible" v-tooltip.bottom="'Tambah Mapel'" />
+                    <Button v-tooltip.bottom="'Tambah Mapel'" icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="isVisible = !isVisible" />
                     <Button
+                        v-tooltip.bottom="'Hapus banyak mapel'"
                         icon="pi pi-trash"
                         severity="danger"
                         class="mr-2 text-lg"
-                        @click="dialogBatchDelete"
                         :disabled="!selectedKategoriMapel || !selectedKategoriMapel.length || selectedKategoriMapel.length == 1"
-                        v-tooltip.bottom="'Hapus banyak mapel'"
+                        @click="dialogBatchDelete"
                     />
-                    <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download Mapel'" />
+                    <Button v-tooltip.bottom="'Download Mapel'" icon="pi pi-download" severity="help" class="mr-2 text-sm" @click="exportCSV($event)" />
                 </div>
-                <Select v-model="selectedKategoriSekolah" :options="kategoriSekolahList" optionLabel="nama_kurikulum" placeholder="Kurikulum" class="mr-2 !w-96" checkmark fluid />
+                <Select v-model="selectedKategoriSekolah" :options="kategoriSekolahList" option-label="nama_kurikulum" placeholder="Kurikulum" class="mr-2 !w-96" checkmark fluid />
             </template>
             <template #end>
                 <div class="flex">
@@ -279,35 +279,35 @@ onMounted(async () => {
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Search..." class="md:w-48" />
                         </IconField> -->
-                    <Button icon="pi pi-refresh" severity="help" class="ml-2 text-lg" v-tooltip.bottom="'Refresh'" />
+                    <Button v-tooltip.bottom="'Refresh'" icon="pi pi-refresh" severity="help" class="ml-2 text-lg" />
                 </div>
             </template>
         </Toolbar>
         <DataTable
             ref="dt"
             v-model:selection="selectedKategoriMapel"
-            stripedRows
+            striped-rows
             size="small"
             :value="kategoriMapelList"
-            dataKey="id"
+            data-key="id"
             :paginator="true"
             :rows="10"
             :filters="filters"
             :first="first"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rows-per-page-options="[10, 20, 50]"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} mata pelajaran"
             @page="(e) => (first = e.first)"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rowsPerPageOptions="[10, 20, 50]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} mata pelajaran"
         >
-            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
+            <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
             <Column header="No" style="width: 2rem">
                 <template #body="slotProps">
                     <!-- {{ slotProps.index + 1 + (dt.value?.first || 0) }} -->
                     {{ slotProps.index + 1 + first }}
                 </template>
             </Column>
-            <Column field="nmMapel" header="Nama" sortable></Column>
-            <Column field="tingkatPendidikan" header="Tingkat" sortable></Column>
+            <Column field="nmMapel" header="Nama" sortable />
+            <Column field="tingkatPendidikan" header="Tingkat" sortable />
             <Column field="" header="Guru" sortable>
                 <template #body>
                     {{ selectedKategoriSekolah?.namaJurusan }}
@@ -318,7 +318,7 @@ onMounted(async () => {
             <Column field="" header="Aksi">
                 <template #body="{ data }">
                     <!-- <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editMapel(data)" size="small" :rounded="true" /> -->
-                    <Button icon="pi pi-trash" outlined rounded severity="danger" @click="dialogDelete(data)" size="small" />
+                    <Button icon="pi pi-trash" outlined rounded severity="danger" size="small" @click="dialogDelete(data)" />
                 </template>
             </Column>
             <!-- <template #expansion="slotProps">
@@ -344,7 +344,7 @@ onMounted(async () => {
                     <div class="mb-2">
                         <Toolbar>
                             <template #start>
-                                <Button icon="pi pi-plus" severity="success" class="mr-2" @click="openNewMapel" v-tooltip.bottom="'Tambah data'" />
+                                <Button v-tooltip.bottom="'Tambah data'" icon="pi pi-plus" severity="success" class="mr-2" @click="openNewMapel" />
                                 <!-- <Button icon="pi pi-pencil" severity="warn" @click="editKelas(selectedKelas)"
                                     :disabled="!selectedKelas || !selectedKelas.length || selectedKelas.length > 1"
                                     class="mr-2" v-tooltip.bottom="'Edit data'" />
@@ -353,8 +353,8 @@ onMounted(async () => {
                                     v-tooltip.bottom="'Hapus data'" /> -->
                             </template>
                             <template #end>
-                                <Button label="Import" icon="pi pi-download" severity="warn" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Import siswa'" />
-                                <Button label="Export" icon="pi pi-upload" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" />
+                                <Button v-tooltip.bottom="'Import siswa'" label="Import" icon="pi pi-download" severity="warn" class="mr-2 text-sm" @click="dialogImport = true" />
+                                <Button label="Export" icon="pi pi-upload" severity="help" class="mr-2 text-sm" @click="exportCSV($event)" />
                             </template>
                         </Toolbar>
                     </div>
@@ -373,7 +373,7 @@ onMounted(async () => {
 
         <Dialog v-model:visible="deletemapelDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product"
                     >Are you sure you want to delete <b>{{ product.name }}</b
                     >?</span
@@ -387,7 +387,7 @@ onMounted(async () => {
 
         <Dialog v-model:visible="deleteMapelsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product">Apakah data lulusan akan dihapus?</span>
             </div>
             <template #footer>
@@ -405,13 +405,13 @@ onMounted(async () => {
                         <AutoComplete
                             v-model="selectedMapel"
                             :suggestions="filteredMapel"
-                            optionLabel="nama"
-                            @complete="searchMapel"
-                            @keydown.space.prevent="handleKeydown"
+                            option-label="nama"
                             placeholder="Cari Mapel..."
                             class="w-full"
                             fluid
                             :invalid="submitted && !selectedMapel"
+                            @complete="searchMapel"
+                            @keydown.space.prevent="handleKeydown"
                         />
                         <small v-if="submitted && !selectedMapel" class="text-red-500">Subject is required.</small>
                     </div>
@@ -420,14 +420,14 @@ onMounted(async () => {
                         <AutoComplete
                             v-model="selectedGuru"
                             :suggestions="filteredGuru"
-                            optionLabel="ptk.nama"
-                            @complete="searchGuru"
-                            @keydown.space.prevent="handleKeydown"
+                            option-label="ptk.nama"
                             placeholder="Cari Guru..."
                             class="w-full"
                             fluid
                             dropdown
                             :invalid="submitted && !selectedGuru"
+                            @complete="searchGuru"
+                            @keydown.space.prevent="handleKeydown"
                         />
                         <small v-if="submitted && !selectedGuru" class="text-red-500">Teacher is required.</small>
                     </div>
@@ -438,11 +438,11 @@ onMounted(async () => {
                 <Button label="Tambah" icon="pi pi-check" text @click="tambahPembelajaran" />
             </template>
         </Dialog>
-        <DialogConfirmDelete v-model:visible="isDelete" @confirm="confirmDelete" :message="messageDelete" />
-        <DialogConfirmDelete v-model:visible="isBatchDelete" @confirm="confirmBatchDelete" :message="messageBatchDelete" />
+        <DialogConfirmDelete v-model:visible="isDelete" :message="messageDelete" @confirm="confirmDelete" />
+        <DialogConfirmDelete v-model:visible="isBatchDelete" :message="messageBatchDelete" @confirm="confirmBatchDelete" />
         <!-- end of import data -->
         <Dialog v-model:visible="isVisible" :style="{ width: '450px' }" header="Tambah Mapel" :modal="true" position="top">
-            <DialogMapel v-model="cekMapel" @addMapel="addMapel1" />
+            <DialogMapel v-model="cekMapel" @add-mapel="addMapel1" />
         </Dialog>
     </div>
 </template>

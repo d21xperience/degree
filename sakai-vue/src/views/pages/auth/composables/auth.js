@@ -1,4 +1,3 @@
-import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
 import router from '@/router';
 import { computed } from 'vue';
 import { useStore } from 'vuex';
@@ -13,7 +12,7 @@ const isValidUsername = (input) => {
 };
 
 export function useAuth() {
-    const { fetchSekolah } = useSekolah();
+    // const { fetchSekolah } = useSekolah();
     const store = useStore();
     const currentUser = computed(() => store.getters['authService/getUserProfile']);
     const user = store.getters['authService/userRole'];
@@ -36,6 +35,7 @@ export function useAuth() {
                 remember_me: rememberMe
             });
 
+            // console.log(response);
             if (response.status) {
                 if (response.userRole != 'superadmin') {
                     // await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
@@ -43,7 +43,6 @@ export function useAuth() {
                     // // Ambil tahun ajaran
                     // await store.dispatch('semesterService/fetchTahunAjaran');
                     // await store.dispatch('semesterService/fetchSemester');
-
                     const namaSekolah = response?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
                     await router.push({ name: 'dashboard', params: { sekolah: namaSekolah } });
                 } else {

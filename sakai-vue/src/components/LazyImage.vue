@@ -161,14 +161,14 @@ watch(
 
 <template>
     <div ref="imageContainer" :class="containerClass" :style="containerStyle">
-        <img v-if="shouldLoad" :src="imageSrc" :alt="alt" :class="imageClass" :style="imageStyle" @load="onImageLoad" @error="onImageError" :loading="nativeLoading ? 'lazy' : 'eager'" />
+        <img v-if="shouldLoad" :src="imageSrc" :alt="alt" :class="imageClass" :style="imageStyle" :loading="nativeLoading ? 'lazy' : 'eager'" @load="onImageLoad" @error="onImageError" />
 
         <!-- Placeholder while loading -->
         <div v-if="!isLoaded && shouldLoad" :class="placeholderClass" :style="placeholderStyle">
-            <div class="loading-spinner" v-if="showSpinner">
+            <div v-if="showSpinner" class="loading-spinner">
                 <svg class="animate-spin h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                 </svg>
             </div>
             <div v-else class="placeholder-content">

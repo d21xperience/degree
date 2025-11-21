@@ -1,9 +1,29 @@
 import api from '../api';
+const decodeToken = (token) => {
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return {
+            id: payload.user_id,
+            username: payload.username || '',
+            name: payload.name || '',
+            roles: payload.roles || '',
+            asalSekolah: payload.asal_sekolah || '',
+            sekolah_tenant_id: payload.sekolah_tenant_id || ''
+            // exp: payload.exp ? new Date(payload.exp * 1000) : null,
+            // raw: payload // simpan semua jika perlu
+        };
+    } catch (e) {
+        console.error('Gagal decode token:', e);
+        return null;
+    }
+};
+
 const state = {
     user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null,
     sekolah: JSON.parse(localStorage.getItem('sekolah')) || null,
     userRole: localStorage.getItem('userRole') ? JSON.parse(localStorage.getItem('userRole')) : null,
-    userProfile: JSON.parse(localStorage.getItem('userProfile')) || null // Ambil dari localStorage
+    userProfile: JSON.parse(localStorage.getItem('userProfile')) || null, // Ambil dari localStorage
+    accessToken: null
 };
 
 const mutations = {
@@ -21,14 +41,18 @@ const mutations = {
     },
     CLEAR_AUTH(state) {
         state.user = null;
+        state.sekolah = null;
         state.userRole = null;
         state.userProfile = null;
-        state.sekolah = null;
         localStorage.clear();
     },
     SET_SEKOLAH(state, sekolah) {
         state.sekolah = sekolah;
         localStorage.setItem('sekolah', JSON.stringify(sekolah));
+    },
+    SET_TOKEN(state, value) {
+        state.accessToken = value;
+        localStorage.setItem('accessToken', JSON.stringify(value));
     },
     RESET(state) {
         state.user = null;
@@ -40,17 +64,34 @@ const mutations = {
 const actions = {
     async login({ commit }, credentials) {
         try {
-            const cek = await api.post('/as/auth/web/login', credentials).then((a) => console.log(a));
-
-            // if (cek.status) {
-
-            // }
-            console.log('cek', cek.status);
-            // const { data } = await api.post('/as/auth/web/login', credentials);
+            const { data } = await api.post('/as/auth:login', credentials);
+            if (data.accessToken) {
+                commit('SET_TOKEN', data.accessToken);
+                const userClaims = decodeToken(data.accessToken);
+                commit('SET_USER', {
+                    username: userClaims.username,
+                    asalSekolah: userClaims.asalSekolah
+                });
+                commit('SET_USER_ROLE', userClaims.roles[0]);
+                // user.value = { id: payload.user_id };
+                console.log(userClaims);
+                // console.log('Id:', userClaims.id, 'Role:', userClaims.roles, 'Asal sekolah:', userClaims.asalSekolah);
+                // const user = await api.get('/as/users/');
+                // console.log(user);
+                return {
+                    status: true,
+                    userRole: userClaims.roles[0],
+                    sekolahTenant: {
+                        namaSekolah: userClaims.asalSekolah,
+                        sekolahTenantId: userClaims.sekolah_tenant_id
+                    }
+                };
+            }
+            return { status: false };
             // const { status, user, sekolahTenant } = data;
             // if (status) {
             //     commit('SET_USER', user);
-            //     commit('SET_USER_ROLE', user.role);
+
             //     commit('SET_SEKOLAH', sekolahTenant);
             //     return {
             //         status: true,
@@ -103,7 +144,8 @@ const actions = {
     },
     async logout({ commit }) {
         try {
-            await api.post('/as/auth/web/logout');
+            // await api.post('/as/auth/web/logout');
+            localStorage.removeItem('accessToken');
         } finally {
             commit('CLEAR_AUTH');
             commit('RESET');
@@ -161,8 +203,9 @@ const actions = {
     },
     //  Ambil Profil Pengguna
     async getUserProfile({ commit }, userID) {
+        console.log(userID);
         try {
-            const response = await api.get(`/as/user/${userID}/profile`);
+            const response = await api.get(`/as/users/${userID}/profile`);
             commit('SET_USER_PROFILE', response.data.userProfile);
             return response.data;
         } catch (error) {

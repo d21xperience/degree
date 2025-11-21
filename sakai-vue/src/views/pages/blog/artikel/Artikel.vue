@@ -107,7 +107,7 @@ const toggleExpand = (postId) => {
                         <p class="text-sm font-medium text-gray-900">{{ featuredPost.author.name }}</p>
                         <p class="text-sm text-gray-500">{{ formatDate(featuredPost.date) }}</p>
                     </div>
-                    <button @click="toggleExpand(featuredPost.id)" class="ml-auto px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">
+                    <button class="ml-auto px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition" @click="toggleExpand(featuredPost.id)">
                         {{ expandedPosts[featuredPost.id] ? 'Read Less' : 'Read More' }}
                     </button>
                 </div>

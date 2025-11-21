@@ -107,7 +107,7 @@ onMounted(() => {
                 <option value="fabric">Hyperledger Fabric</option>
             </select>
 
-            <input type="text" v-model="searchQuery" placeholder="Cari transaksi..." @input="debouncedSearch" />
+            <input v-model="searchQuery" type="text" placeholder="Cari transaksi..." @input="debouncedSearch" />
         </div>
 
         <div v-if="isLoading" class="loading">Memuat data transaksi...</div>
@@ -119,7 +119,7 @@ onMounted(() => {
         <div v-else-if="transactions.length === 0" class="empty">Tidak ada transaksi ditemukan</div>
 
         <div v-else class="transactions-list">
-            <div class="transaction-card" v-for="tx in transactions" :key="tx.id">
+            <div v-for="tx in transactions" :key="tx.id" class="transaction-card">
                 <div class="tx-header">
                     <span class="tx-id">{{ tx.id }}</span>
                     <span class="tx-chain" :class="tx.blockchain.toLowerCase()">
@@ -144,22 +144,22 @@ onMounted(() => {
                         <span class="label">Waktu:</span>
                         <span class="value">{{ formatTimestamp(tx.timestamp) }}</span>
                     </div>
-                    <div class="tx-row" v-if="tx.blockNumber">
+                    <div v-if="tx.blockNumber" class="tx-row">
                         <span class="label">Block:</span>
                         <span class="value">{{ tx.blockNumber }}</span>
                     </div>
                 </div>
 
                 <div class="tx-footer">
-                    <button @click="showTransactionDetails(tx)" class="details-btn">Detail</button>
+                    <button class="details-btn" @click="showTransactionDetails(tx)">Detail</button>
                 </div>
             </div>
         </div>
 
-        <div class="pagination" v-if="totalPages > 1">
-            <button @click="changePage(currentPage - 1)" :disabled="currentPage === 1">Sebelumnya</button>
+        <div v-if="totalPages > 1" class="pagination">
+            <button :disabled="currentPage === 1" @click="changePage(currentPage - 1)">Sebelumnya</button>
             <span>Halaman {{ currentPage }} dari {{ totalPages }}</span>
-            <button @click="changePage(currentPage + 1)" :disabled="currentPage === totalPages">Berikutnya</button>
+            <button :disabled="currentPage === totalPages" @click="changePage(currentPage + 1)">Berikutnya</button>
         </div>
 
         <TransactionModal v-if="selectedTransaction" :transaction="selectedTransaction" @close="selectedTransaction = null" />

@@ -1,8 +1,11 @@
 package server
 
 import (
+	"log"
 	pb "sekolah/generated"
+	"sekolah/models"
 	"sekolah/services"
+	"sekolah/utils"
 
 	"google.golang.org/grpc"
 )
@@ -10,7 +13,34 @@ import (
 var UploadService *services.UploadServiceServer
 
 func RunGRPCServer() *grpc.Server {
-	grpcServer := grpc.NewServer()
+	publicKey, err := utils.LoadPublicKey()
+	if err != nil {
+		log.Printf("Error load public key: %v", err)
+	}
+	allowlist := map[string]bool{
+		"/auth.AuthService/Login":        true,
+		"/auth.AuthService/RefreshToken": true,
+		"/auth.AuthService/JWKS":         true,
+	}
+
+	// method -> allowed roles
+	methodRoles := map[string][]string{
+		// no role restriction, but requires authentication:
+		"/auth.AuthService/GetUser": {models.RoleAdmin},
+
+		// strict role requirement:
+		// "/sc.v1.SmartContractService/IssueDegree": {"admin", "issuer"},
+		// if omitted or empty slice => any authenticated user allowed
+	}
+
+	rbac := &utils.RBACInterceptorConfig{
+		MethodAllowlist: allowlist,
+		MethodRoles:     methodRoles,
+		PublicKey:       publicKey,
+	}
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(utils.AuthInterceptor(rbac)),
+	)
 
 	sekolahService := services.NewSekolahService()
 	pb.RegisterSekolahServiceServer(grpcServer, sekolahService)

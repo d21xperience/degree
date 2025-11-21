@@ -98,8 +98,8 @@ const isTextFile = computed(() => {
         <!-- Download Section -->
         <div class="section">
             <h3>Retrieve File</h3>
-            <input type="text" v-model="cidInput" placeholder="Enter IPFS CID" class="cid-input" />
-            <button @click="retrieveFile" :disabled="!cidInput || isRetrieving">
+            <input v-model="cidInput" type="text" placeholder="Enter IPFS CID" class="cid-input" />
+            <button :disabled="!cidInput || isRetrieving" @click="retrieveFile">
                 {{ isRetrieving ? 'Retrieving...' : 'Retrieve from IPFS' }}
             </button>
 

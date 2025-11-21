@@ -135,15 +135,15 @@ const architecture = ref([
         </div> -->
         <Toolbar class="mb-6">
             <template #start>
-                <Button icon="pi pi-plus" severity="success" class="mr-2" @click="addBCNetwork" :disabled="selectedBCNetwork.length" />
-                <Button icon="pi pi-pencil" severity="warn" @click="editBCNetwork" :disabled="!selectedBCNetwork || !selectedBCNetwork.length || selectedBCNetwork.length >= 2" class="mr-2" />
-                <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!selectedBCNetwork || !selectedBCNetwork.length" />
+                <Button icon="pi pi-plus" severity="success" class="mr-2" :disabled="selectedBCNetwork.length" @click="addBCNetwork" />
+                <Button icon="pi pi-pencil" severity="warn" :disabled="!selectedBCNetwork || !selectedBCNetwork.length || selectedBCNetwork.length >= 2" class="mr-2" @click="editBCNetwork" />
+                <Button icon="pi pi-trash" severity="danger" class="mr-2" :disabled="!selectedBCNetwork || !selectedBCNetwork.length" @click="confirmDeleteSelected" />
             </template>
 
             <template #end>
                 <IconField>
                     <InputIcon>
-                        <i class="pi pi-search" />
+                        <i class="pi pi-search"></i>
                     </InputIcon>
                     <InputText v-model="filters['global'].value" placeholder="Search..." />
                 </IconField>
@@ -154,16 +154,16 @@ const architecture = ref([
             ref="dt"
             v-model:selection="selectedBCNetwork"
             :value="BCNetworks"
-            dataKey="Type"
+            data-key="Type"
             :paginator="true"
             :rows="10"
             :filters="filters"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rowsPerPageOptions="[5, 10, 25]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} BCNetworks"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rows-per-page-options="[5, 10, 25]"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} BCNetworks"
         >
-            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-            <Column field="Name" header="Nama Jaringan" bodyStyle="width:20rem" />
+            <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
+            <Column field="Name" header="Nama Jaringan" body-style="width:20rem" />
             <Column field="Architecture" header="Arsitektur" />
             <Column field="Type" header="Tipe Jaringan" sortable />
             <Column field="ChainId" header="Chain ID" />
@@ -182,7 +182,7 @@ const architecture = ref([
 
             <label class="font-bold">Tipe Jaringan</label>
             <!-- <InputText v-model.trim="editingItem.Type" required /> -->
-            <NetworkTypeComponent v-model:modelValue="editingItem.Type" :initialValue="editingItem.Type" />
+            <NetworkTypeComponent v-model:modelValue="editingItem.Type" :initial-value="editingItem.Type" />
 
             <label class="font-bold">Nama Jaringan</label>
             <InputText v-model.trim="editingItem.Name" required />
@@ -211,7 +211,7 @@ const architecture = ref([
 
     <Dialog v-model:visible="deleteDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
         <div class="flex items-center gap-4">
-            <i class="pi pi-exclamation-triangle !text-3xl" />
+            <i class="pi pi-exclamation-triangle !text-3xl"></i>
             <span v-if="selectedBCNetwork.length == 1"
                 >Apakah jaringan <span class="font-medium">{{ selectedBCNetwork[0].Name }} </span> akan dihapus?</span
             >

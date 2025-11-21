@@ -106,7 +106,7 @@ const formatValues = (obj) => {
                                 <SekolahComponent v-model:modelValue="searchTerm" />
                             </div>
                             <div>
-                                <Button label="Cek" class="w-24" @click="cekSekolah" :loading="loading" :disabled="!isObject(searchTerm)"></Button>
+                                <Button label="Cek" class="w-24" :loading="loading" :disabled="!isObject(searchTerm)" @click="cekSekolah" />
                             </div>
                         </div>
                     </div>
@@ -140,15 +140,15 @@ const formatValues = (obj) => {
                     <form @submit.prevent="handleSubmit">
                         <div>
                             <label for="sekolah" class="block text-surface-900 dark:text-surface-0 text-lg font-medium">Sekolah</label>
-                            <InputText id="sekolah" name="sekolah" type="text" placeholder="Masukan sekolah" class="w-full md:w-[30rem] mb-3" v-model="searchTerm.nama_sekolah" disabled />
+                            <InputText id="sekolah" v-model="searchTerm.nama_sekolah" name="sekolah" type="text" placeholder="Masukan sekolah" class="w-full md:w-[30rem] mb-3" disabled />
 
                             <label for="email1" class="block text-surface-900 dark:text-surface-0 text-lg font-medium">Email</label>
-                            <InputText id="email1" name="email1" type="email" placeholder="Masukan email" class="w-full md:w-[30rem] mb-3" v-model="email" />
+                            <InputText id="email1" v-model="email" name="email1" type="email" placeholder="Masukan email" class="w-full md:w-[30rem] mb-3" />
 
                             <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-lg">Password</label>
-                            <Password id="password1" name="password1" v-model="password" placeholder="Password" :toggleMask="true" class="mb-4" fluid :feedback="false" autocomplete="new-password"></Password>
+                            <Password id="password1" v-model="password" name="password1" placeholder="Password" :toggle-mask="true" class="mb-4" fluid :feedback="false" autocomplete="new-password" />
 
-                            <Button type="submit" label="Sign Up" class="w-full" :loading="loading"></Button>
+                            <Button type="submit" label="Sign Up" class="w-full" :loading="loading" />
                         </div>
                     </form>
                 </div>
@@ -159,12 +159,12 @@ const formatValues = (obj) => {
     <!-- Dialog start -->
     <Dialog v-model:visible="dialogInfo" :style="{ width: '450px' }" header="Warning" :modal="true" position="top">
         <div class="flex items-center gap-4">
-            <i class="pi pi-exclamation-triangle !text-3xl" />
+            <i class="pi pi-exclamation-triangle !text-3xl"></i>
             <span class="font-semibold">{{ searchTerm?.nama_sekolah }}</span
             >sudah terdaftar!!
         </div>
         <template #footer>
-            <Button label="Ok" icon="pi pi-times" @click="resetSearchTerm" severity="warn" />
+            <Button label="Ok" icon="pi pi-times" severity="warn" @click="resetSearchTerm" />
         </template>
     </Dialog>
 

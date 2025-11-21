@@ -273,13 +273,13 @@ const capaianPenilaian = ref([
                 ref="dt"
                 v-model:selection="dataLulusan"
                 :value="capaianPenilaian"
-                dataKey="id"
+                data-key="id"
                 :paginator="true"
                 :rows="10"
                 :filters="filters"
-                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                :rowsPerPageOptions="[5, 10, 25]"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+                paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                :rows-per-page-options="[5, 10, 25]"
+                current-page-report-template="Showing {first} to {last} of {totalRecords} products"
             >
                 <!-- <template #header>
                     <div class="flex flex-wrap gap-2 items-center justify-between">
@@ -303,18 +303,18 @@ const capaianPenilaian = ref([
                 </template> -->
 
                 <!-- <Column selectionMode="multiple" style="width: 3rem" pasundan123 :exportable="false"></Column> -->
-                <Column field="namaMapel" header="Nama Mapel"></Column>
-                <Column field="code" header="SMT 1" sortable></Column>
-                <Column field="name" header="SMT 2" sortable></Column>
-                <Column field="name" header="SMT 3"></Column>
+                <Column field="namaMapel" header="Nama Mapel" />
+                <Column field="code" header="SMT 1" sortable />
+                <Column field="name" header="SMT 2" sortable />
+                <Column field="name" header="SMT 3" />
                 <Column field="price" header="SMT 4">
                     <!-- <template #body="slotProps">
                         {{ formatCurrency(slotProps.data.price) }}
                     </template> -->
                 </Column>
-                <Column field="category" header="SMT 5" sortable></Column>
-                <Column field="category" header="SMT 6" sortable></Column>
-                <Column field="category" header="Rata-Rata"></Column>
+                <Column field="category" header="SMT 5" sortable />
+                <Column field="category" header="SMT 6" sortable />
+                <Column field="category" header="Rata-Rata" />
                 <!-- <Column header="Image">
                     <template #body="slotProps">
                         <img :src="`https://primefaces.org/cdn/primevue/images/product/${slotProps.data.image}`"
@@ -414,7 +414,7 @@ const capaianPenilaian = ref([
 
         <Dialog v-model:visible="deleteProductDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product"
                     >Are you sure you want to delete <b>{{ product.name }}</b
                     >?</span
@@ -428,7 +428,7 @@ const capaianPenilaian = ref([
 
         <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product">Apakah data lulusan akan dihapus?</span>
             </div>
             <template #footer>

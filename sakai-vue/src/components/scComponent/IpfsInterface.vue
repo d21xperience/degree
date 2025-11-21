@@ -106,22 +106,22 @@ async function viewFile(cid) {
         <div class="section">
             <h2>Upload File Ijazah</h2>
             <input type="file" @change="handleFileUpload" />
-            <button @click="uploadFile" :disabled="!selectedFile">Upload</button>
+            <button :disabled="!selectedFile" @click="uploadFile">Upload</button>
             <div v-if="uploadResult">
                 <p>File uploaded with CID: {{ uploadResult.cid }}</p>
                 <button @click="viewFile(uploadResult.cid)">View File</button>
             </div>
         </div>
 
-        <div class="section" v-if="fileContent">
+        <div v-if="fileContent" class="section">
             <h2>File Content</h2>
             <pre>{{ fileContent }}</pre>
         </div>
 
-        <div class="status" v-if="status">
+        <div v-if="status" class="status">
             {{ status }}
         </div>
-        <div class="error" v-if="error">Error: {{ error }}</div>
+        <div v-if="error" class="error">Error: {{ error }}</div>
     </div>
 </template>
 

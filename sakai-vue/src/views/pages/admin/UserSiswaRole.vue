@@ -1,8 +1,6 @@
 <script setup>
-import FileUpload from 'primevue/fileupload';
-
-import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
 
 import Button from 'primevue/button';
 
@@ -10,19 +8,14 @@ import Dialog from 'primevue/dialog';
 
 import Toolbar from 'primevue/toolbar';
 
-import ColumnGroup from 'primevue/columngroup'; // optional
-import Row from 'primevue/row'; // optional
-
-import { ref, onMounted, computed, watch } from 'vue';
-import { useStore } from 'vuex';
-const store = useStore();
 import { FilterMatchMode } from '@primevue/core/api';
-import { useToast } from 'primevue/usetoast';
-import InputText from 'primevue/inputtext';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
-import RadioButton from 'primevue/radiobutton';
-import DataLulusanService from '@/service/ProductService.js';
+import InputText from 'primevue/inputtext';
+import { useToast } from 'primevue/usetoast';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useStore } from 'vuex';
+const store = useStore();
 
 // ================================
 // composable
@@ -155,7 +148,6 @@ const getStatusLabel = (status) => {
 };
 
 import Select from 'primevue/select';
-import EmptyData from '@/components/EmptyData.vue';
 
 // select tahun ijazah
 const selectedCity = ref();
@@ -204,15 +196,15 @@ onMounted(() => {
         <div class="my-2">
             <Toolbar>
                 <template #end>
-                    <Button label="Tambah user" icon="pi pi-plus" severity="help" @click="exportCSV($event)" class="mr-2" />
+                    <Button label="Tambah user" icon="pi pi-plus" severity="help" class="mr-2" @click="exportCSV($event)" />
                     <Button label="Generate Otomatis" icon="pi pi-users" severity="info" @click="exportCSV($event)" />
                 </template>
             </Toolbar>
             <Toolbar>
                 <template #start>
-                    <Button icon="pi pi-pencil" severity="warn" @click="confirmDeleteSelected" :disabled="!dataLulusan || !dataLulusan.length || dataLulusan.length > 2" class="mr-2" />
-                    <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!dataLulusan || !dataLulusan.length" />
-                    <Button icon="pi pi-key" severity="success" class="mr-2" @click="confirmDeleteSelected" :disabled="!dataLulusan || !dataLulusan.length" />
+                    <Button icon="pi pi-pencil" severity="warn" :disabled="!dataLulusan || !dataLulusan.length || dataLulusan.length > 2" class="mr-2" @click="confirmDeleteSelected" />
+                    <Button icon="pi pi-trash" severity="danger" class="mr-2" :disabled="!dataLulusan || !dataLulusan.length" @click="confirmDeleteSelected" />
+                    <Button icon="pi pi-key" severity="success" class="mr-2" :disabled="!dataLulusan || !dataLulusan.length" @click="confirmDeleteSelected" />
                     <Button icon="pi pi-download" severity="warn" class="mr-2" @click="confirmDeleteSelected" />
                 </template>
                 <template #end>
@@ -220,14 +212,14 @@ onMounted(() => {
                         <div class="flex">
                             <!-- <Select v-model="selectedJurusan" :options="jurusan" optionLabel="name"
                                 placeholder="Tahun Ajaran" class="md:w-48  mr-2" /> -->
-                            <Select v-model="selectedJurusan" :options="jurusan" optionLabel="name" placeholder="Rombel" class="w-full md:w-48 mr-1" />
+                            <Select v-model="selectedJurusan" :options="jurusan" option-label="name" placeholder="Rombel" class="w-full md:w-48 mr-1" />
                             <!-- <Button icon="pi pi-times" severity="danger" class="mr-2" @click="confirmDeleteSelected"
                                 :disabled="!dataLulusan || !dataLulusan.length" /> -->
                         </div>
                     </div>
                     <IconField>
                         <InputIcon>
-                            <i class="pi pi-search" />
+                            <i class="pi pi-search"></i>
                         </InputIcon>
                         <InputText v-model="filters['global'].value" placeholder="Search..." />
                     </IconField>
@@ -237,20 +229,20 @@ onMounted(() => {
         <DataTable
             ref="dt"
             v-model:selection="dataLulusan"
-            stripedRows
+            striped-rows
             size="small"
             :value="users"
-            dataKey="id"
+            data-key="id"
             :paginator="true"
             :rows="10"
             :filters="filters"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rowsPerPageOptions="[10, 25]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Users"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rows-per-page-options="[10, 25]"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} Users"
             class=""
         >
-            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-            <Column field="nmSiswa" header="Username" sortable></Column>
+            <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
+            <Column field="nmSiswa" header="Username" sortable />
             <!-- <Column field="name" header="Nama user" sortable></Column>
             <Column field="code" header="Login terakhir"></Column>
             <Column field="code" header="Online" sortable></Column>
@@ -296,7 +288,7 @@ onMounted(() => {
 
         <Dialog v-model:visible="deleteProductDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product"
                     >Are you sure you want to delete <b>{{ product.name }}</b
                     >?</span
@@ -310,7 +302,7 @@ onMounted(() => {
 
         <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product">Apakah data lulusan akan dihapus?</span>
             </div>
             <template #footer>
@@ -322,7 +314,7 @@ onMounted(() => {
         <!-- Dialog Status kenaikan/ lulus -->
         <Dialog v-model:visible="dialogStatus" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product">Apakah siswa akan diluluskan?</span>
             </div>
             <template #footer>

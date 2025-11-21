@@ -1,6 +1,10 @@
 <script setup>
 import { onMounted, ref } from 'vue';
 
+// Muat data saat komponen di-load
+onMounted(() => {
+    loadProfile();
+});
 // Data profil
 const profile = ref({
     siteName: '',
@@ -88,32 +92,27 @@ const resetForm = () => {
         showNotification('Form telah direset', true);
     }
 };
-
-// Muat data saat komponen di-load
-onMounted(() => {
-    loadProfile();
-});
 </script>
 
 <template>
     <div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md">
         <h1 class="text-2xl font-bold text-gray-800 mb-6">Pengaturan Profil Website</h1>
 
-        <form @submit.prevent="saveProfile" class="space-y-6">
+        <form class="space-y-6" @submit.prevent="saveProfile">
             <!-- Informasi Dasar -->
             <div class="space-y-4">
                 <h2 class="text-xl font-semibold text-gray-700 border-b pb-2">Informasi Dasar</h2>
 
                 <div>
                     <label for="siteName" class="block text-sm font-medium text-gray-700">Nama Website</label>
-                    <input v-model="profile.siteName" type="text" id="siteName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Nama website Anda" />
+                    <input id="siteName" v-model="profile.siteName" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Nama website Anda" />
                 </div>
 
                 <div>
                     <label for="siteDescription" class="block text-sm font-medium text-gray-700">Deskripsi Website</label>
                     <textarea
-                        v-model="profile.siteDescription"
                         id="siteDescription"
+                        v-model="profile.siteDescription"
                         rows="3"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         placeholder="Deskripsi singkat tentang website Anda"
@@ -122,7 +121,7 @@ onMounted(() => {
 
                 <div>
                     <label for="logoUrl" class="block text-sm font-medium text-gray-700">URL Logo</label>
-                    <input v-model="profile.logoUrl" type="url" id="logoUrl" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="https://example.com/logo.png" />
+                    <input id="logoUrl" v-model="profile.logoUrl" type="url" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="https://example.com/logo.png" />
                     <div v-if="profile.logoUrl" class="mt-2">
                         <p class="text-sm text-gray-500">Pratinjau Logo:</p>
                         <img :src="profile.logoUrl" alt="Logo Preview" class="h-16 mt-1" />
@@ -136,19 +135,19 @@ onMounted(() => {
 
                 <div>
                     <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                    <input v-model="profile.contact.email" type="email" id="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="contact@example.com" />
+                    <input id="email" v-model="profile.contact.email" type="email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="contact@example.com" />
                 </div>
 
                 <div>
                     <label for="phone" class="block text-sm font-medium text-gray-700">Telepon</label>
-                    <input v-model="profile.contact.phone" type="tel" id="phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="+62 123 4567 890" />
+                    <input id="phone" v-model="profile.contact.phone" type="tel" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="+62 123 4567 890" />
                 </div>
 
                 <div>
                     <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
                     <textarea
-                        v-model="profile.contact.address"
                         id="address"
+                        v-model="profile.contact.address"
                         rows="2"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         placeholder="Alamat fisik perusahaan/organisasi"
@@ -163,7 +162,7 @@ onMounted(() => {
                 <div v-for="(social, index) in profile.socialMedia" :key="index" class="flex items-end space-x-4">
                     <div class="flex-1">
                         <label :for="'socialPlatform' + index" class="block text-sm font-medium text-gray-700">Platform</label>
-                        <select v-model="social.platform" :id="'socialPlatform' + index" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <select :id="'socialPlatform' + index" v-model="social.platform" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="">Pilih Platform</option>
                             <option value="facebook">Facebook</option>
                             <option value="twitter">Twitter/X</option>
@@ -178,13 +177,13 @@ onMounted(() => {
 
                     <div class="flex-1">
                         <label :for="'socialUrl' + index" class="block text-sm font-medium text-gray-700">URL/Username</label>
-                        <input v-model="social.url" type="text" :id="'socialUrl' + index" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Username atau URL lengkap" />
+                        <input :id="'socialUrl' + index" v-model="social.url" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Username atau URL lengkap" />
                     </div>
 
-                    <button type="button" @click="removeSocial(index)" class="mb-1 px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition">Hapus</button>
+                    <button type="button" class="mb-1 px-3 py-1 bg-red-100 text-red-700 rounded-md hover:bg-red-200 transition" @click="removeSocial(index)">Hapus</button>
                 </div>
 
-                <button type="button" @click="addSocial" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition flex items-center">
+                <button type="button" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition flex items-center" @click="addSocial">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
                     </svg>
@@ -199,8 +198,8 @@ onMounted(() => {
                 <div>
                     <label for="businessHours" class="block text-sm font-medium text-gray-700">Jam Operasional</label>
                     <textarea
-                        v-model="profile.businessHours"
                         id="businessHours"
+                        v-model="profile.businessHours"
                         rows="2"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         placeholder="Contoh: Senin-Jumat: 08:00-17:00"
@@ -210,8 +209,8 @@ onMounted(() => {
                 <div>
                     <label for="privacyPolicy" class="block text-sm font-medium text-gray-700">Kebijakan Privasi</label>
                     <textarea
-                        v-model="profile.privacyPolicy"
                         id="privacyPolicy"
+                        v-model="profile.privacyPolicy"
                         rows="3"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         placeholder="Ringkasan kebijakan privasi atau link ke halaman lengkap"
@@ -221,8 +220,8 @@ onMounted(() => {
                 <div>
                     <label for="termsConditions" class="block text-sm font-medium text-gray-700">Syarat & Ketentuan</label>
                     <textarea
-                        v-model="profile.termsConditions"
                         id="termsConditions"
+                        v-model="profile.termsConditions"
                         rows="3"
                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         placeholder="Ringkasan syarat dan ketentuan atau link ke halaman lengkap"
@@ -232,7 +231,7 @@ onMounted(() => {
 
             <!-- Tombol Aksi -->
             <div class="flex justify-end space-x-4 pt-4">
-                <button type="button" @click="resetForm" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition">Reset</button>
+                <button type="button" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition" @click="resetForm">Reset</button>
                 <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition">Simpan Profil</button>
             </div>
         </form>

@@ -37,7 +37,7 @@ const steps = [
             <h2 class="section-title">Bagaimana Cara Verifikasi?</h2>
 
             <div class="steps-container">
-                <div class="step-card" v-for="(step, index) in steps" :key="index">
+                <div v-for="(step, index) in steps" :key="index" class="step-card">
                     <div class="step-number">{{ index + 1 }}</div>
                     <div class="step-icon" :class="step.iconClass">
                         <component :is="icons[step.iconName]" />

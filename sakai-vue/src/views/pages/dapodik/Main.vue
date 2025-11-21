@@ -29,7 +29,7 @@ const namaRoute = computed(() => route.meta.namaRoute);
             </div>
             <div class="md:flex md:items-center">
                 <!-- <div class="min-w-32">Tahun Pelajaran</div> -->
-                <SemesterComponent v-model="selectedSemester" :isDisabled="isDisabled" />
+                <SemesterComponent v-model="selectedSemester" :is-disabled="isDisabled" />
             </div>
         </div>
         <div class="card">

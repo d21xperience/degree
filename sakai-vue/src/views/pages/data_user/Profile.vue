@@ -1,252 +1,256 @@
-<script setup>
-import DatePicker from 'primevue/datepicker';
-
-import { onMounted, ref } from 'vue';
-import { useStore } from 'vuex';
-const store = useStore();
-// ==========[PROFILE]-----------
-const fetchUserProfile = async () => {
-    try {
-        const userId = store.state.authService.user?.userId;
-        if (!userId) throw new Error('User ID not found');
-        // Dispatch untuk mendapatkan profil pengguna
-        await store.dispatch('authService/getUserProfile', userId);
-
-        // Ambil data terbaru dari store
-        akun.value = store.getters['authService/getUserProfile'];
-    } catch (error) {
-        console.error('Failed to fetch user profile:', error.message);
-    }
-};
-const showUpdateProfile = async () => {
-    try {
-        await store.dispatch('authService/updateUserProfile', akun.value);
-    } catch (error) {
-        console.log(error);
-    }
-};
-
-onMounted(fetchUserProfile);
-// ==============================
-// State untuk menyimpan file yang dipilih
-const selectedFile = ref(null);
-// Biodata
-// const akun = computed(() => store.getters["authService/getUserProfile"])
-const akun = ref({
-    userId: '',
-    username: '',
-    email: '',
-    role: '',
-    sekolahId: '',
-    nama: '',
-    jk: '',
-    phone: '',
-    tptLahir: '',
-    tglLahir: '',
-    alamatJalan: '',
-    kotaKab: '',
-    prov: '',
-    kodePos: '',
-    namaAyah: '',
-    namaIbu: ''
-    // photo_url: "@/assets/default_profile.jpg"
-});
-const isProfileEdit = ref(false);
-const editProfile = () => {
-    isProfileEdit.value = !isProfileEdit.value;
-};
-// const 'p-inputtext' = ref('edit')
-// const editProfileClass = ref('tes')
-
-const fileInput = ref(null);
-const previewPhoto = ref(null);
-
-// Data pengguna (contoh akun dengan photo_url dari backend)
-// const akun = ref({
-//     photo_url: "https://via.placeholder.com/150" // Ganti dengan URL default atau dari backend
-// });
-
-// Trigger input file saat ikon kamera diklik
-const triggerFileInput = () => {
-    fileInput.value.click();
-};
-
-// Handle file yang dipilih oleh pengguna
-const handleFileSelect = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        // Tampilkan preview foto sebelum upload
-        previewPhoto.value = URL.createObjectURL(file);
-
-        // Kirim ke backend
-        uploadPhoto(file);
-    }
-};
-
-// Upload foto ke backend
-const uploadPhoto = async (file) => {
-    const formData = new FormData();
-    formData.append('photo', file);
-
-    try {
-        const response = await axios.post('http://localhost:8080/api/upload/photo', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
-        });
-
-        // Update photo_url dengan respons dari server
-        akun.value.photo_url = response.data.photo_url;
-    } catch (error) {
-        console.error('Gagal upload foto:', error);
-    }
-};
-</script>
-
 <template>
-    <div>
-        <div class="">
-            <div class="">
-                <div class="flex justify-end">
-                    <button @click="editProfile" class="hover:text-red-500" :class="{ editProfileClass: isProfileEdit }"><i class="pi pi-user-edit" style="font-size: 1.5rem"></i></button>
+    <div class="profile-container p-4">
+        <Card class="max-w-4xl mx-auto">
+            <template #title>
+                <div class="flex items-center gap-3">
+                    <i class="pi pi-user text-2xl"></i>
+                    <span>Profile Pengguna</span>
                 </div>
-                <div class="grid grid-cols-2">
-                    <div class="flex justify-center">
-                        <div class=" ">
-                            <div class="relative">
-                                <!-- Foto Profil -->
-                                <img alt="Profile picture" class="w-32 h-32 rounded-full block border" height="150" :src="previewPhoto || akun.photo_url" width="150" />
+            </template>
 
-                                <!-- Overlay untuk Upload -->
-                                <div class="absolute w-full h-full top-0 left-0 flex items-center justify-center opacity-0 rounded-full hover:opacity-100 bg-black bg-opacity-50 text-gray-100 transition ease-in-out duration-500">
-                                    <i @click="triggerFileInput" class="pi pi-camera cursor-pointer" style="font-size: 1.5rem"></i>
-                                </div>
+            <template #content>
+                <!-- Header Profile -->
+                <div class="flex flex-col md:flex-row items-center gap-6 mb-8">
+                    <div class="relative">
+                        <Avatar :image="userData.avatar" :label="userData.avatar ? '' : userData.name.charAt(0)" size="xlarge" class="bg-primary-500 text-white text-2xl" shape="circle" />
+                        <Button icon="pi pi-camera" class="absolute bottom-0 right-0 w-8 h-8" severity="secondary" @click="changeAvatar" />
+                    </div>
 
-                                <!-- Input File (Disembunyikan) -->
-                                <input ref="fileInput" type="file" accept="image/*" style="display: none" @change="handleFileSelect" />
-                            </div>
-                            <div class="text-center">
-                                <h1 class="text-2xl font-bold">
-                                    {{ akun.username }}
-                                </h1>
-                                <p class="text-gray-600">
-                                    {{ akun.role.toUpperCase() }}
-                                </p>
-                            </div>
+                    <div class="text-center md:text-left">
+                        <h2 class="text-2xl font-bold mb-2">{{ userData.name }}</h2>
+                        <p class="text-gray-600 mb-2">{{ userData.email }}</p>
+                        <Chip :label="userData.role" class="bg-primary-100 text-primary-800" />
+                    </div>
+                </div>
+
+                <!-- Form Edit Profile -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Kolom Kiri -->
+                    <div class="space-y-4">
+                        <div class="field">
+                            <label for="name" class="font-semibold block mb-2">Nama Lengkap</label>
+                            <InputText id="name" v-model="userData.name" class="w-full" placeholder="Masukkan nama lengkap" />
+                        </div>
+
+                        <div class="field">
+                            <label for="email" class="font-semibold block mb-2">Email</label>
+                            <InputText id="email" v-model="userData.email" class="w-full" placeholder="Masukkan email" type="email" />
+                        </div>
+
+                        <div class="field">
+                            <label for="phone" class="font-semibold block mb-2">Nomor Telepon</label>
+                            <InputText id="phone" v-model="userData.phone" class="w-full" placeholder="Masukkan nomor telepon" />
                         </div>
                     </div>
+
+                    <!-- Kolom Kanan -->
+                    <div class="space-y-4">
+                        <div class="field">
+                            <label for="department" class="font-semibold block mb-2">Departemen</label>
+                            <Dropdown id="department" v-model="userData.department" :options="departments" option-label="name" placeholder="Pilih departemen" class="w-full" />
+                        </div>
+
+                        <div class="field">
+                            <label for="position" class="font-semibold block mb-2">Posisi</label>
+                            <InputText id="position" v-model="userData.position" class="w-full" placeholder="Masukkan posisi" />
+                        </div>
+
+                        <div class="field">
+                            <label for="joinDate" class="font-semibold block mb-2">Tanggal Bergabung</label>
+                            <Calendar id="joinDate" v-model="userData.joinDate" class="w-full" date-format="dd/mm/yy" show-icon />
+                            <!-- show-icon /> -->
+                        </div>
+                    </div>
+
+                    <!-- Bio Section -->
                     <div class="mt-6">
-                        <h2 class="text-xl font-semibold">Personal Information</h2>
-                        <div class="mt-4">
-                            <p>
-                                <span class="font-bold"> Email: </span>
-                                {{ akun.email }}
-                            </p>
-                            <p>
-                                <span class="font-bold"> Phone: </span>
-                                +123 456 7890
-                            </p>
-                            <div>
-                                <span class="font-bold"> Nama: </span>
-                                <div class="inline-block">
-                                    <div v-if="isProfileEdit">
-                                        {{ akun.nama }}
-                                    </div>
-                                    <div v-else>
-                                        {{ akun.nama }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div>
-                                <span class="font-bold"> Tanggal Lahir: </span>
-                                <div class="inline-block">
-                                    <div v-if="isProfileEdit">
-                                        <DatePicker v-model="akun.tglLahir" dateFormat="dd/mm/yy" :inputClass="{ dateClass: isProfileEdit }" />
-                                    </div>
-                                    <div v-else>
-                                        {{ akun.tglLahir }}
-                                    </div>
-                                </div>
-                            </div>
+                        <label for="bio" class="font-semibold block mb-2">Bio</label>
+                        <Textarea id="bio" v-model="userData.bio" rows="3" class="w-full" placeholder="Ceritakan sedikit tentang diri Anda..." />
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex gap-3 justify-end mt-6 pt-6 border-t">
+                        <Button label="Batal" severity="secondary" outlined @click="resetForm" />
+                        <Button label="Simpan Perubahan" icon="pi pi-check" :loading="loading" @click="saveProfile" />
+                    </div>
+                </div>
+            </template>
+        </Card>
+
+        <!-- Additional Info Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6 max-w-4xl mx-auto">
+            <Card>
+                <template #title>
+                    <div class="flex items-center gap-2">
+                        <i class="pi pi-chart-line text-primary-500"></i>
+                        <span>Statistik</span>
+                    </div>
+                </template>
+                <template #content>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span>Projects</span>
+                            <span class="font-semibold">12</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Tasks</span>
+                            <span class="font-semibold">47</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Completed</span>
+                            <span class="font-semibold">38</span>
                         </div>
                     </div>
-                </div>
-                <h5 class=" ">Alamat</h5>
-                <div class="grid md:grid-cols-2 md:space-x-2 lg:grid-cols-4 lg:space-x-2">
-                    <div>
-                        <span class=""> Nama Jalan: </span>
-                        <InputText fluid type="text" name="nama-jalan" id="nama-jalan" v-model="akun.alamatJalan" :class="{ 'p-inputtext': isProfileEdit }" />
-                        <!-- 123 Main St -->
+                </template>
+            </Card>
+
+            <Card>
+                <template #title>
+                    <div class="flex items-center gap-2">
+                        <i class="pi pi-cog text-primary-500"></i>
+                        <span>Pengaturan</span>
                     </div>
-                    <div>
-                        <span class=""> Kota/Kab: </span>
-                        <InputText fluid type="text" name="kota-kab" id="kota-kab" v-model="akun.kotaKab" :class="{ 'p-inputtext': isProfileEdit }" />
+                </template>
+                <template #content>
+                    <div class="space-y-2">
+                        <Button label="Ubah Password" icon="pi pi-key" text class="w-full justify-start" />
+                        <Button label="Preferensi Notifikasi" icon="pi pi-bell" text class="w-full justify-start" />
+                        <Button label="Privasi & Keamanan" icon="pi pi-shield" text class="w-full justify-start" />
                     </div>
-                    <div>
-                        <span class=""> Provinsi: </span>
-                        <InputText fluid type="text" name="prov" id="prov" v-model="akun.prov" :class="{ 'p-inputtext': isProfileEdit }" />
+                </template>
+            </Card>
+
+            <Card>
+                <template #title>
+                    <div class="flex items-center gap-2">
+                        <i class="pi pi-info-circle text-primary-500"></i>
+                        <span>Informasi</span>
                     </div>
-                    <div>
-                        <span class=""> Kode Pos: </span>
-                        <InputText fluid type="text" name="kodepos" id="kodepos" v-model="akun.kodePos" :class="{ 'p-inputtext': isProfileEdit }" />
-                    </div>
-                    <!-- <div class="mt-6">
-                        <h2 class="text-xl font-semibold">Orang tua</h2>
-                        <div class="mt-4">
-                            <p>
-                                <span class="font-bold"> Nama Ayah: </span>
-                                <input type="text" name="tgl-lahir" id="nm-ayah" v-model="akun.namaAyah" :class="{ 'p-inputtext': isProfileEdit }" />
-                            </p>
-                            <p>
-                                <span class="font-bold"> Nama Ibu: </span>
-                                <input type="text" name="tgl-lahir" id="nama-ibu" v-model="akun.namaIbu" :class="{ 'p-inputtext': isProfileEdit }" />
-                            </p>
+                </template>
+                <template #content>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Status</span>
+                            <Tag value="Aktif" severity="success" />
                         </div>
-                    </div> -->
-                </div>
-            </div>
-        </div>
-        <h5 class=" ">Riwayat Pendidikan</h5>
-        <section class="grid grid-cols-2 space-x-2">
-            <!-- <div class="mr-2">
-                <label for="email">TK</label>
-                <InputText class="w-full" type="email" name="email" id="email" />
-            </div> -->
-            <div>
-                <label for="email">SD</label>
-                <InputText class="w-full" type="email" name="email" id="email" />
-            </div>
-            <div>
-                <label for="password">SMP</label>
-                <InputText class="w-full" type="password" name="password" id="password" />
-            </div>
-        </section>
-        <h5 class=" ">Change email & password</h5>
-        <section class="mt-2">
-            <div class="flex justify-between space-x-2">
-                <div class="w-1/2">
-                    <label for="email">Email</label>
-                    <InputText class="w-full" type="email" name="email" id="email" />
-                </div>
-                <div class="w-1/2">
-                    <label for="password">Password</label>
-                    <InputText class="w-full" type="password" name="password" id="password" />
-                </div>
-            </div>
-        </section>
-        <div v-show="isProfileEdit" class="flex space-x-4 mt-16">
-            <Button label="Simpan" class="min-w-32 mr-2" @click="showUpdateProfile" />
-            <Button label="Batal" severity="warn" class="min-w-32" @click="editProfile" />
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Terakhir Login</span>
+                            <span>2 jam yang lalu</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Member sejak</span>
+                            <span>Jan 2023</span>
+                        </div>
+                    </div>
+                </template>
+            </Card>
         </div>
     </div>
 </template>
 
+<script setup>
+import { useToast } from 'primevue/usetoast';
+import { reactive, ref } from 'vue';
+
+// Components PrimeVue
+import Avatar from 'primevue/avatar';
+import Button from 'primevue/button';
+import Calendar from 'primevue/calendar';
+import Card from 'primevue/card';
+import Chip from 'primevue/chip';
+import Dropdown from 'primevue/dropdown';
+import InputText from 'primevue/inputtext';
+import Tag from 'primevue/tag';
+import Textarea from 'primevue/textarea';
+
+const toast = useToast();
+const loading = ref(false);
+
+// Data user
+const userData = reactive({
+    name: 'John Doe',
+    email: 'john.doe@example.com',
+    phone: '+62 812-3456-7890',
+    department: null,
+    position: 'Senior Developer',
+    joinDate: new Date('2023-01-15'),
+    bio: 'Full-stack developer dengan pengalaman 5+ tahun dalam pengembangan web application.',
+    role: 'Administrator',
+    avatar: null
+});
+
+// Options untuk dropdown
+const departments = ref([
+    { name: 'IT & Development', code: 'IT' },
+    { name: 'Human Resources', code: 'HR' },
+    { name: 'Marketing', code: 'MKT' },
+    { name: 'Finance', code: 'FIN' },
+    { name: 'Operations', code: 'OPS' }
+]);
+
+// Set default department
+userData.department = departments.value[0];
+
+// Methods
+const changeAvatar = () => {
+    toast.add({
+        severity: 'info',
+        summary: 'Info',
+        detail: 'Fitur upload avatar akan segera tersedia',
+        life: 3000
+    });
+};
+
+const saveProfile = async () => {
+    loading.value = true;
+
+    // Simulate API call
+    try {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        toast.add({
+            severity: 'success',
+            summary: 'Berhasil',
+            detail: 'Profile berhasil diperbarui',
+            life: 3000
+        });
+    } catch (error) {
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Gagal memperbarui profile',
+            life: 3000
+        });
+    } finally {
+        loading.value = false;
+    }
+};
+
+const resetForm = () => {
+    // Reset logic here
+    toast.add({
+        severity: 'info',
+        summary: 'Info',
+        detail: 'Form telah direset',
+        life: 3000
+    });
+};
+</script>
+
 <style scoped>
-.p-inputext {
-    padding: 0;
+.profile-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.editProfileClass {
-    color: red;
+:deep(.p-card) {
+    box-shadow:
+        0 10px 25px -5px rgba(0, 0, 0, 0.1),
+        0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+:deep(.p-avatar) {
+    border: 4px solid white;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 </style>

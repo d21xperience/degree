@@ -5,6 +5,13 @@ import { onMounted, ref, watchEffect } from 'vue';
 const scService = useSCService();
 const networkSelected = ref(null);
 const platformSelected = ref(null);
+
+onMounted(async () => {
+    isConnected.value = await scService.getBCConnected();
+    console.log(isConnected.value);
+    // platforms.value = await scService.fetchNetworkPlatform();
+});
+
 // const isConnected = ref(false);
 watchEffect(async () => {
     platformSelected.value = await scService.getNetowrkPlatform();
@@ -28,11 +35,6 @@ const handleConnect = async () => {
     // console.log(response)
 };
 const { isConnected } = useWebSocket('ws://localhost:8080/ws');
-onMounted(async () => {
-    isConnected.value = await scService.getBCConnected();
-    console.log(isConnected.value);
-    // platforms.value = await scService.fetchNetworkPlatform();
-});
 
 // // Cleanup WebSocket on component unmount
 // onBeforeUnmount(() => {
@@ -69,12 +71,12 @@ onMounted(async () => {
             <RouterView />
         </div>
 
-        <Dialog header="Connect" v-model:visible="isShowConnected" position="top">
+        <Dialog v-model:visible="isShowConnected" header="Connect" position="top">
             <div>Hubungkan ke platform {{ platformSelected.name }} dengan jaringan {{ networkSelected.Name }} ?</div>
             <template #footer>
                 <div class="space-x-2">
-                    <Button label="Ya" @click="handleConnect" class="w-24" />
-                    <Button severity="help" label="Config" @click="handleCancel" icon="pi pi-cog" class="w-24" />
+                    <Button label="Ya" class="w-24" @click="handleConnect" />
+                    <Button severity="help" label="Config" icon="pi pi-cog" class="w-24" @click="handleCancel" />
                 </div>
             </template>
         </Dialog>

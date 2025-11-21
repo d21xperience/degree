@@ -173,18 +173,19 @@ func local_request_UserService_CreateUser_0(ctx context.Context, marshaler runti
 	return msg, metadata, err
 }
 
-var filter_UserService_GetUser_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-
 func request_UserService_GetUser_0(ctx context.Context, marshaler runtime.Marshaler, client UserServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq GetUserRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok := pathParams["id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_UserService_GetUser_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	protoReq.Id, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 	msg, err := client.GetUser(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -194,12 +195,15 @@ func local_request_UserService_GetUser_0(ctx context.Context, marshaler runtime.
 	var (
 		protoReq GetUserRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok := pathParams["id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "id")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_UserService_GetUser_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	protoReq.Id, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "id", err)
 	}
 	msg, err := server.GetUser(ctx, &protoReq)
 	return msg, metadata, err
@@ -237,18 +241,19 @@ func local_request_UserService_ListUsers_0(ctx context.Context, marshaler runtim
 	return msg, metadata, err
 }
 
-var filter_UserProfileService_GetProfile_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-
 func request_UserProfileService_GetProfile_0(ctx context.Context, marshaler runtime.Marshaler, client UserProfileServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq GetProfileRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok := pathParams["user_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_UserProfileService_GetProfile_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	protoReq.UserId, err = runtime.Int64(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 	msg, err := client.GetProfile(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -258,12 +263,15 @@ func local_request_UserProfileService_GetProfile_0(ctx context.Context, marshale
 	var (
 		protoReq GetProfileRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok := pathParams["user_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_UserProfileService_GetProfile_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	protoReq.UserId, err = runtime.Int64(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 	msg, err := server.GetProfile(ctx, &protoReq)
 	return msg, metadata, err
@@ -273,9 +281,18 @@ func request_UserProfileService_UpdateProfile_0(ctx context.Context, marshaler r
 	var (
 		protoReq UpdateProfileRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	val, ok := pathParams["user_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
+	}
+	protoReq.UserId, err = runtime.Int64(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 	msg, err := client.UpdateProfile(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -285,26 +302,36 @@ func local_request_UserProfileService_UpdateProfile_0(ctx context.Context, marsh
 	var (
 		protoReq UpdateProfileRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil && !errors.Is(err, io.EOF) {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+	val, ok := pathParams["user_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
+	}
+	protoReq.UserId, err = runtime.Int64(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 	msg, err := server.UpdateProfile(ctx, &protoReq)
 	return msg, metadata, err
 }
 
-var filter_UserProfileService_GetProfilePhoto_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-
 func request_UserProfileService_GetProfilePhoto_0(ctx context.Context, marshaler runtime.Marshaler, client UserProfileServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
 		protoReq GetProfilePhotoRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok := pathParams["user_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_UserProfileService_GetProfilePhoto_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	protoReq.UserId, err = runtime.Int64(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 	msg, err := client.GetProfilePhoto(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
@@ -314,12 +341,15 @@ func local_request_UserProfileService_GetProfilePhoto_0(ctx context.Context, mar
 	var (
 		protoReq GetProfilePhotoRequest
 		metadata runtime.ServerMetadata
+		err      error
 	)
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	val, ok := pathParams["user_id"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "user_id")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_UserProfileService_GetProfilePhoto_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	protoReq.UserId, err = runtime.Int64(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "user_id", err)
 	}
 	msg, err := server.GetProfilePhoto(ctx, &protoReq)
 	return msg, metadata, err
@@ -663,7 +693,7 @@ func RegisterUserServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.UserService/GetUser", runtime.WithHTTPPathPattern("/api/v1/as/users/id"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.UserService/GetUser", runtime.WithHTTPPathPattern("/api/v1/as/users/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -713,7 +743,7 @@ func RegisterUserProfileServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.UserProfileService/GetProfile", runtime.WithHTTPPathPattern("/api/v1/as/users/user_id/profile"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.UserProfileService/GetProfile", runtime.WithHTTPPathPattern("/api/v1/as/users/{user_id}/profile"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -733,7 +763,7 @@ func RegisterUserProfileServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.UserProfileService/UpdateProfile", runtime.WithHTTPPathPattern("/api/v1/as/users/user_id/profile"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.UserProfileService/UpdateProfile", runtime.WithHTTPPathPattern("/api/v1/as/users/{user_id}/profile"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -753,7 +783,7 @@ func RegisterUserProfileServiceHandlerServer(ctx context.Context, mux *runtime.S
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.UserProfileService/GetProfilePhoto", runtime.WithHTTPPathPattern("/api/v1/as/users/user_id/profile/photo"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.UserProfileService/GetProfilePhoto", runtime.WithHTTPPathPattern("/api/v1/as/users/{user_id}/profile/photo"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1127,7 +1157,7 @@ func RegisterUserServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/auth.UserService/GetUser", runtime.WithHTTPPathPattern("/api/v1/as/users/id"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/auth.UserService/GetUser", runtime.WithHTTPPathPattern("/api/v1/as/users/{id}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1162,7 +1192,7 @@ func RegisterUserServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux
 
 var (
 	pattern_UserService_CreateUser_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "as", "users"}, ""))
-	pattern_UserService_GetUser_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "as", "users", "id"}, ""))
+	pattern_UserService_GetUser_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4}, []string{"api", "v1", "as", "users", "id"}, ""))
 	pattern_UserService_ListUsers_0  = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "as", "users"}, ""))
 )
 
@@ -1212,7 +1242,7 @@ func RegisterUserProfileServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/auth.UserProfileService/GetProfile", runtime.WithHTTPPathPattern("/api/v1/as/users/user_id/profile"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/auth.UserProfileService/GetProfile", runtime.WithHTTPPathPattern("/api/v1/as/users/{user_id}/profile"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1229,7 +1259,7 @@ func RegisterUserProfileServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/auth.UserProfileService/UpdateProfile", runtime.WithHTTPPathPattern("/api/v1/as/users/user_id/profile"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/auth.UserProfileService/UpdateProfile", runtime.WithHTTPPathPattern("/api/v1/as/users/{user_id}/profile"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1246,7 +1276,7 @@ func RegisterUserProfileServiceHandlerClient(ctx context.Context, mux *runtime.S
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/auth.UserProfileService/GetProfilePhoto", runtime.WithHTTPPathPattern("/api/v1/as/users/user_id/profile/photo"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/auth.UserProfileService/GetProfilePhoto", runtime.WithHTTPPathPattern("/api/v1/as/users/{user_id}/profile/photo"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -1297,9 +1327,9 @@ func RegisterUserProfileServiceHandlerClient(ctx context.Context, mux *runtime.S
 }
 
 var (
-	pattern_UserProfileService_GetProfile_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"api", "v1", "as", "users", "user_id", "profile"}, ""))
-	pattern_UserProfileService_UpdateProfile_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"api", "v1", "as", "users", "user_id", "profile"}, ""))
-	pattern_UserProfileService_GetProfilePhoto_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5, 2, 6}, []string{"api", "v1", "as", "users", "user_id", "profile", "photo"}, ""))
+	pattern_UserProfileService_GetProfile_0           = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "as", "users", "user_id", "profile"}, ""))
+	pattern_UserProfileService_UpdateProfile_0        = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5}, []string{"api", "v1", "as", "users", "user_id", "profile"}, ""))
+	pattern_UserProfileService_GetProfilePhoto_0      = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 1, 0, 4, 1, 5, 4, 2, 5, 2, 6}, []string{"api", "v1", "as", "users", "user_id", "profile", "photo"}, ""))
 	pattern_UserProfileService_UploadProfilePhoto_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5, 2, 6}, []string{"api", "v1", "as", "users", "user_id", "profile", "photo"}, "upload"))
 	pattern_UserProfileService_DownloadProfilePhoto_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5, 2, 6}, []string{"api", "v1", "as", "users", "user_id", "profile", "photo"}, "download"))
 )

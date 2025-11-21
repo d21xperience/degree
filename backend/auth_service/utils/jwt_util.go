@@ -1,51 +1,84 @@
 package utils
 
 import (
+	"auth_service/models"
+	"context"
+	"crypto/rsa"
 	"encoding/hex"
-	"net/http"
+	"errors"
 	"os"
+	"slices"
 	"strings"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
+	// "github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
+	"google.golang.org/grpc/metadata"
 )
 
-var jwtKey = []byte("secret_key")
-
-//	func GenerateJWT(user any, duration time.Duration) (string, error) {
-//		claims := &jwt.StandardClaims{
-//			IssuedAt:  time.Now().Unix(),
-//			ExpiresAt: time.Now().Add(duration).Unix(),
-//		}
-//		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-//		return token.SignedString(jwtKey)
-//	}
-func JWTAuthMiddleware() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		authHeader := ctx.GetHeader("Authorization")
-		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			ctx.Abort()
-			return
-		}
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-			return jwtKey, nil
-		})
-
-		if err != nil || !token.Valid {
-			ctx.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
-			ctx.Abort()
-			return
-		}
-
-		claims := token.Claims.(jwt.MapClaims)
-		ctx.Set("claims", claims)
-
-		ctx.Next()
-	}
+type Claims struct {
+	UserID          int64    `json:"user_id"`
+	Roles           []string `json:"roles"`
+	Username        string   `json:"username"`
+	AsalSekolah     string   `json:"asal_sekolah"`
+	SekolahTenantId int32    `json:"sekolah_tenant_id"`
+	jwt.RegisteredClaims
 }
+
+func ExtractToken(ctx context.Context) (string, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return "", errors.New("no metadata")
+	}
+
+	authHeader := md["authorization"]
+	if len(authHeader) == 0 {
+		return "", errors.New("no auth header")
+	}
+
+	parts := strings.Split(authHeader[0], " ")
+	if len(parts) != 2 || parts[0] != "Bearer" {
+		return "", errors.New("invalid auth header")
+	}
+
+	return parts[1], nil
+}
+
+func ParseAndVerify(tokenStr string, pub *rsa.PublicKey) (*Claims, error) {
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (any, error) {
+		// ensure method is RSA
+		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return pub, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+	// Normalize roles: avoid nil slice
+	if claims.Roles == nil {
+		claims.Roles = []string{}
+	}
+	return claims, nil
+}
+
+// func HasRole(claims *Claims, required string) bool {
+// 	for _, r := range claims.Roles {
+// 		if r == required {
+// 			return true
+// 		}
+// 	}
+// 	return false
+// }
+
+func Contains(r []string, target string) bool {
+	return slices.Contains(r, target)
+}
+
 func GenerateRefreshToken(randRead func([]byte) (int, error)) (string, error) {
 	bytes := make([]byte, 32)
 	_, err := randRead(bytes)
@@ -67,14 +100,40 @@ func LoadPrivateKey(path string) (any, error) {
 	return priv, nil
 }
 
-func GenerateTokenRS256(priv any, userID int64) (string, int64, error) {
+func LoadPublicKey() (*rsa.PublicKey, error) {
+	data, _ := os.ReadFile("config/public.pem")
+	key, _ := jwt.ParseRSAPublicKeyFromPEM(data)
+	return key, nil
+}
+
+func GenerateTokenRS256(priv any, user *models.User, sekolahTenant *models.SekolahTenant) (string, int64, error) {
 	now := time.Now().UTC()
 	exp := now.Add(2 * time.Hour)
 	claims := jwt.MapClaims{
-		"user_id": userID,
-		"exp":     exp.Unix(),
+		"user_id":           user.ID, //fmt.Sprintf("%d", user.ID),
+		"roles":             []string{user.Role},
+		"exp":               exp.Unix(),
+		"username":          user.Username,
+		"asal_sekolah":      sekolahTenant.NamaSekolah,
+		"sekolah_tenant_id": sekolahTenant.ID,
 	}
 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	s, err := t.SignedString(priv)
 	return s, exp.Unix(), err
 }
+
+// func ParseToken(tokenStr string, pubKey *rsa.PublicKey) (*Claims, error) {
+// 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+// 		return pubKey, nil
+// 	})
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	claims, ok := token.Claims.(*Claims)
+// 	if !ok || !token.Valid {
+// 		return nil, errors.New("invalid token")
+// 	}
+
+// 	return claims, nil
+// }

@@ -46,7 +46,7 @@ onMounted(() => {
 
     <FloatLabel variant="on">
         <IconField>
-            <AutoComplete optionLabel="nama_sekolah" v-model="internalValue" :suggestions="sekolahOptions" @complete="search" fluid @keydown.space.prevent="handleKeydown" :loading="loading" />
+            <AutoComplete v-model="internalValue" option-label="nama_sekolah" :suggestions="sekolahOptions" fluid :loading="loading" @complete="search" @keydown.space.prevent="handleKeydown" />
             <InputIcon class="pi pi-building-columns" />
         </IconField>
         <label>NPSN/Nama Sekolah</label>

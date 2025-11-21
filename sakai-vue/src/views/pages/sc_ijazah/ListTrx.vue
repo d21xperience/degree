@@ -5,6 +5,10 @@ import { onMounted, ref } from 'vue';
 const scService = useSCService();
 
 const bcTransactions = ref();
+onMounted(async () => {
+    bcTransactions.value = await scService.getBCTransaction();
+    console.log(bcTransactions.value);
+});
 // const fetchTransaksi = async () => {
 //     try {
 //         let payload = {
@@ -22,22 +26,18 @@ const bcTransactions = ref();
 // watch(tahunAjaranId, async (newVal) => {
 //     await fetchTransaksi()
 // })
-onMounted(async () => {
-    bcTransactions.value = await scService.getBCTransaction();
-    console.log(bcTransactions.value);
-});
 </script>
 <template>
     <div class="p2 my-2">
         <div>
-            <DataTable stripedRows :value="bcTransactions">
-                <Column field="ijazah.nama" header="Nama"></Column>
-                <Column field="degreeHash" header="Degree Hash"></Column>
-                <Column field="txHash" header="Trx Hash"></Column>
+            <DataTable striped-rows :value="bcTransactions">
+                <Column field="ijazah.nama" header="Nama" />
+                <Column field="degreeHash" header="Degree Hash" />
+                <Column field="txHash" header="Trx Hash" />
                 <!-- <Column field="bcType" header="BC Type"></Column> -->
-                <Column field="ipfsUrl" header="IPFS URL"></Column>
-                <Column field="ipfsUrl" header="BC URL"></Column>
-                <Column header="Created"></Column>
+                <Column field="ipfsUrl" header="IPFS URL" />
+                <Column field="ipfsUrl" header="BC URL" />
+                <Column header="Created" />
             </DataTable>
         </div>
         <Toast />

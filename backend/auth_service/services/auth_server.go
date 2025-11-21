@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"auth_service/config"
@@ -74,10 +73,18 @@ func (s *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*p
 		return nil, status.Error(codes.Unauthenticated, "Username/email atau password salah")
 	}
 
-	token, exp, err := utils.GenerateTokenRS256(s.pvKey, user.ID)
+	// Ambil data Sekolah
+	asalSekolah, err := s.repoSekolah.GetSekolahByTenantId(user.SekolahTenantID)
+	if err != nil {
+		log.Printf("Error fetching sekolahTenant: %v", err)
+		return nil, status.Error(codes.NotFound, "Sekolah tidak ditemukan")
+	}
+
+	token, exp, err := utils.GenerateTokenRS256(s.pvKey, user, asalSekolah)
 	if err != nil {
 		log.Printf("token gen error: %v", err)
-		return nil, fmt.Errorf("token gen error")
+		// return nil, fmt.Errorf("token gen error")
+		return nil, status.Error(codes.Internal, "token gen error")
 	}
 	return &pb.LoginResponse{
 		AccessToken: token,

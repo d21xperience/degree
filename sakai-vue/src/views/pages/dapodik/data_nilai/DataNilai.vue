@@ -121,25 +121,25 @@ const loadSiswaAktif = async () => {
         <Toolbar>
             <template #start>
                 <div class="w-56">
-                    <KelasComponent class="mr-2" v-model="kelasSelected" />
+                    <KelasComponent v-model="kelasSelected" class="mr-2" />
                 </div>
                 <div v-show="!!kelasSelected" class="ml-1 flex space-x-1">
                     <!-- <Button icon="pi pi-plus" severity="success" class="text-lg" @click="openNew" v-tooltip.bottom="'Tambah Siswa'" :loading="isOpenNew" /> -->
                     <!-- <Button icon="pi pi-pencil" severity="warn" @click="editNilai" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 2" class="" v-tooltip.bottom="'Edit nilai'" :loading="loadingEdit" /> -->
                     <!-- <Button icon="pi pi-trash" severity="danger" class="text-lg" @click="deleteSiswaDialog = true" :disabled="!selectedSiswa || !selectedSiswa.length" v-tooltip.bottom="'Hapus Nilai'" /> -->
-                    <Button icon="pi pi-upload" severity="warn" @click="exportCSV($event)" class="text-sm" v-tooltip.bottom="'Import Nilai'" />
+                    <Button v-tooltip.bottom="'Import Nilai'" icon="pi pi-upload" severity="warn" class="text-sm" @click="exportCSV($event)" />
                 </div>
             </template>
             <template #end>
                 <div v-show="!!kelasSelected" class="mr-1">
                     <IconField>
                         <InputIcon>
-                            <i class="pi pi-search" />
+                            <i class="pi pi-search"></i>
                         </InputIcon>
                         <InputText v-model="filters['global'].value" placeholder="Search..." :disabled="!dataNilaiSiswa || (Array.isArray(dataNilaiSiswa) && !dataNilaiSiswa.length > 0)" />
                     </IconField>
                 </div>
-                <Button icon="pi pi-refresh" severity="help" class="mr-2 text-lg" @click="loadSiswaAktif" v-tooltip.bottom="'Refresh'" v-show="!!kelasSelected" />
+                <Button v-show="!!kelasSelected" v-tooltip.bottom="'Refresh'" icon="pi pi-refresh" severity="help" class="mr-2 text-lg" @click="loadSiswaAktif" />
             </template>
         </Toolbar>
         <div v-if="!kelasSelected" class="flex justify-center h-32 items-center">
@@ -149,18 +149,18 @@ const loadSiswaAktif = async () => {
             v-else
             ref="dt"
             v-model:expandedRows="expandedRows"
-            stripedRows
+            striped-rows
             size="small"
             :value="dataNilaiSiswa"
-            @rowExpand="onRowExpand"
-            @rowCollapse="onRowCollapse"
-            dataKey="pesertaDidikId"
+            data-key="pesertaDidikId"
             :paginator="true"
             :rows="10"
             :filters="filters"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rowsPerPageOptions="[10, 20, 50]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} siswa"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rows-per-page-options="[10, 20, 50]"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} siswa"
+            @row-expand="onRowExpand"
+            @row-collapse="onRowCollapse"
         >
             <template #header>
                 <div class="flex flex-wrap justify-end gap-2">
@@ -172,9 +172,9 @@ const loadSiswaAktif = async () => {
                 <p class="flex justify-center text-xl">Data Tidak ditemukan.</p>
             </template>
             <Column expander style="width: 5rem" />
-            <Column field="nmSiswa" header="Nama" sortable></Column>
-            <Column field="tingkatPendidikanId" header="Tingkat"></Column>
-            <Column field="nmKelas" header="Nama Kelas"></Column>
+            <Column field="nmSiswa" header="Nama" sortable />
+            <Column field="tingkatPendidikanId" header="Tingkat" />
+            <Column field="nmKelas" header="Nama Kelas" />
             <Column field="" header="Aksi">
                 <template #body="{ data }">
                     <Button icon="pi pi-trash" outlined rounded class="mr-2" @click="editNilai(data)" />
@@ -216,7 +216,7 @@ const loadSiswaAktif = async () => {
 
         <!-- import data -->
         <!-- DIALOG IMPORT -->
-        <DialogImport v-model:visible="isDialogImport" @save="saveImport" @cancel="cancelImport" template-type="nilai" />
+        <DialogImport v-model:visible="isDialogImport" template-type="nilai" @save="saveImport" @cancel="cancelImport" />
 
         <!-- end of import data -->
         <LoadingOverlay :visible="isLoading"> Memuat data, harap tunggu... </LoadingOverlay>

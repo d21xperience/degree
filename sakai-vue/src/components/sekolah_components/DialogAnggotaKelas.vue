@@ -40,31 +40,31 @@ const isErr = ref(false);
             <DataTable
                 ref="dt"
                 v-model:selection="selectedKelas"
-                stripedRows
+                striped-rows
                 size="small"
                 :value="kelasList"
                 scrollable
-                scrollHeight="400px"
-                dataKey="rombonganBelajarId"
+                scroll-height="400px"
+                data-key="rombonganBelajarId"
                 :paginator="true"
                 :rows="10"
                 :filters="filters"
-                tableStyle="min-width: 50rem"
-                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                :rowsPerPageOptions="[10, 20, 30]"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} kelas"
+                table-style="min-width: 50rem"
+                paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                :rows-per-page-options="[10, 20, 30]"
+                current-page-report-template="Showing {first} to {last} of {totalRecords} kelas"
                 class="mt-2"
             >
-                <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-                <Column field="nmKelas" header="Nama Siswa"></Column>
-                <Column field="tingkatPendidikanId" header="Jk" sortable></Column>
-                <Column field="kurikulum.namaKurikulum" header="nis"></Column>
+                <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
+                <Column field="nmKelas" header="Nama Siswa" />
+                <Column field="tingkatPendidikanId" header="Jk" sortable />
+                <Column field="kurikulum.namaKurikulum" header="nis" />
                 <!-- Jika SMK/MAK Program Keahlian & Kompetensi Keahlian akan muncul-->
                 <div v-if="['smk', 'mak'].includes(bentukPendidikan)">
-                    <Column field="namaJurusanSp" header="Jurusan" sortable></Column>
+                    <Column field="namaJurusanSp" header="Jurusan" sortable />
                 </div>
-                <Column field="ptk.nama" header="Wali kelas"></Column>
-                <Column field="jumlahAnggota" header="Jml.Anggota"></Column>
+                <Column field="ptk.nama" header="Wali kelas" />
+                <Column field="jumlahAnggota" header="Jml.Anggota" />
                 <Column header="Anggota Kelas">
                     <template #body="slotProps">
                         <Button icon="pi pi-bullseye" outlined rounded class="mr-2" @click="dialogAnggotaRombel(slotProps.data)" />

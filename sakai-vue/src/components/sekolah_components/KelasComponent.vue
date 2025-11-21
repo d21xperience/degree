@@ -56,5 +56,5 @@ onMounted(async () => {
 </script>
 
 <template>
-    <Select v-model="internalValue" :options="kelasOptions" optionLabel="nmKelas" :placeholder="!loadingKelas ? 'Pilih Kelas...' : 'Memuat data..'" fluid checkmark :showClear="true" :loading="loadingKelas" />
+    <Select v-model="internalValue" :options="kelasOptions" option-label="nmKelas" :placeholder="!loadingKelas ? 'Pilih Kelas...' : 'Memuat data..'" fluid checkmark :show-clear="true" :loading="loadingKelas" />
 </template>

@@ -1,5 +1,6 @@
 <script setup>
 import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
+import { computed } from 'vue';
 const { fetchSemester, initSelectedSemester, selectedSemester, listSemester } = useSekolahService();
 
 const namaRoute = computed(() => route.meta.namaRoute);
@@ -12,7 +13,7 @@ const isDisabled = computed(() => route.meta.disableSelect);
         >
         <div class="md:flex md:items-center">
             <label class="min-w-32">Tahun Pelajaran</label>
-            <Select v-model="selectedSemester" :options="listSemester" optionLabel="namaSemester" placeholder="Tahun Pelajaran" class="w-full" :disabled="isDisabled" />
+            <Select v-model="selectedSemester" :options="listSemester" option-label="namaSemester" placeholder="Tahun Pelajaran" class="w-full" :disabled="isDisabled" />
         </div>
     </div>
     <div class="card">

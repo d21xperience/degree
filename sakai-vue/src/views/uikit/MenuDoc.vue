@@ -426,7 +426,7 @@ function onContextRightClick(event) {
         <div class="font-semibold text-xl mb-4">Menubar</div>
         <Menubar :model="nestedMenuitems">
             <template #end>
-                <IconField iconPosition="left">
+                <IconField icon-position="left">
                     <InputIcon class="pi pi-search" />
                     <InputText type="text" placeholder="Search" />
                 </IconField>
@@ -483,7 +483,7 @@ function onContextRightClick(event) {
             <div class="card">
                 <div class="font-semibold text-xl mb-4">Overlay Menu</div>
                 <Menu ref="menu" :model="overlayMenuItems" :popup="true" />
-                <Button type="button" label="Options" icon="pi pi-angle-down" @click="toggleMenu" style="width: auto" />
+                <Button type="button" label="Options" icon="pi pi-angle-down" style="width: auto" @click="toggleMenu" />
             </div>
 
             <div class="card" @contextmenu="onContextRightClick">

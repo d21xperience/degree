@@ -190,7 +190,7 @@ func (s *UploadServiceServer) UploadFileHTTP(w http.ResponseWriter, r *http.Requ
 	} 
 	// Berikan respon
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	json.NewEncoder(w).Encode(map[string]any{
 		"message": "File berhasil diproses",
 		// "data":    data,
 	})

@@ -33,10 +33,10 @@ onBeforeUnmount(() => {
         <div class="font-semibold text-xl mb-4">ProgressBar</div>
         <div class="flex flex-col md:flex-row gap-4">
             <div class="md:w-1/2">
-                <ProgressBar :value="value"></ProgressBar>
+                <ProgressBar :value="value" />
             </div>
             <div class="md:w-1/2">
-                <ProgressBar :value="50" :showValue="false"></ProgressBar>
+                <ProgressBar :value="50" :show-value="false" />
             </div>
         </div>
     </div>
@@ -46,37 +46,37 @@ onBeforeUnmount(() => {
             <div class="card">
                 <div class="font-semibold text-xl mb-4">Badge</div>
                 <div class="flex gap-2">
-                    <Badge :value="2"></Badge>
-                    <Badge :value="8" severity="success"></Badge>
-                    <Badge :value="4" severity="info"></Badge>
-                    <Badge :value="12" severity="Warn"></Badge>
-                    <Badge :value="3" severity="danger"></Badge>
+                    <Badge :value="2" />
+                    <Badge :value="8" severity="success" />
+                    <Badge :value="4" severity="info" />
+                    <Badge :value="12" severity="Warn" />
+                    <Badge :value="3" severity="danger" />
                 </div>
 
                 <div class="font-semibold my-4">Overlay</div>
                 <div class="flex gap-6">
                     <OverlayBadge value="2">
-                        <i class="pi pi-bell" style="font-size: 2rem" />
+                        <i class="pi pi-bell" style="font-size: 2rem"></i>
                     </OverlayBadge>
                     <OverlayBadge value="4" severity="danger">
-                        <i class="pi pi-calendar" style="font-size: 2rem" />
+                        <i class="pi pi-calendar" style="font-size: 2rem"></i>
                     </OverlayBadge>
                     <OverlayBadge severity="danger">
-                        <i class="pi pi-envelope" style="font-size: 2rem" />
+                        <i class="pi pi-envelope" style="font-size: 2rem"></i>
                     </OverlayBadge>
                 </div>
 
                 <div class="font-semibold my-4">Button</div>
                 <div class="flex gap-2">
-                    <Button label="Emails" badge="8" class="mr-2"></Button>
-                    <Button label="Messages" icon="pi pi-users" severity="warn" badge="8" badgeClass="p-badge-danger"></Button>
+                    <Button label="Emails" badge="8" class="mr-2" />
+                    <Button label="Messages" icon="pi pi-users" severity="warn" badge="8" badge-class="p-badge-danger" />
                 </div>
 
                 <div class="font-semibold my-4">Sizes</div>
                 <div class="flex items-start gap-2">
-                    <Badge :value="2"></Badge>
-                    <Badge :value="4" size="large" severity="warn"></Badge>
-                    <Badge :value="6" size="xlarge" severity="success"></Badge>
+                    <Badge :value="2" />
+                    <Badge :value="4" size="large" severity="warn" />
+                    <Badge :value="6" size="xlarge" severity="success" />
                 </div>
             </div>
 
@@ -84,18 +84,18 @@ onBeforeUnmount(() => {
                 <div class="font-semibold text-xl mb-4">Avatar</div>
                 <div class="font-semibold mb-4">Group</div>
                 <AvatarGroup>
-                    <Avatar :image="'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png'" size="large" shape="circle"></Avatar>
-                    <Avatar :image="'https://primefaces.org/cdn/primevue/images/avatar/asiyajavayant.png'" size="large" shape="circle"></Avatar>
-                    <Avatar :image="'https://primefaces.org/cdn/primevue/images/avatar/onyamalimba.png'" size="large" shape="circle"></Avatar>
-                    <Avatar :image="'https://primefaces.org/cdn/primevue/images/avatar/ionibowcher.png'" size="large" shape="circle"></Avatar>
-                    <Avatar :image="'https://primefaces.org/cdn/primevue/images/avatar/xuxuefeng.png'" size="large" shape="circle"></Avatar>
-                    <Avatar label="+2" shape="circle" size="large" :style="{ 'background-color': '#9c27b0', color: '#ffffff' }"></Avatar>
+                    <Avatar :image="'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png'" size="large" shape="circle" />
+                    <Avatar :image="'https://primefaces.org/cdn/primevue/images/avatar/asiyajavayant.png'" size="large" shape="circle" />
+                    <Avatar :image="'https://primefaces.org/cdn/primevue/images/avatar/onyamalimba.png'" size="large" shape="circle" />
+                    <Avatar :image="'https://primefaces.org/cdn/primevue/images/avatar/ionibowcher.png'" size="large" shape="circle" />
+                    <Avatar :image="'https://primefaces.org/cdn/primevue/images/avatar/xuxuefeng.png'" size="large" shape="circle" />
+                    <Avatar label="+2" shape="circle" size="large" :style="{ 'background-color': '#9c27b0', color: '#ffffff' }" />
                 </AvatarGroup>
 
                 <div class="font-semibold my-4">Label - Circle</div>
-                <Avatar label="P" class="mr-2" size="xlarge" shape="circle"></Avatar>
-                <Avatar label="V" class="mr-2" size="large" :style="{ 'background-color': '#2196F3', color: '#ffffff' }" shape="circle"></Avatar>
-                <Avatar label="U" class="mr-2" :style="{ 'background-color': '#9c27b0', color: '#ffffff' }" shape="circle"></Avatar>
+                <Avatar label="P" class="mr-2" size="xlarge" shape="circle" />
+                <Avatar label="V" class="mr-2" size="large" :style="{ 'background-color': '#2196F3', color: '#ffffff' }" shape="circle" />
+                <Avatar label="U" class="mr-2" :style="{ 'background-color': '#9c27b0', color: '#ffffff' }" shape="circle" />
 
                 <div class="font-semibold my-4">Icon - Badge</div>
                 <OverlayBadge value="4" severity="danger" class="inline-flex">
@@ -113,7 +113,7 @@ onBeforeUnmount(() => {
                         nisl purus. Cursus sit amet dictum sit amet. Tristique senectus et netus et malesuada fames ac turpis egestas. Et tortor consequat id porta nibh venenatis cras sed. Diam maecenas ultricies mi eget mauris. Eget egestas purus
                         viverra accumsan in nisl nisi. Suscipit adipiscing bibendum est ultricies integer. Mattis aliquam faucibus purus in massa tempor nec.
                     </p>
-                    <ScrollTop target="parent" :threshold="100" icon="pi pi-arrow-up"></ScrollTop>
+                    <ScrollTop target="parent" :threshold="100" icon="pi pi-arrow-up" />
                 </ScrollPanel>
             </div>
         </div>
@@ -122,29 +122,29 @@ onBeforeUnmount(() => {
                 <div class="font-semibold text-xl mb-4">Tag</div>
                 <div class="font-semibold mb-4">Default</div>
                 <div class="flex gap-2">
-                    <Tag value="Primary"></Tag>
-                    <Tag severity="success" value="Success"></Tag>
-                    <Tag severity="info" value="Info"></Tag>
-                    <Tag severity="warn" value="Warn"></Tag>
-                    <Tag severity="danger" value="Danger"></Tag>
+                    <Tag value="Primary" />
+                    <Tag severity="success" value="Success" />
+                    <Tag severity="info" value="Info" />
+                    <Tag severity="warn" value="Warn" />
+                    <Tag severity="danger" value="Danger" />
                 </div>
 
                 <div class="font-semibold my-4">Pills</div>
                 <div class="flex gap-2">
-                    <Tag value="Primary" :rounded="true"></Tag>
-                    <Tag severity="success" value="Success" :rounded="true"></Tag>
-                    <Tag severity="info" value="Info" :rounded="true"></Tag>
-                    <Tag severity="warn" value="Warn" :rounded="true"></Tag>
-                    <Tag severity="danger" value="Danger" :rounded="true"></Tag>
+                    <Tag value="Primary" :rounded="true" />
+                    <Tag severity="success" value="Success" :rounded="true" />
+                    <Tag severity="info" value="Info" :rounded="true" />
+                    <Tag severity="warn" value="Warn" :rounded="true" />
+                    <Tag severity="danger" value="Danger" :rounded="true" />
                 </div>
 
                 <div class="font-semibold my-4">Icons</div>
                 <div class="flex gap-2">
-                    <Tag icon="pi pi-user" value="Primary"></Tag>
-                    <Tag icon="pi pi-check" severity="success" value="Success"></Tag>
-                    <Tag icon="pi pi-info-circle" severity="info" value="Info"></Tag>
-                    <Tag con="pi pi-exclamation-triangle" severity="warn" value="Warn"></Tag>
-                    <Tag icon="pi pi-times" severity="danger" value="Danger"></Tag>
+                    <Tag icon="pi pi-user" value="Primary" />
+                    <Tag icon="pi pi-check" severity="success" value="Success" />
+                    <Tag icon="pi pi-info-circle" severity="info" value="Info" />
+                    <Tag con="pi pi-exclamation-triangle" severity="warn" value="Warn" />
+                    <Tag icon="pi pi-times" severity="danger" value="Danger" />
                 </div>
             </div>
 
@@ -152,25 +152,25 @@ onBeforeUnmount(() => {
                 <div class="font-semibold text-xl mb-4">Chip</div>
                 <div class="font-semibold mb-4">Basic</div>
                 <div class="flex items-center flex-col sm:flex-row">
-                    <Chip label="Action" class="mr-2 mb-2"></Chip>
-                    <Chip label="Comedy" class="mr-2 mb-2"></Chip>
-                    <Chip label="Mystery" class="mr-2 mb-2"></Chip>
-                    <Chip label="Thriller" :removable="true" class="mb-2"></Chip>
+                    <Chip label="Action" class="mr-2 mb-2" />
+                    <Chip label="Comedy" class="mr-2 mb-2" />
+                    <Chip label="Mystery" class="mr-2 mb-2" />
+                    <Chip label="Thriller" :removable="true" class="mb-2" />
                 </div>
 
                 <div class="font-semibold my-4">Icon</div>
                 <div class="flex items-center flex-col sm:flex-row">
-                    <Chip label="Apple" icon="pi pi-apple" class="mr-2 mb-2"></Chip>
-                    <Chip label="Facebook" icon="pi pi-facebook" class="mr-2 mb-2"></Chip>
-                    <Chip label="Google" icon="pi pi-google" class="mr-2 mb-2"></Chip>
-                    <Chip label="Microsoft" icon="pi pi-microsoft" :removable="true" class="mb-2"></Chip>
+                    <Chip label="Apple" icon="pi pi-apple" class="mr-2 mb-2" />
+                    <Chip label="Facebook" icon="pi pi-facebook" class="mr-2 mb-2" />
+                    <Chip label="Google" icon="pi pi-google" class="mr-2 mb-2" />
+                    <Chip label="Microsoft" icon="pi pi-microsoft" :removable="true" class="mb-2" />
                 </div>
 
                 <div class="font-semibold my-4">Image</div>
                 <div class="flex items-center flex-col sm:flex-row">
-                    <Chip label="Amy Elsner" :image="'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png'" class="mr-2 mb-2"></Chip>
-                    <Chip label="Asiya Javayant" :image="'https://primefaces.org/cdn/primevue/images/avatar/asiyajavayant.png'" class="mr-2 mb-2"></Chip>
-                    <Chip label="Onyama Limba" :image="'https://primefaces.org/cdn/primevue/images/avatar/onyamalimba.png'" class="mr-2 mb-2"></Chip>
+                    <Chip label="Amy Elsner" :image="'https://primefaces.org/cdn/primevue/images/avatar/amyelsner.png'" class="mr-2 mb-2" />
+                    <Chip label="Asiya Javayant" :image="'https://primefaces.org/cdn/primevue/images/avatar/asiyajavayant.png'" class="mr-2 mb-2" />
+                    <Chip label="Onyama Limba" :image="'https://primefaces.org/cdn/primevue/images/avatar/onyamalimba.png'" class="mr-2 mb-2" />
                 </div>
             </div>
 
@@ -178,17 +178,17 @@ onBeforeUnmount(() => {
                 <div class="font-semibold text-xl mb-4">Skeleton</div>
                 <div class="rounded-border border border-surface p-6">
                     <div class="flex mb-4">
-                        <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
+                        <Skeleton shape="circle" size="4rem" class="mr-2" />
                         <div>
-                            <Skeleton width="10rem" class="mb-2"></Skeleton>
-                            <Skeleton width="5rem" class="mb-2"></Skeleton>
-                            <Skeleton height=".5rem"></Skeleton>
+                            <Skeleton width="10rem" class="mb-2" />
+                            <Skeleton width="5rem" class="mb-2" />
+                            <Skeleton height=".5rem" />
                         </div>
                     </div>
-                    <Skeleton width="100%" height="150px"></Skeleton>
+                    <Skeleton width="100%" height="150px" />
                     <div class="flex justify-between mt-4">
-                        <Skeleton width="4rem" height="2rem"></Skeleton>
-                        <Skeleton width="4rem" height="2rem"></Skeleton>
+                        <Skeleton width="4rem" height="2rem" />
+                        <Skeleton width="4rem" height="2rem" />
                     </div>
                 </div>
             </div>

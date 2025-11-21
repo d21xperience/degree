@@ -12,16 +12,16 @@ defineEmits(['update:modelValue']); // Mengizinkan emit untuk update
 <template>
     <Dialog
         :visible="modelValue"
-        @update:visible="(newValue) => $emit('update:modelValue', newValue)"
         :pt="{
             root: { class: '!border-0 !bg-transparent' },
             mask: { class: 'backdrop-blur-sm' }
         }"
         :modal="true"
+        @update:visible="(newValue) => $emit('update:modelValue', newValue)"
     >
         <template #container>
             <div class="flex flex-col px-8 py-8 gap-6 rounded-2xl">
-                <ProgressSpinner style="width: 100px; height: 100px" strokeWidth="8" fill="transparent" animationDuration=".5s" aria-label="Custom ProgressSpinner" />
+                <ProgressSpinner style="width: 100px; height: 100px" stroke-width="8" fill="transparent" animation-duration=".5s" aria-label="Custom ProgressSpinner" />
                 <slot> <span class="text-slate-100">Sedang mengambil data</span> </slot>
             </div>
         </template>

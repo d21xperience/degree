@@ -18,7 +18,17 @@ const networkStatus = computed(() => {
     // if (nodeInfo.value.peers > 0) return { text: 'Connected', class: 'connected' };
     return { text: 'Standalone', class: 'standalone' };
 });
-
+onMounted(async () => {
+    // platformSelected.value = {
+    //     id: 'f45865b2-9dd9-4085-942c-89a8d1847674',
+    //     name: 'Ethereum',
+    //     active: false
+    // };
+    // environmentSelected.value = await scService.getBCNetwork();
+    // console.log(environmentSelected.value)
+    // await Promise.all([checknetworkStatus()]);
+    // await Promise.all([checknetworkStatus(), fetchConfig(), fetchPeers(), fetchPinnedItems()]);
+});
 // Fungsi untuk memeriksa status node
 const checknetworkStatus = async () => {
     isCheckingStatus.value = true;
@@ -71,17 +81,6 @@ watch(environmentSelected, (newVal) => {
 });
 // const isConnected = ref(true);
 // Load data saat komponen dimount
-onMounted(async () => {
-    // platformSelected.value = {
-    //     id: 'f45865b2-9dd9-4085-942c-89a8d1847674',
-    //     name: 'Ethereum',
-    //     active: false
-    // };
-    // environmentSelected.value = await scService.getBCNetwork();
-    // console.log(environmentSelected.value)
-    // await Promise.all([checknetworkStatus()]);
-    // await Promise.all([checknetworkStatus(), fetchConfig(), fetchPeers(), fetchPinnedItems()]);
-});
 </script>
 
 <template>
@@ -109,14 +108,14 @@ onMounted(async () => {
                     <EnvironmentComponent v-model="environmentSelected" :architecture="platformSelected" :disabled="isNetworkPlatform" class="flex-1" />
                 </div>
                 <div>
-                    <Button v-if="!isNetworkPlatform" icon="pi pi-save" @click="saveConfiguration" severity="danger" class="p-button-danger" />
-                    <Button v-else icon="pi pi-pencil" @click="editConfiguration" severity="warn" class="p-button-warning" />
+                    <Button v-if="!isNetworkPlatform" icon="pi pi-save" severity="danger" class="p-button-danger" @click="saveConfiguration" />
+                    <Button v-else icon="pi pi-pencil" severity="warn" class="p-button-warning" @click="editConfiguration" />
                 </div>
             </div>
 
             <!-- Tombol Sync -->
             <div class="flex justify-start mt-2 space-x-2">
-                <Button icon="pi pi-sync" @click="checknetworkStatus" :label="networkStatus.text" :severity="networkStatus.severity" :disabled="!isNetworkPlatform" class="p-button-sm" />
+                <Button icon="pi pi-sync" :label="networkStatus.text" :severity="networkStatus.severity" :disabled="!isNetworkPlatform" class="p-button-sm" @click="checknetworkStatus" />
             </div>
         </div>
     </div>

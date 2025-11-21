@@ -1,32 +1,31 @@
 <script setup>
 import { useDashboard } from '@/composables/sekolah_composable/useDashboard';
-import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
-import { useSemester } from '@/composables/sekolah_composable/useSemester';
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+import { useAuth } from './pages/auth/composables/auth';
 const { fetchDashboard } = useDashboard();
 
-const { sekolah } = useSekolah();
-const { initSelectedSemester } = useSemester();
-// Ambil data dashboard
-const dashboard = ref({
-    data: {
-        countSiswa: 0,
-        countGuru: 0,
-        countKelas: 0
-    }
-});
 onMounted(async () => {
     try {
         dashboard.value = await fetchDashboard();
+        isSekolahDashboard.value = true;
+        isSCDashboard.value = true;
     } catch (error) {
-        alert(error);
-    } finally {
-        dashboard.value.data.countGuru = 0;
-        dashboard.value.data.countKelas = 0;
-        dashboard.value.data.countSiswa = 0;
+        console.log(error);
     }
     // alert('hello');
 });
+// const { sekolah } = useSekolah();
+const { currentUser } = useAuth();
+// const { initSelectedSemester } = useSemester();
+// Ambil data dashboard
+const dashboard = ref({
+    countSiswa: 0,
+    countGuru: 0,
+    countKelas: 0
+});
+const isSekolahDashboard = ref(false);
+const isSCDashboard = ref(false);
+const namaSekolah = computed(() => currentUser.value.asalSekolah);
 </script>
 
 <template>
@@ -34,22 +33,23 @@ onMounted(async () => {
         <div class="flex justify-between items-center">
             <div>
                 Selamat datang
-                <!-- <h3>{{ sekolah.sekolah.nama }}!</h3> -->
+                <h3>{{ namaSekolah }}!</h3>
+                <!-- <h3 v-else>Sekolah tes!</h3> -->
             </div>
-            <h4>T.A. {{ initSelectedSemester?.namaSemester }}</h4>
+            <!-- <h4>T.A. {{ initSelectedSemester?.namaSemester }}</h4> -->
         </div>
-        <div class="grid grid-cols-12 gap-8">
+        <div v-show="isSekolahDashboard" class="grid grid-cols-12 gap-8 my-4">
             <StatsWidget label="Siswa" :target-number="Number(dashboard.data?.countSiswa)" icon="pi pi-users" url="infoSiswa" />
             <StatsWidget label="Guru" :target-number="Number(dashboard.data?.countGuru)" icon="pi pi-users" url="infoGuru" />
             <StatsWidget label="Kelas" :target-number="Number(dashboard.data?.countKelas)" icon="pi pi-building-columns" url="infoKelas" />
-            <!-- <div class="col-span-12 xl:col-span-6">
-            <RecentSalesWidget />
-            <BestSellingWidget />
         </div>
         <div class="col-span-12 xl:col-span-6">
-            <RevenueStreamWidget />
             <NotificationsWidget />
-        </div> -->
+            <RevenueStreamWidget />
+        </div>
+        <div class="col-span-12 xl:col-span-6">
+            <RecentSalesWidget />
+            <BestSellingWidget />
         </div>
     </div>
 </template>

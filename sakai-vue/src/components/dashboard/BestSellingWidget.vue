@@ -14,8 +14,8 @@ const items = ref([
         <div class="flex justify-between items-center mb-6">
             <div class="font-semibold text-xl">Best Selling Products</div>
             <div>
-                <Button icon="pi pi-ellipsis-v" class="p-button-text p-button-plain p-button-rounded" @click="$refs.menu.toggle($event)"></Button>
-                <Menu ref="menu" popup :model="items" class="!min-w-40"></Menu>
+                <Button icon="pi pi-ellipsis-v" class="p-button-text p-button-plain p-button-rounded" @click="$refs.menu.toggle($event)" />
+                <Menu ref="menu" popup :model="items" class="!min-w-40" />
             </div>
         </div>
         <ul class="list-none p-0 m-0">

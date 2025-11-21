@@ -1,23 +1,22 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import FileUpload from 'primevue/fileupload';
+import { onMounted, ref } from 'vue';
 import { useStore } from 'vuex';
 const store = useStore();
-import FileUpload from 'primevue/fileupload';
 
-import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
+import DataTable from 'primevue/datatable';
 
 import Button from 'primevue/button';
 
 import Dialog from 'primevue/dialog';
 
-import Toolbar from 'primevue/toolbar';
 import { FilterMatchMode } from '@primevue/core/api';
-import { useToast } from 'primevue/usetoast';
-import InputText from 'primevue/inputtext';
 import IconField from 'primevue/iconfield';
 import InputIcon from 'primevue/inputicon';
-import DataLulusanService from '@/service/ProductService.js';
+import InputText from 'primevue/inputtext';
+import Toolbar from 'primevue/toolbar';
+import { useToast } from 'primevue/usetoast';
 // =============UJI FITUR FOTO========================
 import Image from 'primevue/image';
 // =====================================
@@ -143,8 +142,8 @@ const getStatusLabel = (status) => {
     }
 };
 
-import Select from 'primevue/select';
 import EmptyData from '@/components/EmptyData.vue';
+import Select from 'primevue/select';
 
 // select tahun ijazah
 const selectedCity = ref();
@@ -235,21 +234,21 @@ const fetchSiswa = async () => {
                                 <div class="md:flex md:items-center md:space-x-2">
                                     <h3 class="text-slate-500 md:text-base text-sm">Tahun Pelajaran</h3>
                                     <div>
-                                        <Select v-model="selectedSemester" :options="semester" optionLabel="namaSemester" placeholder="Tahun Pelajaran" class="w-full md:w-52 mr-2" />
+                                        <Select v-model="selectedSemester" :options="semester" option-label="namaSemester" placeholder="Tahun Pelajaran" class="w-full md:w-52 mr-2" />
                                     </div>
                                 </div>
                             </div>
                             <div class="mb-2">
                                 <Toolbar>
                                     <template #start>
-                                        <Button icon="pi pi-pencil" severity="warn" @click="confirmDeleteSelected" :disabled="!dataLulusan || !dataLulusan.length || dataLulusan.length > 2" class="mr-2" />
-                                        <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!dataLulusan || !dataLulusan.length" />
-                                        <Button label="Lulus" severity="warn" class="mr-2" @click="dialogStatus = true" :disabled="!dataLulusan || !dataLulusan.length" />
-                                        <Button label="Naik" severity="warn" class="mr-2" @click="openNew" :disabled="!dataLulusan || !dataLulusan.length" />
+                                        <Button icon="pi pi-pencil" severity="warn" :disabled="!dataLulusan || !dataLulusan.length || dataLulusan.length > 2" class="mr-2" @click="confirmDeleteSelected" />
+                                        <Button icon="pi pi-trash" severity="danger" class="mr-2" :disabled="!dataLulusan || !dataLulusan.length" @click="confirmDeleteSelected" />
+                                        <Button label="Lulus" severity="warn" class="mr-2" :disabled="!dataLulusan || !dataLulusan.length" @click="dialogStatus = true" />
+                                        <Button label="Naik" severity="warn" class="mr-2" :disabled="!dataLulusan || !dataLulusan.length" @click="openNew" />
                                     </template>
                                     <template #end>
-                                        <FileUpload mode="basic" accept="xlsx/*" :maxFileSize="1000000" label="Import" chooseLabel="Import" class="mr-2" auto />
-                                        <Button label="Export" icon="pi pi-upload" severity="help" @click="exportCSV($event)" class="mr-2" />
+                                        <FileUpload mode="basic" accept="xlsx/*" :max-file-size="1000000" label="Import" choose-label="Import" class="mr-2" auto />
+                                        <Button label="Export" icon="pi pi-upload" severity="help" class="mr-2" @click="exportCSV($event)" />
                                         <!-- <Button label="Proses" icon="pi pi-send" severity="info"
                                             @click="exportCSV($event)" /> -->
                                     </template>
@@ -260,15 +259,15 @@ const fetchSiswa = async () => {
                                 <template #start>
                                     <div class="flex flex-wrap gap-2 items-center justify-between">
                                         <div class="flex">
-                                            <Select v-model="selectedJurusan" :options="jurusan" optionLabel="name" placeholder="Rombel" class="w-full md:w-56 mr-2" />
-                                            <Select v-model="selectedJurusan" :options="jurusan" optionLabel="name" placeholder="Tingkat" class="mr-2" />
+                                            <Select v-model="selectedJurusan" :options="jurusan" option-label="name" placeholder="Rombel" class="w-full md:w-56 mr-2" />
+                                            <Select v-model="selectedJurusan" :options="jurusan" option-label="name" placeholder="Tingkat" class="mr-2" />
                                         </div>
                                     </div>
                                 </template>
                                 <template #end>
                                     <IconField>
                                         <InputIcon>
-                                            <i class="pi pi-search" />
+                                            <i class="pi pi-search"></i>
                                         </InputIcon>
                                         <InputText v-model="filters['global'].value" placeholder="Search..." />
                                     </IconField>
@@ -281,19 +280,19 @@ const fetchSiswa = async () => {
                 <DataTable
                     ref="dt"
                     v-model:selection="selectedSiswa"
-                    stripedRows
+                    striped-rows
                     size="small"
                     :value="siswa"
-                    dataKey="id"
+                    data-key="id"
                     :paginator="true"
                     :rows="10"
                     :filters="filters"
-                    paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                    :rowsPerPageOptions="[10, 20, 50]"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+                    paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                    :rows-per-page-options="[10, 20, 50]"
+                    current-page-report-template="Showing {first} to {last} of {totalRecords} products"
                     class="mt-56"
                 >
-                    <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
+                    <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
                     <Column field="name" header="Foto">
                         <template #body="slotProps">
                             <Image :src="`https://primefaces.org/cdn/primevue/images/product/${slotProps.data.image}`" :alt="slotProps.data.image" preview image-class="w-16 h-16 rounded-full" />
@@ -349,7 +348,7 @@ const fetchSiswa = async () => {
                 </DataTable>
             </div>
             <div v-else>
-                <EmptyData @profileFetched="handleProfileFetched" @fetchError="handleFetchError" />
+                <EmptyData @profile-fetched="handleProfileFetched" @fetch-error="handleFetchError" />
             </div>
         </div>
 
@@ -386,7 +385,7 @@ const fetchSiswa = async () => {
 
         <Dialog v-model:visible="deleteProductDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product"
                     >Are you sure you want to delete <b>{{ product.name }}</b
                     >?</span
@@ -400,7 +399,7 @@ const fetchSiswa = async () => {
 
         <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product">Apakah data lulusan akan dihapus?</span>
             </div>
             <template #footer>
@@ -412,7 +411,7 @@ const fetchSiswa = async () => {
         <!-- Dialog Status kenaikan/ lulus -->
         <Dialog v-model:visible="dialogStatus" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product">Apakah siswa akan diluluskan?</span>
             </div>
             <template #footer>

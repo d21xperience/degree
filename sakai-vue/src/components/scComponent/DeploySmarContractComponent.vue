@@ -54,12 +54,12 @@ async function deploy() {
         <div class="mb-4">
             <label class="block font-medium mb-1">ABI (JSON)</label>
             <!-- PrimeVue InputTextarea automatically resizes -->
-            <InputTextarea v-model="abiJson" rows="8" autoResize placeholder="{ ... }" class="w-full" />
+            <InputTextarea v-model="abiJson" rows="8" auto-resize placeholder="{ ... }" class="w-full" />
         </div>
 
         <div class="mb-4">
             <label class="block font-medium mb-1">Bytecode (hex, 0x…)</label>
-            <InputTextarea v-model="bytecodeHex" rows="5" autoResize placeholder="0x600360…" class="w-full" />
+            <InputTextarea v-model="bytecodeHex" rows="5" auto-resize placeholder="0x600360…" class="w-full" />
         </div>
 
         <Button :loading="loading" label="Deploy" class="w-full" @click="deploy" />

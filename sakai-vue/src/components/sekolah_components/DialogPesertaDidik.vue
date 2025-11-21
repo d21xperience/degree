@@ -154,11 +154,11 @@ const fetchSiswa = async () => {
             <Toolbar class="mb-6">
                 <template #start>
                     <Button label="New" icon="pi pi-plus" class="mr-2" @click="openNew" />
-                    <Button label="Delete" icon="pi pi-trash" severity="danger" outlined @click="confirmDeleteSelected" :disabled="!selectedProducts || !selectedProducts.length" />
+                    <Button label="Delete" icon="pi pi-trash" severity="danger" outlined :disabled="!selectedProducts || !selectedProducts.length" @click="confirmDeleteSelected" />
                 </template>
 
                 <template #end>
-                    <FileUpload mode="basic" accept="image/*" :maxFileSize="1000000" label="Import" customUpload chooseLabel="Import" class="mr-2" auto :chooseButtonProps="{ severity: 'secondary' }" />
+                    <FileUpload mode="basic" accept="image/*" :max-file-size="1000000" label="Import" custom-upload choose-label="Import" class="mr-2" auto :choose-button-props="{ severity: 'secondary' }" />
                     <Button label="Export" icon="pi pi-upload" severity="secondary" @click="exportCSV($event)" />
                 </template>
             </Toolbar>
@@ -167,34 +167,34 @@ const fetchSiswa = async () => {
                 ref="dt"
                 v-model:selection="selectedProducts"
                 :value="siswaList"
-                dataKey="pesertaDidikId"
+                data-key="pesertaDidikId"
                 :paginator="true"
                 :rows="10"
                 :filters="filters"
-                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                :rowsPerPageOptions="[5, 10, 25]"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+                paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                :rows-per-page-options="[5, 10, 25]"
+                current-page-report-template="Showing {first} to {last} of {totalRecords} products"
             >
                 <template #header>
                     <div class="flex flex-wrap gap-2 items-center justify-between">
                         <h4 class="m-0">Manage Products</h4>
                         <IconField>
                             <InputIcon>
-                                <i class="pi pi-search" />
+                                <i class="pi pi-search"></i>
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Search..." />
                         </IconField>
                     </div>
                 </template>
 
-                <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-                <Column field="siswa.nmSiswa" header="Name" sortable style="min-width: 16rem"></Column>
-                <Column field="siswa.jenisKelamin" header="JK" sortable style="min-width: 6rem"></Column>
-                <Column field="siswa.tempatLahir" header="Tpt Lahir" style="min-width: 12rem"></Column>
-                <Column field="siswa.tanggalLahir" header="Tgl Lahir" style="min-width: 12rem"></Column>
-                <Column field="siswa.nis" header="NISN" style="min-width: 12rem"></Column>
-                <Column field="siswa.nisn" header="NISN" style="min-width: 12rem"></Column>
-                <Column field="sekolahAsal" header="Asal sekolah" style="min-width: 16rem"></Column>
+                <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
+                <Column field="siswa.nmSiswa" header="Name" sortable style="min-width: 16rem" />
+                <Column field="siswa.jenisKelamin" header="JK" sortable style="min-width: 6rem" />
+                <Column field="siswa.tempatLahir" header="Tpt Lahir" style="min-width: 12rem" />
+                <Column field="siswa.tanggalLahir" header="Tgl Lahir" style="min-width: 12rem" />
+                <Column field="siswa.nis" header="NISN" style="min-width: 12rem" />
+                <Column field="siswa.nisn" header="NISN" style="min-width: 12rem" />
+                <Column field="sekolahAsal" header="Asal sekolah" style="min-width: 16rem" />
             </DataTable>
         </div>
 
@@ -263,7 +263,7 @@ const fetchSiswa = async () => {
 
         <Dialog v-model:visible="deleteProductDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product"
                     >Are you sure you want to delete <b>{{ product.name }}</b
                     >?</span
@@ -277,7 +277,7 @@ const fetchSiswa = async () => {
 
         <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product">Are you sure you want to delete the selected products?</span>
             </div>
             <template #footer>

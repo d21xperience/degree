@@ -15,9 +15,9 @@
                             <span class="text-5xl font-bold mr-2 text-surface-900 dark:text-surface-0">$0</span>
                             <span class="text-surface-600 dark:text-surface-200">per month</span>
                         </div>
-                        <Button label="Get Started" class="p-button-rounded border-0 ml-4 font-light leading-tight bg-blue-500 text-white"></Button>
+                        <Button label="Get Started" class="p-button-rounded border-0 ml-4 font-light leading-tight bg-blue-500 text-white" />
                     </div>
-                    <Divider class="w-full bg-surface-200"></Divider>
+                    <Divider class="w-full bg-surface-200" />
                     <ul class="my-8 list-none p-0 flex text-surface-900 dark:text-surface-0 flex-col px-8">
                         <li class="py-2">
                             <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
@@ -48,9 +48,9 @@
                             <span class="text-5xl font-bold mr-2 text-surface-900 dark:text-surface-0">$1</span>
                             <span class="text-surface-600 dark:text-surface-200">per month</span>
                         </div>
-                        <Button label="Get Started" class="p-button-rounded border-0 ml-4 font-light leading-tight bg-blue-500 text-white"></Button>
+                        <Button label="Get Started" class="p-button-rounded border-0 ml-4 font-light leading-tight bg-blue-500 text-white" />
                     </div>
-                    <Divider class="w-full bg-surface-200"></Divider>
+                    <Divider class="w-full bg-surface-200" />
                     <ul class="my-8 list-none p-0 flex text-surface-900 dark:text-surface-0 flex-col px-8">
                         <li class="py-2">
                             <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>
@@ -81,9 +81,9 @@
                             <span class="text-5xl font-bold mr-2 text-surface-900 dark:text-surface-0">$5</span>
                             <span class="text-surface-600 dark:text-surface-200">per month</span>
                         </div>
-                        <Button label="Get Started" class="p-button-rounded border-0 ml-4 font-light leading-tight bg-blue-500 text-white"></Button>
+                        <Button label="Get Started" class="p-button-rounded border-0 ml-4 font-light leading-tight bg-blue-500 text-white" />
                     </div>
-                    <Divider class="w-full bg-surface-200"></Divider>
+                    <Divider class="w-full bg-surface-200" />
                     <ul class="my-8 list-none p-0 flex text-surface-900 dark:text-surface-0 flex-col px-8">
                         <li class="py-2">
                             <i class="pi pi-fw pi-check text-xl text-cyan-500 mr-2"></i>

@@ -70,5 +70,5 @@ onMounted(async () => {
 </script>
 
 <template>
-    <Select v-model="internalValue" :options="accountOptions" fluid placeholder="Pilih Account" :option-label="handleLabelOption" @update:modelValue="onSelectionChange" />
+    <Select v-model="internalValue" :options="accountOptions" fluid placeholder="Pilih Account" :option-label="handleLabelOption" @update:model-value="onSelectionChange" />
 </template>

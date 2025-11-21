@@ -184,19 +184,19 @@ const dialogStatus = ref(false);
         <div class="my-2">
             <Toolbar>
                 <template #start>
-                    <Button icon="pi pi-pencil" severity="warn" @click="confirmDeleteSelected" :disabled="!dataLulusan || !dataLulusan.length || dataLulusan.length > 2" class="mr-2" />
-                    <Button icon="pi pi-trash" severity="danger" class="mr-2" @click="confirmDeleteSelected" :disabled="!dataLulusan || !dataLulusan.length" />
+                    <Button icon="pi pi-pencil" severity="warn" :disabled="!dataLulusan || !dataLulusan.length || dataLulusan.length > 2" class="mr-2" @click="confirmDeleteSelected" />
+                    <Button icon="pi pi-trash" severity="danger" class="mr-2" :disabled="!dataLulusan || !dataLulusan.length" @click="confirmDeleteSelected" />
                 </template>
                 <template #end>
                     <div class="flex flex-wrap gap-2 items-center justify-between">
                         <div class="flex">
-                            <Select v-model="selectedJurusan" :options="jurusan" optionLabel="name" placeholder="Tahun Ajaran" class="md:w-56 mr-2" />
-                            <Select v-model="selectedJurusan" :options="jurusan" optionLabel="name" placeholder="Rombel" class="w-full md:w-56 mr-2" />
+                            <Select v-model="selectedJurusan" :options="jurusan" option-label="name" placeholder="Tahun Ajaran" class="md:w-56 mr-2" />
+                            <Select v-model="selectedJurusan" :options="jurusan" option-label="name" placeholder="Rombel" class="w-full md:w-56 mr-2" />
                         </div>
                     </div>
                     <IconField>
                         <InputIcon>
-                            <i class="pi pi-search" />
+                            <i class="pi pi-search"></i>
                         </InputIcon>
                         <InputText v-model="filters['global'].value" placeholder="Search..." />
                     </IconField>
@@ -206,24 +206,24 @@ const dialogStatus = ref(false);
         <DataTable
             ref="dt"
             v-model:selection="dataLulusan"
-            stripedRows
+            striped-rows
             size="small"
             :value="products"
-            dataKey="id"
+            data-key="id"
             :paginator="true"
             :rows="5"
             :filters="filters"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rowsPerPageOptions="[5, 10, 25]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Users"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rows-per-page-options="[5, 10, 25]"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} Users"
             class=""
         >
-            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-            <Column field="name" header="Username" sortable></Column>
-            <Column field="name" header="Nama user" sortable></Column>
-            <Column field="code" header="Login terakhir"></Column>
-            <Column field="code" header="Online" sortable></Column>
-            <Column field="code" header="Status" sortable></Column>
+            <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
+            <Column field="name" header="Username" sortable />
+            <Column field="name" header="Nama user" sortable />
+            <Column field="code" header="Login terakhir" />
+            <Column field="code" header="Online" sortable />
+            <Column field="code" header="Status" sortable />
             <!-- <Column field="inventoryStatus" header="Status" sortable>
                 <template #body="slotProps">
                     <Tag :value="slotProps.data.inventoryStatus"
@@ -265,7 +265,7 @@ const dialogStatus = ref(false);
 
         <Dialog v-model:visible="deleteProductDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product"
                     >Are you sure you want to delete <b>{{ product.name }}</b
                     >?</span
@@ -279,7 +279,7 @@ const dialogStatus = ref(false);
 
         <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product">Apakah data lulusan akan dihapus?</span>
             </div>
             <template #footer>
@@ -291,7 +291,7 @@ const dialogStatus = ref(false);
         <!-- Dialog Status kenaikan/ lulus -->
         <Dialog v-model:visible="dialogStatus" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product">Apakah siswa akan diluluskan?</span>
             </div>
             <template #footer>

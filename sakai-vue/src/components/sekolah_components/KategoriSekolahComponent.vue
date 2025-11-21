@@ -269,16 +269,16 @@ onMounted(async () => {
         <!-- Header Section -->
         <div class="flex justify-between mb-4">
             <div>
-                <Button label="Tambah" v-show="isEditKategoriSekolah" icon="pi pi-plus" @click="openAddDialog" size="small" v-tooltip.bottom="`Tambah kompetensi`" />
+                <Button v-show="isEditKategoriSekolah" v-tooltip.bottom="`Tambah kompetensi`" label="Tambah" icon="pi pi-plus" size="small" @click="openAddDialog" />
             </div>
             <div>
-                <Button icon="pi pi-pencil" @click="isEditKategoriSekolah = !isEditKategoriSekolah" severity="secondary" v-tooltip.bottom="'Edit kategori'" :loading="isLoadingEditKategoriSekolah" />
+                <Button v-tooltip.bottom="'Edit kategori'" icon="pi pi-pencil" severity="secondary" :loading="isLoadingEditKategoriSekolah" @click="isEditKategoriSekolah = !isEditKategoriSekolah" />
             </div>
         </div>
 
         <!-- Main Table -->
         <div class="grid grid-cols-1 gap-4">
-            <DataTable v-model:expandedRows="expandedRows" :value="kategoriSekolahTabel" dataKey="kurikulum_id" striped-rows>
+            <DataTable v-model:expandedRows="expandedRows" :value="kategoriSekolahTabel" data-key="kurikulum_id" striped-rows>
                 <Column expander style="width: 2rem" />
                 <Column header="No" style="width: 2rem">
                     <template #body="slotProps">
@@ -291,8 +291,8 @@ onMounted(async () => {
                 <Column header="Tahun Ajaran" field="tahun_ajaran_id" />
                 <Column header="Aksi" :hidden="!isEditKategoriSekolah">
                     <template #body="slotProps">
-                        <Button icon="pi pi-trash" class="mr-2 !text-sm" severity="danger" @click="handleDeleteKategoriSekolah(slotProps.data)" size="small" rounded v-tooltip.bottom="'Hapus kompetensi'" />
-                        <Button icon="pi pi-plus" class="mr-2 !text-sm" severity="success" @click="dialogAddKelas(slotProps.data)" size="small" rounded v-tooltip.bottom="'Tambah kelas'" />
+                        <Button v-tooltip.bottom="'Hapus kompetensi'" icon="pi pi-trash" class="mr-2 !text-sm" severity="danger" size="small" rounded @click="handleDeleteKategoriSekolah(slotProps.data)" />
+                        <Button v-tooltip.bottom="'Tambah kelas'" icon="pi pi-plus" class="mr-2 !text-sm" severity="success" size="small" rounded @click="dialogAddKelas(slotProps.data)" />
                     </template>
                 </Column>
 
@@ -306,8 +306,8 @@ onMounted(async () => {
                         <Column header="Jml.Kelas" field="jumlah" />
                         <Column header="Aksi" :hidden="!isEditKategoriSekolah">
                             <template #body="slotProps">
-                                <Button icon="pi pi-trash" class="mr-2 !text-sm" severity="danger" @click="handleDeleteKategoriKelas(slotProps.data)" size="small" rounded v-tooltip.bottom="'Hapus kelas'" />
-                                <Button icon="pi pi-pencil" class="mr-2 !text-sm" severity="warn" @click="dialogEditKelas(slotProps.data)" size="small" rounded v-tooltip.bottom="'Edit kelas'" />
+                                <Button v-tooltip.bottom="'Hapus kelas'" icon="pi pi-trash" class="mr-2 !text-sm" severity="danger" size="small" rounded @click="handleDeleteKategoriKelas(slotProps.data)" />
+                                <Button v-tooltip.bottom="'Edit kelas'" icon="pi pi-pencil" class="mr-2 !text-sm" severity="warn" size="small" rounded @click="dialogEditKelas(slotProps.data)" />
                             </template>
                         </Column>
                     </DataTable>
@@ -315,7 +315,7 @@ onMounted(async () => {
             </DataTable>
         </div>
         <div class="flex justify-end mt-10">
-            <Button icon="pi pi-process" label="Proses kurikulum" severity="danger" @click="dialogProsesKurikulum" v-show="isEditKategoriSekolah" />
+            <Button v-show="isEditKategoriSekolah" icon="pi pi-process" label="Proses kurikulum" severity="danger" @click="dialogProsesKurikulum" />
         </div>
         <!-- Add Kategori Sekolah Dialog -->
         <Dialog v-model:visible="isDialogVisible.addKategoriSekolah" style="width: 550px" :header="formState.title" :modal="true">
@@ -331,7 +331,7 @@ onMounted(async () => {
                     </div>
                     <div>
                         <div class="font-semibold">Kompetensi Keahlian/ Jurusan</div>
-                        <JurusanComponent v-model="currentKategori.jurusan" id="jurusan" :disabled="!currentKategori.program_keahlian" :jurusan-induk="currentKategori.program_keahlian?.jurusanId ?? ''" />
+                        <JurusanComponent id="jurusan" v-model="currentKategori.jurusan" :disabled="!currentKategori.program_keahlian" :jurusan-induk="currentKategori.program_keahlian?.jurusanId ?? ''" />
                     </div>
                 </div>
                 <div class="">
@@ -341,8 +341,8 @@ onMounted(async () => {
             </div>
             <div class="flex justify-end space-x-4 mt-10">
                 <!-- <Button v-if="formState.isEditMode" @click="editKategoriSekolah" label="Update" severity="warn" class="w-20" :disabled="formState.isSubmitDisabled" /> -->
-                <Button @click="addKategoriSekolah" :label="formState.submitButtonText" severity="warn" :disabled="formState.isSubmitDisabled" />
-                <Button @click="isDialogVisible.addKategoriSekolah = false" severity="help" label="Batal" class="w-20" />
+                <Button :label="formState.submitButtonText" severity="warn" :disabled="formState.isSubmitDisabled" @click="addKategoriSekolah" />
+                <Button severity="help" label="Batal" class="w-20" @click="isDialogVisible.addKategoriSekolah = false" />
             </div>
         </Dialog>
 
@@ -355,22 +355,22 @@ onMounted(async () => {
                 </div>
                 <div>
                     <div class="font-semibold">Jumlah Kelas</div>
-                    <InputNumber placeholder="Masukan jumlah kelas" class="block" fluid v-model="currentKategori.jumlah" :min="1" />
+                    <InputNumber v-model="currentKategori.jumlah" placeholder="Masukan jumlah kelas" class="block" fluid :min="1" />
                 </div>
             </div>
             <div class="flex justify-end space-x-4 mt-10">
                 <div>
-                    <Button @click="updateKelas" label="Update" severity="warn" v-if="formState.isEditMode == true" />
-                    <Button @click="addKelas" label="Simpan" severity="warn" v-else />
+                    <Button v-if="formState.isEditMode == true" label="Update" severity="warn" @click="updateKelas" />
+                    <Button v-else label="Simpan" severity="warn" @click="addKelas" />
                 </div>
-                <Button @click="isDialogVisible.addKategoriKelas = false" severity="help" label="Batal" class="w-20" />
+                <Button severity="help" label="Batal" class="w-20" @click="isDialogVisible.addKategoriKelas = false" />
             </div>
         </Dialog>
 
         <!-- Delete Confirmation Dialog -->
-        <DialogConfirmDelete :message="messageDelete" v-model:visible="isDialogVisible.deleteKategoriSekolah" @confirm="deleteKategoriSekolah(selectedItemToDelete)" />
-        <DialogConfirmDelete :message="messageDelete" v-model:visible="isDialogVisible.deleteKategoriKelas" @confirm="deleteKelas(selectedItemToDelete)" />
-        <DialogConfirmDelete :message="messageDelete" v-model:visible="isDialogVisible.prosesKurikulum" @confirm="addProsesKurikulum(selectedItemToDelete)" />
+        <DialogConfirmDelete v-model:visible="isDialogVisible.deleteKategoriSekolah" :message="messageDelete" @confirm="deleteKategoriSekolah(selectedItemToDelete)" />
+        <DialogConfirmDelete v-model:visible="isDialogVisible.deleteKategoriKelas" :message="messageDelete" @confirm="deleteKelas(selectedItemToDelete)" />
+        <DialogConfirmDelete v-model:visible="isDialogVisible.prosesKurikulum" :message="messageDelete" @confirm="addProsesKurikulum(selectedItemToDelete)" />
         <!-- <Dialog :visible="true">"hello"</Dialog> -->
     </div>
 </template>

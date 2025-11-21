@@ -39,11 +39,11 @@ onMounted(async () => {
         v-model="internalValue"
         :suggestions="kurikulumOptions"
         option-label="namaKurikulum"
-        @complete="searchKurikulum(query)"
-        @keydown.space.prevent="kurikulumHandleKeydown"
         placeholder="Pilih kurikulum"
         fluid
         dropdown
         :loading="kurikulumLoading"
+        @complete="searchKurikulum(query)"
+        @keydown.space.prevent="kurikulumHandleKeydown"
     />
 </template>

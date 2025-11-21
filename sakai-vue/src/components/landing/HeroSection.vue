@@ -2,11 +2,20 @@
 import { computed, nextTick, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import LazyImage from '../LazyImage.vue';
-import TopbarWidget from './TopbarWidget.vue';
+
 const { t } = useI18n();
 // Emits
 const emit = defineEmits(['verification-submit', 'dialog-open', 'dialog-close', 'background-load']);
 
+// Lifecycle
+onMounted(() => {
+    document.addEventListener('keydown', handleKeydown);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('keydown', handleKeydown);
+});
+// Methods
 // Reactive data
 const heroData = computed(() => ({
     headline: t('hero.headline'),
@@ -42,7 +51,6 @@ const isFormValid = computed(() => {
     return formData.nisn.length === 10 && /^[0-9]{10}$/.test(formData.nisn) && !formErrors.nisn;
 });
 
-// Methods
 const openVerificationDialog = async () => {
     isLoading.value = true;
 
@@ -130,25 +138,16 @@ const handleKeydown = (event) => {
         closeDialog();
     }
 };
-
-// Lifecycle
-onMounted(() => {
-    document.addEventListener('keydown', handleKeydown);
-});
-
-onUnmounted(() => {
-    document.removeEventListener('keydown', handleKeydown);
-});
 </script>
 
 <template>
     <div class="hero-wrapper">
         <!-- Navigation Bar -->
-        <nav class="navigation-bar" role="navigation" aria-label="Main navigation">
+        <!-- <nav class="navigation-bar" role="navigation" aria-label="Main navigation">
             <div class="nav-container">
                 <TopbarWidget />
             </div>
-        </nav>
+        </nav> -->
 
         <!-- Hero Section -->
         <section class="hero-section" role="banner" aria-labelledby="hero-title">
@@ -163,7 +162,7 @@ onUnmounted(() => {
                 <p class="hero-subtitle">
                     {{ heroData.subtitle }}
                 </p>
-                <button class="hero-cta" @click="openVerificationDialog" :disabled="isLoading" :aria-describedby="isLoading ? 'loading-description' : null">
+                <button class="hero-cta" :disabled="isLoading" :aria-describedby="isLoading ? 'loading-description' : null" @click="openVerificationDialog">
                     <span v-if="!isLoading">{{ heroData.ctaText }}</span>
                     <span v-else class="loading-content">
                         <svg class="loading-spinner" viewBox="0 0 24 24">
@@ -173,7 +172,7 @@ onUnmounted(() => {
                         Memuat...
                     </span>
                 </button>
-                <div id="loading-description" class="sr-only" v-if="isLoading">Sedang memuat dialog verifikasi</div>
+                <div v-if="isLoading" id="loading-description" class="sr-only">Sedang memuat dialog verifikasi</div>
             </div>
 
             <!-- Decorative Pattern -->
@@ -182,22 +181,22 @@ onUnmounted(() => {
 
         <!-- Verification Dialog -->
         <Teleport to="body">
-            <div v-if="showDialog" class="dialog-overlay" @click="closeDialog" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description">
-                <div class="dialog-content" @click.stop ref="dialogContent">
+            <div v-if="showDialog" class="dialog-overlay" role="dialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-description" @click="closeDialog">
+                <div ref="dialogContent" class="dialog-content" @click.stop>
                     <header class="dialog-header">
                         <h2 id="dialog-title" class="dialog-title">
                             {{ dialogData.title }}
                         </h2>
-                        <button class="dialog-close" @click="closeDialog" aria-label="Tutup dialog">
+                        <button class="dialog-close" aria-label="Tutup dialog" @click="closeDialog">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
                             </svg>
                         </button>
                     </header>
 
                     <div id="dialog-description" class="dialog-body">
-                        <form @submit.prevent="handleVerification" class="verification-form">
+                        <form class="verification-form" @submit.prevent="handleVerification">
                             <div class="form-group">
                                 <label for="nisn-input" class="form-label"> NISN (Nomor Induk Siswa Nasional) </label>
                                 <input
@@ -210,19 +209,19 @@ onUnmounted(() => {
                                     maxlength="10"
                                     pattern="[0-9]{10}"
                                     :disabled="isSubmitting"
-                                    @input="validateNisn"
-                                    @blur="validateNisn"
                                     aria-describedby="nisn-error nisn-help"
                                     required
+                                    @input="validateNisn"
+                                    @blur="validateNisn"
                                 />
                                 <div id="nisn-help" class="form-help">NISN terdiri dari 10 digit angka</div>
-                                <div id="nisn-error" class="form-error" v-if="formErrors.nisn" role="alert">
+                                <div v-if="formErrors.nisn" id="nisn-error" class="form-error" role="alert">
                                     {{ formErrors.nisn }}
                                 </div>
                             </div>
 
                             <div class="form-actions">
-                                <button type="button" class="btn-secondary" @click="closeDialog" :disabled="isSubmitting">Batal</button>
+                                <button type="button" class="btn-secondary" :disabled="isSubmitting" @click="closeDialog">Batal</button>
                                 <button type="submit" class="btn-primary" :disabled="!isFormValid || isSubmitting">
                                     <span v-if="!isSubmitting">Verifikasi</span>
                                     <span v-else class="loading-content">

@@ -140,7 +140,7 @@ function getStatusLabel(status) {
             <Toolbar class="mb-6">
                 <template #start>
                     <Button label="New" icon="pi pi-plus" severity="secondary" class="mr-2" @click="openNew" />
-                    <Button label="Delete" icon="pi pi-trash" severity="secondary" @click="confirmDeleteSelected" :disabled="!selectedProducts || !selectedProducts.length" />
+                    <Button label="Delete" icon="pi pi-trash" severity="secondary" :disabled="!selectedProducts || !selectedProducts.length" @click="confirmDeleteSelected" />
                 </template>
 
                 <template #end>
@@ -152,29 +152,29 @@ function getStatusLabel(status) {
                 ref="dt"
                 v-model:selection="selectedProducts"
                 :value="products"
-                dataKey="id"
+                data-key="id"
                 :paginator="true"
                 :rows="10"
                 :filters="filters"
-                paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                :rowsPerPageOptions="[5, 10, 25]"
-                currentPageReportTemplate="Showing {first} to {last} of {totalRecords} products"
+                paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                :rows-per-page-options="[5, 10, 25]"
+                current-page-report-template="Showing {first} to {last} of {totalRecords} products"
             >
                 <template #header>
                     <div class="flex flex-wrap gap-2 items-center justify-between">
                         <h4 class="m-0">Manage Products</h4>
                         <IconField>
                             <InputIcon>
-                                <i class="pi pi-search" />
+                                <i class="pi pi-search"></i>
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Search..." />
                         </IconField>
                     </div>
                 </template>
 
-                <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-                <Column field="code" header="Code" sortable style="min-width: 12rem"></Column>
-                <Column field="name" header="Name" sortable style="min-width: 16rem"></Column>
+                <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
+                <Column field="code" header="Code" sortable style="min-width: 12rem" />
+                <Column field="name" header="Name" sortable style="min-width: 16rem" />
                 <Column header="Image">
                     <template #body="slotProps">
                         <img :src="`https://primefaces.org/cdn/primevue/images/product/${slotProps.data.image}`" :alt="slotProps.data.image" class="rounded" style="width: 64px" />
@@ -185,10 +185,10 @@ function getStatusLabel(status) {
                         {{ formatCurrency(slotProps.data.price) }}
                     </template>
                 </Column>
-                <Column field="category" header="Category" sortable style="min-width: 10rem"></Column>
+                <Column field="category" header="Category" sortable style="min-width: 10rem" />
                 <Column field="rating" header="Reviews" sortable style="min-width: 12rem">
                     <template #body="slotProps">
-                        <Rating :modelValue="slotProps.data.rating" :readonly="true" />
+                        <Rating :model-value="slotProps.data.rating" :readonly="true" />
                     </template>
                 </Column>
                 <Column field="inventoryStatus" header="Status" sortable style="min-width: 12rem">
@@ -219,7 +219,7 @@ function getStatusLabel(status) {
                 </div>
                 <div>
                     <label for="inventoryStatus" class="block font-bold mb-3">Inventory Status</label>
-                    <Select id="inventoryStatus" v-model="product.inventoryStatus" :options="statuses" optionLabel="label" placeholder="Select a Status" fluid></Select>
+                    <Select id="inventoryStatus" v-model="product.inventoryStatus" :options="statuses" option-label="label" placeholder="Select a Status" fluid />
                 </div>
 
                 <div>
@@ -264,7 +264,7 @@ function getStatusLabel(status) {
 
         <Dialog v-model:visible="deleteProductDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product"
                     >Are you sure you want to delete <b>{{ product.name }}</b
                     >?</span
@@ -278,7 +278,7 @@ function getStatusLabel(status) {
 
         <Dialog v-model:visible="deleteProductsDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 <span v-if="product">Are you sure you want to delete the selected products?</span>
             </div>
             <template #footer>

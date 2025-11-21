@@ -16,8 +16,8 @@ const isLoading = ref(false);
             </div>
 
             <div class="flex justify-end mt-8 space-x-4">
-                <Button label="Simpan" severity="success" @click="submitForm" :loading="isLoading" class="min-w-28" />
-                <Button label="Batal" severity="secondary" @click="batal" class="min-w-28" />
+                <Button label="Simpan" severity="success" :loading="isLoading" class="min-w-28" @click="submitForm" />
+                <Button label="Batal" severity="secondary" class="min-w-28" @click="batal" />
             </div>
         </div>
     </div>

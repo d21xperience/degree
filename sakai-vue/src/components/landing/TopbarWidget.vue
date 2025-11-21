@@ -1,10 +1,12 @@
 <script setup>
 import router from '@/router';
+import { useAuth } from '@/views/pages/auth/composables/auth';
 import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import LanguageSwitcher from '../LanguageSwitcher.vue';
 const store = useStore();
+const { user, currentUser } = useAuth();
 function smoothScroll(id) {
     document.body.click();
     const element = document.getElementById(id);
@@ -22,11 +24,20 @@ onMounted(async () => {
 });
 
 const toDashboard = async () => {
-    const sekolah = await store.getters['authService/getSekolah']?.namaSekolah;
     if (isAuthenticated.value) {
-        router.push({ name: 'suDashboard' });
+        console.log(user);
+        // cek role
+        switch (user) {
+            case 'admin':
+                router.push({ name: 'dashboard', params: { sekolah: (currentUser.value.asalSekolah || '').toLowerCase().replace(/\s+/g, '') } });
+                break;
+            case 'superadmin':
+                router.push({ name: 'suDashboard' });
+                break;
+            default:
+                break;
+        }
     }
-    router.push({ name: 'dashboard', params: { sekolah: sekolah.toLowerCase().replace(/\s+/g, '') } });
 };
 </script>
 
@@ -51,49 +62,49 @@ const toDashboard = async () => {
         </svg>
         <span class="text-primary dark:text-surface-0 font-medium text-2xl leading-normal mr-20">AKA</span>
     </a>
-    <Button class="lg:!hidden" text severity="success" rounded v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }">
+    <Button v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }" class="lg:!hidden" text severity="success" rounded>
         <i class="pi pi-bars !text-2xl"></i>
     </Button>
     <div class="items-center bg-white grow justify-between hidden lg:flex absolute lg:static w-full left-0 top-full px-12 lg:px-0 z-20 rounded-border">
         <ul class="list-none p-0 m-0 flex lg:items-center select-none flex-col lg:flex-row cursor-pointer gap-8">
             <li>
-                <a @click="smoothScroll('hero')" class="px-0 py-4 dark:text-surface-0 font-medium text-xl text-primary">
+                <a class="px-0 py-4 dark:text-surface-0 font-medium text-xl text-primary" @click="smoothScroll('hero')">
                     <span>Home</span>
                 </a>
             </li>
             <li>
-                <a @click="smoothScroll('how-it-works')" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
+                <a class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl" @click="smoothScroll('how-it-works')">
                     <span>Cara kerja</span>
                 </a>
             </li>
             <li>
-                <a @click="smoothScroll('about')" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
+                <a class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl" @click="smoothScroll('about')">
                     <span>{{ t('about') }}</span>
                 </a>
             </li>
             <li>
-                <a @click="smoothScroll('contact')" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
+                <a class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl" @click="smoothScroll('contact')">
                     <span>{{ t('contact') }}</span>
                 </a>
             </li>
             <li>
-                <a @click="router.push({ name: 'faq' })" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
+                <a class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl" @click="router.push({ name: 'faq' })">
                     <span>FAQ</span>
                 </a>
             </li>
             <li>
-                <a @click="router.push({ name: 'blog' })" class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl">
+                <a class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl" @click="router.push({ name: 'blog' })">
                     <span>Blog</span>
                 </a>
             </li>
         </ul>
         <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
             <div v-if="!isAuthenticated">
-                <Button label="Login" text as="router-link" to="/auth/login" rounded class="mr-2"></Button>
-                <Button label="Register" as="router-link" to="/auth/register" rounded></Button>
+                <Button label="Login" text as="router-link" to="/auth/login" rounded class="mr-2" />
+                <Button label="Register" as="router-link" to="/auth/register" rounded />
             </div>
             <div v-else>
-                <Button label="Dashboard" rounded @click="toDashboard"></Button>
+                <Button label="Dashboard" rounded @click="toDashboard" />
             </div>
             <div>
                 <LanguageSwitcher />

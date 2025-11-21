@@ -176,7 +176,7 @@ onMounted(() => {
 
             <div class="contact-content">
                 <div class="contact-form-container">
-                    <form @submit.prevent="handleSubmit" class="contact-form" novalidate>
+                    <form class="contact-form" novalidate @submit.prevent="handleSubmit">
                         <div class="form-group">
                             <label for="contact-name" class="form-label"> Nama Lengkap </label>
                             <input
@@ -187,12 +187,12 @@ onMounted(() => {
                                 :class="{ error: formErrors.name }"
                                 placeholder="Masukkan nama lengkap Anda"
                                 :disabled="isSubmitting"
-                                @input="validateField('name')"
-                                @blur="validateField('name')"
                                 aria-describedby="name-error"
                                 required
+                                @input="validateField('name')"
+                                @blur="validateField('name')"
                             />
-                            <div id="name-error" class="form-error" v-if="formErrors.name" role="alert">
+                            <div v-if="formErrors.name" id="name-error" class="form-error" role="alert">
                                 {{ formErrors.name }}
                             </div>
                         </div>
@@ -207,25 +207,25 @@ onMounted(() => {
                                 :class="{ error: formErrors.email }"
                                 placeholder="Masukkan alamat email Anda"
                                 :disabled="isSubmitting"
-                                @input="validateField('email')"
-                                @blur="validateField('email')"
                                 aria-describedby="email-error"
                                 required
+                                @input="validateField('email')"
+                                @blur="validateField('email')"
                             />
-                            <div id="email-error" class="form-error" v-if="formErrors.email" role="alert">
+                            <div v-if="formErrors.email" id="email-error" class="form-error" role="alert">
                                 {{ formErrors.email }}
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="contact-subject" class="form-label"> Subjek </label>
-                            <select id="contact-subject" v-model="formData.subject" class="form-select" :class="{ error: formErrors.subject }" :disabled="isSubmitting" @change="validateField('subject')" aria-describedby="subject-error" required>
+                            <select id="contact-subject" v-model="formData.subject" class="form-select" :class="{ error: formErrors.subject }" :disabled="isSubmitting" aria-describedby="subject-error" required @change="validateField('subject')">
                                 <option value="">Pilih subjek pesan</option>
                                 <option v-for="(option, index) in subjectOptions" :key="index" :value="option.value">
                                     {{ option.label }}
                                 </option>
                             </select>
-                            <div id="subject-error" class="form-error" v-if="formErrors.subject" role="alert">
+                            <div v-if="formErrors.subject" id="subject-error" class="form-error" role="alert">
                                 {{ formErrors.subject }}
                             </div>
                         </div>
@@ -240,14 +240,14 @@ onMounted(() => {
                                 placeholder="Tulis pesan Anda di sini..."
                                 rows="5"
                                 :disabled="isSubmitting"
-                                @input="validateField('message')"
-                                @blur="validateField('message')"
                                 aria-describedby="message-error message-counter"
                                 required
+                                @input="validateField('message')"
+                                @blur="validateField('message')"
                             ></textarea>
                             <div class="form-meta">
                                 <div id="message-counter" class="character-counter" :class="{ warning: messageLength > 450 }">{{ messageLength }}/500 karakter</div>
-                                <div id="message-error" class="form-error" v-if="formErrors.message" role="alert">
+                                <div v-if="formErrors.message" id="message-error" class="form-error" role="alert">
                                     {{ formErrors.message }}
                                 </div>
                             </div>
@@ -270,7 +270,7 @@ onMounted(() => {
                     <!-- Success Message -->
                     <div v-if="showSuccessMessage" class="success-message" role="alert" aria-live="polite">
                         <svg class="success-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
                         <div>
                             <h3>Pesan Berhasil Dikirim!</h3>

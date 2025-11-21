@@ -11,6 +11,13 @@ const platforms = ref(null);
 
 const dialogSelectplatforms = ref(false);
 const selectedPlatform = ref();
+onMounted(async () => {
+    // await fetchTahunAjaran();
+    // listTahunAjaran.value = listTahunAjaran.value._rawValue;
+    // selectedTahunAjaran.value = initSelectedTahunAjaran.value;
+    // // await fetchPlatforms();
+    // await fetchSemester();
+});
 // const fetchPlatforms = async () => {
 //     payload.schemaname = store.getters['sekolahService/getTabeltenant']?.schemaname;
 
@@ -78,13 +85,7 @@ const saveSelection = async () => {
 // };
 // const listTahunAjaran = ref([]);
 // const selectedTahunAjaran = ref();
-onMounted(async () => {
-    // await fetchTahunAjaran();
-    // listTahunAjaran.value = listTahunAjaran.value._rawValue;
-    // selectedTahunAjaran.value = initSelectedTahunAjaran.value;
-    // // await fetchPlatforms();
-    // await fetchSemester();
-});
+
 // const semester = ref();
 // const fetchSemester = async () => {
 //     try {
@@ -149,19 +150,19 @@ const isDisabled = computed(() => route.meta.disableSelect);
                 <div class="md:flex md:items-center md:space-x-2">
                     <label class="text-slate-500 md:text-base text-sm">Tahun Pelajaran</label>
                     <div>
-                        <Select v-model="selectedTahunAjaran" :options="listTahunAjaran" optionLabel="nama" placeholder="Tahun Pelajaran" class="w-full md:w-52 mr-2" :disabled="isDisabled" />
+                        <Select v-model="selectedTahunAjaran" :options="listTahunAjaran" option-label="nama" placeholder="Tahun Pelajaran" class="w-full md:w-52 mr-2" :disabled="isDisabled" />
                     </div>
                 </div>
             </div>
         </div>
         <div class="card">
-            <RouterView></RouterView>
+            <RouterView />
         </div>
 
         <Dialog v-model:visible="dialogSelectplatforms" modal header="Pilih Platform" position="top">
             <div>
                 <div v-for="platform in platforms" :key="platform.id" class="my-2 flex space-x-1">
-                    <input type="radio" :name="platform.id" :id="platform.id" :value="platform.name" v-model="selectedPlatform" />
+                    <input :id="platform.id" v-model="selectedPlatform" type="radio" :name="platform.id" :value="platform.name" />
                     <label :for="platform.id">{{ platform?.name }}</label>
                 </div>
 

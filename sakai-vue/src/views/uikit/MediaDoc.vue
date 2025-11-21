@@ -66,7 +66,7 @@ function getSeverity(status) {
 <template>
     <div class="card">
         <div class="font-semibold text-xl mb-4">Carousel</div>
-        <Carousel :value="products" :numVisible="3" :numScroll="3" :responsiveOptions="carouselResponsiveOptions">
+        <Carousel :value="products" :num-visible="3" :num-scroll="3" :responsive-options="carouselResponsiveOptions">
             <template #item="slotProps">
                 <div class="border border-surface-200 dark:border-surface-700 rounded m-2 p-4">
                     <div class="mb-4">
@@ -97,7 +97,7 @@ function getSeverity(status) {
 
     <div class="card">
         <div class="font-semibold text-xl mb-4">Galleria</div>
-        <Galleria :value="images" :responsiveOptions="galleriaResponsiveOptions" :numVisible="5" containerStyle="max-width: 640px">
+        <Galleria :value="images" :responsive-options="galleriaResponsiveOptions" :num-visible="5" container-style="max-width: 640px">
             <template #item="slotProps">
                 <img :src="slotProps.item.itemImageSrc" :alt="slotProps.item.alt" style="width: 100%" />
             </template>

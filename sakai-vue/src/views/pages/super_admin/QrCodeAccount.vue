@@ -33,13 +33,13 @@ const saveQRCode = (format) => {
     <div class="flex flex-col items-center justify-center h-screen bg-gray-100">
         <h1 class="text-2xl font-bold text-gray-800 mb-4">Generate and Save QR Code</h1>
         <!-- QR Code -->
-        <qrcode-vue :value="text" :size="200" class="shadow-lg" ref="qrcodeRef" />
+        <qrcode-vue ref="qrcodeRef" :value="text" :size="200" class="shadow-lg" />
         <!-- Input for QR Code -->
         <input v-model="text" type="text" placeholder="Enter text for QR code" class="mt-4 p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500" />
         <!-- Save as PNG Button -->
-        <button @click="saveQRCode('png')" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-400">Save as PNG</button>
+        <button class="mt-4 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-400" @click="saveQRCode('png')">Save as PNG</button>
         <!-- Save as JPEG Button -->
-        <button @click="saveQRCode('jpeg')" class="mt-2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-green-400">Save as JPEG</button>
+        <button class="mt-2 bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-green-400" @click="saveQRCode('jpeg')">Save as JPEG</button>
     </div>
 </template>
 

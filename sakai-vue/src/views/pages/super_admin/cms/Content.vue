@@ -51,6 +51,6 @@ fetchContent();
         </section>
 
         <!-- Simpan -->
-        <button @click="saveContent" class="bg-blue-500 text-white px-4 py-2 rounded">Simpan</button>
+        <button class="bg-blue-500 text-white px-4 py-2 rounded" @click="saveContent">Simpan</button>
     </div>
 </template>

@@ -353,3 +353,4 @@ func ValidateJWT(tokenStr string) (*customClaims, error) {
 	}
 	return &claims, nil
 }
+

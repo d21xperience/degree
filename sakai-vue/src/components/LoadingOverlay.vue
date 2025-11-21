@@ -15,7 +15,7 @@ defineProps({
         <div class="flex flex-col items-center justify-center px-10 py-12 gap-6 bg-white/10 backdrop-blur-lg border border-white/20 rounded-3xl shadow-2xl min-w-[320px] text-center">
             <!-- Spinner -->
             <div class="relative">
-                <ProgressSpinner :style="{ width: '80px', height: '80px' }" strokeWidth="6" fill="none" animationDuration="1.2s" class="text-white drop-shadow-lg" />
+                <ProgressSpinner :style="{ width: '80px', height: '80px' }" stroke-width="6" fill="none" animation-duration="1.2s" class="text-white drop-shadow-lg" />
                 <div class="absolute inset-0 rounded-full border-2 border-blue-300/30 animate-ping" style="width: 80px; height: 80px"></div>
             </div>
 

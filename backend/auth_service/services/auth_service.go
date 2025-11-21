@@ -16,8 +16,8 @@ type AuthService interface {
 	Register(user *models.User) error
 	RegisterAdmin(user *models.User) error
 	Login(username, password string) (*models.User, error)
-	// GenerateToken(userID int, role string) (string, error)
 	GetUserByID(userId int64) (*models.User, error)
+	// GenerateToken(userID int, role string) (string, error)
 	// SetAuthCookies(w http.ResponseWriter, accessToken, refreshToken string)
 	// ClearAuthCookies(w http.ResponseWriter)
 }
@@ -149,18 +149,7 @@ func (s *authServiceImpl) Login(identifier, password string) (*models.User, erro
 	}
 
 	return user, nil
-}
-
-// func (as *authServiceImpl) GenerateToken(userID int, role string) (string, error) {
-// 	claims := jwt.MapClaims{
-// 		"userID": userID,
-// 		"role":   role,
-// 		"exp":    time.Now().Add(24 * time.Hour).Unix(),
-// 	}
-
-// 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-// 	return token.SignedString([]byte(as.secretKey))
-// }
+} 
 
 func (s *authServiceImpl) GetUserByID(userId int64) (*models.User, error) {
 	cekUser, err := s.repo.FindByID(strconv.FormatInt(userId, 10))
@@ -169,44 +158,4 @@ func (s *authServiceImpl) GetUserByID(userId int64) (*models.User, error) {
 	}
 	return cekUser, nil
 }
-
-// func (s *authServiceImpl) SetAuthCookies(w http.ResponseWriter, accessToken, refreshToken string) {
-// 	http.SetCookie(w, &http.Cookie{
-// 		Name:     "access_token",
-// 		Value:    accessToken,
-// 		Path:     "/",
-// 		HttpOnly: true,
-// 		Secure:   true, // aktifkan jika https
-// 		MaxAge:   15 * 60,
-// 		SameSite: http.SameSiteStrictMode,
-// 	})
-
-// 	http.SetCookie(w, &http.Cookie{
-// 		Name:     "refresh_token",
-// 		Value:    refreshToken,
-// 		Path:     "/",
-// 		HttpOnly: true,
-// 		Secure:   true,
-// 		MaxAge:   7 * 24 * 60 * 60,
-// 		SameSite: http.SameSiteStrictMode,
-// 	})
-// }
-
-// func (s *authServiceImpl) ClearAuthCookies(w http.ResponseWriter) {
-// 	http.SetCookie(w, &http.Cookie{
-// 		Name:     "access_token",
-// 		Value:    "",
-// 		Path:     "/",
-// 		MaxAge:   -1,
-// 		HttpOnly: true,
-// 		Secure:   true,
-// 	})
-// 	http.SetCookie(w, &http.Cookie{
-// 		Name:     "refresh_token",
-// 		Value:    "",
-// 		Path:     "/",
-// 		MaxAge:   -1,
-// 		HttpOnly: true,
-// 		Secure:   true,
-// 	})
-// }
+ 

@@ -57,7 +57,7 @@ async function checkIpfsConnection() {
 <template>
     <div>
         <h1>IPFS Docker Connection Check</h1>
-        <button @click="checkIpfsConnection" :disabled="isChecking">
+        <button :disabled="isChecking" @click="checkIpfsConnection">
             {{ isChecking ? 'Checking...' : 'Check IPFS Connection' }}
         </button>
 

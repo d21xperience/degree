@@ -4,7 +4,7 @@ import "time"
 
 type User struct {
 	ID                int64      `gorm:"primaryKey;autoIncrement;column:id"`
-	SekolahTenantID   uint32     `gorm:"column:sekolah_tenant_id"`
+	SekolahTenantID   int32      `gorm:"column:sekolah_tenant_id"`
 	Username          string     `gorm:"column:username;not null;uniqueIndex:uni_users_username"`
 	Email             string     `gorm:"column:email;not null;uniqueIndex:uni_users_email"`
 	Password          string     `gorm:"column:password;not null"`

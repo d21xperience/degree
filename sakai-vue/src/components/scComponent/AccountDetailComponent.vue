@@ -72,7 +72,7 @@ const copyToClipboard = (text) => {
                         <span class="font-mono bg-gray-700 px-3 py-1 rounded">
                             {{ shortenAddress(account.address) }}
                         </span>
-                        <button @click="copyToClipboard(account.address)" class="text-blue-400 hover:text-blue-300">
+                        <button class="text-blue-400 hover:text-blue-300" @click="copyToClipboard(account.address)">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path
                                     stroke-linecap="round"

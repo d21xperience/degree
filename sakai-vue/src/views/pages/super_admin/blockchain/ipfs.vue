@@ -275,7 +275,7 @@ const saveAdvancedConfig = async () => {
                     <span>{{ formatBytes(nodeInfo.repoSize) }} / {{ formatBytes(nodeInfo.repoSizeMax) }}</span>
                 </div>
             </div>
-            <Button @click="checkNodeStatus" :disabled="isCheckingStatus" icon="pi pi-sync" :class="{ 'pi pi-spin': isCheckingStatus }" label="Refresh Status" />
+            <Button :disabled="isCheckingStatus" icon="pi pi-sync" :class="{ 'pi pi-spin': isCheckingStatus }" label="Refresh Status" @click="checkNodeStatus" />
         </div>
 
         <!-- Konfigurasi Koneksi -->
@@ -284,11 +284,11 @@ const saveAdvancedConfig = async () => {
             <form @submit.prevent="updateConnectionConfig">
                 <div class="form-group">
                     <label>API Endpoint</label>
-                    <input type="text" v-model="connectionConfig.apiEndpoint" required />
+                    <input v-model="connectionConfig.apiEndpoint" type="text" required />
                 </div>
                 <div class="form-group">
                     <label>Gateway URL</label>
-                    <input type="text" v-model="connectionConfig.gatewayUrl" required />
+                    <input v-model="connectionConfig.gatewayUrl" type="text" required />
                 </div>
                 <div class="form-group">
                     <label>Swarm Ports</label>
@@ -296,7 +296,7 @@ const saveAdvancedConfig = async () => {
                 </div>
                 <div class="form-actions">
                     <Button :disabled="isSavingConfig" icon="pi pi-save" label="Save Configuration" />
-                    <Button type="button" @click="resetConfig" class="secondary" icon="pi pi-undo" label="Reset" severity="secondary" />
+                    <Button type="button" class="secondary" icon="pi pi-undo" label="Reset" severity="secondary" @click="resetConfig" />
                 </div>
             </form>
         </div>
@@ -305,8 +305,8 @@ const saveAdvancedConfig = async () => {
         <div class="config-section">
             <h3><i class="fas fa-network-wired"></i> Peer Management</h3>
             <div class="peer-controls">
-                <input type="text" v-model="newPeerAddress" placeholder="/ip4/127.0.0.1/tcp/4001/p2p/QmPeerID" class="peer-input" />
-                <button @click="addPeer" :disabled="!newPeerAddress || isManagingPeers"><i class="fas fa-plus"></i> Add Peer</button>
+                <input v-model="newPeerAddress" type="text" placeholder="/ip4/127.0.0.1/tcp/4001/p2p/QmPeerID" class="peer-input" />
+                <button :disabled="!newPeerAddress || isManagingPeers" @click="addPeer"><i class="fas fa-plus"></i> Add Peer</button>
             </div>
 
             <div class="peer-list">
@@ -316,7 +316,7 @@ const saveAdvancedConfig = async () => {
                         <span class="peer-id">{{ peer.id }}</span>
                         <span class="peer-address">{{ peer.address }}</span>
                     </div>
-                    <button @click="removePeer(peer.id)" class="danger small">
+                    <button class="danger small" @click="removePeer(peer.id)">
                         <i class="fas fa-trash-alt"></i>
                     </button>
                 </div>
@@ -327,9 +327,9 @@ const saveAdvancedConfig = async () => {
         <div class="config-section">
             <h3><i class="pi pi-thumbtack" style="font-size: 1.5rem"></i> Pin Management</h3>
             <div class="pin-controls">
-                <input type="text" v-model="pinCid" placeholder="Enter CID to pin" class="cid-input" />
-                <Button @click="pinContent" :disabled="!pinCid || isManagingPins" icon="pi pi-thumbtack" label="Pin Content" />
-                <Button @click="unpinContent" :disabled="!pinCid || isManagingPins" severity="danger" icon="pi pi-trash-alt" label="Unpin" />
+                <input v-model="pinCid" type="text" placeholder="Enter CID to pin" class="cid-input" />
+                <Button :disabled="!pinCid || isManagingPins" icon="pi pi-thumbtack" label="Pin Content" @click="pinContent" />
+                <Button :disabled="!pinCid || isManagingPins" severity="danger" icon="pi pi-trash-alt" label="Unpin" @click="unpinContent" />
             </div>
 
             <div class="pin-list">
@@ -338,7 +338,7 @@ const saveAdvancedConfig = async () => {
                     <span class="pin-cid">{{ item.cid }}</span>
                     <span class="pin-size">{{ formatBytes(item.size) }}</span>
                     <span class="pin-type">{{ item.type || 'unknown' }}</span>
-                    <button @click="showPinInfo(item.cid)" class="small"><i class="fas fa-info-circle"></i> Details</button>
+                    <button class="small" @click="showPinInfo(item.cid)"><i class="fas fa-info-circle"></i> Details</button>
                 </div>
             </div>
         </div>
@@ -352,7 +352,7 @@ const saveAdvancedConfig = async () => {
             <div v-if="showAdvanced" class="advanced-content">
                 <div class="form-group">
                     <label>GC Interval (minutes)</label>
-                    <input type="number" v-model="advancedConfig.gcInterval" />
+                    <input v-model="advancedConfig.gcInterval" type="number" />
                 </div>
                 <div class="form-group">
                     <label>Routing Type</label>
@@ -364,13 +364,13 @@ const saveAdvancedConfig = async () => {
                 </div>
                 <div class="form-group">
                     <label>Enable Auto-NAT</label>
-                    <input type="checkbox" v-model="advancedConfig.autoNAT" />
+                    <input v-model="advancedConfig.autoNAT" type="checkbox" />
                 </div>
                 <div class="form-group">
                     <label>Enable PubSub</label>
-                    <input type="checkbox" v-model="advancedConfig.pubSub" />
+                    <input v-model="advancedConfig.pubSub" type="checkbox" />
                 </div>
-                <button @click="saveAdvancedConfig" :disabled="isSavingAdvanced"><i class="fas fa-save"></i> Save Advanced Config</button>
+                <button :disabled="isSavingAdvanced" @click="saveAdvancedConfig"><i class="fas fa-save"></i> Save Advanced Config</button>
             </div>
         </div>
 
@@ -379,7 +379,7 @@ const saveAdvancedConfig = async () => {
             <div class="modal">
                 <div class="modal-header">
                     <h3>Pin Details</h3>
-                    <button @click="currentPinDetail = null" class="close-button">
+                    <button class="close-button" @click="currentPinDetail = null">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -408,7 +408,7 @@ const saveAdvancedConfig = async () => {
                     </div>
                 </div>
                 <div class="modal-actions">
-                    <button @click="unpinContent(currentPinDetail.cid)" class="danger"><i class="fas fa-thumbtack"></i> Unpin This Content</button>
+                    <button class="danger" @click="unpinContent(currentPinDetail.cid)"><i class="fas fa-thumbtack"></i> Unpin This Content</button>
                     <button @click="currentPinDetail = null">Close</button>
                 </div>
             </div>

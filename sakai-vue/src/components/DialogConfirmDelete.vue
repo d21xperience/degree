@@ -37,7 +37,7 @@ const confirm = () => {
 <template>
     <Dialog v-model:visible="isVisible" :style="{ width: '450px' }" :header="judul" :modal="true">
         <div class="flex items-center gap-4">
-            <i class="pi pi-exclamation-triangle !text-3xl" />
+            <i class="pi pi-exclamation-triangle !text-3xl"></i>
             <span>Apakah <span v-html="message"></span></span>
         </div>
         <template #footer>

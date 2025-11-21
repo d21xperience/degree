@@ -154,69 +154,69 @@ onMounted(async () => {
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="block text-gray-700" for="nama">Nama</label>
-                                    <InputText v-model="dns.nama" fluid name="nama" id="nama" placeholder="Diisi nama" disabled />
+                                    <InputText id="nama" v-model="dns.nama" fluid name="nama" placeholder="Diisi nama" disabled />
                                 </div>
                                 <div class="w-full">
                                     <label class="block text-gray-700">Jenis Kelamin</label>
-                                    <Select v-model="dns.jenisKelamin" :options="jenisKelaminOptions" placeholder="Pilih jenis kelamin" optionLabel="label" option-value="value" class="w-full" disabled />
+                                    <Select v-model="dns.jenisKelamin" :options="jenisKelaminOptions" placeholder="Pilih jenis kelamin" option-label="label" option-value="value" class="w-full" disabled />
                                 </div>
                                 <div>
                                     <div class="md:flex md:space-x-1">
                                         <div class="w-full">
                                             <label class="block text-gray-700" for="tempatLahir">Tpt Lahir</label>
-                                            <InputText v-model="dns.tempatLahir" fluid name="tempatLahir" id="tempatLahir" placeholder="Diisi tempat lahir" class="w-full md:w-64" disabled />
+                                            <InputText id="tempatLahir" v-model="dns.tempatLahir" fluid name="tempatLahir" placeholder="Diisi tempat lahir" class="w-full md:w-64" disabled />
                                         </div>
                                         <div>
                                             <label class="block text-gray-700">Tgl Lahir</label>
-                                            <input type="date" placeholder="YYYY-MM-DD" class="w-full p-2 border border-gray-300 rounded" v-model="dns.tanggalLahir" disabled />
+                                            <input v-model="dns.tanggalLahir" type="date" placeholder="YYYY-MM-DD" class="w-full p-2 border border-gray-300 rounded" disabled />
                                         </div>
                                     </div>
                                 </div>
                                 <div class="flex space-x-2">
                                     <div class="w-full">
                                         <label class="block text-gray-700" for="nis">NIS</label>
-                                        <InputText v-model="dns.nis" fluid name="nis" id="nis" placeholder="Diisi NIS" disabled />
+                                        <InputText id="nis" v-model="dns.nis" fluid name="nis" placeholder="Diisi NIS" disabled />
                                     </div>
                                     <div class="w-full">
                                         <label class="block text-gray-700" for="nisn">NISN</label>
-                                        <InputText v-model="dns.nisn" fluid name="nisn" id="nisn" placeholder="Diisi NISN" disabled />
+                                        <InputText id="nisn" v-model="dns.nisn" fluid name="nisn" placeholder="Diisi NISN" disabled />
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="jurusan">Program Keahlian</label>
-                                    <InputText v-model="dns.programKeahlian" fluid name="jurusan" id="jurusan" placeholder="Diisi nama" disabled />
+                                    <InputText id="jurusan" v-model="dns.programKeahlian" fluid name="jurusan" placeholder="Diisi nama" disabled />
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="kab">Kompetensi Keahlian</label>
-                                    <InputText fluid name="kab" id="kab" placeholder="Diisi nama" v-model="dns.paketKeahlian" disabled />
+                                    <InputText id="kab" v-model="dns.paketKeahlian" fluid name="kab" placeholder="Diisi nama" disabled />
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="jurusan">Kab/Kota</label>
-                                    <InputText fluid name="jurusan" id="jurusan" placeholder="Diisi nama" v-model="dns.kabupatenKota" disabled />
+                                    <InputText id="jurusan" v-model="dns.kabupatenKota" fluid name="jurusan" placeholder="Diisi nama" disabled />
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="kab">Provinsi</label>
-                                    <InputText fluid name="kab" id="kab" placeholder="Diisi nama" v-model="dns.provinsi" disabled />
+                                    <InputText id="kab" v-model="dns.provinsi" fluid name="kab" placeholder="Diisi nama" disabled />
                                 </div>
                             </div>
                             <h2 class="text-xl font-normal mb-4">Informasi Pengisian Ijazah</h2>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div>
                                     <label class="block text-gray-700" for="no-ijazah">No. Ijazah</label>
-                                    <InputText v-model="dns.nomorIjazah" fluid name="no-ijazah" id="no-ijazah" placeholder="Contoh: M-SMK/K13-3/23/0000001" :invalid="!dns.nomorIjazah" />
+                                    <InputText id="no-ijazah" v-model="dns.nomorIjazah" fluid name="no-ijazah" placeholder="Contoh: M-SMK/K13-3/23/0000001" :invalid="!dns.nomorIjazah" />
                                     <small v-if="!dns.nomorIjazah" class="text-red-500">No Ijazah harus diisi.</small>
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="tpt-ijazah">Tempat Penerbitan</label>
-                                    <InputText v-model="dns.tempatIjazah" fluid name="tpt-ijazah" id="tpt-ijazah" placeholder="Diisi nama" />
+                                    <InputText id="tpt-ijazah" v-model="dns.tempatIjazah" fluid name="tpt-ijazah" placeholder="Diisi nama" />
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="tgl-dikelurkan-ijazah">Tgl Penerbitan</label>
-                                    <input type="date" placeholder="YYYY-MM-DD" class="w-full p-2 border border-gray-300 rounded" v-model="dns.tanggalIjazah" />
+                                    <input v-model="dns.tanggalIjazah" type="date" placeholder="YYYY-MM-DD" class="w-full p-2 border border-gray-300 rounded" />
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="nmWali">Nama Ortu/Wali</label>
-                                    <InputText v-model="dns.namaOrtuWali" fluid name="nmWali" id="nmWali" placeholder="Diisi nama Wali" :invalid="!dns.namaOrtuWali" />
+                                    <InputText id="nmWali" v-model="dns.namaOrtuWali" fluid name="nmWali" placeholder="Diisi nama Wali" :invalid="!dns.namaOrtuWali" />
                                     <small v-if="!dns.namaOrtuWali" class="text-red-500">Nama Ortu/Wali harus diisi.</small>
                                 </div>
                             </div>
@@ -229,13 +229,13 @@ onMounted(async () => {
                                 </div>
                                 <div>
                                     <label class="block text-gray-700" for="blockhain-type">Blockhain Type</label>
-                                    <InputText v-model="selectedBCNetwork.name" fluid name="blockhain-type" id="blockhain-type" placeholder="Diisi nama" disabled />
+                                    <InputText id="blockhain-type" v-model="selectedBCNetwork.name" fluid name="blockhain-type" placeholder="Diisi nama" disabled />
                                 </div>
                             </div>
                         </section>
                         <div class="flex justify-end space-x-4">
-                            <Button class="w-32" @click="save" label="Update" :loading="isLoadingSave" />
-                            <Button class="w-32" @click="cancel" label="Batal" severity="info" :loading="isLoading" />
+                            <Button class="w-32" label="Update" :loading="isLoadingSave" @click="save" />
+                            <Button class="w-32" label="Batal" severity="info" :loading="isLoading" @click="cancel" />
                         </div>
                     </div>
                 </TabPanel>
@@ -245,32 +245,32 @@ onMounted(async () => {
                         <DataTable
                             ref="dt"
                             v-model:selection="selectedKelas"
-                            stripedRows
+                            striped-rows
                             size="small"
                             :value="kelasList"
                             scrollable
-                            scrollHeight="400px"
-                            dataKey="rombonganBelajarId"
+                            scroll-height="400px"
+                            data-key="rombonganBelajarId"
                             :paginator="true"
                             :rows="10"
                             :filters="filters"
-                            tableStyle="min-width: 50rem"
-                            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-                            :rowsPerPageOptions="[10, 20, 30]"
-                            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} kelas"
+                            table-style="min-width: 50rem"
+                            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                            :rows-per-page-options="[10, 20, 30]"
+                            current-page-report-template="Showing {first} to {last} of {totalRecords} kelas"
                             class="mt-2"
                         >
-                            <Column field="nmKelas" header="Nama Mapel"></Column>
-                            <Column field="tingkatPendidikanId" header="SMT 1"></Column>
-                            <Column field="kurikulum.namaKurikulum" header="SMT 2"></Column>
+                            <Column field="nmKelas" header="Nama Mapel" />
+                            <Column field="tingkatPendidikanId" header="SMT 1" />
+                            <Column field="kurikulum.namaKurikulum" header="SMT 2" />
 
                             <div v-if="['smk', 'mak'].includes(bentukPendidikan)">
-                                <Column field="namaJurusanSp" header="Jurusan"></Column>
+                                <Column field="namaJurusanSp" header="Jurusan" />
                             </div>
-                            <Column field="ptk.nama" header="SMT 3"></Column>
-                            <Column field="jumlahAnggota" header="SMT 4"></Column>
-                            <Column field="jumlahAnggota" header="SMT 5"></Column>
-                            <Column field="jumlahAnggota" header="SMT 6"></Column>
+                            <Column field="ptk.nama" header="SMT 3" />
+                            <Column field="jumlahAnggota" header="SMT 4" />
+                            <Column field="jumlahAnggota" header="SMT 5" />
+                            <Column field="jumlahAnggota" header="SMT 6" />
                             <Column header="Rata-rata">
                                 <template #body="slotProps">
                                     <Button icon="pi pi-bullseye" outlined rounded class="mr-2" @click="dialogAnggotaRombel(slotProps.data)" />

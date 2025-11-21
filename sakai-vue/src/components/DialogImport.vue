@@ -168,13 +168,13 @@ onMounted(async () => {
                         :customUpload="true" @before-upload="onBeforeUpload" @upload="onUpload" severity="secondary" />
                 </div> -->
                 <div class="mt-2 flex flex-col gap-6 items-center justify-center">
-                    <FileUpload ref="uploadedFiles" mode="basic" name="file" accept=".xlsx" :maxFileSize="2000000" :customUpload="true" severity="secondary" />
+                    <FileUpload ref="uploadedFiles" mode="basic" name="file" accept=".xlsx" :max-file-size="2000000" :custom-upload="true" severity="secondary" />
                 </div>
             </div>
             <div class="mb-4 flex justify-between">
                 <div class="mt-2 text-sm text-gray-500">
                     Unduh Template Import data
-                    <a href="#" @click.prevent="downloadTemplate" class="text-indigo-600 hover:text-indigo-500"
+                    <a href="#" class="text-indigo-600 hover:text-indigo-500" @click.prevent="downloadTemplate"
                         >disini <span class="text-gray-500">untuk tahun ajaran {{ selectedTahunAjaran.namaSemester }}</span></a
                     >
                 </div>

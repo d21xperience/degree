@@ -93,7 +93,7 @@ const batal = async () => {
     <div class="">
         <div class="flex justify-between items-center mb-1">
             <h1 class="text-2xl font-bold mb-6">{{ isEdit ? 'Form Edit Kelas' : 'Form Tambah Kelas' }}</h1>
-            <Button icon="pi pi-times" severity="danger" rounded size="small" :loading="isLoadingCancel" @click="batal" v-tooltip.bottom="'Batal'" />
+            <Button v-tooltip.bottom="'Batal'" icon="pi pi-times" severity="danger" rounded size="small" :loading="isLoadingCancel" @click="batal" />
         </div>
         <section class="mb-6">
             <h2 class="text-xl font-semibold mb-4">Informasi Kelas</h2>
@@ -101,7 +101,7 @@ const batal = async () => {
                 <div class="flex space-x-1">
                     <div class="w-full">
                         <label class="block text-gray-700" for="nmKelas">Nama Kelas</label>
-                        <InputText v-model="rombel.nmKelas" fluid name="nmKelas" id="nmKelas" placeholder="contoh: TBSM A (tanpa tingkat)" :invalid="submitted && !rombel.nmKelas" :disabled="isEdit" />
+                        <InputText id="nmKelas" v-model="rombel.nmKelas" fluid name="nmKelas" placeholder="contoh: TBSM A (tanpa tingkat)" :invalid="submitted && !rombel.nmKelas" :disabled="isEdit" />
                         <small v-if="submitted && rombel.nmKelas.trim().length == 0" class="text-red-500">Nama kelas harus diisi.</small>
                     </div>
                     <div class="w-full md:w-40">
@@ -152,8 +152,8 @@ const batal = async () => {
         <!-- </div> -->
 
         <div class="flex justify-end mt-8 space-x-4">
-            <Button label="Simpan" severity="success" @click="tambah" :loading="isLoadingTambah" class="min-w-28" />
-            <Button label="Batal" severity="secondary" @click="batal" class="min-w-28" :loading="isLoadingCancel" />
+            <Button label="Simpan" severity="success" :loading="isLoadingTambah" class="min-w-28" @click="tambah" />
+            <Button label="Batal" severity="secondary" class="min-w-28" :loading="isLoadingCancel" @click="batal" />
         </div>
     </div>
 </template>

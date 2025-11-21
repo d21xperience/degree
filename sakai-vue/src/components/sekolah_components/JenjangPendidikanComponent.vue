@@ -43,11 +43,11 @@ onMounted(async () => {
     <Select
         v-model="internalValue"
         :options="jenjangPendidikanOptions"
-        optionLabel="nama"
+        option-label="nama"
         :placeholder="!loadingJenjangPendidikan ? 'Pilih Jenjang Pendidikan...' : 'Memuat data..'"
         fluid
         checkmark
-        :showClear="true"
+        :show-clear="true"
         :loading="loadingJenjangPendidikan"
     />
 </template>

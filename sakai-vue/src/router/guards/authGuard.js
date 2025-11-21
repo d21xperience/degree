@@ -10,13 +10,13 @@ export async function authGuard(to, from, next) {
         return next(); // sudah login
     }
 
-    try {
-        await store.dispatch('authService/refreshToken');
-        return next(); // berhasil refresh
-    } catch {
-        console.warn('Token expired or not found. Redirecting to login.');
-        return next('/auth/login');
-    }
+    // try {
+    //     await store.dispatch('authService/refreshToken');
+    //     return next(); // berhasil refresh
+    // } catch {
+    //     console.warn('Token expired or not found. Redirecting to login.');
+    return next('/auth/login');
+    // }
 }
 
 export async function redirectIfAuthenticated(to, from, next) {

@@ -80,18 +80,18 @@ const loadingAdd = ref(false);
     <div class="">
         <Toolbar>
             <template #start>
-                <Button icon="pi pi-pencil" severity="warn" @click="editGuru" :disabled="!selectedGuru || !selectedGuru.length || selectedGuru.length > 1" class="mr-2" v-tooltip.bottom="'Edit Guru'" :loading="loadingEdit" />
-                <Button icon="pi pi-trash" severity="danger" class="mr-2 text-lg" @click="deleteGuruDialog = true" :disabled="!selectedGuru || !selectedGuru.length" v-tooltip.bottom="'Hapus Guru'" :loading="loading" />
-                <Button icon="pi pi-download" severity="help" @click="exportCSV($event)" class="mr-2 text-sm" v-tooltip.bottom="'Download Guru'" />
-                <Button icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="openNew" v-tooltip.bottom="'Tambah Guru Baru'" :loading="loadingAdd" :disabled="selectedGuru.length" />
-                <Button icon="pi pi-upload" severity="info" @click="dialogImport = true" class="mr-2 text-sm" v-tooltip.bottom="'Upload Guru'" />
+                <Button v-tooltip.bottom="'Edit Guru'" icon="pi pi-pencil" severity="warn" :disabled="!selectedGuru || !selectedGuru.length || selectedGuru.length > 1" class="mr-2" :loading="loadingEdit" @click="editGuru" />
+                <Button v-tooltip.bottom="'Hapus Guru'" icon="pi pi-trash" severity="danger" class="mr-2 text-lg" :disabled="!selectedGuru || !selectedGuru.length" :loading="loading" @click="deleteGuruDialog = true" />
+                <Button v-tooltip.bottom="'Download Guru'" icon="pi pi-download" severity="help" class="mr-2 text-sm" @click="exportCSV($event)" />
+                <Button v-tooltip.bottom="'Tambah Guru Baru'" icon="pi pi-plus" severity="success" class="mr-2 text-lg" :loading="loadingAdd" :disabled="selectedGuru.length" @click="openNew" />
+                <Button v-tooltip.bottom="'Upload Guru'" icon="pi pi-upload" severity="info" class="mr-2 text-sm" @click="dialogImport = true" />
             </template>
             <template #end>
                 <!-- <Button label="Proses" icon="pi pi-send" severity="info"
                                             @click="exportCSV($event)" /> -->
                 <IconField>
                     <InputIcon>
-                        <i class="pi pi-search" />
+                        <i class="pi pi-search"></i>
                     </InputIcon>
                     <InputText v-model="filters['global'].value" placeholder="Search..." />
                 </IconField>
@@ -103,24 +103,24 @@ const loadingAdd = ref(false);
             v-else
             ref="dt"
             v-model:selection="selectedGuru"
-            stripedRows
+            striped-rows
             size="small"
             :value="guruTerdaftarList"
-            dataKey="ptkTerdaftarId"
+            data-key="ptkTerdaftarId"
             :paginator="true"
             :rows="10"
             :filters="filters"
-            paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rowsPerPageOptions="[10, 20, 50]"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} Guru"
+            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+            :rows-per-page-options="[10, 20, 50]"
+            current-page-report-template="Showing {first} to {last} of {totalRecords} Guru"
         >
-            <Column selectionMode="multiple" style="width: 3rem" :exportable="false"></Column>
-            <Column field="ptk.nama" header="Nama" sortable> </Column>
-            <Column field="ptkPelengkap.gelarBelakang" header="Gelar belakang"> </Column>
-            <Column field="ptk.jenisKelamin" header="JK"> </Column>
-            <Column field="ptkPelengkap.nip" header="NIP"> </Column>
-            <Column field="ptkPelengkap.nuptk" header="NUPTK"> </Column>
-            <Column field="ptk.tempatLahir" header="Tpt.Lahir"> </Column>
+            <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
+            <Column field="ptk.nama" header="Nama" sortable />
+            <Column field="ptkPelengkap.gelarBelakang" header="Gelar belakang" />
+            <Column field="ptk.jenisKelamin" header="JK" />
+            <Column field="ptkPelengkap.nip" header="NIP" />
+            <Column field="ptkPelengkap.nuptk" header="NUPTK" />
+            <Column field="ptk.tempatLahir" header="Tpt.Lahir" />
             <Column field="ptk.tanggalLahir" header="Tgl.Lahir">
                 <template #body="slotProps">
                     {{ formatterDateID(slotProps.data.ptk.tanggalLahir) }}
@@ -130,7 +130,7 @@ const loadingAdd = ref(false);
 
         <Dialog v-model:visible="deleteGuruDialog" :style="{ width: '450px' }" header="Confirm" :modal="true">
             <div class="flex items-center gap-4">
-                <i class="pi pi-exclamation-triangle !text-3xl" />
+                <i class="pi pi-exclamation-triangle !text-3xl"></i>
                 Yakin akan menghapus<span v-if="selectedGuru.length == 1"
                     ><b>{{ selectedGuru[0].ptk.nama }}</b
                     >?</span

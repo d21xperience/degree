@@ -17,11 +17,11 @@ const isVisible = computed({
     <!-- Dialog start -->
     <Dialog v-model:visible="isVisible" :style="{ width: '450px' }" header="Keluar" :modal="true" position="top">
         <div class="flex items-center gap-4">
-            <i class="pi pi-exclamation-triangle !text-3xl" />
+            <i class="pi pi-exclamation-triangle !text-3xl"></i>
             <span>Yakin akan keluar?</span>
         </div>
         <template #footer>
-            <Button label="Tidak" icon="pi pi-times" text @click="isVisible = false" severity="warn" />
+            <Button label="Tidak" icon="pi pi-times" text severity="warn" @click="isVisible = false" />
             <Button label="Ya" icon="pi pi-check" text @click="onLogout" />
         </template>
     </Dialog>

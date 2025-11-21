@@ -11,24 +11,28 @@ import (
 )
 
 func RunHTTPGateway(ctx context.Context, gatewayMux *runtime.ServeMux, grpcServerEndpoint, httpPort string) {
-	// log.Printf("Connecting HTTP Gateway to gRPC server at %s...", grpcServerEndpoint)
-	// conn, err := grpc.Dial(grpcServerEndpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
-	// if err != nil {
-	// 	log.Fatalf("❌ Cannot connect to gRPC server: %v", err)
-	// }
-	// defer conn.Close()
-	// log.Println("✅ HTTP Gateway successfully connected to gRPC server.")
 
-	// log.Println("Registering AuthService handler...")
 	// Gunakan insecure.NewCredentials() sebagai pengganti grpc.WithInsecure()
 	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-
+	// opts := []grpc.DialOption{
+	// 	grpc.WithInsecure(),
+	// 	grpc.WithPerRPCCredentials(runtime.NewHeaderMatcher(func(key string) (string, bool) {
+	// 		if strings.ToLower(key) == "authorization" {
+	// 			return key, true
+	// 		}
+	// 		return key, false
+	// 	})),
+	// }
 	// Register gRPC-Gateway handlers
 	err := pb.RegisterAuthServiceHandlerFromEndpoint(ctx, gatewayMux, grpcServerEndpoint, opts)
 	if err != nil {
 		log.Fatalf("Failed to register Auth service gRPC Gateway: %v", err)
 	}
 	// log.Println("AuthService handler registered successfully")
+	err = pb.RegisterUserServiceHandlerFromEndpoint(ctx, gatewayMux, grpcServerEndpoint, opts)
+	if err != nil {
+		log.Fatalf("Failed to register User service gRPC Gateway: %v", err)
+	}
 	err = pb.RegisterUserProfileServiceHandlerFromEndpoint(ctx, gatewayMux, grpcServerEndpoint, opts)
 	if err != nil {
 		log.Fatalf("Failed to register User profile service gRPC Gateway: %v", err)

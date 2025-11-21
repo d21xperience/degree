@@ -17,7 +17,7 @@ const shwoVerifikasi = ref(false);
         <div class="absolute mx-6 md:mx-20 lg:top-1/3">
             <h1 class="text-6xl text-primary font-bold leading-tight"><span class="text-primary font-light block">Verifikasi Ijazah</span>dengan Blockchain</h1>
             <p class="font-normal text-2xl leading-6 md:mt-4 text-primary">Pastikan keaslian ijazah Anda dengan teknologi blockchain yang terpercaya dan transparan...</p>
-            <Button label="Mulai verifikasi" @click="shwoVerifikasi = true" rounded class="!text-xl mt-8 !px-4"></Button>
+            <Button label="Mulai verifikasi" rounded class="!text-xl mt-8 !px-4" @click="shwoVerifikasi = true" />
         </div>
         <!-- <div class="flex justify-center md:justify-end">
             <img src="/demo/images/landing/screen-1.png"  alt="Hero Image" class="w-9/12 md:w-auto" />

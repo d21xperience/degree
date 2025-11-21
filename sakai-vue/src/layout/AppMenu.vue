@@ -51,7 +51,7 @@ const model = computed(() => {
                         {
                             label: 'Manajemen user',
                             icon: 'pi pi-fw pi-user',
-                            to: `/${sekolahPath}/data-penerima/ijazah`
+                            to: `/${sekolahPath}/manajemen-user`
                         }
                         // {
                         //     label: 'Transkrip Nilai',
@@ -283,27 +283,26 @@ const model = computed(() => {
 });
 
 const getProfile = (newValue) => {
-    console.log(newValue);
+    // console.log(newValue);
     switch (newValue) {
         case 'superadmin':
             router.push({ name: 'ownProfile' });
             break;
-
+        case 'admin':
+            router.push({ name: 'userProfile' });
+            break;
         default:
             break;
     }
 };
 
-// onMounted(() => {
-//     console.log(role.value);
-// });
 const isLoading = ref(false);
 const logout = async () => {
     isLoading.value = true;
     try {
         isDialogSignOut.value = false;
-        await onLogout();
         router.push({ name: 'landing' });
+        await onLogout();
     } catch (error) {
         console.log(error);
     } finally {

@@ -287,41 +287,41 @@ const submitForm = async () => {
     <div class="mt-4"></div>
     <div class="max-w-2xl mx-auto p-6 bg-white shadow-md rounded-lg">
         <h2 class="text-2xl font-bold mb-6 text-center">Issue Degree</h2>
-        <form @submit.prevent="submitForm" class="space-y-4">
+        <form class="space-y-4" @submit.prevent="submitForm">
             <!-- Degree Hash -->
             <div>
                 <label for="degreeHash" class="block text-sm font-medium text-gray-700">Degree Hash:</label>
-                <input type="text" id="degreeHash" v-model="formData.degreeHash" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                <input id="degreeHash" v-model="formData.degreeHash" type="text" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
             </div>
 
             <!-- Sekolah -->
             <div>
                 <label for="sekolah" class="block text-sm font-medium text-gray-700">Sekolah:</label>
-                <input type="text" id="sekolah" v-model="formData.sekolah" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                <input id="sekolah" v-model="formData.sekolah" type="text" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
             </div>
 
             <!-- Issue Date -->
             <div>
                 <label for="issueDate" class="block text-sm font-medium text-gray-700">Issue Date (Unix Timestamp):</label>
-                <input type="number" id="issueDate" v-model="formData.issueDate" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                <input id="issueDate" v-model="formData.issueDate" type="number" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
             </div>
 
             <!-- IPFS URL -->
             <div>
                 <label for="ipfsUrl" class="block text-sm font-medium text-gray-700">IPFS URL:</label>
-                <input type="text" id="ipfsUrl" v-model="formData.ipfsUrl" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                <input id="ipfsUrl" v-model="formData.ipfsUrl" type="text" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
             </div>
 
             <!-- Mata Pelajaran -->
             <div>
                 <label for="mataPelajaran" class="block text-sm font-medium text-gray-700">Mata Pelajaran (comma-separated):</label>
-                <input type="text" id="mataPelajaran" v-model="formData.mataPelajaran" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                <input id="mataPelajaran" v-model="formData.mataPelajaran" type="text" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
             </div>
 
             <!-- Nilai -->
             <div>
                 <label for="nilai" class="block text-sm font-medium text-gray-700">Nilai (comma-separated):</label>
-                <input type="text" id="nilai" v-model="formData.nilai" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
+                <input id="nilai" v-model="formData.nilai" type="text" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500" />
             </div>
 
             <!-- Submit Button -->

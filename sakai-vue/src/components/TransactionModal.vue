@@ -78,22 +78,22 @@ const formatTimestamp = (timestamp) => {
                     <span class="detail-value">{{ formatTimestamp(transaction.timestamp) }}</span>
                 </div>
 
-                <div class="detail-row" v-if="transaction.blockNumber">
+                <div v-if="transaction.blockNumber" class="detail-row">
                     <span class="detail-label">Nomor Block:</span>
                     <span class="detail-value">{{ transaction.blockNumber }}</span>
                 </div>
 
-                <div class="detail-row" v-if="transaction.hash">
+                <div v-if="transaction.hash" class="detail-row">
                     <span class="detail-label">Hash:</span>
                     <span class="detail-value">{{ transaction.hash }}</span>
                 </div>
 
-                <div class="detail-row" v-if="transaction.status">
+                <div v-if="transaction.status" class="detail-row">
                     <span class="detail-label">Status:</span>
                     <span class="detail-value">{{ transaction.status }}</span>
                 </div>
 
-                <div class="detail-row" v-if="transaction.inputData">
+                <div v-if="transaction.inputData" class="detail-row">
                     <span class="detail-label">Input Data:</span>
                     <span class="detail-value">{{ transaction.inputData }}</span>
                 </div>

@@ -36,7 +36,7 @@ func (s *SekolahServiceClient) RegistrasiSekolah(sekolah *models.SekolahTenant) 
 	_, err := s.client.RegistrasiSekolah(ctx, &pb.TabelSekolahRequest{
 		Sekolah: &pb.Sekolah{
 			EnkripId:        sekolah.EnkripID,
-			SekolahTenantId: sekolah.ID,
+			SekolahTenantId: uint32(sekolah.ID),
 			NamaSekolah:     sekolah.NamaSekolah,
 			Kecamatan:       utils.SafeString(sekolah.Kecamatan),
 			Kabupaten:       utils.SafeString(sekolah.Kabupaten),

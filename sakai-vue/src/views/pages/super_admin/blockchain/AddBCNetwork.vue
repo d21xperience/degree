@@ -17,7 +17,7 @@ const bc = () => {
         <form action="" class="w-1/2 mx-auto border p-4">
             <div>
                 <label for="tipe-jaringan" class="font-bold">Tipe Jaringan</label>
-                <select name="tipe-jaringan" id="tip-jaringan" class="block border p-2 w-full rounded-lg">
+                <select id="tip-jaringan" name="tipe-jaringan" class="block border p-2 w-full rounded-lg">
                     <option value="0" selected disabled>Pilih tipe jaringan</option>
                     <option value="public">Public</option>
                     <option value="private">Private</option>
@@ -48,7 +48,7 @@ const bc = () => {
                 <input id="id-chain" type="text" class="block border w-full rounded-lg p-2" />
             </div>
             <div class="mt-3 flex justify-between">
-                <button @click="bc" class="mr-2 p-2 border rounded-lg w-40 bg-yellow-800 text-white hover:bg-slate-400 hover:text-black">Batal</button>
+                <button class="mr-2 p-2 border rounded-lg w-40 bg-yellow-800 text-white hover:bg-slate-400 hover:text-black" @click="bc">Batal</button>
                 <button class="p-2 border rounded-lg w-40 bg-blue-500 text-white">Simpan &amp; gunakan</button>
             </div>
         </form>
