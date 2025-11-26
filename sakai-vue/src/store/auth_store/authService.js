@@ -19,17 +19,27 @@ const decodeToken = (token) => {
 };
 
 const state = {
-    user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null,
-    sekolah: JSON.parse(localStorage.getItem('sekolah')) || null,
-    userRole: localStorage.getItem('userRole') ? JSON.parse(localStorage.getItem('userRole')) : null,
-    userProfile: JSON.parse(localStorage.getItem('userProfile')) || null, // Ambil dari localStorage
-    accessToken: null
+    // user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null,
+    // sekolah: JSON.parse(localStorage.getItem('sekolah')) || null,
+    // userRole: localStorage.getItem('userRole') ? JSON.parse(localStorage.getItem('userRole')) : null,
+    // userProfile: JSON.parse(localStorage.getItem('userProfile')) || null, // Ambil dari localStorage
+    // accessToken: null
+    user: null, // { user_id, email, ... }
+    isAuthenticated: false,
+    isCheckingAuth: true // untuk menampilkan loading saat cek session
 };
 
 const mutations = {
     SET_USER(state, user) {
         state.user = user;
         localStorage.setItem('user', JSON.stringify(user)); // Simpan user ke localStorage
+    },
+    CLEAR_USER(state) {
+        state.user = null;
+        state.isAuthenticated = false;
+    },
+    SET_CHECKING(state, value) {
+        state.isCheckingAuth = value;
     },
     SET_USER_ROLE(state, value) {
         state.userRole = value;
@@ -50,10 +60,7 @@ const mutations = {
         state.sekolah = sekolah;
         localStorage.setItem('sekolah', JSON.stringify(sekolah));
     },
-    SET_TOKEN(state, value) {
-        state.accessToken = value;
-        localStorage.setItem('accessToken', JSON.stringify(value));
-    },
+
     RESET(state) {
         state.user = null;
         state.sekolah = null;
@@ -62,9 +69,22 @@ const mutations = {
 };
 
 const actions = {
+    async checkAuth({ commit }) {
+        commit('SET_CHECKING', true);
+        try {
+            const { data } = await api.get('/as/auth/web/me');
+            commit('SET_USER', data);
+        } catch (err) {
+            // Jika 401 atau error jaringan → anggap tidak login
+            commit('CLEAR_USER');
+        } finally {
+            commit('SET_CHECKING', false);
+        }
+    },
+
     async login({ commit }, credentials) {
         try {
-            const { data } = await api.post('/as/auth:login', credentials);
+            const { data } = await api.post('/as/auth/web/login', credentials);
             if (data.accessToken) {
                 commit('SET_TOKEN', data.accessToken);
                 const userClaims = decodeToken(data.accessToken);
@@ -110,6 +130,7 @@ const actions = {
     async refreshToken() {
         try {
             const { data } = await api.post('/as/auth/web/refresh');
+            await actions.checkAuth();
             return data;
         } catch (err) {
             console.warn('Refresh token invalid/expired. Logging out...');
@@ -127,6 +148,7 @@ const actions = {
             throw err.response?.data; //|| { message: 'Unauthorized' };
         }
     },
+
     /*—— BOOTSTRAP di App.vue created() ——*/
     async bootstrap({ commit }) {
         try {
@@ -269,7 +291,10 @@ const actions = {
 };
 
 const getters = {
-    isAuthenticated: (state) => !!state.user,
+    user: (state) => state.user,
+    isAuthenticated: (state) => state.isAuthenticated,
+    isCheckingAuth: (state) => state.isCheckingAuth,
+    // isAuthenticated: (state) => !!state.user,
     userRole: (state) => state.userRole,
     currentUser: (state) => state.user,
     getSekolah: (state) => state.sekolah,

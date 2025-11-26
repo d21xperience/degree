@@ -7,8 +7,10 @@ import (
 	"auth_service/repositories"
 	"auth_service/utils"
 	"context"
-	"errors"
 	"log"
+
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type UserProfileServiceServer struct {
@@ -29,7 +31,7 @@ func (s *UserProfileServiceServer) GetProfile(ctx context.Context, req *pb.GetPr
 	profile, err := s.repo.FindByID(ctx, userID, "public", "user_id")
 	if err != nil {
 		log.Printf("Error fetching user profile: %v", err)
-		return nil, errors.New("failed to retrieve user profile")
+		return nil, status.Error(codes.NotFound, "failed to retrieve user profile")
 	}
 
 	return &pb.UserProfile{

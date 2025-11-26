@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"auth_service/jwks"
 	"auth_service/models"
 	"context"
 	"crypto/rsa"
@@ -13,7 +14,9 @@ import (
 
 	// "github.com/dgrijalva/jwt-go"
 	"github.com/golang-jwt/jwt/v5"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 type Claims struct {
@@ -101,12 +104,17 @@ func LoadPrivateKey(path string) (any, error) {
 }
 
 func LoadPublicKey() (*rsa.PublicKey, error) {
-	data, _ := os.ReadFile("config/public.pem")
+	LoadEnvFiles()
+	data, _ := os.ReadFile(GetEnv("JWT_PUBLIC_PATH", "./keys/public.pem"))
 	key, _ := jwt.ParseRSAPublicKeyFromPEM(data)
 	return key, nil
 }
 
 func GenerateTokenRS256(priv any, user *models.User, sekolahTenant *models.SekolahTenant) (string, int64, error) {
+	kid, err := jwks.LoadKID("keys/jwks.json")
+	if err != nil {
+		return "", 0, status.Errorf(codes.Internal, "cannot load KID: %v", err)
+	}
 	now := time.Now().UTC()
 	exp := now.Add(2 * time.Hour)
 	claims := jwt.MapClaims{
@@ -118,22 +126,7 @@ func GenerateTokenRS256(priv any, user *models.User, sekolahTenant *models.Sekol
 		"sekolah_tenant_id": sekolahTenant.ID,
 	}
 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+	t.Header["kid"] = kid
 	s, err := t.SignedString(priv)
 	return s, exp.Unix(), err
 }
-
-// func ParseToken(tokenStr string, pubKey *rsa.PublicKey) (*Claims, error) {
-// 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-// 		return pubKey, nil
-// 	})
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	claims, ok := token.Claims.(*Claims)
-// 	if !ok || !token.Valid {
-// 		return nil, errors.New("invalid token")
-// 	}
-
-// 	return claims, nil
-// }

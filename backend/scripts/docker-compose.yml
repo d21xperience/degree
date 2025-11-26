@@ -1,0 +1,5 @@
+rotate-keys:
+  build: ./scripts/rotate
+  volumes:
+    - ./auth_service/keys:/auth_service/keys
+  entrypoint: ["sh", "-c", "while true; do /rotate/rotate_keys.sh; sleep 604800; done"]

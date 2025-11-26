@@ -3,14 +3,16 @@ package services
 import (
 	"context"
 	"log"
+	"net/http"
 
 	"auth_service/config"
 	pb "auth_service/generated"
+	"auth_service/http_handler"
+	"auth_service/interceptor"
+	"auth_service/jwt"
 	"auth_service/models"
 	"auth_service/queue"
 	"auth_service/repositories"
-
-	"auth_service/utils"
 
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -19,13 +21,15 @@ import (
 // AuthServiceServer dengan Redis Client sebagai Dependency Injection
 type AuthServiceServer struct {
 	pb.UnimplementedAuthServiceServer
-	// RedisClient    *redis.Client // Tambahkan Redis sebagai field
-	repoSekolah repositories.SekolahRepository
-	authService AuthService
-	repoProfile repositories.GenericRepository[models.UserProfile]
-	repoUser    repositories.UserRepository
-	rQueue      queue.RedisEnqueue
-	pvKey       any
+	// RedisClient *redis.Client // Tambahkan Redis sebagai field
+	repoSekolah   repositories.SekolahRepository
+	authService   AuthService
+	repoProfile   repositories.GenericRepository[models.UserProfile]
+	repoUser      repositories.UserRepository
+	rQueue        queue.RedisEnqueue
+	pvKey         any
+	jwtManager    *jwt.Manager
+	cookieHandler *http_handler.CookieHandler
 }
 
 func NewAuthServiceServer(pvKey any) *AuthServiceServer {
@@ -35,22 +39,33 @@ func NewAuthServiceServer(pvKey any) *AuthServiceServer {
 	repoProfile := repositories.NewUserProfileRepository(config.DB)
 	repoUser := repositories.NewUserRepository(config.DB)
 	rQueue := queue.NewRedisEnqueue(config.RDB)
+	jwtManager := jwt.NewManager()
+	conf := http_handler.CookieConfig{
+		Secure:   true,
+		Domain:   "localhost",
+		SameSite: http.SameSiteLaxMode,
+	}
+
+	cookieHandler := http_handler.NewCookieHandler(conf)
 	return &AuthServiceServer{
-		authService: authService,
-		repoSekolah: repoSekolah,
-		repoProfile: *repoProfile,
-		repoUser:    repoUser,
-		rQueue:      *rQueue,
-		pvKey:       pvKey,
+		authService:   authService,
+		repoSekolah:   repoSekolah,
+		repoProfile:   *repoProfile,
+		repoUser:      repoUser,
+		rQueue:        *rQueue,
+		pvKey:         pvKey,
+		jwtManager:    jwtManager,
+		cookieHandler: cookieHandler,
 	}
 }
 
-type SchoolRegistration struct {
-	SchoolName string `json:"school_name"`
-	AdminEmail string `json:"admin_email"`
-}
+// type SchoolRegistration struct {
+// 	SchoolName string `json:"school_name"`
+// 	AdminEmail string `json:"admin_email"`
+// }
 
 func (s *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+	// Validate credentials
 	username := req.GetUsername()
 	email := req.GetEmail()
 	password := req.GetPassword()
@@ -80,17 +95,80 @@ func (s *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*p
 		return nil, status.Error(codes.NotFound, "Sekolah tidak ditemukan")
 	}
 
-	token, exp, err := utils.GenerateTokenRS256(s.pvKey, user, asalSekolah)
+	// Generate tokens
+	// token, exp, err := utils.GenerateTokenRS256(s.pvKey, user, asalSekolah)
+	// if err != nil {
+	// 	log.Printf("token gen error: %v", err)
+	// 	// return nil, fmt.Errorf("token gen error")
+	// 	return nil, status.Error(codes.Internal, "token gen error")
+	// }
+	accessToken, refreshToken, err := s.jwtManager.GenerateTokens(user, asalSekolah)
 	if err != nil {
-		log.Printf("token gen error: %v", err)
-		// return nil, fmt.Errorf("token gen error")
-		return nil, status.Error(codes.Internal, "token gen error")
+		return nil, status.Error(codes.Internal, "failed to generate tokens")
 	}
+
 	return &pb.LoginResponse{
-		AccessToken: token,
-		ExpiresAt:   exp,
+		AccessToken: accessToken,
+		// ExpiresAt:    exp,
+		RefreshToken: refreshToken,
 	}, nil
 }
+
+func (s *AuthServiceServer) AuthMe(ctx context.Context, _ *pb.Empty) (*pb.UserProfile, error) {
+	// ✅ Ambil user_id dari context (yang di-inject oleh interceptor)
+	userID, ok := ctx.Value(interceptor.UserIDKey).(string)
+	if !ok || userID == "" {
+		return nil, status.Error(codes.Internal, "user_id not found in context")
+	}
+
+	// ✅ Ambil data user dari DB/repo
+	user, err := s.repoUser.FindByID(userID)
+	if err != nil {
+		// if errors.Is(err, domain.ErrUserNotFound) {
+		// 	return nil, status.Error(codes.Unauthenticated, "user not found") // bisa jadi token palsu
+		// }
+		return nil, status.Error(codes.Internal, "failed to fetch user")
+	}
+
+	// ✅ Konversi ke proto
+	return &pb.UserProfile{
+		UserId: user.ID,
+		// Username: user.Username,
+		// Email:    user.Email,
+	}, nil
+}
+
+// func (s *AuthServiceServer) RefreshToken(ctx context.Context, req *pb.RefreshRequest) (*pb.LoginResponse, error) {
+
+// 	refreshID := req.RefreshToken
+// 	if refreshID == "" {
+// 		return nil, status.Error(codes.InvalidArgument, "empty refresh token")
+// 	}
+
+// 	// cek refresh token di Redis
+// 	userID, err := s.redis.Get(ctx, "refresh:"+refreshID).Result()
+// 	if err == redis.Nil {
+// 		return nil, status.Error(codes.Unauthenticated, "invalid refresh token")
+// 	} else if err != nil {
+// 		return nil, status.Error(codes.Internal, "redis error")
+// 	}
+
+// 	// generate access token baru
+// 	accessToken, kid, err := GenerateAccessToken(userID, s.privateKey)
+// 	if err != nil {
+// 		return nil, status.Error(codes.Internal, "cannot generate access token")
+// 	}
+
+// 	// rotate refresh token
+// 	newRefreshID := uuid.New().String()
+// 	s.redis.Set(ctx, "refresh:"+newRefreshID, userID, 30*24*time.Hour)
+// 	s.redis.Del(ctx, "refresh:"+refreshID)
+
+// 	return &authpb.RefreshTokenResponse{
+// 		AccessToken:  accessToken,
+// 		RefreshToken: newRefreshID,
+// 	}, nil
+// }
 
 // func (s *AuthServiceServer) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 // 	// Debugging: Cek nilai request yang diterima

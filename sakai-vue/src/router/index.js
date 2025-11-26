@@ -1,9 +1,10 @@
 import AppLayout from '@/layout/AppLayout.vue';
-import { createRouter, createWebHistory } from 'vue-router';
-
+import store from '@/store';
 import { ref } from 'vue';
-import { authGuard, redirectIfAuthenticated } from './guards/authGuard';
+import { createRouter, createWebHistory } from 'vue-router';
+import { authGuard } from './guards/authGuard';
 export const isLoading = ref(false); // state loading global
+
 const router = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: [
@@ -33,15 +34,15 @@ const router = createRouter({
             path: '/auth/login',
             name: 'login',
             meta: { title: 'Login' },
-            component: () => import('@/views/pages/auth/Login.vue'),
-            beforeEnter: redirectIfAuthenticated
+            component: () => import('@/views/pages/auth/Login.vue')
+            // beforeEnter: redirectIfAuthenticated
         },
         {
             path: '/auth/register',
             name: 'register',
             component: () => import('@/views/pages/auth/Register.vue'),
-            meta: { title: 'Register' },
-            beforeEnter: redirectIfAuthenticated
+            meta: { title: 'Register' }
+            // beforeEnter: redirectIfAuthenticated
         },
         {
             path: '/auth/access',
@@ -327,15 +328,76 @@ const router = createRouter({
 });
 
 // Saat mulai navigasi → tampilkan loading
-router.beforeEach((to, from, next) => {
+// router.beforeEach((to, from, next) => {
+//     isLoading.value = true;
+//     try {
+//         const token = localStorage.getItem('token');
+//         if (to.meta.requiresAuth && (!token || isTokenExpired(token))) {
+//             console.log(isTokenExpired(token));
+//             localStorage.clear();
+//             next('/auth/login');
+//         } else {
+//             next();
+//         }
+//     } catch (error) {
+//         alert('error');
+//     } finally {
+//         isLoading.value = false;
+//     }
+// });
+
+// 🔐 Global navigation guard
+router.beforeEach(async (to, from, next) => {
     isLoading.value = true;
-    next();
+
+    // Cek auth sekali saat app pertama kali load
+    if (store.state.authService.isCheckingAuth && !store.state.authService.user) {
+        await store.dispatch('authService/checkAuth');
+    }
+
+    const { isAuthenticated } = store.getters['authService/isAuthenticated'];
+
+    if (to.meta.requiresAuth && !isAuthenticated) {
+        // next({ name: 'Login', query: { redirect: to.fullPath } });
+        next({ name: 'login' });
+    } else if (to.meta.guestOnly && isAuthenticated) {
+        next({ name: 'Dashboard' });
+    } else {
+        next();
+    }
 });
+
 // Tambahkan afterEach untuk update title
 router.afterEach((to) => {
     const defaultTitle = 'Verfikasi Ijazah';
     document.title = to.meta.title ? `${to.meta.title}` : defaultTitle;
     isLoading.value = false;
+});
+
+// // 🧨 Tangani 401 dari interceptor → logout & redirect
+// window.addEventListener('unauthorized', () => {
+//     store.dispatch('authService/logout');
+//     router.push({ name: 'login' });
+// });
+
+// src/router/index.js (atau tempat Anda daftarkan event listener)
+
+window.addEventListener('unauthorized', () => {
+    const currentRoute = router.currentRoute.value;
+
+    // ✅ Logout dulu (hapus cookie & reset state)
+    store.dispatch('authService/logout');
+
+    // ✅ Cek: apakah route saat ini memerlukan autentikasi?
+    if (currentRoute.meta.requiresAuth) {
+        // 🔐 Protected route → redirect ke login + simpan redirect
+        router.push({
+            name: 'login',
+            query: { redirect: currentRoute.fullPath }
+        });
+    }
+    // 🌐 Public route (landing page, dll) → biarkan user di halaman ini
+    //    (misal: ganti navbar jadi "Login/Register")
 });
 
 export default router;

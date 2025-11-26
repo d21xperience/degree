@@ -11,8 +11,10 @@ import i18n from './i18n';
 import store from './store';
 
 const app = createApp(App);
+
 app.use(store);
 app.use(router);
+
 app.use(PrimeVue, {
     theme: {
         preset: Aura,
@@ -24,4 +26,6 @@ app.use(PrimeVue, {
 app.use(ToastService);
 app.use(ConfirmationService);
 app.use(i18n);
-app.mount('#app');
+store.dispatch('authService/checkAuth').finally(() => {
+    app.mount('#app');
+});

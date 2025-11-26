@@ -27,7 +27,7 @@ func JWKSHandler(pub *rsa.PublicKey, kid string) func(w http.ResponseWriter, r *
 		e := base64.RawURLEncoding.EncodeToString(big.NewInt(int64(pub.E)).Bytes())
 
 		jwk := JWK{
-			Kid: kid,
+			Kid: "d4f131d4b4e3c51d",
 			Kty: "RSA",
 			Alg: "RS256",
 			Use: "sig",

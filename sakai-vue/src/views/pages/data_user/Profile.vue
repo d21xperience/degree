@@ -47,7 +47,7 @@
                     <div class="space-y-4">
                         <div class="field">
                             <label for="department" class="font-semibold block mb-2">Departemen</label>
-                            <Dropdown id="department" v-model="userData.department" :options="departments" option-label="name" placeholder="Pilih departemen" class="w-full" />
+                            <Select id="department" v-model="userData.department" :options="departments" option-label="name" placeholder="Pilih departemen" class="w-full" />
                         </div>
 
                         <div class="field">
@@ -57,7 +57,7 @@
 
                         <div class="field">
                             <label for="joinDate" class="font-semibold block mb-2">Tanggal Bergabung</label>
-                            <Calendar id="joinDate" v-model="userData.joinDate" class="w-full" date-format="dd/mm/yy" show-icon />
+                            <DatePicker id="joinDate" v-model="userData.joinDate" class="w-full" date-format="dd/mm/yy" show-icon />
                             <!-- show-icon /> -->
                         </div>
                     </div>
@@ -67,12 +67,11 @@
                         <label for="bio" class="font-semibold block mb-2">Bio</label>
                         <Textarea id="bio" v-model="userData.bio" rows="3" class="w-full" placeholder="Ceritakan sedikit tentang diri Anda..." />
                     </div>
-
-                    <!-- Action Buttons -->
-                    <div class="flex gap-3 justify-end mt-6 pt-6 border-t">
-                        <Button label="Batal" severity="secondary" outlined @click="resetForm" />
-                        <Button label="Simpan Perubahan" icon="pi pi-check" :loading="loading" @click="saveProfile" />
-                    </div>
+                </div>
+                <!-- Action Buttons -->
+                <div class="flex gap-3 justify-end mt-6 pt-6 border-t">
+                    <Button label="Batal" severity="secondary" outlined @click="resetForm" />
+                    <Button label="Simpan Perubahan" icon="pi pi-check" :loading="loading" @click="saveProfile" />
                 </div>
             </template>
         </Card>
@@ -155,11 +154,10 @@ import { reactive, ref } from 'vue';
 // Components PrimeVue
 import Avatar from 'primevue/avatar';
 import Button from 'primevue/button';
-import Calendar from 'primevue/calendar';
 import Card from 'primevue/card';
 import Chip from 'primevue/chip';
-import Dropdown from 'primevue/dropdown';
 import InputText from 'primevue/inputtext';
+import Select from 'primevue/Select';
 import Tag from 'primevue/tag';
 import Textarea from 'primevue/textarea';
 
@@ -179,7 +177,7 @@ const userData = reactive({
     avatar: null
 });
 
-// Options untuk dropdown
+// Options untuk Select
 const departments = ref([
     { name: 'IT & Development', code: 'IT' },
     { name: 'Human Resources', code: 'HR' },
@@ -240,7 +238,7 @@ const resetForm = () => {
 <style scoped>
 .profile-container {
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
 }
 
 :deep(.p-card) {

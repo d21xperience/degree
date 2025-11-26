@@ -17,6 +17,7 @@ type AuthService interface {
 	RegisterAdmin(user *models.User) error
 	Login(username, password string) (*models.User, error)
 	GetUserByID(userId int64) (*models.User, error)
+	
 	// GenerateToken(userID int, role string) (string, error)
 	// SetAuthCookies(w http.ResponseWriter, accessToken, refreshToken string)
 	// ClearAuthCookies(w http.ResponseWriter)

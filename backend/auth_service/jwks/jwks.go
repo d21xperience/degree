@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"encoding/hex"
+	"encoding/json"
 	"encoding/pem"
 	"fmt"
 	"os"
@@ -22,6 +23,24 @@ type JWK struct {
 
 type JWKS struct {
 	Keys []JWK `json:"keys"`
+}
+
+func LoadKID(jwksPath string) (string, error) {
+	b, err := os.ReadFile(jwksPath)
+	if err != nil {
+		return "", err
+	}
+
+	var file JWKS
+	if err := json.Unmarshal(b, &file); err != nil {
+		return "", err
+	}
+
+	if len(file.Keys) == 0 {
+		return "", fmt.Errorf("no keys found in JWKS file")
+	}
+
+	return file.Keys[0].Kid, nil
 }
 
 // ParseKeyFile membaca file PEM (private key PKCS1/PKCS8 / public key PKIX / certificate)
