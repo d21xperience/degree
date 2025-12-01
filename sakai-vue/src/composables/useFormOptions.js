@@ -35,7 +35,7 @@ export function useFormOptions() {
     const gelarAkademikOptions = ref();
     const gelarAkademikDepanOptions = ref();
     const gelarAkademikBelakangOptions = ref();
-    const kurikulumList = computed(() => store.getters['sekolahService/getKurikulum'] || []);
+    const kurikulumList = computed(() => store.getters['kurikulumService/getKurikulum'] || []);
 
     const kurikulumOptions = ref();
     const kurikulumLoading = ref(false);
@@ -82,12 +82,13 @@ export function useFormOptions() {
         try {
             // let response = kurikulumList; //await store.getters['sekolahService/getKurikulum'];
             if (!kurikulumList.value || kurikulumList.value.length == 0) {
-                const response = await store.dispatch('kurikulumService/fetchKurikulum', { jenjangPendidikanId: sekolah.value?.sekolah.jenjangPendidikanId, jenjangPendidikanStr: sekolah.value?.bentukPendidikanStr });
+                const { kurikulum } = await store.dispatch('kurikulumService/fetchKurikulum', { jenjangPendidikanId: sekolah.value?.sekolah.jenjangPendidikanId, jenjangPendidikanStr: sekolah.value?.bentukPendidikanStr });
                 // if (response.value.status) {
                 //     toast.add({ severity: 'success', summary: 'Successful', detail: `${response.value.message}`, life: 3000 });
                 //     return response.value.kurikulum;
                 // }
-                return response;
+                kurikulumList.value = kurikulum;
+                return kurikulum;
             } else {
                 return kurikulumList.value;
             }

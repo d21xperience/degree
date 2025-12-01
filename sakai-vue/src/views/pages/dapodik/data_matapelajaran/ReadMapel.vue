@@ -245,9 +245,7 @@ onMounted(async () => {
     initial();
 });
 
-// const resetValue = () => {
-
-// }
+// const isCompleted = ref(false)
 </script>
 
 <template>

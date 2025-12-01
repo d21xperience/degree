@@ -439,99 +439,99 @@ func request_UserProfileService_DownloadProfilePhoto_0(ctx context.Context, mars
 	return stream, metadata, nil
 }
 
-var filter_SekolahService_GetSekolah_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+var filter_SekolahTenantService_GetSekolahTenant_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 
-func request_SekolahService_GetSekolah_0(ctx context.Context, marshaler runtime.Marshaler, client SekolahServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_SekolahTenantService_GetSekolahTenant_0(ctx context.Context, marshaler runtime.Marshaler, client SekolahTenantServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq GetSekolahRequest
+		protoReq GetSekolahTenantRequest
 		metadata runtime.ServerMetadata
 	)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SekolahService_GetSekolah_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SekolahTenantService_GetSekolahTenant_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := client.GetSekolah(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.GetSekolahTenant(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
 
-func local_request_SekolahService_GetSekolah_0(ctx context.Context, marshaler runtime.Marshaler, server SekolahServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_SekolahTenantService_GetSekolahTenant_0(ctx context.Context, marshaler runtime.Marshaler, server SekolahTenantServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq GetSekolahRequest
+		protoReq GetSekolahTenantRequest
 		metadata runtime.ServerMetadata
 	)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SekolahService_GetSekolah_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SekolahTenantService_GetSekolahTenant_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := server.GetSekolah(ctx, &protoReq)
+	msg, err := server.GetSekolahTenant(ctx, &protoReq)
 	return msg, metadata, err
 }
 
-var filter_SekolahService_ListSekolah_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+var filter_SekolahTenantService_ListSekolahTenant_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 
-func request_SekolahService_ListSekolah_0(ctx context.Context, marshaler runtime.Marshaler, client SekolahServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_SekolahTenantService_ListSekolahTenant_0(ctx context.Context, marshaler runtime.Marshaler, client SekolahTenantServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq ListSekolahRequest
+		protoReq ListSekolahTenantRequest
 		metadata runtime.ServerMetadata
 	)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SekolahService_ListSekolah_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SekolahTenantService_ListSekolahTenant_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := client.ListSekolah(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.ListSekolahTenant(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
 
-func local_request_SekolahService_ListSekolah_0(ctx context.Context, marshaler runtime.Marshaler, server SekolahServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_SekolahTenantService_ListSekolahTenant_0(ctx context.Context, marshaler runtime.Marshaler, server SekolahTenantServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq ListSekolahRequest
+		protoReq ListSekolahTenantRequest
 		metadata runtime.ServerMetadata
 	)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SekolahService_ListSekolah_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SekolahTenantService_ListSekolahTenant_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := server.ListSekolah(ctx, &protoReq)
+	msg, err := server.ListSekolahTenant(ctx, &protoReq)
 	return msg, metadata, err
 }
 
-var filter_SekolahService_SearchSekolah_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+var filter_SekolahTenantService_SearchSekolahTenant_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
 
-func request_SekolahService_SearchSekolah_0(ctx context.Context, marshaler runtime.Marshaler, client SekolahServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func request_SekolahTenantService_SearchSekolahTenant_0(ctx context.Context, marshaler runtime.Marshaler, client SekolahTenantServiceClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq SearchSekolahRequest
+		protoReq SearchSekolahTenantRequest
 		metadata runtime.ServerMetadata
 	)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SekolahService_SearchSekolah_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SekolahTenantService_SearchSekolahTenant_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := client.SearchSekolah(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.SearchSekolahTenant(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 }
 
-func local_request_SekolahService_SearchSekolah_0(ctx context.Context, marshaler runtime.Marshaler, server SekolahServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+func local_request_SekolahTenantService_SearchSekolahTenant_0(ctx context.Context, marshaler runtime.Marshaler, server SekolahTenantServiceServer, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var (
-		protoReq SearchSekolahRequest
+		protoReq SearchSekolahTenantRequest
 		metadata runtime.ServerMetadata
 	)
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SekolahService_SearchSekolah_0); err != nil {
+	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_SekolahTenantService_SearchSekolahTenant_0); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
-	msg, err := server.SearchSekolah(ctx, &protoReq)
+	msg, err := server.SearchSekolahTenant(ctx, &protoReq)
 	return msg, metadata, err
 }
 
@@ -853,71 +853,71 @@ func RegisterUserProfileServiceHandlerServer(ctx context.Context, mux *runtime.S
 	return nil
 }
 
-// RegisterSekolahServiceHandlerServer registers the http handlers for service SekolahService to "mux".
-// UnaryRPC     :call SekolahServiceServer directly.
+// RegisterSekolahTenantServiceHandlerServer registers the http handlers for service SekolahTenantService to "mux".
+// UnaryRPC     :call SekolahTenantServiceServer directly.
 // StreamingRPC :currently unsupported pending https://github.com/grpc/grpc-go/issues/906.
-// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterSekolahServiceHandlerFromEndpoint instead.
+// Note that using this registration option will cause many gRPC library features to stop working. Consider using RegisterSekolahTenantServiceHandlerFromEndpoint instead.
 // GRPC interceptors will not work for this type of registration. To use interceptors, you must use the "runtime.WithMiddlewares" option in the "runtime.NewServeMux" call.
-func RegisterSekolahServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server SekolahServiceServer) error {
-	mux.Handle(http.MethodGet, pattern_SekolahService_GetSekolah_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+func RegisterSekolahTenantServiceHandlerServer(ctx context.Context, mux *runtime.ServeMux, server SekolahTenantServiceServer) error {
+	mux.Handle(http.MethodGet, pattern_SekolahTenantService_GetSekolahTenant_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.SekolahService/GetSekolah", runtime.WithHTTPPathPattern("/api/v1/as/sekolah/npsn"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.SekolahTenantService/GetSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/as/sekolah-tenant/npsn"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_SekolahService_GetSekolah_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_SekolahTenantService_GetSekolahTenant_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_SekolahService_GetSekolah_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_SekolahTenantService_GetSekolahTenant_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodGet, pattern_SekolahService_ListSekolah_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodGet, pattern_SekolahTenantService_ListSekolahTenant_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.SekolahService/ListSekolah", runtime.WithHTTPPathPattern("/api/v1/as/sekolah"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.SekolahTenantService/ListSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/as/sekolah-tenant"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_SekolahService_ListSekolah_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_SekolahTenantService_ListSekolahTenant_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_SekolahService_ListSekolah_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_SekolahTenantService_ListSekolahTenant_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodGet, pattern_SekolahService_SearchSekolah_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodGet, pattern_SekolahTenantService_SearchSekolahTenant_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		var stream runtime.ServerTransportStream
 		ctx = grpc.NewContextWithServerTransportStream(ctx, &stream)
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.SekolahService/SearchSekolah", runtime.WithHTTPPathPattern("/api/v1/as/sekolah:search"))
+		annotatedContext, err := runtime.AnnotateIncomingContext(ctx, mux, req, "/auth.SekolahTenantService/SearchSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/as/sekolah-tenant:search"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := local_request_SekolahService_SearchSekolah_0(annotatedContext, inboundMarshaler, server, req, pathParams)
+		resp, md, err := local_request_SekolahTenantService_SearchSekolahTenant_0(annotatedContext, inboundMarshaler, server, req, pathParams)
 		md.HeaderMD, md.TrailerMD = metadata.Join(md.HeaderMD, stream.Header()), metadata.Join(md.TrailerMD, stream.Trailer())
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_SekolahService_SearchSekolah_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_SekolahTenantService_SearchSekolahTenant_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 
 	return nil
@@ -1399,9 +1399,9 @@ var (
 	forward_UserProfileService_DownloadProfilePhoto_0 = runtime.ForwardResponseStream
 )
 
-// RegisterSekolahServiceHandlerFromEndpoint is same as RegisterSekolahServiceHandler but
+// RegisterSekolahTenantServiceHandlerFromEndpoint is same as RegisterSekolahTenantServiceHandler but
 // automatically dials to "endpoint" and closes the connection when "ctx" gets done.
-func RegisterSekolahServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
+func RegisterSekolahTenantServiceHandlerFromEndpoint(ctx context.Context, mux *runtime.ServeMux, endpoint string, opts []grpc.DialOption) (err error) {
 	conn, err := grpc.NewClient(endpoint, opts...)
 	if err != nil {
 		return err
@@ -1420,85 +1420,85 @@ func RegisterSekolahServiceHandlerFromEndpoint(ctx context.Context, mux *runtime
 			}
 		}()
 	}()
-	return RegisterSekolahServiceHandler(ctx, mux, conn)
+	return RegisterSekolahTenantServiceHandler(ctx, mux, conn)
 }
 
-// RegisterSekolahServiceHandler registers the http handlers for service SekolahService to "mux".
+// RegisterSekolahTenantServiceHandler registers the http handlers for service SekolahTenantService to "mux".
 // The handlers forward requests to the grpc endpoint over "conn".
-func RegisterSekolahServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
-	return RegisterSekolahServiceHandlerClient(ctx, mux, NewSekolahServiceClient(conn))
+func RegisterSekolahTenantServiceHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc.ClientConn) error {
+	return RegisterSekolahTenantServiceHandlerClient(ctx, mux, NewSekolahTenantServiceClient(conn))
 }
 
-// RegisterSekolahServiceHandlerClient registers the http handlers for service SekolahService
-// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "SekolahServiceClient".
-// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "SekolahServiceClient"
+// RegisterSekolahTenantServiceHandlerClient registers the http handlers for service SekolahTenantService
+// to "mux". The handlers forward requests to the grpc endpoint over the given implementation of "SekolahTenantServiceClient".
+// Note: the gRPC framework executes interceptors within the gRPC handler. If the passed in "SekolahTenantServiceClient"
 // doesn't go through the normal gRPC flow (creating a gRPC client etc.) then it will be up to the passed in
-// "SekolahServiceClient" to call the correct interceptors. This client ignores the HTTP middlewares.
-func RegisterSekolahServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client SekolahServiceClient) error {
-	mux.Handle(http.MethodGet, pattern_SekolahService_GetSekolah_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+// "SekolahTenantServiceClient" to call the correct interceptors. This client ignores the HTTP middlewares.
+func RegisterSekolahTenantServiceHandlerClient(ctx context.Context, mux *runtime.ServeMux, client SekolahTenantServiceClient) error {
+	mux.Handle(http.MethodGet, pattern_SekolahTenantService_GetSekolahTenant_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/auth.SekolahService/GetSekolah", runtime.WithHTTPPathPattern("/api/v1/as/sekolah/npsn"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/auth.SekolahTenantService/GetSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/as/sekolah-tenant/npsn"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_SekolahService_GetSekolah_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_SekolahTenantService_GetSekolahTenant_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_SekolahService_GetSekolah_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_SekolahTenantService_GetSekolahTenant_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodGet, pattern_SekolahService_ListSekolah_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodGet, pattern_SekolahTenantService_ListSekolahTenant_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/auth.SekolahService/ListSekolah", runtime.WithHTTPPathPattern("/api/v1/as/sekolah"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/auth.SekolahTenantService/ListSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/as/sekolah-tenant"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_SekolahService_ListSekolah_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_SekolahTenantService_ListSekolahTenant_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_SekolahService_ListSekolah_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_SekolahTenantService_ListSekolahTenant_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
-	mux.Handle(http.MethodGet, pattern_SekolahService_SearchSekolah_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle(http.MethodGet, pattern_SekolahTenantService_SearchSekolahTenant_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(req.Context())
 		defer cancel()
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
-		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/auth.SekolahService/SearchSekolah", runtime.WithHTTPPathPattern("/api/v1/as/sekolah:search"))
+		annotatedContext, err := runtime.AnnotateContext(ctx, mux, req, "/auth.SekolahTenantService/SearchSekolahTenant", runtime.WithHTTPPathPattern("/api/v1/as/sekolah-tenant:search"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		resp, md, err := request_SekolahService_SearchSekolah_0(annotatedContext, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_SekolahTenantService_SearchSekolahTenant_0(annotatedContext, inboundMarshaler, client, req, pathParams)
 		annotatedContext = runtime.NewServerMetadataContext(annotatedContext, md)
 		if err != nil {
 			runtime.HTTPError(annotatedContext, mux, outboundMarshaler, w, req, err)
 			return
 		}
-		forward_SekolahService_SearchSekolah_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_SekolahTenantService_SearchSekolahTenant_0(annotatedContext, mux, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 	})
 	return nil
 }
 
 var (
-	pattern_SekolahService_GetSekolah_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "as", "sekolah", "npsn"}, ""))
-	pattern_SekolahService_ListSekolah_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "as", "sekolah"}, ""))
-	pattern_SekolahService_SearchSekolah_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "as", "sekolah"}, "search"))
+	pattern_SekolahTenantService_GetSekolahTenant_0    = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"api", "v1", "as", "sekolah-tenant", "npsn"}, ""))
+	pattern_SekolahTenantService_ListSekolahTenant_0   = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "as", "sekolah-tenant"}, ""))
+	pattern_SekolahTenantService_SearchSekolahTenant_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3}, []string{"api", "v1", "as", "sekolah-tenant"}, "search"))
 )
 
 var (
-	forward_SekolahService_GetSekolah_0    = runtime.ForwardResponseMessage
-	forward_SekolahService_ListSekolah_0   = runtime.ForwardResponseMessage
-	forward_SekolahService_SearchSekolah_0 = runtime.ForwardResponseMessage
+	forward_SekolahTenantService_GetSekolahTenant_0    = runtime.ForwardResponseMessage
+	forward_SekolahTenantService_ListSekolahTenant_0   = runtime.ForwardResponseMessage
+	forward_SekolahTenantService_SearchSekolahTenant_0 = runtime.ForwardResponseMessage
 )
 
 // RegisterStudentServiceHandlerFromEndpoint is same as RegisterStudentServiceHandler but

@@ -8,17 +8,21 @@ export function useKategoriSekolah() {
     const { schemaname } = useTableTenant();
     const { initSelectedSemester } = useSemester();
     const fetchKategoriSekolah = async () => {
+        if (!initSelectedSemester.value?.tahunAjaranId) {
+            throw new Error('Silahkan pilih tahun ajaran terlebih dahulu');
+            // return;
+        }
         try {
             const payload = {
                 schemaname: schemaname.value,
                 tahun_ajaran_id: initSelectedSemester.value?.tahunAjaranId
             };
-            console.log(payload);
+            // console.log(payload);
             const response = await store.dispatch('sekolahService/fetchKategoriSekolah', payload);
             kategoriSekolahList.value = response.kategoriSekolah;
             return response.kategoriSekolah;
         } catch (error) {
-            throw new Error('Gagal mendapatkan Kategori Sekolah:', error);
+            throw new Error(`Gagal mendapatkan Kategori Sekolah:'${error.message || error}`);
         }
     };
     const kategoriSekolahList = ref([]);
@@ -89,7 +93,7 @@ export function useKategoriSekolah() {
             const response = await store.dispatch('sekolahService/createKategoriSekolah', payload);
             return response.kategoriSekolah;
         } catch (error) {
-            throw new Error('Gagal membuat Kategori Sekolah:', error);
+            throw new Error(`Gagal membuat Kategori Sekolah:'${error.message || error}`);
         }
     };
     const updateKategoriSekolah = async (kategoriSekolah) => {
@@ -101,7 +105,7 @@ export function useKategoriSekolah() {
             const response = await store.dispatch('sekolahService/updateKategoriSekolah', payload);
             return response.kategoriSekolah;
         } catch (error) {
-            throw new Error('Gagal update Kategori Sekolah:', error);
+            throw new Error(`Gagal update Kategori Sekolah:'${error.message || error}`);
         }
     };
     const deleteKategoriSekolah = async (kategoriSekolahId) => {
@@ -115,7 +119,7 @@ export function useKategoriSekolah() {
 
             return response.kategoriSekolah;
         } catch (error) {
-            throw new Error('Gagal menghapus Kategori Sekolah:', error);
+            throw new Error(`Gagal menghapus Kategori Sekolah:'${error.message || error}`);
         }
     };
     const deleteKategoriSekolahKurikulum = async (kurikulumId) => {
@@ -128,7 +132,7 @@ export function useKategoriSekolah() {
             const response = await store.dispatch('sekolahService/deleteKategoriSekolahKurikulum', payload);
             return response.kategoriSekolah;
         } catch (error) {
-            throw new Error('Gagal menghapus Kategori Kurikulum Sekolah:', error);
+            throw new Error(`Gagal menghapus Kategori Kurikulum Sekolah:'${error.message || error}`);
         }
     };
     const createProsesKategoriSekolahDanKelas = async () => {
@@ -140,7 +144,7 @@ export function useKategoriSekolah() {
             const response = await store.dispatch('sekolahService/createProsesKelas', payload);
             return response.kategoriSekolah;
         } catch (error) {
-            throw new Error('Gagal membuat Kategori Sekolah:', error);
+            throw new Error(`Gagal membuat Kategori Sekolah:'${error.message || error}`);
         }
     };
 
@@ -155,7 +159,7 @@ export function useKategoriSekolah() {
             const response = await store.dispatch('sekolahService/fetchKategoriMapel', payload);
             return response.kategoriMapel;
         } catch (error) {
-            throw new Error('Gagal mendapatkan Kategori Mapel:', error);
+            throw new Error(`Gagal mendapatkan Kategori Mapel:'${error.message || error}`);
         }
     };
 
@@ -171,7 +175,7 @@ export function useKategoriSekolah() {
             return response;
             // return response.kategoriSekolah;
         } catch (error) {
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal menghapus Kategori Mapel:'${error.message || error}`);
         }
     };
     const deleteBatchKategoriMapel = async (idMapel) => {
@@ -187,7 +191,7 @@ export function useKategoriSekolah() {
             return response;
             // return response.kategoriSekolah;
         } catch (error) {
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error(`Gagal menghapus Kategori Mapel:'${error.message || error}`);
         }
     };
 

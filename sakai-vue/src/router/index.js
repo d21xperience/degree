@@ -45,6 +45,13 @@ const router = createRouter({
             // beforeEnter: redirectIfAuthenticated
         },
         {
+            path: '/auth/register/success',
+            name: 'registerSuccess',
+            component: () => import('@/components/authentication_components/RegisterSuccess.vue'),
+            meta: { title: 'Register' }
+            // beforeEnter: redirectIfAuthenticated
+        },
+        {
             path: '/auth/access',
             name: 'accessDenied',
             component: () => import('@/views/pages/auth/Access.vue')
@@ -355,11 +362,19 @@ router.beforeEach(async (to, from, next) => {
         await store.dispatch('authService/checkAuth');
     }
 
-    const { isAuthenticated } = store.getters['authService/isAuthenticated'];
-
+    const isAuthenticated = store.getters['authService/isAuthenticated'];
+    // console.log('nilai isAuthenticated', isAuthenticated);
     if (to.meta.requiresAuth && !isAuthenticated) {
         // next({ name: 'Login', query: { redirect: to.fullPath } });
-        next({ name: 'login' });
+        // next({ name: 'login' });
+        // ✅ Simpan query asli + tambahkan redirect jika perlu
+        next({
+            name: 'login',
+            query: {
+                ...to.query, // ← lestarikan semua query (termasuk `from=...`)
+                redirect: to.fullPath // opsional: untuk redirect setelah login
+            }
+        });
     } else if (to.meta.guestOnly && isAuthenticated) {
         next({ name: 'Dashboard' });
     } else {

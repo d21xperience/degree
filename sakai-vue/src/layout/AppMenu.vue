@@ -16,7 +16,7 @@ const sekolah = computed(() => route.params.sekolah);
 const { user, onLogout } = useAuth(); // pastikan 'user' ada dan reactive
 const isDialogSignOut = ref(false);
 
-const role = computed(() => user); //|| 'guest');
+const role = computed(() => user.role); //|| 'guest');
 
 const model = computed(() => {
     const sekolahPath = sekolah.value;

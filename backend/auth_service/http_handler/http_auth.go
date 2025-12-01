@@ -68,6 +68,8 @@ func (h *HTTPHandler) HandlerLoginHTTP() func(w http.ResponseWriter, r *http.Req
 		json.NewEncoder(w).Encode(map[string]any{
 			"status":  true,
 			"message": "logged on",
+			"user_id": resp.UserId,
+			"email":   resp.Email,
 			// "email":   resp.Email,
 		})
 	}

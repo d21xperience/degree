@@ -54,19 +54,20 @@ const mutations = {
         localStorage.setItem('tabelJenjang', JSON.stringify(value));
     },
     resetState(state) {
-        state.tabelTenant = null;
+        localStorage.clear();
+        // state.tabelTenant = null;
 
-        state.tabelSekolah = null;
+        // state.tabelSekolah = null;
 
-        state.tabelTingkatPendidikan = null;
+        // state.tabelTingkatPendidikan = null;
 
-        state.tabelJurusan = null;
+        // state.tabelJurusan = null;
 
-        state.tabelMapel = null;
+        // state.tabelMapel = null;
 
-        state.selectedTahunAjaran = [];
-        state.tabelGelarAkademik = [];
-        state.tabelDashboard = [];
+        // state.selectedTahunAjaran = [];
+        // state.tabelGelarAkademik = [];
+        // state.tabelDashboard = [];
     }
 };
 
@@ -152,7 +153,7 @@ const actions = {
     async fetchBentukPendidikan() {
         try {
             const { data } = await api.get(`/ss/ref/bentuk-pendidikan`);
-            return data.bentukPendidikan;
+            return data;
         } catch (error) {
             throw new Error(`Gagal membuat bentuk pendidikan: ${error}`);
         }
@@ -317,7 +318,7 @@ const actions = {
 
     async fetchKategoriSekolah({ commit }, payload) {
         console.log('payload fetchKategoriSekolah', payload);
-        if (!payload) {
+        if (!payload.tahunAjaranId) {
             return;
         }
         try {
@@ -331,7 +332,8 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
-            throw new Error(`Gagal mendapatkan Kategori Sekolah: ${error}`);
+            console.log(error);
+            throw new Error(error.message);
         }
     },
     async createKategoriSekolah({ commit }, payload) {

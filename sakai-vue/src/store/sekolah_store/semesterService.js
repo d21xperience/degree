@@ -33,18 +33,23 @@ const mutations = {
     }
 };
 const actions = {
-    async fetchSemester({ commit }) {
+    async fetchSemester({ commit }, schemaname = 'ref') {
         try {
-            const { data, status } = await api.get(`ss/semester`);
+            const { data, status } = await api.get(`ss/semester`, {
+                params: {
+                    schemaname: schemaname
+                }
+            });
             if (status) {
+                const selectedSemester = data.semester.find((item) => item.periodeAktif === 1)?.semesterId;
+                const selectedTahunAjaran = [...new Set(data.semester.filter((item) => item.periodeAktif === 1).map((item) => item.tahunAjaranId))];
+                commit('SET_SELECTEDSEMESTER', selectedSemester);
+                commit('SET_SELECTEDTAHUNAJARAN', selectedTahunAjaran);
+
+                const listTahunAjaran = [...new Set(data.semester.map((item) => item.tahunAjaranId))];
                 commit('SET_TABELSEMESTER', data.semester);
+                commit('SET_TABELTAHUNAJARAN', listTahunAjaran);
             }
-            const tahunAjaran = state.selectedTahunAjaran?.tahunAjaranId;
-            // const selectedSemester = response.data.semester.reduce((max, item) => (item.semesterId > max.semesterId ? item : max), response.data.semester[0]);
-            // if (!state.selectedSemester) {
-            //     const selectedSemester = data.semester.filter((item) => item.tahunAjaranId == tahunAjaran);
-            //     commit('SET_SELECTEDSEMESTER', selectedSemester[0]);
-            // }
             return data;
         } catch (error) {
             console.log(error);

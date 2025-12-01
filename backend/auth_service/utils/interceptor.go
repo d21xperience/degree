@@ -88,7 +88,7 @@ func AuthInterceptor(rbac *RBACInterceptorConfig) grpc.UnaryServerInterceptor {
 
 		// 5) inject user info into context
 		newCtx := context.WithValue(ctx, CtxUserID, claims.UserID)
-		newCtx = context.WithValue(newCtx, CtxRoles, claims.Roles)
+		newCtx = context.WithValue(newCtx, CtxRole, claims.Roles)
 
 		// 6) call handler with newCtx
 		return handler(newCtx, req)

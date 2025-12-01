@@ -1,14 +1,24 @@
 <script setup>
 import { useAuth } from '@/views/pages/auth/composables/auth';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+import { useRoute } from 'vue-router';
 const { onLogin } = useAuth();
-
 const username = ref('');
 const password = ref('');
 const checked = ref(false);
 const loading = ref(false);
 const dialogError = ref(false);
 const messageError = ref('');
+const route = useRoute();
+onMounted(() => {
+    if (route.query.from === 'register-success') {
+        registerSuccessMessage.value = 'Silakan login untuk melanjutkan.';
+        registerSuccessStatus.value = true;
+    }
+});
+
+const registerSuccessMessage = ref('');
+const registerSuccessStatus = ref(false);
 // Fungsi handler submit form
 const handleSubmit = async () => {
     loading.value = true;
@@ -76,6 +86,26 @@ const handleSubmit = async () => {
 
         <Dialog v-model:visible="dialogError" :style="{ width: '450px' }" header="Warning" :modal="true" position="top">
             <p>{{ messageError }}</p>
+        </Dialog>
+        <!-- <Dialog v-model:visible="registerSuccessStatus" :style="{ width: '450px' }" header="Akun berhasil dibuat" :modal="true" pt:mask:class="backdrop-blur-sm">
+            <p class="text-xl">{{ registerSuccessMessage }}</p>
+        </Dialog> -->
+
+        <Dialog v-model:visible="registerSuccessStatus" modal :draggable="false" :breakpoints="{ '960px': '450px', '640px': '90vw' }" pt:mask:class="backdrop-blur-sm" header="Akun berhasil dibuat">
+            <template #header>
+                <div class="flex items-center gap-3 py-2">
+                    <i class="pi pi-check-circle text-green-500 text-3xl"></i>
+                    <span class="text-xl font-semibold">Selamat! 😀</span>
+                </div>
+            </template>
+
+            <div class="py-4">
+                <p class="text-lg leading-relaxed text-gray-700">Akun berhasil dibuat. {{ registerSuccessMessage }}</p>
+            </div>
+
+            <template #footer>
+                <Button label="OK" icon="pi pi-check" class="p-button-success px-5 py-2" @click="registerSuccessStatus = false" />
+            </template>
         </Dialog>
     </div>
 </template>

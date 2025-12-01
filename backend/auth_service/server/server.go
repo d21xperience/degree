@@ -4,6 +4,7 @@ import (
 	auth "auth_service/generated"
 	"auth_service/http_handler"
 	"auth_service/jwks"
+	"auth_service/jwt"
 	"auth_service/utils"
 	"context"
 	"fmt"
@@ -34,23 +35,16 @@ func StartGRPCServer() {
 	// Tangani sinyal OS
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM)
-
 	// =========================================================
-	// Load private key
-	priv, err := utils.LoadPrivateKey(utils.GetEnv("JWT_PRIVATE_PATH", "./keys/private.pem"))
-	if err != nil {
-		log.Fatal("failed load private key:", err)
-	}
-	pub, kid, err := jwks.ParseKeyFile(utils.GetEnv("JWT_PRIVATE_PATH", "./keys/private.pem"))
-	if err != nil {
-		panic(err)
-	}
+
+	jwtManager := jwt.NewManager()
+
 	// Jalankan gRPC server
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", gRPCPort))
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
-	grpcServer := RunGRPCServer(priv)
+	grpcServer := RunGRPCServer(jwtManager)
 	// =========================================================
 	grpcServerEndpoint := fmt.Sprintf("%s:%d", "localhost", gRPCPort)
 	// Inisialisasi HTTP mux (gRPC-Gateway)
@@ -73,7 +67,7 @@ func StartGRPCServer() {
 		}),
 	)
 	method, pattern := createPattern("GET", ".well-known", "jwks.json")
-	gwmux.Handle(method, pattern, jwks.JWKSHandler(pub, kid))
+	gwmux.Handle(method, pattern, jwks.JWKSHandler(jwtManager))
 	// 🔌 Buat gRPC client (untuk HTTP handler)
 	conn, err := grpc.NewClient(grpcServerEndpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {

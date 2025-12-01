@@ -4,17 +4,18 @@ import { useTableTenant } from './useTableTenant';
 export function useDashboard() {
     const store = useStore();
     const { schemaname } = useTableTenant();
-    const { initSelectedSemester } = useSemester();
+    const { selectedSemester } = useSemester();
 
     const fetchDashboard = async () => {
         try {
             let response = store.getters['sekolahService/getDashboard'];
-            // console.log('useDashboard', response);
-            if (!response || response.semester_id != initSelectedSemester.value?.semesterId) {
-                // console.log('useDashboard1', response.semester_id != initSelectedSemester.value?.semesterId);
+            if (!response || response.semester_id != selectedSemester.value) {
+                // console.log('useDashboard1', response.semester_id != storeSelectedSemester.value?.semesterId);
+                console.log(schemaname.value);
+                console.log(selectedSemester.value);
                 const payload = {
                     schemaname: schemaname.value,
-                    semester_id: initSelectedSemester.value?.semesterId
+                    semester_id: selectedSemester.value
                 };
                 if (payload.schemaname === '') {
                     return null;
@@ -24,7 +25,7 @@ export function useDashboard() {
 
             return response;
         } catch (error) {
-            throw new Error('Gagal medapatkan nilai untuk Dashboard');
+            throw new Error(error);
         }
     };
 

@@ -6,7 +6,7 @@ type ctxKey string
 
 const (
 	CtxUserID ctxKey = "user_id"
-	CtxRoles  ctxKey = "roles"
+	CtxRole   ctxKey = "role"
 )
 
 // FromContext helpers
@@ -18,11 +18,11 @@ func UserIDFromContext(ctx context.Context) (string, bool) {
 	id, ok := v.(string)
 	return id, ok
 }
-func RolesFromContext(ctx context.Context) ([]string, bool) {
-	v := ctx.Value(CtxRoles)
+func RolesFromContext(ctx context.Context) (string, bool) {
+	v := ctx.Value(CtxRole)
 	if v == nil {
-		return nil, false
+		return "", false
 	}
-	r, ok := v.([]string)
+	r, ok := v.(string)
 	return r, ok
 }

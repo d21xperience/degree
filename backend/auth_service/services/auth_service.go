@@ -12,29 +12,36 @@ import (
 )
 
 type AuthService interface {
-	IsAdminExists(schoolTenantID uint32) (bool, error)
+	IsAdminExists(schoolTenantID int32) (bool, error)
 	Register(user *models.User) error
-	RegisterAdmin(user *models.User) error
+	RegisterAdmin(user *models.User) (int64, error)
 	Login(username, password string) (*models.User, error)
 	GetUserByID(userId int64) (*models.User, error)
-	
+
 	// GenerateToken(userID int, role string) (string, error)
 	// SetAuthCookies(w http.ResponseWriter, accessToken, refreshToken string)
 	// ClearAuthCookies(w http.ResponseWriter)
+	WithTx(tx *gorm.DB) AuthService
 }
 
 // AuthServiceImpl is the implementation of AuthService
-type authServiceImpl struct {
+type authService struct {
 	repo repositories.UserRepository
 	// secretKey any
 }
 
 func NewAuthService(as repositories.UserRepository) AuthService {
-	return &authServiceImpl{repo: as}
+	return &authService{repo: as}
+}
+
+func (s *authService) WithTx(tx *gorm.DB) AuthService {
+	return &authService{
+		repo: s.repo.WithTx(tx),
+	}
 }
 
 // IsAdminExists cek apakah admin sudah adah ada pada sekolah
-func (s *authServiceImpl) IsAdminExists(schoolTenantID uint32) (bool, error) {
+func (s *authService) IsAdminExists(schoolTenantID int32) (bool, error) {
 	admin, err := s.repo.FindUserByRoleAndSchoolID("admin", schoolTenantID)
 	if err != nil {
 		// Return false if no admin found or error is not nil
@@ -46,7 +53,7 @@ func (s *authServiceImpl) IsAdminExists(schoolTenantID uint32) (bool, error) {
 	return admin != nil, nil
 }
 
-func (s *authServiceImpl) Register(user *models.User) error {
+func (s *authService) Register(user *models.User) error {
 	// Cek apakah username sudah ada
 	var lanjutkan bool
 	existingUser, err := s.repo.FindByUsername(user.Username)
@@ -92,14 +99,14 @@ func (s *authServiceImpl) Register(user *models.User) error {
 	}
 
 }
-func (s *authServiceImpl) RegisterAdmin(user *models.User) error {
+func (s *authService) RegisterAdmin(user *models.User) (int64, error) {
 	// Cek apakah email sudah ada dengan query efisien
 	emailExists, err := s.repo.EmailExists(user.Email) // Hanya cek keberadaan email
 	if err != nil {
-		return err
+		return 0, err
 	}
 	if emailExists {
-		return errors.New("email already exists")
+		return 0, errors.New("email already exists")
 	}
 
 	// Enkripsi password
@@ -119,13 +126,13 @@ func (s *authServiceImpl) RegisterAdmin(user *models.User) error {
 	select {
 	case user.Password = <-encryptedPasswordChan:
 		// Simpan admin baru
-		return s.repo.Save(user)
+		return user.ID, s.repo.Save(user)
 	case err = <-errorChan:
-		return err
+		return 0, err
 	}
 }
 
-func (s *authServiceImpl) Login(identifier, password string) (*models.User, error) {
+func (s *authService) Login(identifier, password string) (*models.User, error) {
 	var user *models.User
 	var err error
 
@@ -150,13 +157,12 @@ func (s *authServiceImpl) Login(identifier, password string) (*models.User, erro
 	}
 
 	return user, nil
-} 
+}
 
-func (s *authServiceImpl) GetUserByID(userId int64) (*models.User, error) {
+func (s *authService) GetUserByID(userId int64) (*models.User, error) {
 	cekUser, err := s.repo.FindByID(strconv.FormatInt(userId, 10))
 	if err != nil {
 		return nil, err
 	}
 	return cekUser, nil
 }
- 

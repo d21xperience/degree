@@ -1,122 +1,166 @@
-import { computed, ref, watch } from 'vue';
+import { computed, getCurrentInstance, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
-export function useSemester() {
+import { useTableTenant } from './useTableTenant';
+export function useSemester({ autoload = true } = {}) {
+    const { schemaname } = useTableTenant();
+    if (import.meta.env.DEV && !getCurrentInstance()) {
+        console.error('[useSemester] Error: Composable ini harus dipanggil di dalam setup() atau <script setup>.');
+    }
+
     const store = useStore();
-    const rawlistTahunAjaran = ref();
-    const listSemester = store.getters['semesterService/getSemester'];
-    const selectedSemester = ref();
-    const listTahunAjaran = computed(() => rawlistTahunAjaran.value || []);
-    const initSelectedSemester = computed(() => store.getters['semesterService/getSelectedSemester']);
-    const initSelectedTahunAjaran = computed(() => store.getters['semesterService/getSelectedTahunAjaran']);
-    const selectedTahunAjaran = ref();
+
+    // --- 1. Getter-based computed (source of truth dari store)
+    const listSemester = computed(() => store.getters['semesterService/getSemester'] || []);
+    const listTahunAjaran = computed(() => store.getters['semesterService/getTahunAjaran'] || []);
+
+    const storeSelectedSemester = computed(() => store.getters['semesterService/getSelectedSemester']);
+    const storeSelectedTahunAjaran = computed(() => store.getters['semesterService/getSelectedTahunAjaran']);
+
+    // --- 2. Local UI state (hanya untuk interaksi sementara sebelum commit)
+    const selectedSemester = ref(null);
+    const selectedTahunAjaran = ref(null);
+
+    // --- 3. Helper: Load dari store, fallback ke backend jika kosong
+    const initializeFromStoreOrFetch = async () => {
+        // 🔁 Sync `selectedSemester`
+        if (storeSelectedSemester.value != null) {
+            selectedSemester.value = storeSelectedSemester.value;
+        } else {
+            // fallback: ambil dari backend & set ke store + local
+            try {
+                await fetchSemester();
+                // Setelah fetch, coba lagi ambil dari getter
+                if (storeSelectedSemester.value != null) {
+                    selectedSemester.value = storeSelectedSemester.value;
+                } else {
+                    // fallback ke item pertama (opsional, sesuaikan logika bisnis)
+                    selectedSemester.value = listSemester.value[0]?.semesterId ?? null;
+                }
+            } catch (err) {
+                console.warn('Gagal inisialisasi semester:', err.message);
+            }
+        }
+
+        // 🔁 Sync `selectedTahunAjaran`
+        if (storeSelectedTahunAjaran.value != null) {
+            selectedTahunAjaran.value = storeSelectedTahunAjaran.value;
+        } else {
+            try {
+                await fetchTahunAjaran();
+                if (storeSelectedTahunAjaran.value != null) {
+                    selectedTahunAjaran.value = storeSelectedTahunAjaran.value;
+                } else {
+                    selectedTahunAjaran.value = listTahunAjaran.value[0]?.tahunAjaranId ?? null;
+                }
+            } catch (err) {
+                console.warn('Gagal inisialisasi tahun ajaran:', err.message);
+            }
+        }
+    };
+
+    // --- 4. Watcher: Sync ke store hanya saat local state berubah (one-way: local → store)
+    watch(selectedSemester, (newValue) => {
+        if (newValue !== storeSelectedSemester.value) {
+            store.commit('semesterService/SET_SELECTEDSEMESTER', newValue);
+        }
+    });
+
+    watch(selectedTahunAjaran, (newValue) => {
+        if (newValue !== storeSelectedTahunAjaran.value) {
+            store.commit('semesterService/SET_SELECTEDTAHUNAJARAN', newValue);
+        }
+    });
+
+    // --- 5. Actions (dibuat lebih reusable & clear responsibilities)
+
     const fetchSemester = async () => {
         try {
-            const results = await store.dispatch('semesterService/fetchSemester');
-            if (results.status) {
-                // const periodeAktif = results.semester
-                return results.semester;
-            }
+            console.log('dipanggil dari useSemester', schemaname.value);
+            const result = await store.dispatch('semesterService/fetchSemester', schemaname.value);
+            if (!result?.status) throw new Error(result?.message || 'Fetch semester failed');
+            return result.semester;
         } catch (error) {
-            throw new Error(`Gagal mengambil semester: ${error.message}`);
-        }
-    };
-
-    /**
-     * Gets a contract for the given owner address
-     * @param {Array} semester
-     * @returns {Promise} A promise that resolves with the contract response
-     * @throws {Error} If there's an error fetching the contract
-     */
-    /**
-     * Deletes semesters by their IDs
-     * @param {Array<Object>} semesters - Array of semester objects containing semesterId
-     * @returns {Promise<Object>} A promise that resolves with the deletion response
-     * @throws {Error} If the deletion request fails
-     *
-     * @example
-     * await deleteSemester([{ semesterId: 1 }, { semesterId: 2 }]);
-     */
-    const deleteSemester = async (semesters) => {
-        // Validasi input
-        if (!Array.isArray(semesters)) {
-            throw new Error('Parameter must be an array of semester objects');
-        }
-
-        // Ekstrak semesterId secara langsung
-        const semesterIds = semesters
-            .map((semester) => {
-                if (semester.semesterId == null) {
-                    console.warn('Semester object missing semesterId:', semester);
-                }
-                return semester.semesterId;
-            })
-            .filter((id) => id != null); // Filter null/undefined
-
-        if (semesterIds.length === 0) {
-            throw new Error('No valid semester IDs provided');
-        }
-        console.log(semesterIds);
-        // return;
-        try {
-            // Tunggu hasil dispatch dengan await
-            const response = await store.dispatch('semesterService/deleteSemester', semesterIds);
-            console.log('deleteSemester', response);
-            // Asumsi response memiliki struktur { status: true, data: ... } atau sejenisnya
-            if (response.status) {
-                return response;
-            } else {
-                throw new Error(response?.message || 'Failed to delete semesters');
-            }
-        } catch (error) {
-            // Tambahkan konteks error
-            console.error('Error deleting semesters:', error);
-            throw new Error(`Failed to delete semesters: ${error.message || 'Unknown error'}`);
-        }
-    };
-
-    const updateSemester = async (semester) => {
-        try {
-            console.log('updateSemester', semester);
-            // return
-            const res = await store.dispatch('semesterService/updateSemester', semester);
-            return res;
-        } catch (error) {
-            throw new Error(`Gagal update semester: ${error.message}`);
+            const msg = error instanceof Error ? error.message : String(error);
+            throw new Error(`Gagal mengambil semester: ${msg}`);
         }
     };
 
     const fetchTahunAjaran = async () => {
+        // ✅ Optimasi: hindari fetch ulang jika sudah ada
+        if (listTahunAjaran.value.length > 0) return listTahunAjaran.value;
+
         try {
-            rawlistTahunAjaran.value = store.getters['semesterService/getTahunAjaran'];
-            if (!rawlistTahunAjaran.value || rawlistTahunAjaran.value.length == 0) {
-                const results = await store.dispatch('semesterService/fetchTahunAjaran');
-                if (results.status) {
-                    rawlistTahunAjaran.value = results.tahunAjaran;
-                    // toast.add({ severity: 'success', summary: 'Successful', detail: `${results.message}`, life: 3000 });
-                }
-            }
+            const result = await store.dispatch('semesterService/fetchTahunAjaran');
+            if (!result?.status) throw new Error(result?.message || 'Fetch tahun ajaran failed');
+            return result.tahunAjaran;
         } catch (error) {
-            console.log(error);
-            throw new Error(`Gagal mendapatkan tahun ajaran: ${error.message}`);
+            const msg = error instanceof Error ? error.message : String(error);
+            throw new Error(`Gagal mendapatkan tahun ajaran: ${msg}`);
         }
     };
 
-    watch(selectedTahunAjaran, (e) => {
-        store.commit('semesterService/SET_SELECTEDTAHUNAJARAN', e);
-    });
-    watch(selectedSemester, (e) => {
-        store.commit('semesterService/SET_SELECTEDSEMESTER', e);
-    });
+    const deleteSemester = async (semesters) => {
+        if (!Array.isArray(semesters)) {
+            throw new TypeError('Parameter must be an array of semester objects');
+        }
+
+        const semesterIds = semesters.map((s) => s.semesterId).filter((id) => typeof id === 'number' || typeof id === 'string');
+
+        if (semesterIds.length === 0) {
+            throw new Error('No valid semester IDs provided');
+        }
+
+        try {
+            const response = await store.dispatch('semesterService/deleteSemester', semesterIds);
+            if (!response?.status) throw new Error(response?.message || 'Deletion failed');
+            return response;
+        } catch (error) {
+            const msg = error instanceof Error ? error.message : String(error);
+            throw new Error(`Gagal menghapus semester: ${msg}`);
+        }
+    };
+
+    const updateSemester = async (semester) => {
+        if (!semester || typeof semester !== 'object') {
+            throw new TypeError('Semester must be a non-null object');
+        }
+
+        try {
+            const response = await store.dispatch('semesterService/updateSemester', semester);
+            if (!response?.status) throw new Error(response?.message || 'Update failed');
+            return response;
+        } catch (error) {
+            const msg = error instanceof Error ? error.message : String(error);
+            throw new Error(`Gagal update semester: ${msg}`);
+        }
+    };
+
+    // --- 6. Auto-init (opsional, bisa dipanggil manual juga)
+    if (autoload) {
+        onMounted(() => {
+            initializeFromStoreOrFetch();
+        });
+    }
+
+    // 📤 Return API public
     return {
+        // State reaktif
+        selectedSemester,
+        selectedTahunAjaran,
+        listSemester,
+        listTahunAjaran,
+
+        // Derived (opsional, tapi bisa di-return jika perlu)
+        // initSelectedSemester: storeSelectedSemester,  // ← hindari duplikasi; cukup gunakan computed ini jika diperlukan
+        // initSelectedTahunAjaran: storeSelectedTahunAjaran,
+
+        // Actions
         fetchSemester,
+        fetchTahunAjaran,
         deleteSemester,
         updateSemester,
-        selectedSemester,
-        initSelectedSemester,
-        listTahunAjaran,
-        listSemester,
-        fetchTahunAjaran,
-        selectedTahunAjaran,
-        initSelectedTahunAjaran
+
+        // Manual init (untuk edge case)
+        initialize: initializeFromStoreOrFetch
     };
 }

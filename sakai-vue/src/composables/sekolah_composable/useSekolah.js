@@ -19,7 +19,7 @@ export function useSekolah() {
         try {
             let response = await store.getters['sekolahService/getSekolah'];
             if (!response) {
-                const sekolahID = await store.state.authService.user?.sekolahTenantId;
+                const sekolahID = await store.state.authService.user?.sekolahAsal.id;
                 const tTenant = await store.dispatch('sekolahService/fetchTabeltenant', sekolahID);
                 response = await store.dispatch('sekolahService/fetchSekolah', { schemaname: tTenant.schemaname, namaSekolah: tTenant.namaSekolah });
                 // response = await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
@@ -75,30 +75,26 @@ export function useSekolah() {
     };
 
     const fetchBentukPendidikan = async () => {
-        const { data } = await store.dispatch('sekolahService/fetchBentukPendidikan');
-        return data;
+        try {
+            const { bentukPendidikan } = await store.dispatch('sekolahService/fetchBentukPendidikan');
+            return bentukPendidikan;
+        } catch (error) {
+            throw new Error(error);
+        }
     };
     /**
      * @param {Object} jenjang - Default value = jenjangLembaga = 1; jenjangOrang = 0
      * @returns Object
      */
     const fetchJenjangPendidikan = async (jenjang = { isJenjangLembaga: true, jenjangLembaga: 1, isJenjangOrang: false, jenjangOrang: 0 }) => {
-        const response = await store.dispatch('sekolahService/fetchJenjangPendidikan', jenjang);
-        return response;
+        try {
+            const response = await store.dispatch('sekolahService/fetchJenjangPendidikan', jenjang);
+            console.log(response);
+            return response.jenjang;
+        } catch (error) {
+            throw new Error(error);
+        }
     };
-    // const fetchMapel = async (mapel) => {
-    //     try {
-    //         let response = await store.dispatch('sekolahService/fetchMapel');
-
-    //         if (response.status) {
-    //             toast.add({ severity: 'success', summary: 'Success', detail: `${response.message}`, life: 3000 });
-    //         }
-
-    //         return response.kategoriMapel;
-    //     } catch (error) {
-    //         toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mendapatkan informasi: ${error}`, life: 3000 });
-    //     }
-    // };
     return {
         fetchTingkat,
         fetchSekolah,

@@ -30,7 +30,7 @@ func NewSemesterService() *SemesterServiceServer {
 // **CreateSemester**
 func (s *SemesterServiceServer) CreateSemester(ctx context.Context, req *pb.CreateSemesterRequest) (*pb.CreateSemesterResponse, error) {
 	// Daftar field yang wajib diisi
-	requiredFields := []string{"Semester", "TahunAjaranId"}
+	requiredFields := []string{"Semester", "TahunAjaranId", "Schemaname"}
 	// Validasi request
 	err := utils.ValidateFields(req, requiredFields)
 	if err != nil {
@@ -56,10 +56,10 @@ func (s *SemesterServiceServer) CreateSemester(ctx context.Context, req *pb.Crea
 		TanggalSelesai: tglSelesai,
 	}
 
-	err = s.repo.Save(ctx, semesterModel, "ref")
+	err = s.repo.Save(ctx, semesterModel, req.GetSchemaname())
 	if err != nil {
 		log.Printf("Gagal menyimpan semester: %v", err)
-		return nil, fmt.Errorf("gagal menyimpan semester: %w", err)
+		return nil, status.Error(codes.Aborted, err.Error())
 	}
 
 	return &pb.CreateSemesterResponse{
@@ -69,14 +69,20 @@ func (s *SemesterServiceServer) CreateSemester(ctx context.Context, req *pb.Crea
 }
 
 // **GetSemester**
-func (s *SemesterServiceServer) GetSemester(ctx context.Context, req *pb.Empty) (*pb.GetSemesterResponse, error) {
+func (s *SemesterServiceServer) GetSemester(ctx context.Context, req *pb.GetSemesterRequest) (*pb.GetSemesterResponse, error) {
+	requiredFields := []string{"Schemaname"}
+	// Validasi request
+	err := utils.ValidateFields(req, requiredFields)
+	if err != nil {
+		return nil, err
+	}
 	conditions := make(map[string]any)
 	orderBy := []string{"tahun_ajaran_id DESC", "semester DESC"}
-	SemesterModels, err := s.repo.FindAllByConditions(ctx, "ref", conditions, 500, 0, orderBy)
+	SemesterModels, err := s.repo.FindAllByConditions(ctx, req.GetSchemaname(), conditions, 500, 0, orderBy)
 	if err != nil {
 		return &pb.GetSemesterResponse{
 			Status:  false,
-			Message: fmt.Sprintf("gagal mendapatkan data semester pada schema '%s': %v", "ref", err),
+			Message: fmt.Sprintf("gagal mendapatkan data semester pada schema '%s': %v", req.GetSchemaname(), err),
 		}, nil
 	}
 	// Konversi hasil ke response protobuf
@@ -103,7 +109,7 @@ func (s *SemesterServiceServer) GetSemester(ctx context.Context, req *pb.Empty) 
 // **UpdateSemester**
 func (s *SemesterServiceServer) UpdateSemester(ctx context.Context, req *pb.UpdateSemesterRequest) (*pb.UpdateSemesterResponse, error) {
 	// Daftar field yang wajib diisi
-	requiredFields := []string{"Semester"}
+	requiredFields := []string{"Semester", "Schemaname"}
 	// Validasi request
 	err := utils.ValidateFields(req, requiredFields)
 	if err != nil {
@@ -128,7 +134,7 @@ func (s *SemesterServiceServer) UpdateSemester(ctx context.Context, req *pb.Upda
 		TanggalMulai:   tglMulai,
 		TanggalSelesai: tglSelesai,
 	}
-	err = s.repo.Update(ctx, SemesterModel, "ref", "semester_id", SemesterModel.SemesterID)
+	err = s.repo.Update(ctx, SemesterModel, req.GetSchemaname(), "semester_id", SemesterModel.SemesterID)
 	if err != nil {
 		log.Printf("Gagal memperbarui tahun ajaran: %v", err)
 		return nil, fmt.Errorf("gagal memperbarui tahun ajaran: %w", err)
@@ -142,7 +148,7 @@ func (s *SemesterServiceServer) UpdateSemester(ctx context.Context, req *pb.Upda
 // // **DeleteSemester**
 func (s *SemesterServiceServer) DeleteSemester(ctx context.Context, req *pb.DeleteSemesterRequest) (*pb.DeleteSemesterResponse, error) {
 	// Daftar field yang wajib diisi
-	requiredFields := []string{"SemesterIds"}
+	requiredFields := []string{"SemesterIds", "Schemaname"}
 	// Validasi request
 	err := utils.ValidateFields(req, requiredFields)
 	if err != nil {
@@ -159,7 +165,7 @@ func (s *SemesterServiceServer) DeleteSemester(ctx context.Context, req *pb.Dele
 		return nil, status.Error(codes.InvalidArgument, "semester_ids cannot be empty")
 	}
 
-	err = s.repo.DeleteBatch(ctx, validIds, "ref", "semester_id", repositories.ValidateString)
+	err = s.repo.DeleteBatch(ctx, validIds, req.GetSchemaname(), "semester_id", repositories.ValidateString)
 	if err != nil {
 		log.Printf("Gagal menghapus semester: %v", err)
 		return &pb.DeleteSemesterResponse{

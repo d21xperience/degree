@@ -80,8 +80,14 @@ const displayName = computed(() => {
 //     }
 // };
 
-const handleWalletInfo = (e) => {
-    console.log(e);
+// const handleWalletInfo = (e) => {
+//     console.log(e);
+// };
+
+const logoutHandler = async () => {
+    isDialogSignOut.value = false;
+    await onLogout();
+    router.push({ name: 'landing' });
 };
 </script>
 
@@ -188,10 +194,10 @@ const handleWalletInfo = (e) => {
                             class="config-panel hidden absolute top-[3.25rem] right-0 w-64 p-4 bg-surface-0 dark:bg-surface-900 border border-surface rounded-border origin-top shadow-[0px_3px_5px_rgba(0,0,0,0.02),0px_0px_2px_rgba(0,0,0,0.05),0px_1px_4px_rgba(0,0,0,0.08)]"
                         >
                             <p v-show="currentUser" class="font-semibold">Hello, {{ displayName }}</p>
-                            <!-- <div class="w-full hover:bg-primary hover:text-surface-100 p-2 cursor-pointer" @click="isDialogSignOut = true">
+                            <div class="w-full hover:bg-primary hover:text-surface-100 p-2 cursor-pointer" @click="isDialogSignOut = true">
                                 <i class="pi pi-fw pi-sign-out"></i>
                                 Sign out
-                            </div> -->
+                            </div>
                             <div class="w-full hover:bg-primary hover:text-surface-100 p-2 cursor-pointer" @click="cek">
                                 <i class="pi pi-fw pi-user"></i>
                                 Profile
@@ -202,7 +208,7 @@ const handleWalletInfo = (e) => {
             </div>
         </div>
 
-        <DialogSignOut v-model:visible="isDialogSignOut" @confirm="onLogout" />
+        <DialogSignOut v-model:visible="isDialogSignOut" @confirm="logoutHandler" />
         <!-- <Dialog v-model:visible="isSignerDialog" header="Metamask conected" position="top">
             <div>
                 <h6>Metamask</h6>

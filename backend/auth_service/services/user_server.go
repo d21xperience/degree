@@ -17,12 +17,12 @@ import (
 type UserServer struct {
 	pb.UnimplementedUserServiceServer
 	repo        repositories.UserRepository
-	repoSekolah repositories.SekolahRepository
+	repoSekolah repositories.SekolahTenantRepository
 }
 
 func NewUserUserServiceServer() *UserServer {
 	repoUser := repositories.NewUserRepository(config.DB)
-	repoSekolah := repositories.NewSekolahRepository(config.DB)
+	repoSekolah := repositories.NewSekolahTenantRepository(config.DB)
 	return &UserServer{
 		repo:        repoUser,
 		repoSekolah: repoSekolah,
@@ -35,8 +35,8 @@ func (s *UserServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.U
 	if !ok {
 		return nil, status.Error(codes.Unauthenticated, "no user")
 	}
-	roles, _ := utils.RolesFromContext(ctx)
-	if !(utils.Contains(roles, models.RoleAdmin) || utils.Contains(roles, models.RoleSiswa) || utils.Contains(roles, models.RoleSuperadmin)) {
+	role, _ := utils.RolesFromContext(ctx)
+	if !(role == models.RoleAdmin || role == models.RoleSiswa || role == models.RoleSuperadmin) {
 		return nil, status.Error(codes.PermissionDenied, "role tidak diizinkan")
 	}
 	user, err := s.repo.FindByID(userID)
@@ -44,7 +44,7 @@ func (s *UserServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.U
 		log.Printf("Error fetching user: %v", err)
 		return nil, errors.New("failed to retrieve user")
 	}
-	asalSekolah, err := s.repoSekolah.GetSekolahByTenantId(user.SekolahTenantID)
+	asalSekolah, err := s.repoSekolah.GetSekolahTenantByTenantId(user.SekolahTenantID)
 	if err != nil {
 		log.Printf("Error fetching user: %v", err)
 		return nil, errors.New("failed to retrieve user")
@@ -52,7 +52,7 @@ func (s *UserServer) GetUser(ctx context.Context, req *pb.GetUserRequest) (*pb.U
 	return &pb.User{
 		Id:       user.ID,
 		Username: user.Username,
-		SekolahAsal: &pb.Sekolah{
+		SekolahAsal: &pb.SekolahTenant{
 			Id:          asalSekolah.ID,
 			NamaSekolah: asalSekolah.NamaSekolah,
 			EnkripId:    asalSekolah.EnkripID,

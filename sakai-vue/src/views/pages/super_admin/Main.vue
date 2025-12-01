@@ -139,14 +139,14 @@ const getTahunAjaran = (semesterArray) => {
 //     store.commit('sekolahService/SET_SELECTEDTAHUNAJARAN', val);
 // });
 const isDisabled = computed(() => route.meta.disableSelect);
-onBeforeMount(async () => {
-    const res = await store.dispatch('authService/bootstrap');
-    console.log('onBeforeMount', res);
-    if (!res) {
-        alert('sesi telah habis');
-        router.push({ name: 'login' });
-    }
-});
+// onBeforeMount(async () => {
+//     const res = await store.dispatch('authService/bootstrap');
+//     console.log('onBeforeMount', res);
+//     if (!res) {
+//         alert('sesi telah habis');
+//         router.push({ name: 'login' });
+//     }
+// });
 </script>
 
 <template>

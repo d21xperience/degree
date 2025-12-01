@@ -15,7 +15,7 @@ onMounted(async () => {
     // alert('hello');
 });
 // const { sekolah } = useSekolah();
-const { currentUser } = useAuth();
+const { user } = useAuth();
 // const { initSelectedSemester } = useSemester();
 // Ambil data dashboard
 const dashboard = ref({
@@ -25,7 +25,7 @@ const dashboard = ref({
 });
 const isSekolahDashboard = ref(false);
 const isSCDashboard = ref(false);
-const namaSekolah = computed(() => currentUser.value.asalSekolah);
+const namaSekolah = computed(() => user.sekolahAsal.namaSekolah);
 </script>
 
 <template>

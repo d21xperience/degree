@@ -22,7 +22,7 @@ func ConvertUintToString[T uint8 | uint16 | uint32 | uint64](num T) string {
 	return strconv.FormatUint(uint64(num), 10)
 }
 
-func ValidateFields(req interface{}, fieldNames []string) error {
+func ValidateFields(req any, fieldNames []string) error {
 	log.Printf("Received data request: %+v\n", req)
 
 	// Cek apakah req kosong

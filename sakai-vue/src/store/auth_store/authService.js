@@ -1,29 +1,24 @@
 import api from '../api';
-const decodeToken = (token) => {
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return {
-            id: payload.user_id,
-            username: payload.username || '',
-            name: payload.name || '',
-            roles: payload.roles || '',
-            asalSekolah: payload.asal_sekolah || '',
-            sekolah_tenant_id: payload.sekolah_tenant_id || ''
-            // exp: payload.exp ? new Date(payload.exp * 1000) : null,
-            // raw: payload // simpan semua jika perlu
-        };
-    } catch (e) {
-        console.error('Gagal decode token:', e);
-        return null;
-    }
-};
+// const decodeToken = (token) => {
+//     try {
+//         const payload = JSON.parse(atob(token.split('.')[1]));
+//         return {
+//             id: payload.user_id,
+//             username: payload.username || '',
+//             name: payload.name || '',
+//             roles: payload.roles || '',
+//             asalSekolah: payload.asal_sekolah || '',
+//             sekolah_tenant_id: payload.sekolah_tenant_id || ''
+//             // exp: payload.exp ? new Date(payload.exp * 1000) : null,
+//             // raw: payload // simpan semua jika perlu
+//         };
+//     } catch (e) {
+//         console.error('Gagal decode token:', e);
+//         return null;
+//     }
+// };
 
 const state = {
-    // user: localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null,
-    // sekolah: JSON.parse(localStorage.getItem('sekolah')) || null,
-    // userRole: localStorage.getItem('userRole') ? JSON.parse(localStorage.getItem('userRole')) : null,
-    // userProfile: JSON.parse(localStorage.getItem('userProfile')) || null, // Ambil dari localStorage
-    // accessToken: null
     user: null, // { user_id, email, ... }
     isAuthenticated: false,
     isCheckingAuth: true // untuk menampilkan loading saat cek session
@@ -32,11 +27,16 @@ const state = {
 const mutations = {
     SET_USER(state, user) {
         state.user = user;
-        localStorage.setItem('user', JSON.stringify(user)); // Simpan user ke localStorage
+        // localStorage.setItem('user', JSON.stringify(user)); // Simpan user ke localStorage
+        state.isAuthenticated = !!user;
     },
     CLEAR_USER(state) {
+        // state.user = null;
+        // state.isAuthenticated = false;
+        // console.log('[Vuex] CLEAR_USER called');
         state.user = null;
         state.isAuthenticated = false;
+        // console.log('[Vuex] After clear:', { user: state.user, auth: state.isAuthenticated });
     },
     SET_CHECKING(state, value) {
         state.isCheckingAuth = value;
@@ -77,53 +77,20 @@ const actions = {
         } catch (err) {
             // Jika 401 atau error jaringan → anggap tidak login
             commit('CLEAR_USER');
+            commit('RESET');
         } finally {
             commit('SET_CHECKING', false);
         }
     },
 
-    async login({ commit }, credentials) {
+    // eslint-disable-next-line no-unused-vars
+    async login({ commit, dispatch }, credentials) {
         try {
             const { data } = await api.post('/as/auth/web/login', credentials);
-            if (data.accessToken) {
-                commit('SET_TOKEN', data.accessToken);
-                const userClaims = decodeToken(data.accessToken);
-                commit('SET_USER', {
-                    username: userClaims.username,
-                    asalSekolah: userClaims.asalSekolah
-                });
-                commit('SET_USER_ROLE', userClaims.roles[0]);
-                // user.value = { id: payload.user_id };
-                console.log(userClaims);
-                // console.log('Id:', userClaims.id, 'Role:', userClaims.roles, 'Asal sekolah:', userClaims.asalSekolah);
-                // const user = await api.get('/as/users/');
-                // console.log(user);
-                return {
-                    status: true,
-                    userRole: userClaims.roles[0],
-                    sekolahTenant: {
-                        namaSekolah: userClaims.asalSekolah,
-                        sekolahTenantId: userClaims.sekolah_tenant_id
-                    }
-                };
-            }
-            return { status: false };
-            // const { status, user, sekolahTenant } = data;
-            // if (status) {
-            //     commit('SET_USER', user);
-
-            //     commit('SET_SEKOLAH', sekolahTenant);
-            //     return {
-            //         status: true,
-            //         userRole: user.role,
-            //         user,
-            //         sekolahTenant
-            //     };
-            // }
+            await dispatch('checkAuth');
+            return data;
         } catch (error) {
-            alert('error');
             console.log(error);
-            // throw error.response?.data || error;
             throw error;
         }
     },
@@ -150,40 +117,40 @@ const actions = {
     },
 
     /*—— BOOTSTRAP di App.vue created() ——*/
-    async bootstrap({ commit }) {
-        try {
-            const data = await actions.me();
-            if (data.status) {
-                commit('SET_USER', data.user);
-                commit('SET_USER_ROLE', data.user.role);
-                commit('SET_SEKOLAH', data.sekolahTenant);
-            }
-            return true;
-        } catch (_) {
-            commit('RESET'); // clear user if not logged in
-            return false;
-        }
-    },
+    // async bootstrap({ commit }) {
+    //     try {
+    //         const data = await actions.me();
+    //         if (data.status) {
+    //             commit('SET_USER', data.user);
+    //             commit('SET_USER_ROLE', data.user.role);
+    //             commit('SET_SEKOLAH', data.sekolahTenant);
+    //         }
+    //         return true;
+    //     } catch (_) {
+    //         commit('RESET'); // clear user if not logged in
+    //         return false;
+    //     }
+    // },
     async logout({ commit }) {
         try {
-            // await api.post('/as/auth/web/logout');
-            localStorage.removeItem('accessToken');
+            await api.post('/as/auth/web/logout');
         } finally {
-            commit('CLEAR_AUTH');
+            commit('CLEAR_USER');
             commit('RESET');
         }
     },
+    // eslint-disable-next-line no-unused-vars
     async registerAdmin({ commit }, payload) {
         console.log(payload);
         try {
-            const response = await api.post('/as/auth/register', payload);
+            const response = await api.post('/as/auth:register', payload);
             console.log('authService/registerAdmin', response);
-            if (response.data.ok) {
-                commit('setToken', response.data.token);
-                // Simpan informasi pengguna setelah login
-                commit('SET_USER', response.data.user);
-                commit('SET_USER_ROLE', response.data.user.role);
-            }
+            // if (response.data.ok) {
+            //     commit('setToken', response.data.token);
+            //     // Simpan informasi pengguna setelah login
+            //     commit('SET_USER', response.data.user);
+            //     commit('SET_USER_ROLE', response.data.user.role);
+            // }
             // console.log('from Register:', response.data);
             return response.data;
         } catch (error) {
@@ -192,22 +159,18 @@ const actions = {
         }
     },
     // Fitur baru ceknpsn
+    // eslint-disable-next-line no-unused-vars
     async ceknpsn({ commit }, npsn) {
         // console.log(npsn);
         try {
-            const { data } = await api.get(`/as/sekolah`, {
+            const { data } = await api.get(`/as/sekolah-tenant/npsn`, {
                 params: {
                     npsn: npsn
                 }
             });
-            // console.log(data);
-            if (data.status) {
-                commit('SET_SEKOLAH', data.sekolahData);
-            }
             return data; // Mengembalikan data sekolah
         } catch (error) {
-            // console.log(error);
-            throw new Error('Sekolah tidak ditemukan', error);
+            throw new Error(`Sekolah tidak ditemukan, ${error}`);
         }
     },
     async getSekolahByID({ commit }, sekolahId) {
@@ -293,15 +256,15 @@ const actions = {
 const getters = {
     user: (state) => state.user,
     isAuthenticated: (state) => state.isAuthenticated,
-    isCheckingAuth: (state) => state.isCheckingAuth,
+    isCheckingAuth: (state) => state.isCheckingAuth
     // isAuthenticated: (state) => !!state.user,
-    userRole: (state) => state.userRole,
-    currentUser: (state) => state.user,
-    getSekolah: (state) => state.sekolah,
-    getUserProfile(state) {
-        const userData = { ...state.user, ...state.userProfile };
-        return userData;
-    }
+    // userRole: (state) => state.userRole,
+    // currentUser: (state) => state.user,
+    // getSekolah: (state) => state.sekolah,
+    // getUserProfile(state) {
+    //     const userData = { ...state.user, ...state.userProfile };
+    //     return userData;
+    // }
 };
 
 export default {

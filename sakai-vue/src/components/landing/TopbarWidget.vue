@@ -1,12 +1,12 @@
 <script setup>
 import router from '@/router';
 import { useAuth } from '@/views/pages/auth/composables/auth';
-import { onMounted, ref } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
 import LanguageSwitcher from '../LanguageSwitcher.vue';
 const store = useStore();
-const { user, currentUser } = useAuth();
+const { user } = useAuth();
 function smoothScroll(id) {
     document.body.click();
     const element = document.getElementById(id);
@@ -18,18 +18,15 @@ function smoothScroll(id) {
     }
 }
 const { t } = useI18n();
-const isAuthenticated = ref(false);
-onMounted(async () => {
-    isAuthenticated.value = await store.getters['authService/isAuthenticated'];
-});
+const isAuthenticated = computed(() => store.getters['authService/isAuthenticated']);
 
 const toDashboard = async () => {
     if (isAuthenticated.value) {
-        console.log(user);
+        console.log('topbarWidget', user);
         // cek role
-        switch (user) {
+        switch (user.role) {
             case 'admin':
-                router.push({ name: 'dashboard', params: { sekolah: (currentUser.value.asalSekolah || '').toLowerCase().replace(/\s+/g, '') } });
+                router.push({ name: 'dashboard', params: { sekolah: (user.sekolahAsal.namaSekolah || '').toLowerCase().replace(/\s+/g, '') } });
                 break;
             case 'superadmin':
                 router.push({ name: 'suDashboard' });

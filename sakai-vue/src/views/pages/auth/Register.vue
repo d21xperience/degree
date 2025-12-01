@@ -4,6 +4,7 @@ import { ref } from 'vue';
 // const store = useStore();
 
 import SekolahComponent from '@/components/sekolah_components/SekolahComponent.vue';
+import router from '@/router';
 import { isObject } from '@/utils/format';
 import { useAuth } from '@/views/pages/auth/composables/auth';
 const { cekSekolahByNPSN, onRegisterAdmin } = useAuth();
@@ -24,24 +25,37 @@ const resetSearchTerm = () => {
 };
 
 const cekSekolah = async () => {
-    statusSekolahTerdaftar.value = await cekSekolahByNPSN(searchTerm.value?.npsn);
-    if (!statusSekolahTerdaftar.value) {
-        // console.log(statusSekolahTerdaftar.value);
-        dialogInfo.value = true;
+    loading.value = true;
+    try {
+        statusSekolahTerdaftar.value = await cekSekolahByNPSN(searchTerm.value?.npsn);
+        if (!statusSekolahTerdaftar.value) {
+            // console.log(statusSekolahTerdaftar.value);
+            dialogInfo.value = true;
+        }
+    } catch (error) {
+        console.log(error);
+    } finally {
+        loading.value = false;
     }
 };
-
-// Fungsi handler submit form
+const errorMessage = ref('');
 const handleSubmit = async () => {
+    // 🔒 1. Cegah multiple submit
+    if (loading.value) return; // <-- tambahkan ini: early return jika sedang loading
+
     loading.value = true;
-    let dataReg = {
+
+    // 🧹 2. Reset error sebelumnya (opsional, untuk UI feedback)
+    errorMessage.value = null;
+
+    const dataReg = {
         user: {
-            username: '',
-            email: email.value,
+            email: email.value.trim(),
             password: password.value,
             role: 'admin'
+            // username di-generate di backend → tidak perlu kirim
         },
-        sekolah: {
+        sekolah: formatValues({
             nama_sekolah: searchTerm.value.nama_sekolah,
             npsn: searchTerm.value.npsn,
             enkrip_id: searchTerm.value.sekolah_id_enkrip,
@@ -52,34 +66,45 @@ const handleSubmit = async () => {
             kode_kab: searchTerm.value.kode_kab,
             kode_prop: searchTerm.value.kode_prop,
             alamat_jalan: searchTerm.value.alamat_jalan
-        }
+        })
     };
+
     try {
-        dataReg.sekolah = formatValues(dataReg.sekolah);
-        const response = await onRegisterAdmin(dataReg);
-        //     // console.log(response);
-        // Jika sukses, arahkan ke beranda
-        if (response.ok) {
-            // const result = response?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
-            // router.push({ name: 'dashboard', params: { sekolah: result } });
-            // await store.dispatch('sekolahService/fetchTahunAjaran');
-            // await store.dispatch('sekolahService/fetchSemester');
-            // const result = response?.sekolahTenant.namaSekolah.toLowerCase().replace(/\s+/g, '');
-            // await store.dispatch('sekolahService/fetchTabeltenant', response?.user.sekolahTenantId);
-            // await router.push({ name: 'dashboard', params: { sekolah: result } });
+        // ✅ 3. Tambahkan timeout (opsional, tapi direkomendasikan)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 detik
+
+        const response = await onRegisterAdmin(dataReg, { signal: controller.signal });
+        clearTimeout(timeoutId);
+
+        if (response.status) {
+            // 🎉 Sukses → redirect
+            router.push({
+                name: 'registerSuccess',
+                query: { from: 'register' } // opsional: untuk notifikasi di halaman sukses
+            });
+        } else {
+            throw new Error(response.message || 'Registrasi gagal');
         }
-        //     // success.value = 'Admin registered successfully!';
     } catch (error) {
-        //     errorDialog.value = true;
-        //     errorInfo.value = error?.message;
-        //     console.error(error);
-        //     // error.value = err.error || 'Registration failed';
+        // 🔍 4. Tangani error dengan baik
+        if (error.name === 'AbortError') {
+            errorMessage.value = 'Waktu permintaan habis. Coba lagi.';
+        } else if (error.code === 'ALREADY_EXISTS') {
+            errorMessage.value = 'Email atau sekolah sudah terdaftar.';
+        } else if (error.code === 'INVALID_ARGUMENT') {
+            errorMessage.value = 'Data tidak valid. Periksa kembali.';
+        } else {
+            errorMessage.value = 'Gagal mendaftar. Coba beberapa saat lagi.';
+        }
+
+        console.error('[Register] Error:', error);
     } finally {
-        loading.value = false;
+        loading.value = false; // <-- pastikan selalu reset loading
     }
-    // return { name, email, password, schoolName, register, error, success };
 };
 
+const disableButton = ref(false);
 // Fungsi untuk menghapus spasi dan konversi ke string
 const formatValues = (obj) => {
     return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, String(value).trim()]));
@@ -106,7 +131,7 @@ const formatValues = (obj) => {
                                 <SekolahComponent v-model:modelValue="searchTerm" />
                             </div>
                             <div>
-                                <Button label="Cek" class="w-24" :loading="loading" :disabled="!isObject(searchTerm)" @click="cekSekolah" />
+                                <Button label="Cek" class="w-24" :loading="loading" :disabled="!isObject(searchTerm) || loading == true" @click="cekSekolah" />
                             </div>
                         </div>
                     </div>
@@ -124,31 +149,38 @@ const formatValues = (obj) => {
             <div v-else class="flex flex-col items-center justify-center">
                 <!-- <h2>Register</h2> -->
                 <div class="w-full bg-surface-0 dark:bg-surface-900 py-20 px-8 sm:px-20" style="border-radius: 53px">
-                    <!-- <div class="text-center mb-8"> 
-                    </div> -->
-
-                    <!-- <div>
-                        <label for="sekolah" class="block text-surface-900 dark:text-surface-0 text-lg font-medium">Sekolah</label>
-                        <InputText id="sekolah" name="sekolah" type="text" placeholder="Masukan sekolah" class="w-full md:w-[30rem] mb-3" v-model="searchTerm.nama_sekolah" disabled />
-                        <label for="email1" class="block text-surface-900 dark:text-surface-0 text-lg font-medium">Email</label>
-                        <InputText id="email1" name="email1" type="text" placeholder="Masukan email" class="w-full md:w-[30rem] mb-3" v-model="email" />
-                        <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-lg">Password</label>
-                        <Password id="password1" v-model="password" placeholder="Password" :toggleMask="true" class="mb-4" fluid :feedback="false"></Password>
-                        <Button label="Sign Up" class="w-full" @click="handleSubmit" :loading="loading"></Button>
-                    </div> -->
-
                     <form @submit.prevent="handleSubmit">
                         <div>
                             <label for="sekolah" class="block text-surface-900 dark:text-surface-0 text-lg font-medium">Sekolah</label>
                             <InputText id="sekolah" v-model="searchTerm.nama_sekolah" name="sekolah" type="text" placeholder="Masukan sekolah" class="w-full md:w-[30rem] mb-3" disabled />
 
                             <label for="email1" class="block text-surface-900 dark:text-surface-0 text-lg font-medium">Email</label>
-                            <InputText id="email1" v-model="email" name="email1" type="email" placeholder="Masukan email" class="w-full md:w-[30rem] mb-3" />
+                            <InputText id="email1" v-model="email" name="email1" type="email" placeholder="Masukan email" class="w-full md:w-[30rem] mb-3" required />
 
                             <label for="password1" class="block text-surface-900 dark:text-surface-0 font-medium text-lg">Password</label>
-                            <Password id="password1" v-model="password" name="password1" placeholder="Password" :toggle-mask="true" class="mb-4" fluid :feedback="false" autocomplete="new-password" />
+                            <Password id="password1" v-model="password" name="password1" placeholder="Password" :toggle-mask="true" class="mb-4" fluid :feedback="false" autocomplete="new-password" required />
 
-                            <Button type="submit" label="Sign Up" class="w-full" :loading="loading" />
+                            <!--<Button type="submit" label="Sign Up" class="w-full" :loading="loading" />-->
+                            <button :disabled="disableButton" class="w-full bg-blue-500 p-2 text-white rounded-lg" :class="{ 'opacity-50 cursor-not-allowed': disableButton }" @click="handleSubmit">
+                                <span v-if="!loading">Daftar Sekarang</span>
+                                <span v-else>
+                                    <!-- <SpinnerIcon class="inline w-4 h-4 mr-2" /> -->
+                                    Sedang mendaftar...
+                                </span>
+                            </button>
+
+                            <!-- Tampilkan error (jika ada) -->
+                            <div v-if="errorMessage" class="mt-2 text-sm text-red-600">
+                                {{ errorMessage }}
+                            </div>
+                        </div>
+                        <div class="flex justify-between mt-6">
+                            <div class="flex justify-center flex-col">
+                                <RouterLink to="/" class="xs:text-[10px] text-blue-600 hover:underline">Ke halaman utama </RouterLink>
+                            </div>
+                            <div class="flex justify-center flex-col">
+                                <p class="">Sudah punya akun? <RouterLink :to="{ name: 'login' }" class="text-blue-600 font-semibold hover:underline ml-1">Login disini</RouterLink></p>
+                            </div>
                         </div>
                     </form>
                 </div>

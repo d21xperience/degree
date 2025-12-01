@@ -400,3 +400,74 @@ CREATE TRIGGER trg_move_ijazah_on_complete
 AFTER UPDATE ON {{schema_name}}.data_nominasi_sementara
 FOR EACH ROW
 EXECUTE FUNCTION {{schema_name}}.move_to_ijazah_when_complete();
+
+
+CREATE TABLE IF NOT EXISTS {{schema_name}}.semester (
+	semester_id CHAR(5) NOT NULL,
+	tahun_ajaran_id NUMERIC(4,0) NOT NULL,
+	nama VARCHAR(20) NOT NULL,
+	semester NUMERIC(1,0) NOT NULL,
+	periode_aktif NUMERIC(1,0) NOT NULL,
+	tanggal_mulai DATE NOT NULL,
+	tanggal_selesai DATE NOT NULL,
+	create_date TIMESTAMP NOT NULL DEFAULT '2019-09-10 14:29:59.238151',
+	last_update TIMESTAMP NOT NULL DEFAULT '2019-09-10 14:29:59.238151',
+	expired_date TIMESTAMP NULL DEFAULT NULL,
+	last_sync TIMESTAMP NOT NULL DEFAULT '1901-01-01 00:00:00',
+	PRIMARY KEY (semester_id),
+	CONSTRAINT FK_semester_tahun_ajaran FOREIGN KEY (tahun_ajaran_id) REFERENCES ref.tahun_ajaran (tahun_ajaran_id) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+DO $$
+DECLARE
+    current_year INTEGER := EXTRACT(YEAR FROM CURRENT_DATE);
+    active_year_ajaran INTEGER;
+BEGIN
+    -- Langsung set tahun ajaran aktif sesuai tahun berjalan
+    active_year_ajaran := current_year;
+    
+    -- Insert tahun ajaran baru (langsung tanpa cek)
+    INSERT INTO ref.tahun_ajaran 
+    ("tahun_ajaran_id", "nama", "periode_aktif", "tanggal_mulai", "tanggal_selesai", "create_date", "last_update") 
+    VALUES 
+    (
+        current_year,
+        current_year::TEXT || '/' || (current_year + 1)::TEXT,
+        1,  -- langsung set sebagai aktif
+        DATE(current_year::TEXT || '-07-01'),
+        DATE((current_year + 1)::TEXT || '-06-30'),
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    )
+    ON CONFLICT (tahun_ajaran_id) DO NOTHING;  -- Hindari duplikasi
+    
+    -- Insert 2 semester sekaligus (Ganjil dan Genap)
+    INSERT INTO {{schema_name}}.semester 
+    ("semester_id", "tahun_ajaran_id", "nama", "semester", "periode_aktif", "tanggal_mulai", "tanggal_selesai", "create_date", "last_update") 
+    VALUES 
+    (
+        current_year::TEXT || '1',  -- Semester Ganjil
+        current_year,
+        current_year::TEXT || '/' || (current_year + 1)::TEXT || ' Ganjil',
+        1,
+        CASE WHEN EXTRACT(MONTH FROM CURRENT_DATE) BETWEEN 7 AND 12 THEN 1 ELSE 0 END,  -- Aktif jika di semester ganjil
+        DATE(current_year::TEXT || '-07-01'),
+        DATE(current_year::TEXT || '-12-31'),
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    ),
+    (
+        current_year::TEXT || '2',  -- Semester Genap  
+        current_year,
+        current_year::TEXT || '/' || (current_year + 1)::TEXT || ' Genap',
+        2,
+        CASE WHEN EXTRACT(MONTH FROM CURRENT_DATE) BETWEEN 1 AND 6 THEN 1 ELSE 0 END,  -- Aktif jika di semester genap
+        DATE((current_year + 1)::TEXT || '-01-01'),
+        DATE((current_year + 1)::TEXT || '-06-30'),
+        CURRENT_TIMESTAMP,
+        CURRENT_TIMESTAMP
+    )
+    ON CONFLICT (semester_id) DO NOTHING;  -- Hindari duplikasi
+
+    RAISE NOTICE 'Berhasil insert tahun ajaran % dan 2 semester', current_year;
+END $$;

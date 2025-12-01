@@ -103,35 +103,3 @@ func LoadPublicKey() (*rsa.PublicKey, error) {
 	key, _ := jwt.ParseRSAPublicKeyFromPEM(data)
 	return key, nil
 }
-
-// func GenerateTokenRS256(priv any, user *models.User, sekolahTenant *models.SekolahTenant) (string, int64, error) {
-// 	now := time.Now().UTC()
-// 	exp := now.Add(2 * time.Hour)
-// 	claims := jwt.MapClaims{
-// 		"user_id":           user.ID, //fmt.Sprintf("%d", user.ID),
-// 		"roles":             []string{user.Role},
-// 		"exp":               exp.Unix(),
-// 		"username":          user.Username,
-// 		"asal_sekolah":      sekolahTenant.NamaSekolah,
-// 		"sekolah_tenant_id": sekolahTenant.ID,
-// 	}
-// 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-// 	s, err := t.SignedString(priv)
-// 	return s, exp.Unix(), err
-// }
-
-// func ParseToken(tokenStr string, pubKey *rsa.PublicKey) (*Claims, error) {
-// 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-// 		return pubKey, nil
-// 	})
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	claims, ok := token.Claims.(*Claims)
-// 	if !ok || !token.Valid {
-// 		return nil, errors.New("invalid token")
-// 	}
-
-// 	return claims, nil
-// }

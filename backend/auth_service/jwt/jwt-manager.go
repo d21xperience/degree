@@ -18,14 +18,14 @@ type Manager struct {
 	RefreshTokenExp time.Duration
 	Issuer          string
 	JwksURL         string
+	Kid             string
 }
 
 type Claims struct {
-	// UserID          int64  `json:"user_id"`
+	UserID          string `json:"user_id"`
+	Email           string `json:"email"`
 	Role            string `json:"role"`
-	Username        string `json:"username"`
-	AsalSekolah     string `json:"asal_sekolah"`
-	SekolahTenantId int32  `json:"sekolah_tenant_id"`
+	SekolahTenantId string `json:"sekolah_tenant_id"`
 	jwt.RegisteredClaims
 }
 
@@ -35,11 +35,10 @@ func NewManager() *Manager {
 	privateKey, err := loadPrivateKey(utils.GetEnv("JWT_PRIVATE_PATH", "./keys/private.pem"))
 	if err != nil {
 		panic("tidak dapat membaca private key " + err.Error())
-	}
-
-	publicKey, err := loadPublicKey(utils.GetEnv("JWT_PUBLIC_PATH", "./keys/public.pem"))
+	} 
+	publicKey, kid, err := ParseKeyFile(utils.GetEnv("JWT_PRIVATE_PATH", "./keys/private.pem"))
 	if err != nil {
-		panic("tidak dapat membaca public key " + err.Error())
+		panic(err)
 	}
 
 	return &Manager{
@@ -48,17 +47,20 @@ func NewManager() *Manager {
 		AccessTokenExp:  15 * time.Minute,
 		RefreshTokenExp: 7 * 24 * time.Hour,
 		Issuer:          "sc-app",
+		Kid:             kid,
 	}
 }
 
-func (m *Manager) GenerateTokens(user *models.User, sekolahTenant *models.SekolahTenant) (string, string, error) {
+func (m *Manager) GenerateTokens(user *models.User) (string, string, error) {
+	if m.Kid == "" {
+		return "", "", fmt.Errorf("KeyID is not configured")
+	}
 	// Access Token
 	accessClaims := Claims{
-		// UserID:          user.ID,
+		UserID:          fmt.Sprintf("%d", user.ID),
+		Email:           user.Email,
 		Role:            user.Role,
-		Username:        user.Username,
-		AsalSekolah:     sekolahTenant.NamaSekolah,
-		SekolahTenantId: sekolahTenant.ID,
+		SekolahTenantId: fmt.Sprintf("%d", user.SekolahTenantID),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(m.AccessTokenExp)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -68,6 +70,7 @@ func (m *Manager) GenerateTokens(user *models.User, sekolahTenant *models.Sekola
 	}
 
 	accessToken := jwt.NewWithClaims(jwt.SigningMethodRS256, accessClaims)
+	accessToken.Header["kid"] = m.Kid
 	accessTokenString, err := accessToken.SignedString(m.PrivateKey)
 	if err != nil {
 		return "", "", err
@@ -75,10 +78,10 @@ func (m *Manager) GenerateTokens(user *models.User, sekolahTenant *models.Sekola
 
 	// Refresh Token
 	refreshClaims := Claims{
+		UserID:          fmt.Sprintf("%d", user.ID),
+		Email:           user.Email,
 		Role:            user.Role,
-		Username:        user.Username,
-		AsalSekolah:     sekolahTenant.NamaSekolah,
-		SekolahTenantId: sekolahTenant.ID,
+		SekolahTenantId: fmt.Sprintf("%d", user.SekolahTenantID),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(m.RefreshTokenExp)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
@@ -88,6 +91,7 @@ func (m *Manager) GenerateTokens(user *models.User, sekolahTenant *models.Sekola
 	}
 
 	refreshToken := jwt.NewWithClaims(jwt.SigningMethodRS256, refreshClaims)
+	refreshToken.Header["kid"] = m.Kid
 	refreshTokenString, err := refreshToken.SignedString(m.PrivateKey)
 	if err != nil {
 		return "", "", err

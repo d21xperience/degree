@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"sekolah/services"
+	"sekolah/utils"
 	"sync"
 	"syscall"
 	"time"
@@ -17,21 +18,13 @@ import (
 )
 
 func StartServer() {
+	utils.LoadEnvFiles()
+
 	// Menggunakan environment variable untuk fleksibilitas
-	grpcHost := os.Getenv("GRPC_HOST")
-	if grpcHost == "" {
-		grpcHost = "localhost"
-	}
-
-	gRPCPort := os.Getenv("GRPC_PORT")
-	if gRPCPort == "" {
-		gRPCPort = "50052"
-	}
-
-	httpPort := os.Getenv("HTTP_PORT")
-	if httpPort == "" {
-		httpPort = "8082"
-	}
+	grpcHost := utils.GetEnv("GRPC_HOST", "localhost")
+	gRPCPort := utils.GetEnv("GRPC_PORT", "50052")
+	httpPort := utils.GetEnv("HTTP_PORT", "8082")
+	jwksUrl := utils.GetEnv("JWKS_URL", "http://auth_service:8182/.well-known/jwks.json")
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -46,7 +39,7 @@ func StartServer() {
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}
-	grpcServer := RunGRPCServer()
+	grpcServer := RunGRPCServer(jwksUrl)
 	// HTTP Gateway
 	// =========================================
 	// Inisialisasi UploadServiceServer sebelum dipakai
@@ -60,7 +53,7 @@ func StartServer() {
 	method, pattern = createPattern("GET", "api", "v1", "ss", "download", "template")
 	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		UploadService.DownloadTemplateHTTP(w, r)
-	}) 
+	})
 	// Middleware CORS
 	corsHandler := corsMiddleware(mux)
 	// HTTP Server dengan Timeout

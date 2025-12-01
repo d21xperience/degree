@@ -3,7 +3,6 @@ package services
 import (
 	"auth_service/config"
 	pb "auth_service/generated"
-	"auth_service/models"
 	"auth_service/repositories"
 	"auth_service/utils"
 	"context"
@@ -15,20 +14,20 @@ import (
 
 type UserProfileServiceServer struct {
 	pb.UnimplementedUserProfileServiceServer
-	repo repositories.GenericRepository[models.UserProfile]
+	repo repositories.UserProfileRepository
 }
 
 func NewUserProfileServiceServer() *UserProfileServiceServer {
 	repoUserProfile := repositories.NewUserProfileRepository(config.DB)
 	return &UserProfileServiceServer{
-		repo: *repoUserProfile,
+		repo: repoUserProfile,
 	}
 }
 
 // GetProfile - Mengambil profil pengguna berdasarkan UserID
 func (s *UserProfileServiceServer) GetProfile(ctx context.Context, req *pb.GetProfileRequest) (*pb.UserProfile, error) {
 	userID := req.GetUserId()
-	profile, err := s.repo.FindByID(ctx, userID, "public", "user_id")
+	profile, err := s.repo.FindByID(userID)
 	if err != nil {
 		log.Printf("Error fetching user profile: %v", err)
 		return nil, status.Error(codes.NotFound, "failed to retrieve user profile")

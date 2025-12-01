@@ -11,19 +11,8 @@ import (
 )
 
 func RunHTTPGateway(ctx context.Context, gatewayMux *runtime.ServeMux, grpcServerEndpoint, httpPort string) {
-
-	// Gunakan insecure.NewCredentials() sebagai pengganti grpc.WithInsecure()
-	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())}
-	// opts := []grpc.DialOption{
-	// 	grpc.WithInsecure(),
-	// 	grpc.WithPerRPCCredentials(runtime.NewHeaderMatcher(func(key string) (string, bool) {
-	// 		if strings.ToLower(key) == "authorization" {
-	// 			return key, true
-	// 		}
-	// 		return key, false
-	// 	})),
-	// }
-	// Register gRPC-Gateway handlers
+ 
+	opts := []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())} 
 	err := pb.RegisterAuthServiceHandlerFromEndpoint(ctx, gatewayMux, grpcServerEndpoint, opts)
 	if err != nil {
 		log.Fatalf("Failed to register Auth service gRPC Gateway: %v", err)
@@ -34,6 +23,11 @@ func RunHTTPGateway(ctx context.Context, gatewayMux *runtime.ServeMux, grpcServe
 		log.Fatalf("Failed to register User service gRPC Gateway: %v", err)
 	}
 	err = pb.RegisterUserProfileServiceHandlerFromEndpoint(ctx, gatewayMux, grpcServerEndpoint, opts)
+	if err != nil {
+		log.Fatalf("Failed to register User profile service gRPC Gateway: %v", err)
+	}
+
+	err = pb.RegisterSekolahTenantServiceHandlerFromEndpoint(ctx, gatewayMux, grpcServerEndpoint, opts)
 	if err != nil {
 		log.Fatalf("Failed to register User profile service gRPC Gateway: %v", err)
 	}

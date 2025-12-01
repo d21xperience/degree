@@ -17,6 +17,12 @@ const mutations = {
 };
 
 const actions = {
+    /**
+     *
+     * @param {any} param0 commit
+     * @param {String} payload payload
+     * @returns
+     */
     async fetchKurikulum({ commit }, payload) {
         try {
             const { data } = await api.get('ss/ref/kurikulum', {
@@ -31,7 +37,7 @@ const actions = {
         } catch (error) {
             // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
             console.error('Gagal mendapatkan kurikulum:', error);
-            throw new Error(`Gagal mendapatkan data: ${error}`);
+            throw new Error(error.message);
         }
     }
 

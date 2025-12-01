@@ -10,11 +10,9 @@ import (
 
 var UploadService *services.UploadServiceServer
 
-func RunGRPCServer() *grpc.Server {
-	urlJwks := "http://localhost:8182/.well-known/jwks.json"
-
+func RunGRPCServer(jwksUrl string) *grpc.Server {
 	grpcServer := grpc.NewServer(
-		grpc.UnaryInterceptor(interceptor.JWTInterceptor(urlJwks)),
+		grpc.UnaryInterceptor(interceptor.JWTInterceptor(jwksUrl)),
 	)
 
 	sekolahService := services.NewSekolahService()

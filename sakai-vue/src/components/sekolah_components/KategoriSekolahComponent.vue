@@ -9,7 +9,7 @@ import TingkatComponent from './TingkatComponent.vue';
 
 // Services and composables
 const { kurikulumList } = useFormOptions();
-const { initSelectedSemester } = useSemester();
+const { selectedSemester } = useSemester();
 const { fetchKategoriSekolah, createKategoriSekolah, deleteKategoriSekolahKurikulum, createProsesKategoriSekolahDanKelas, updateKategoriSekolah, kategoriSekolahList, kategoriSekolahTabel } = useKategoriSekolah();
 const { fetchSekolah, fetchTingkat } = useSekolah();
 // Data
@@ -40,16 +40,20 @@ const formState = reactive({
     submitButtonText: 'Tambah'
 });
 
+const errorDialog = ref(false);
 const messageDelete = ref('');
-const tahunAjaran = ref(`${initSelectedSemester.value?.tahunAjaranId}/${initSelectedSemester.value?.tahunAjaranId + 1}`);
+const tahunAjaran = ref(`${selectedSemester.value?.tahunAjaranId ?? 0}/${(selectedSemester.value?.tahunAjaranId ?? 0) + 1}`);
 // Initialize component
+const errorMessage = ref('');
 const initComponent = async () => {
     try {
         await fetchKategoriSekolah();
         // console.log(kategoriSekolahList.value);
         // kategoriSekolahTabel.value = kategoriSekolahTabel.value;
     } catch (error) {
-        console.error('Initialization error:', error);
+        errorDialog.value = true;
+        errorMessage.value = error;
+        // console.error('Initialization error:', error);
         // Handle error (show toast/notification)
     }
 };
@@ -58,7 +62,7 @@ const currentKategori = reactive({
     program_keahlian: null,
     jurusan: null,
     jumlah: 0,
-    tahun_ajaran_id: initSelectedSemester.value?.tahunAjaranId || '',
+    tahun_ajaran_id: selectedSemester.value?.tahunAjaranId || '',
     tingkat_id: ''
 });
 // Watch for edit mode changes
@@ -100,7 +104,7 @@ const openAddDialog = () => {
         program_keahlian: null,
         jurusan: null,
         jumlah: 0,
-        tahun_ajaran_id: initSelectedSemester.value?.tahunAjaranId || '',
+        tahun_ajaran_id: selectedSemester.value?.tahunAjaranId || '',
         tingkat_id: ''
     });
 };
@@ -120,7 +124,7 @@ const addKategoriSekolah = async () => {
             nama_bidang_keahlian: currentKategori.bidang_keahlian?.namaJurusan || '',
             nama_program_keahlian: currentKategori.program_keahlian?.namaJurusan || '',
             jenjang_pendidikan_id: formState.selectedKurikulum.jenjangPendidikanId,
-            tahun_ajaran_id: initSelectedSemester.value?.tahunAjaranId,
+            tahun_ajaran_id: selectedSemester.value?.tahunAjaranId,
             jumlah: 0
         };
         await createKategoriSekolah(newKategori);
@@ -254,7 +258,7 @@ const addProsesKurikulum = () => {
     createProsesKategoriSekolahDanKelas();
 };
 // Lifecycle
-watch(initSelectedSemester, () => {
+watch(selectedSemester, () => {
     initComponent();
 });
 onMounted(async () => {
@@ -262,60 +266,74 @@ onMounted(async () => {
     tingkat.value = await fetchTingkat();
     initComponent();
 });
+
+const isError = ref(false);
 </script>
 
 <template>
     <div class="kategori-sekolah-container">
+        <div v-if="!isError" class="flex flex-col items-center justify-center p-6 bg-blue-50 border border-blue-200 rounded-lg shadow-sm text-center max-w-md mx-auto">
+            <!-- <div class="mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-blue-500 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div> -->
+            <p class="text-gray-700 mb-4">Data tidak ditemukan, <strong>Klik tambah untuk menambahkan</strong>.</p>
+            <Button label="Tambah" />
+        </div>
         <!-- Header Section -->
-        <div class="flex justify-between mb-4">
-            <div>
-                <Button v-show="isEditKategoriSekolah" v-tooltip.bottom="`Tambah kompetensi`" label="Tambah" icon="pi pi-plus" size="small" @click="openAddDialog" />
+        <div v-else>
+            <div class="flex justify-between mb-4">
+                <div>
+                    <Button v-show="isEditKategoriSekolah" v-tooltip.bottom="`Tambah kompetensi`" label="Tambah" icon="pi pi-plus" size="small" class="rounded-full" @click="openAddDialog" />
+                </div>
+                <div>
+                    <Button v-tooltip.bottom="'Edit kategori'" icon="pi pi-pencil" severity="secondary" :loading="isLoadingEditKategoriSekolah" @click="isEditKategoriSekolah = !isEditKategoriSekolah" />
+                </div>
             </div>
-            <div>
-                <Button v-tooltip.bottom="'Edit kategori'" icon="pi pi-pencil" severity="secondary" :loading="isLoadingEditKategoriSekolah" @click="isEditKategoriSekolah = !isEditKategoriSekolah" />
+
+            <!-- Main Table -->
+            <div class="grid grid-cols-1 gap-4">
+                <DataTable v-model:expandedRows="expandedRows" :value="kategoriSekolahTabel" data-key="kurikulum_id" striped-rows>
+                    <Column expander style="width: 2rem" />
+                    <Column header="No" style="width: 2rem">
+                        <template #body="slotProps">
+                            {{ slotProps.index + 1 }}
+                        </template>
+                    </Column>
+                    <Column header="Kurikulum" field="nama_kurikulum" style="width: 20rem" />
+                    <Column header="Jurusan" field="nama_jurusan" />
+                    <Column header="Total Kelas" field="total_kelas" />
+                    <Column header="Tahun Ajaran" field="tahun_ajaran_id" />
+                    <Column header="Aksi" :hidden="!isEditKategoriSekolah">
+                        <template #body="slotProps">
+                            <Button v-tooltip.bottom="'Hapus kompetensi'" icon="pi pi-trash" class="mr-2 !text-sm" severity="danger" size="small" rounded @click="handleDeleteKategoriSekolah(slotProps.data)" />
+                            <Button v-tooltip.bottom="'Tambah kelas'" icon="pi pi-plus" class="mr-2 !text-sm" severity="success" size="small" rounded @click="dialogAddKelas(slotProps.data)" />
+                        </template>
+                    </Column>
+
+                    <!-- Expanded Row Content -->
+                    <template #expansion="slotProps">
+                        <DataTable :value="slotProps.data.kategorikelas">
+                            <Column>
+                                <!-- {{ slotProps.data }} -->
+                            </Column>
+                            <Column header="Kelas" field="tingkat_id" />
+                            <Column header="Jml.Kelas" field="jumlah" />
+                            <Column header="Aksi" :hidden="!isEditKategoriSekolah">
+                                <!-- eslint-disable-next-line vue/no-template-shadow -->
+                                <template #body="slotProps">
+                                    <Button v-tooltip.bottom="'Hapus kelas'" icon="pi pi-trash" class="mr-2 !text-sm" severity="danger" size="small" rounded @click="handleDeleteKategoriKelas(slotProps.data)" />
+                                    <Button v-tooltip.bottom="'Edit kelas'" icon="pi pi-pencil" class="mr-2 !text-sm" severity="warn" size="small" rounded @click="dialogEditKelas(slotProps.data)" />
+                                </template>
+                            </Column>
+                        </DataTable>
+                    </template>
+                </DataTable>
             </div>
-        </div>
-
-        <!-- Main Table -->
-        <div class="grid grid-cols-1 gap-4">
-            <DataTable v-model:expandedRows="expandedRows" :value="kategoriSekolahTabel" data-key="kurikulum_id" striped-rows>
-                <Column expander style="width: 2rem" />
-                <Column header="No" style="width: 2rem">
-                    <template #body="slotProps">
-                        {{ slotProps.index + 1 }}
-                    </template>
-                </Column>
-                <Column header="Kurikulum" field="nama_kurikulum" style="width: 20rem" />
-                <Column header="Jurusan" field="nama_jurusan" />
-                <Column header="Total Kelas" field="total_kelas" />
-                <Column header="Tahun Ajaran" field="tahun_ajaran_id" />
-                <Column header="Aksi" :hidden="!isEditKategoriSekolah">
-                    <template #body="slotProps">
-                        <Button v-tooltip.bottom="'Hapus kompetensi'" icon="pi pi-trash" class="mr-2 !text-sm" severity="danger" size="small" rounded @click="handleDeleteKategoriSekolah(slotProps.data)" />
-                        <Button v-tooltip.bottom="'Tambah kelas'" icon="pi pi-plus" class="mr-2 !text-sm" severity="success" size="small" rounded @click="dialogAddKelas(slotProps.data)" />
-                    </template>
-                </Column>
-
-                <!-- Expanded Row Content -->
-                <template #expansion="slotProps">
-                    <DataTable :value="slotProps.data.kategorikelas">
-                        <Column>
-                            <!-- {{ slotProps.data }} -->
-                        </Column>
-                        <Column header="Kelas" field="tingkat_id" />
-                        <Column header="Jml.Kelas" field="jumlah" />
-                        <Column header="Aksi" :hidden="!isEditKategoriSekolah">
-                            <template #body="slotProps">
-                                <Button v-tooltip.bottom="'Hapus kelas'" icon="pi pi-trash" class="mr-2 !text-sm" severity="danger" size="small" rounded @click="handleDeleteKategoriKelas(slotProps.data)" />
-                                <Button v-tooltip.bottom="'Edit kelas'" icon="pi pi-pencil" class="mr-2 !text-sm" severity="warn" size="small" rounded @click="dialogEditKelas(slotProps.data)" />
-                            </template>
-                        </Column>
-                    </DataTable>
-                </template>
-            </DataTable>
-        </div>
-        <div class="flex justify-end mt-10">
-            <Button v-show="isEditKategoriSekolah" icon="pi pi-process" label="Proses kurikulum" severity="danger" @click="dialogProsesKurikulum" />
+            <div class="flex justify-end mt-10">
+                <Button v-show="isEditKategoriSekolah" icon="pi pi-process" label="Proses kurikulum" severity="danger" @click="dialogProsesKurikulum" />
+            </div>
         </div>
         <!-- Add Kategori Sekolah Dialog -->
         <Dialog v-model:visible="isDialogVisible.addKategoriSekolah" style="width: 550px" :header="formState.title" :modal="true">
@@ -372,5 +390,8 @@ onMounted(async () => {
         <DialogConfirmDelete v-model:visible="isDialogVisible.deleteKategoriKelas" :message="messageDelete" @confirm="deleteKelas(selectedItemToDelete)" />
         <DialogConfirmDelete v-model:visible="isDialogVisible.prosesKurikulum" :message="messageDelete" @confirm="addProsesKurikulum(selectedItemToDelete)" />
         <!-- <Dialog :visible="true">"hello"</Dialog> -->
+        <Dialog v-model:visible="errorDialog" style="width: 550px" header="Error" :modal="true" position="top">
+            <div>{{ errorMessage }}</div>
+        </Dialog>
     </div>
 </template>

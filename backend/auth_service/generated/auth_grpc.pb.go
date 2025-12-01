@@ -38,7 +38,7 @@ type AuthServiceClient interface {
 	Register(ctx context.Context, in *RegisterRequest, opts ...grpc.CallOption) (*RegisterResponse, error)
 	RefreshToken(ctx context.Context, in *RefreshRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	GetPublicKey(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*PublicKeyResponse, error)
-	AuthMe(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*UserProfile, error)
+	AuthMe(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*User, error)
 }
 
 type authServiceClient struct {
@@ -89,9 +89,9 @@ func (c *authServiceClient) GetPublicKey(ctx context.Context, in *Empty, opts ..
 	return out, nil
 }
 
-func (c *authServiceClient) AuthMe(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*UserProfile, error) {
+func (c *authServiceClient) AuthMe(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*User, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(UserProfile)
+	out := new(User)
 	err := c.cc.Invoke(ctx, AuthService_AuthMe_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -111,7 +111,7 @@ type AuthServiceServer interface {
 	Register(context.Context, *RegisterRequest) (*RegisterResponse, error)
 	RefreshToken(context.Context, *RefreshRequest) (*LoginResponse, error)
 	GetPublicKey(context.Context, *Empty) (*PublicKeyResponse, error)
-	AuthMe(context.Context, *Empty) (*UserProfile, error)
+	AuthMe(context.Context, *Empty) (*User, error)
 	mustEmbedUnimplementedAuthServiceServer()
 }
 
@@ -134,7 +134,7 @@ func (UnimplementedAuthServiceServer) RefreshToken(context.Context, *RefreshRequ
 func (UnimplementedAuthServiceServer) GetPublicKey(context.Context, *Empty) (*PublicKeyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPublicKey not implemented")
 }
-func (UnimplementedAuthServiceServer) AuthMe(context.Context, *Empty) (*UserProfile, error) {
+func (UnimplementedAuthServiceServer) AuthMe(context.Context, *Empty) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AuthMe not implemented")
 }
 func (UnimplementedAuthServiceServer) mustEmbedUnimplementedAuthServiceServer() {}
@@ -836,185 +836,185 @@ var UserProfileService_ServiceDesc = grpc.ServiceDesc{
 }
 
 const (
-	SekolahService_GetSekolah_FullMethodName    = "/auth.SekolahService/GetSekolah"
-	SekolahService_ListSekolah_FullMethodName   = "/auth.SekolahService/ListSekolah"
-	SekolahService_SearchSekolah_FullMethodName = "/auth.SekolahService/SearchSekolah"
+	SekolahTenantService_GetSekolahTenant_FullMethodName    = "/auth.SekolahTenantService/GetSekolahTenant"
+	SekolahTenantService_ListSekolahTenant_FullMethodName   = "/auth.SekolahTenantService/ListSekolahTenant"
+	SekolahTenantService_SearchSekolahTenant_FullMethodName = "/auth.SekolahTenantService/SearchSekolahTenant"
 )
 
-// SekolahServiceClient is the client API for SekolahService service.
+// SekolahTenantServiceClient is the client API for SekolahTenantService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 //
 // ================================================
-// SEKOLAH SERVICE
+// SEKOLAH TENANT SERVICE
 // ================================================
-type SekolahServiceClient interface {
-	GetSekolah(ctx context.Context, in *GetSekolahRequest, opts ...grpc.CallOption) (*Sekolah, error)
-	ListSekolah(ctx context.Context, in *ListSekolahRequest, opts ...grpc.CallOption) (*ListSekolahResponse, error)
-	SearchSekolah(ctx context.Context, in *SearchSekolahRequest, opts ...grpc.CallOption) (*ListSekolahResponse, error)
+type SekolahTenantServiceClient interface {
+	GetSekolahTenant(ctx context.Context, in *GetSekolahTenantRequest, opts ...grpc.CallOption) (*SekolahTenant, error)
+	ListSekolahTenant(ctx context.Context, in *ListSekolahTenantRequest, opts ...grpc.CallOption) (*ListSekolahTenantResponse, error)
+	SearchSekolahTenant(ctx context.Context, in *SearchSekolahTenantRequest, opts ...grpc.CallOption) (*ListSekolahTenantResponse, error)
 }
 
-type sekolahServiceClient struct {
+type sekolahTenantServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewSekolahServiceClient(cc grpc.ClientConnInterface) SekolahServiceClient {
-	return &sekolahServiceClient{cc}
+func NewSekolahTenantServiceClient(cc grpc.ClientConnInterface) SekolahTenantServiceClient {
+	return &sekolahTenantServiceClient{cc}
 }
 
-func (c *sekolahServiceClient) GetSekolah(ctx context.Context, in *GetSekolahRequest, opts ...grpc.CallOption) (*Sekolah, error) {
+func (c *sekolahTenantServiceClient) GetSekolahTenant(ctx context.Context, in *GetSekolahTenantRequest, opts ...grpc.CallOption) (*SekolahTenant, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Sekolah)
-	err := c.cc.Invoke(ctx, SekolahService_GetSekolah_FullMethodName, in, out, cOpts...)
+	out := new(SekolahTenant)
+	err := c.cc.Invoke(ctx, SekolahTenantService_GetSekolahTenant_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *sekolahServiceClient) ListSekolah(ctx context.Context, in *ListSekolahRequest, opts ...grpc.CallOption) (*ListSekolahResponse, error) {
+func (c *sekolahTenantServiceClient) ListSekolahTenant(ctx context.Context, in *ListSekolahTenantRequest, opts ...grpc.CallOption) (*ListSekolahTenantResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListSekolahResponse)
-	err := c.cc.Invoke(ctx, SekolahService_ListSekolah_FullMethodName, in, out, cOpts...)
+	out := new(ListSekolahTenantResponse)
+	err := c.cc.Invoke(ctx, SekolahTenantService_ListSekolahTenant_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *sekolahServiceClient) SearchSekolah(ctx context.Context, in *SearchSekolahRequest, opts ...grpc.CallOption) (*ListSekolahResponse, error) {
+func (c *sekolahTenantServiceClient) SearchSekolahTenant(ctx context.Context, in *SearchSekolahTenantRequest, opts ...grpc.CallOption) (*ListSekolahTenantResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(ListSekolahResponse)
-	err := c.cc.Invoke(ctx, SekolahService_SearchSekolah_FullMethodName, in, out, cOpts...)
+	out := new(ListSekolahTenantResponse)
+	err := c.cc.Invoke(ctx, SekolahTenantService_SearchSekolahTenant_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// SekolahServiceServer is the server API for SekolahService service.
-// All implementations must embed UnimplementedSekolahServiceServer
+// SekolahTenantServiceServer is the server API for SekolahTenantService service.
+// All implementations must embed UnimplementedSekolahTenantServiceServer
 // for forward compatibility.
 //
 // ================================================
-// SEKOLAH SERVICE
+// SEKOLAH TENANT SERVICE
 // ================================================
-type SekolahServiceServer interface {
-	GetSekolah(context.Context, *GetSekolahRequest) (*Sekolah, error)
-	ListSekolah(context.Context, *ListSekolahRequest) (*ListSekolahResponse, error)
-	SearchSekolah(context.Context, *SearchSekolahRequest) (*ListSekolahResponse, error)
-	mustEmbedUnimplementedSekolahServiceServer()
+type SekolahTenantServiceServer interface {
+	GetSekolahTenant(context.Context, *GetSekolahTenantRequest) (*SekolahTenant, error)
+	ListSekolahTenant(context.Context, *ListSekolahTenantRequest) (*ListSekolahTenantResponse, error)
+	SearchSekolahTenant(context.Context, *SearchSekolahTenantRequest) (*ListSekolahTenantResponse, error)
+	mustEmbedUnimplementedSekolahTenantServiceServer()
 }
 
-// UnimplementedSekolahServiceServer must be embedded to have
+// UnimplementedSekolahTenantServiceServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedSekolahServiceServer struct{}
+type UnimplementedSekolahTenantServiceServer struct{}
 
-func (UnimplementedSekolahServiceServer) GetSekolah(context.Context, *GetSekolahRequest) (*Sekolah, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetSekolah not implemented")
+func (UnimplementedSekolahTenantServiceServer) GetSekolahTenant(context.Context, *GetSekolahTenantRequest) (*SekolahTenant, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSekolahTenant not implemented")
 }
-func (UnimplementedSekolahServiceServer) ListSekolah(context.Context, *ListSekolahRequest) (*ListSekolahResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListSekolah not implemented")
+func (UnimplementedSekolahTenantServiceServer) ListSekolahTenant(context.Context, *ListSekolahTenantRequest) (*ListSekolahTenantResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListSekolahTenant not implemented")
 }
-func (UnimplementedSekolahServiceServer) SearchSekolah(context.Context, *SearchSekolahRequest) (*ListSekolahResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SearchSekolah not implemented")
+func (UnimplementedSekolahTenantServiceServer) SearchSekolahTenant(context.Context, *SearchSekolahTenantRequest) (*ListSekolahTenantResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchSekolahTenant not implemented")
 }
-func (UnimplementedSekolahServiceServer) mustEmbedUnimplementedSekolahServiceServer() {}
-func (UnimplementedSekolahServiceServer) testEmbeddedByValue()                        {}
+func (UnimplementedSekolahTenantServiceServer) mustEmbedUnimplementedSekolahTenantServiceServer() {}
+func (UnimplementedSekolahTenantServiceServer) testEmbeddedByValue()                              {}
 
-// UnsafeSekolahServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to SekolahServiceServer will
+// UnsafeSekolahTenantServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to SekolahTenantServiceServer will
 // result in compilation errors.
-type UnsafeSekolahServiceServer interface {
-	mustEmbedUnimplementedSekolahServiceServer()
+type UnsafeSekolahTenantServiceServer interface {
+	mustEmbedUnimplementedSekolahTenantServiceServer()
 }
 
-func RegisterSekolahServiceServer(s grpc.ServiceRegistrar, srv SekolahServiceServer) {
-	// If the following call pancis, it indicates UnimplementedSekolahServiceServer was
+func RegisterSekolahTenantServiceServer(s grpc.ServiceRegistrar, srv SekolahTenantServiceServer) {
+	// If the following call pancis, it indicates UnimplementedSekolahTenantServiceServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&SekolahService_ServiceDesc, srv)
+	s.RegisterService(&SekolahTenantService_ServiceDesc, srv)
 }
 
-func _SekolahService_GetSekolah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetSekolahRequest)
+func _SekolahTenantService_GetSekolahTenant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSekolahTenantRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SekolahServiceServer).GetSekolah(ctx, in)
+		return srv.(SekolahTenantServiceServer).GetSekolahTenant(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SekolahService_GetSekolah_FullMethodName,
+		FullMethod: SekolahTenantService_GetSekolahTenant_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SekolahServiceServer).GetSekolah(ctx, req.(*GetSekolahRequest))
+		return srv.(SekolahTenantServiceServer).GetSekolahTenant(ctx, req.(*GetSekolahTenantRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SekolahService_ListSekolah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListSekolahRequest)
+func _SekolahTenantService_ListSekolahTenant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSekolahTenantRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SekolahServiceServer).ListSekolah(ctx, in)
+		return srv.(SekolahTenantServiceServer).ListSekolahTenant(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SekolahService_ListSekolah_FullMethodName,
+		FullMethod: SekolahTenantService_ListSekolahTenant_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SekolahServiceServer).ListSekolah(ctx, req.(*ListSekolahRequest))
+		return srv.(SekolahTenantServiceServer).ListSekolahTenant(ctx, req.(*ListSekolahTenantRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SekolahService_SearchSekolah_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SearchSekolahRequest)
+func _SekolahTenantService_SearchSekolahTenant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchSekolahTenantRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SekolahServiceServer).SearchSekolah(ctx, in)
+		return srv.(SekolahTenantServiceServer).SearchSekolahTenant(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: SekolahService_SearchSekolah_FullMethodName,
+		FullMethod: SekolahTenantService_SearchSekolahTenant_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SekolahServiceServer).SearchSekolah(ctx, req.(*SearchSekolahRequest))
+		return srv.(SekolahTenantServiceServer).SearchSekolahTenant(ctx, req.(*SearchSekolahTenantRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// SekolahService_ServiceDesc is the grpc.ServiceDesc for SekolahService service.
+// SekolahTenantService_ServiceDesc is the grpc.ServiceDesc for SekolahTenantService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var SekolahService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "auth.SekolahService",
-	HandlerType: (*SekolahServiceServer)(nil),
+var SekolahTenantService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "auth.SekolahTenantService",
+	HandlerType: (*SekolahTenantServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetSekolah",
-			Handler:    _SekolahService_GetSekolah_Handler,
+			MethodName: "GetSekolahTenant",
+			Handler:    _SekolahTenantService_GetSekolahTenant_Handler,
 		},
 		{
-			MethodName: "ListSekolah",
-			Handler:    _SekolahService_ListSekolah_Handler,
+			MethodName: "ListSekolahTenant",
+			Handler:    _SekolahTenantService_ListSekolahTenant_Handler,
 		},
 		{
-			MethodName: "SearchSekolah",
-			Handler:    _SekolahService_SearchSekolah_Handler,
+			MethodName: "SearchSekolahTenant",
+			Handler:    _SekolahTenantService_SearchSekolahTenant_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

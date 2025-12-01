@@ -71,7 +71,7 @@ function itemClick(event, item) {
 }
 
 function checkActiveRoute(item) {
-    console.log(item);
+    // console.log(item);
     return route.path === item.to;
 }
 </script>

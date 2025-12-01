@@ -15,6 +15,7 @@ type SekolahTenant struct {
 	KodeKab       *string    `gorm:"column:kode_kab;size:50"`
 	KodeProp      *string    `gorm:"column:kode_prop;size:50"`
 	AlamatJalan   *string    `gorm:"column:alamat_jalan;size:50"`
+	LogoUrl       *string    `gorm:"column:logo_url;size:50"`
 	CreatedAt     *time.Time `gorm:"column:created_at"`
 	UpdatedAt     *time.Time `gorm:"column:updated_at"`
 }

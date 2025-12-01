@@ -5,12 +5,13 @@ import { useSemester } from '@/composables/sekolah_composable/useSemester';
 import { useTableTenant } from '@/composables/sekolah_composable/useTableTenant';
 
 import { computed, onMounted, ref, watch } from 'vue';
-const { initSelectedSemester } = useSemester();
+const { selectedSemester } = useSemester();
 const { fetchBentukPendidikan, fetchJenjangPendidikan, fetchSekolah, fetchTingkat, updateSekolah } = useSekolah();
 const fetchRefTable = async () => {
     bentukPendidikan.value = await fetchBentukPendidikan(); //getBentukPendidikan();
+    // console.log(bentukPendidikan.value);
     jenjangPendidikan.value = await fetchJenjangPendidikan(); //getJenjangPendidikan();
-    console.log(jenjangPendidikan.value);
+    // console.log(jenjangPendidikan.value);
 };
 const { schemaname } = useTableTenant();
 // Evaluasi variabel di bawah ini:
@@ -33,7 +34,7 @@ onMounted(async () => {
     // const data = await fetchSekolah();
     // Object.assign(sekolah, data);
 });
-watch(initSelectedSemester, () => {
+watch(selectedSemester, () => {
     // console.log('update semester');
     initFirst();
 });
@@ -92,122 +93,157 @@ const updateData = async () => {
         isEdit.value = false;
     }
 };
+// INISIALISASI DATA YANG PERLU DISIAPKAN
+// const initial = () => {
+//     // CEK SEMESTER YANG SEDANG AKTIF
+// };
 </script>
 
 <template>
-    <div>
-        <div>
-            <div class="flex justify-between items-center mb-2">
-                <h5>Data Sekolah</h5>
-                <div>
-                    <Button v-tooltip.bottom="'Edit data sekolah'" icon="pi pi-pencil" :style="isEdit ? 'background-color:blue;border:none' : 'background-color:gray;border:none'" size="small" rounded="" @click="editSekolah" />
-                </div>
-            </div>
-            <div>
-                <div class="p-2">
-                    <div class="mb-4">
-                        <h3 class="text-lg font-semibold mb-2">Identitas</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>Nama</div>
-                            <div>{{ sekolah?.sekolah.nama }}</div>
-                            <div>Jenjang</div>
-                            <div>
-                                <div v-if="!isEdit">{{ sekolah?.jenjangPendidikanStr }}</div>
-                                <div v-else>
-                                    <Select v-model="selectedJenjangPendidikan" filter :options="jenjangPendidikanFiltered" option-label="nama" placeholder="Pilih jenjang pendidikan" fluid show-clear class="w-full md:w-56" />
-                                </div>
+    <div class="">
+        <Accordion :value="['']" multiple>
+            <AccordionPanel value="0">
+                <AccordionHeader>
+                    <h5>Informasi Sekolah</h5>
+                </AccordionHeader>
+                <AccordionContent>
+                    <div class="p-2">
+                        <div class="mb-4">
+                            <div class="flex justify-between">
+                                <h3 class="text-lg font-semibold mb-2">Identitas</h3>
+                                <Button v-tooltip.bottom="'Edit data sekolah'" icon="pi pi-pencil" :style="isEdit ? 'background-color:blue;border:none' : 'background-color:gray;border:none'" size="small" rounded="" @click="editSekolah" />
                             </div>
-                            <div>Bentuk Pendidikan</div>
-                            <div>
-                                <div v-if="!isEdit">{{ sekolah?.bentukPendidikanStr }}</div>
-                                <div v-else>
-                                    <Select v-model="selectedBentukPendidikan" :options="bentukPendidikan" filter option-label="nama" placeholder="Pilih bentuk pendidikan" fluid show-clear class="w-full md:w-56" />
-                                </div>
-                            </div>
-                            <div>NSS</div>
-                            <div>
-                                <div v-if="!isEdit">{{ sekolah?.sekolah.nss }}</div>
-                                <div v-else><InputText v-model="sekolah.sekolah.nss" type="text" placeholder="Masukan NSS" fluid /></div>
-                            </div>
-                            <div>NPSN</div>
-                            <div>{{ sekolah?.sekolah.npsn }}</div>
-                        </div>
-                    </div>
-                    <div class="my-10">
-                        <h3 class="text-lg font-semibold mb-2">Alamat</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>Jalan</div>
-                            <div>{{ sekolah?.sekolah.alamat }}</div>
-                            <div>Desa/Kelurahan</div>
-                            <div>
-                                <div v-if="!isEdit">{{ sekolah?.sekolah.kelurahan }}</div>
-                                <InputText v-else v-model="sekolah.sekolah.kelurahan" placeholder="Masukan nama Desa/Kelurahan" fluid />
-                            </div>
-                            <div>Kecamatan</div>
-                            <div>{{ sekolah?.sekolah.kecamatan }}</div>
-                            <div>Provinsi</div>
-                            <div>{{ sekolah?.sekolah.propinsi }}</div>
-                        </div>
-                    </div>
-                    <div class="mb-4">
-                        <h3 class="text-lg font-semibold mb-2">Kontak</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>Telp./Fax.</div>
-                            <div>
-                                <div v-if="!isEdit">{{ sekolah?.sekolah.telepon }}/{{ sekolah?.sekolah.telepon }}</div>
-                                <div v-else class="space-y-2">
-                                    Telp.
-                                    <InputText v-model="sekolah.sekolah.telepon" type="text" placeholder="Masukan no.tlp" fluid />
-                                    <div>
-                                        Fax.
-                                        <InputText v-model="sekolah.sekolah.fax" type="text" placeholder="Masukan no.fax" fluid />
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>Nama</div>
+                                <div>{{ sekolah?.sekolah.nama }}</div>
+                                <div>Jenjang</div>
+                                <div>
+                                    <div v-if="!isEdit">{{ sekolah?.jenjangPendidikanStr }}</div>
+                                    <div v-else>
+                                        <Select v-model="selectedJenjangPendidikan" filter :options="jenjangPendidikanFiltered" option-label="nama" placeholder="Pilih jenjang pendidikan" fluid show-clear class="w-full md:w-56" />
                                     </div>
                                 </div>
-                            </div>
-                            <div>email</div>
-                            <div>
-                                <div v-if="!isEdit">{{ sekolah?.sekolah.email }}</div>
-                                <div v-else><InputText v-model="sekolah.sekolah.email" type="text" placeholder="Masukan alamat email" fluid /></div>
-                            </div>
-                            <div>website</div>
-                            <div>
-                                <div v-if="!isEdit">
-                                    <a v-if="sekolah?.sekolah.website" :href="getWebsiteUrl(sekolah?.sekolah.website)" target="_blank" rel="noopener noreferrer" class="text-blue-700 underline">
-                                        {{ sekolah?.sekolah.website }}
-                                    </a>
+                                <div>Bentuk Pendidikan</div>
+                                <div>
+                                    <div v-if="!isEdit">{{ sekolah?.bentukPendidikanStr }}</div>
+                                    <div v-else>
+                                        <Select v-model="selectedBentukPendidikan" :options="bentukPendidikan" filter option-label="nama" placeholder="Pilih bentuk pendidikan" fluid show-clear class="w-full md:w-56" />
+                                    </div>
                                 </div>
-                                <div v-else><InputText v-model="sekolah.sekolah.website" type="text" placeholder="Masukan alamat website" fluid /></div>
+                                <div>NSS</div>
+                                <div>
+                                    <div v-if="!isEdit">{{ sekolah?.sekolah.nss }}</div>
+                                    <div v-else><InputText v-model="sekolah.sekolah.nss" type="text" placeholder="Masukan NSS" fluid /></div>
+                                </div>
+                                <div>NPSN</div>
+                                <div>{{ sekolah?.sekolah.npsn }}</div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <h3 class="text-lg font-semibold mb-2">Alamat</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>Jalan</div>
+                                <div>{{ sekolah?.sekolah.alamat }}</div>
+                                <div>Desa/Kelurahan</div>
+                                <div>
+                                    <div v-if="!isEdit">{{ sekolah?.sekolah.kelurahan }}</div>
+                                    <InputText v-else v-model="sekolah.sekolah.kelurahan" placeholder="Masukan nama Desa/Kelurahan" fluid />
+                                </div>
+                                <div>Kecamatan</div>
+                                <div>{{ sekolah?.sekolah.kecamatan }}</div>
+                                <div>Provinsi</div>
+                                <div>{{ sekolah?.sekolah.propinsi }}</div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <h3 class="text-lg font-semibold mb-2">Kontak</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>Telp./Fax.</div>
+                                <div>
+                                    <div v-if="!isEdit">{{ sekolah?.sekolah.telepon }}/{{ sekolah?.sekolah.telepon }}</div>
+                                    <div v-else class="space-y-2">
+                                        Telp.
+                                        <InputText v-model="sekolah.sekolah.telepon" type="text" placeholder="Masukan no.tlp" fluid />
+                                        <div>
+                                            Fax.
+                                            <InputText v-model="sekolah.sekolah.fax" type="text" placeholder="Masukan no.fax" fluid />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>email</div>
+                                <div>
+                                    <div v-if="!isEdit">{{ sekolah?.sekolah.email }}</div>
+                                    <div v-else><InputText v-model="sekolah.sekolah.email" type="text" placeholder="Masukan alamat email" fluid /></div>
+                                </div>
+                                <div>website</div>
+                                <div>
+                                    <div v-if="!isEdit">
+                                        <a v-if="sekolah?.sekolah.website" :href="getWebsiteUrl(sekolah?.sekolah.website)" target="_blank" rel="noopener noreferrer" class="text-blue-700 underline">
+                                            {{ sekolah?.sekolah.website }}
+                                        </a>
+                                    </div>
+                                    <div v-else><InputText v-model="sekolah.sekolah.website" type="text" placeholder="Masukan alamat website" fluid /></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <h3 class="text-lg font-semibold mb-2">Kepala Sekolah</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>Nama Kepsek</div>
+                                <div>
+                                    <div v-if="!isEdit">{{ sekolah.sekolah?.nmKepsek }}</div>
+                                    <div v-else><InputText v-model="sekolah.sekolah.nmKepsek" fluid name="nmKepsek" /></div>
+                                </div>
+                                <div>NIP Kepsek</div>
+                                <div>
+                                    <div v-if="!isEdit">{{ sekolah.sekolah?.nipKepsek }}</div>
+                                    <div v-else><InputText v-model="sekolah.sekolah.nipKepsek" fluid name="nipKepsek" /></div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="mb-4">
-                        <h3 class="text-lg font-semibold mb-2">Kepala Sekolah</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>Nama Kepsek</div>
-                            <div>
-                                <div v-if="!isEdit">{{ sekolah.sekolah?.nmKepsek }}</div>
-                                <div v-else><InputText v-model="sekolah.sekolah.nmKepsek" fluid name="nmKepsek" /></div>
-                            </div>
-                            <div>NIP Kepsek</div>
-                            <div>
-                                <div v-if="!isEdit">{{ sekolah.sekolah?.nipKepsek }}</div>
-                                <div v-else><InputText v-model="sekolah.sekolah.nipKepsek" fluid name="nipKepsek" /></div>
-                            </div>
-                        </div>
+                    <div v-show="isEdit" class="flex justify-end">
+                        <Button class="bg-blue-800 text-white px-4 py-2 rounded flex items-center" label="Update Data" icon="pi pi-save" :loading="loadingUpdate" @click="updateData" />
                     </div>
-                </div>
-                <div v-show="isEdit" class="flex justify-end">
-                    <Button class="bg-blue-800 text-white px-4 py-2 rounded flex items-center" label="Update Data" icon="pi pi-save" :loading="loadingUpdate" @click="updateData" />
-                </div>
-            </div>
-        </div>
-        <!-- Informasi sekolah -->
-        <div>
-            <div>
-                <h5>Kompetensi keahlian Dilayani</h5>
-                <KategoriSekolahComponent />
-            </div>
-        </div>
+                </AccordionContent>
+            </AccordionPanel>
+            <AccordionPanel value="1">
+                <AccordionHeader>
+                    <h5>Semester</h5>
+                </AccordionHeader>
+                <AccordionContent>
+                    <article class="p-2">
+                        <p class="mt-2">Web Service digunakan untuk mengsisi data dapodik melalui aplikasi yang bisa didownload pada web di bawah ini</p>
+                        <p>Untuk menggunakan aplikasi tersebut silahkan download aplikasi</p>
+                    </article>
+                    <!-- <KategoriSekolahComponent /> -->
+                </AccordionContent>
+            </AccordionPanel>
+            <!-- Informasi sekolah -->
+            <AccordionPanel value="2">
+                <AccordionHeader>
+                    <h5>Kompetensi keahlian Dilayani</h5>
+                </AccordionHeader>
+
+                <AccordionContent>
+                    <KategoriSekolahComponent />
+                </AccordionContent>
+            </AccordionPanel>
+
+            <AccordionPanel value="3">
+                <AccordionHeader>
+                    <h5>Web Service</h5>
+                    <!-- <Button v-tooltip.bottom="'Edit data sekolah'" icon="pi pi-pencil" :style="isEdit ? 'background-color:blue;border:none' : 'background-color:gray;border:none'" size="small" rounded="" @click="editSekolah" /> -->
+                </AccordionHeader>
+                <AccordionContent>
+                    <article class="p-2">
+                        <p class="mt-2">Web Service digunakan untuk mengsisi data dapodik melalui aplikasi yang bisa didownload pada web di bawah ini</p>
+                        <p>Untuk menggunakan aplikasi tersebut silahkan download aplikasi</p>
+                    </article>
+                    <!-- <KategoriSekolahComponent /> -->
+                </AccordionContent>
+            </AccordionPanel>
+        </Accordion>
     </div>
 </template>
 

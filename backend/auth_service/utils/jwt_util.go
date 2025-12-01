@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"auth_service/jwks"
-	"auth_service/models"
 	"context"
 	"crypto/rsa"
 	"encoding/hex"
@@ -10,13 +8,10 @@ import (
 	"os"
 	"slices"
 	"strings"
-	"time"
 
 	// "github.com/dgrijalva/jwt-go"
 	"github.com/golang-jwt/jwt/v5"
-	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/status"
 )
 
 type Claims struct {
@@ -110,23 +105,23 @@ func LoadPublicKey() (*rsa.PublicKey, error) {
 	return key, nil
 }
 
-func GenerateTokenRS256(priv any, user *models.User, sekolahTenant *models.SekolahTenant) (string, int64, error) {
-	kid, err := jwks.LoadKID("keys/jwks.json")
-	if err != nil {
-		return "", 0, status.Errorf(codes.Internal, "cannot load KID: %v", err)
-	}
-	now := time.Now().UTC()
-	exp := now.Add(2 * time.Hour)
-	claims := jwt.MapClaims{
-		"user_id":           user.ID, //fmt.Sprintf("%d", user.ID),
-		"roles":             []string{user.Role},
-		"exp":               exp.Unix(),
-		"username":          user.Username,
-		"asal_sekolah":      sekolahTenant.NamaSekolah,
-		"sekolah_tenant_id": sekolahTenant.ID,
-	}
-	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
-	t.Header["kid"] = kid
-	s, err := t.SignedString(priv)
-	return s, exp.Unix(), err
-}
+// func GenerateTokenRS256(priv any, user *models.User, sekolahTenant *models.SekolahTenant) (string, int64, error) {
+// 	kid, err := jwks.LoadKID("keys/jwks.json")
+// 	if err != nil {
+// 		return "", 0, status.Errorf(codes.Internal, "cannot load KID: %v", err)
+// 	}
+// 	now := time.Now().UTC()
+// 	exp := now.Add(2 * time.Hour)
+// 	claims := jwt.MapClaims{
+// 		"user_id":           user.ID, //fmt.Sprintf("%d", user.ID),
+// 		"roles":             []string{user.Role},
+// 		"exp":               exp.Unix(),
+// 		"username":          user.Username,
+// 		"asal_sekolah":      sekolahTenant.NamaSekolah,
+// 		"sekolah_tenant_id": sekolahTenant.ID,
+// 	}
+// 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
+// 	t.Header["kid"] = kid
+// 	s, err := t.SignedString(priv)
+// 	return s, exp.Unix(), err
+// }

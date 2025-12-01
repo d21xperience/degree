@@ -21,11 +21,6 @@ api.interceptors.request.use(
 api.interceptors.response.use(
     (res) => res,
     async (error) => {
-        // if (error.response?.status === 401) {
-        //     // Trigger logout global (via event bus atau store action)
-        //     window.dispatchEvent(new CustomEvent('unauthorized'));
-        // }
-        // return Promise.reject(error);
         const { status } = error.response || {};
         const router = window.$router;
         if (status === 401 || status === 403) {

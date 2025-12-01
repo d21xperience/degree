@@ -31,7 +31,7 @@ const kurikulumHandleKeydown = (event) => {
     }
 };
 onMounted(async () => {
-    await fetchKurikulum();
+    await fetchKurikulum(13);
 });
 </script>
 <template>
