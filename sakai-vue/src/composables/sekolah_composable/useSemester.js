@@ -2,7 +2,7 @@ import { computed, getCurrentInstance, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useTableTenant } from './useTableTenant';
 export function useSemester({ autoload = true } = {}) {
-    const { schemaname } = useTableTenant();
+    const { schemaname, fetchTabelTenant } = useTableTenant({ autoload: false });
     if (import.meta.env.DEV && !getCurrentInstance()) {
         console.error('[useSemester] Error: Composable ini harus dipanggil di dalam setup() atau <script setup>.');
     }
@@ -75,7 +75,15 @@ export function useSemester({ autoload = true } = {}) {
 
     const fetchSemester = async () => {
         try {
-            console.log('dipanggil dari useSemester', schemaname.value);
+            // ✅ Validasi dependensi
+            if (!schemaname.value) {
+                await fetchTabelTenant();
+                // throw new Error('Schema name belum tersedia — pastikan useTableTenant sudah diinisialisasi');
+            }
+            // if (schemaname.value === '') {
+            //     throw new Error('Schema name kosong — kemungkinan data tenant tidak valid');
+            // }
+            // console.log('dipanggil dari useSemester', schemaname.value);
             const result = await store.dispatch('semesterService/fetchSemester', schemaname.value);
             if (!result?.status) throw new Error(result?.message || 'Fetch semester failed');
             return result.semester;

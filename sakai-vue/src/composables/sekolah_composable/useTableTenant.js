@@ -14,8 +14,10 @@ export function useTableTenant({ autoload = true } = {}) {
         if (cached) return cached;
 
         const tenantId = store.getters['authService/user'].sekolahAsal.id;
-        console.log('tenant Id', tenantId);
-        return await store.dispatch('sekolahService/fetchTabeltenant', tenantId);
+        const res = await store.dispatch('sekolahService/fetchTabeltenant', tenantId);
+        console.log('fetchTableTenant', res);
+        return res;
+        // return await store.dispatch('sekolahService/fetchTabeltenant', tenantId);
     };
 
     const initialize = async () => {

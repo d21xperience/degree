@@ -78,6 +78,8 @@ const actions = {
             // Jika 401 atau error jaringan → anggap tidak login
             commit('CLEAR_USER');
             commit('RESET');
+            commit('sekolahService/resetState', null, { root: true });
+            commit('semesterService/resetState', null, { root: true });
         } finally {
             commit('SET_CHECKING', false);
         }
@@ -137,41 +139,24 @@ const actions = {
         } finally {
             commit('CLEAR_USER');
             commit('RESET');
+            commit('sekolahService/resetState', null, { root: true });
+            commit('semesterService/resetState', null, { root: true });
         }
     },
     // eslint-disable-next-line no-unused-vars
     async registerAdmin({ commit }, payload) {
-        console.log(payload);
-        try {
-            const response = await api.post('/as/auth:register', payload);
-            console.log('authService/registerAdmin', response);
-            // if (response.data.ok) {
-            //     commit('setToken', response.data.token);
-            //     // Simpan informasi pengguna setelah login
-            //     commit('SET_USER', response.data.user);
-            //     commit('SET_USER_ROLE', response.data.user.role);
-            // }
-            // console.log('from Register:', response.data);
-            return response.data;
-        } catch (error) {
-            console.log(error);
-            throw error.response.data;
-        }
+        const response = await api.post('/as/auth:register', payload);
+        return response.data;
     },
     // Fitur baru ceknpsn
     // eslint-disable-next-line no-unused-vars
     async ceknpsn({ commit }, npsn) {
-        // console.log(npsn);
-        try {
-            const { data } = await api.get(`/as/sekolah-tenant/npsn`, {
-                params: {
-                    npsn: npsn
-                }
-            });
-            return data; // Mengembalikan data sekolah
-        } catch (error) {
-            throw new Error(`Sekolah tidak ditemukan, ${error}`);
-        }
+        const { data } = await api.get(`/as/sekolah-tenant/npsn`, {
+            params: {
+                npsn: npsn
+            }
+        });
+        return data; // Mengembalikan data sekolah
     },
     async getSekolahByID({ commit }, sekolahId) {
         try {

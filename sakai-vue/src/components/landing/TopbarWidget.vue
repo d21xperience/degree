@@ -26,7 +26,8 @@ const toDashboard = async () => {
         // cek role
         switch (user.role) {
             case 'admin':
-                router.push({ name: 'dashboard', params: { sekolah: (user.sekolahAsal.namaSekolah || '').toLowerCase().replace(/\s+/g, '') } });
+                router.push({ name: 'dashboard', params: { sekolah: user.sekolahSlug } });
+                // router.push({ name: 'dashboard', params: { sekolah: (user.sekolahAsal.namaSekolah || '').toLowerCase().replace(/\s+/g, '') } });
                 break;
             case 'superadmin':
                 router.push({ name: 'suDashboard' });
@@ -62,7 +63,7 @@ const toDashboard = async () => {
     <Button v-styleclass="{ selector: '@next', enterFromClass: 'hidden', enterActiveClass: 'animate-scalein', leaveToClass: 'hidden', leaveActiveClass: 'animate-fadeout', hideOnOutsideClick: true }" class="lg:!hidden" text severity="success" rounded>
         <i class="pi pi-bars !text-2xl"></i>
     </Button>
-    <div class="items-center bg-white grow justify-between hidden lg:flex absolute lg:static w-full left-0 top-full px-12 lg:px-0 z-20 rounded-border">
+    <div class="items-center bg-white lg:bg-transparent grow justify-between hidden lg:flex absolute lg:static w-full left-0 top-full px-12 lg:px-0 z-20 rounded-border">
         <ul class="list-none p-0 m-0 flex lg:items-center select-none flex-col lg:flex-row cursor-pointer gap-8">
             <li>
                 <a class="px-0 py-4 dark:text-surface-0 font-medium text-xl text-primary" @click="smoothScroll('hero')">
@@ -95,9 +96,10 @@ const toDashboard = async () => {
                 </a>
             </li>
         </ul>
-        <div class="flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
+        <div class="lg:flex border-t lg:border-t-0 border-surface py-4 lg:py-0 mt-4 lg:mt-0 gap-2">
             <div v-if="!isAuthenticated">
                 <Button label="Login" text as="router-link" to="/auth/login" rounded class="mr-2" />
+
                 <Button label="Register" as="router-link" to="/auth/register" rounded />
             </div>
             <div v-else>

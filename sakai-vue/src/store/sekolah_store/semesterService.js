@@ -5,8 +5,8 @@ import api from '../api';
 // ================================================
 const state = {
     selectedTahunAjaran: JSON.parse(localStorage.getItem('selectedTahunAjaran')) || [],
-    tabelSemester: JSON.parse(localStorage.getItem('tabelSemester')) || null,
     selectedSemester: JSON.parse(localStorage.getItem('selectedSemester')) || null,
+    tabelSemester: JSON.parse(localStorage.getItem('tabelSemester')) || null,
     tabelTahunAjaran: JSON.parse(localStorage.getItem('tabelTahunAjaran')) || []
 };
 const mutations = {
@@ -26,30 +26,40 @@ const mutations = {
         state.selectedTahunAjaran = value;
         localStorage.setItem('selectedTahunAjaran', JSON.stringify(value));
     },
-    RESET_STATE(state) {
-        state.tabelSemester = null;
+    resetState(state) {
+        state.selectedTahunAjaran = null;
         state.selectedSemester = null;
-        state.tabelTahunAjaran = [];
+        state.tabelSemester = null;
+        state.tabelTahunAjaran = null;
     }
 };
 const actions = {
     async fetchSemester({ commit }, schemaname = 'ref') {
         try {
-            const { data, status } = await api.get(`ss/semester`, {
+            const { data } = await api.get(`ss/semester`, {
                 params: {
                     schemaname: schemaname
                 }
             });
-            if (status) {
-                const selectedSemester = data.semester.find((item) => item.periodeAktif === 1)?.semesterId;
-                const selectedTahunAjaran = [...new Set(data.semester.filter((item) => item.periodeAktif === 1).map((item) => item.tahunAjaranId))];
-                commit('SET_SELECTEDSEMESTER', selectedSemester);
-                commit('SET_SELECTEDTAHUNAJARAN', selectedTahunAjaran);
 
-                const listTahunAjaran = [...new Set(data.semester.map((item) => item.tahunAjaranId))];
-                commit('SET_TABELSEMESTER', data.semester);
-                commit('SET_TABELTAHUNAJARAN', listTahunAjaran);
-            }
+            // const selectedSemester = data.semester.find((item) => item.periodeAktif === 1)?.semesterId;
+            // const selectedTahunAjaran = [
+            //     ...new Set(
+            //         data.semester
+            //             .filter((item) => item.periodeAktif === 1)
+            //             .map((item) => {
+            //                 item.tahunAjaranId;
+            //             })
+            //     )
+            // ];
+            // commit('SET_SELECTEDSEMESTER', selectedSemester);
+            // commit('SET_SELECTEDTAHUNAJARAN', selectedTahunAjaran);
+
+            const listTahunAjaran = [...new Set(data.semester.map((item) => item.tahunAjaranId))].map((id) => ({ tahunAjaranId: id }));
+
+            commit('SET_TABELSEMESTER', data.semester);
+            commit('SET_TABELTAHUNAJARAN', listTahunAjaran);
+
             return data;
         } catch (error) {
             console.log(error);
@@ -94,15 +104,15 @@ const actions = {
     // ================================================
     async fetchTahunAjaran({ commit }, tahun_ajaran_id) {
         try {
-            const response = await api.get(`/ss/tahun-ajaran`, {
+            const { data } = await api.get(`/ss/tahun-ajaran`, {
                 params: {
                     tahun_ajaran_id: tahun_ajaran_id
                 }
             });
-            commit('SET_TABELTAHUNAJARAN', response.data.tahunAjaran);
-            const selectedTahunAjaran = response.data.tahunAjaran.reduce((max, item) => (item.tahunAjaranId > max.tahunAjaranId ? item : max), response.data.tahunAjaran[0]);
+            commit('SET_TABELTAHUNAJARAN', data.tahunAjaran);
+            const selectedTahunAjaran = data.tahunAjaran.reduce((max, item) => (item.tahunAjaranId > max.tahunAjaranId ? item : max), data.tahunAjaran[0]);
             commit('SET_SELECTEDTAHUNAJARAN', selectedTahunAjaran);
-            return response.data;
+            return data;
         } catch (error) {
             throw new Error(`Gagal mendapatkan tahun ajaran: ${error}`);
         }

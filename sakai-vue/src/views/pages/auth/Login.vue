@@ -1,14 +1,15 @@
 <script setup>
+import router from '@/router';
 import { useAuth } from '@/views/pages/auth/composables/auth';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
-const { onLogin } = useAuth();
-const username = ref('');
-const password = ref('');
+const { login, isAuthLoading, authError } = useAuth();
+// const username = ref('');
+// const password = ref('');
 const checked = ref(false);
-const loading = ref(false);
-const dialogError = ref(false);
-const messageError = ref('');
+// const loading = ref(false);
+// const dialogError = ref(false);
+// const messageError = ref('');
 const route = useRoute();
 onMounted(() => {
     if (route.query.from === 'register-success') {
@@ -20,31 +21,62 @@ onMounted(() => {
 const registerSuccessMessage = ref('');
 const registerSuccessStatus = ref(false);
 // Fungsi handler submit form
-const handleSubmit = async () => {
-    loading.value = true;
-    try {
-        // Cek apakah username dan password diisi
-        if (username.value == '' || password.value == '') {
-            messageError.value = 'Username dan password tidak boleh kosong';
-            dialogError.value = true;
-            return;
-        }
-        // Kirim data form ke onLogin
-        await onLogin({
-            values: {
-                username: username.value,
-                password: password.value,
-                rememberMe: checked.value
-            }
-        });
-    } catch (error) {
-        alert('gagal');
-        // messageError.value = error?.message;
-        // dialogError.value = true;
-    } finally {
-        // setTimeout(() => (loading.value[index] = false), 1000);
-        loading.value = false;
+// const handleSubmit = async () => {
+//     loading.value = true;
+//     try {
+//         // Cek apakah username dan password diisi
+//         if (username.value == '' || password.value == '') {
+//             messageError.value = 'Username dan password tidak boleh kosong';
+//             dialogError.value = true;
+//             return;
+//         }
+//         // Kirim data form ke onLogin
+//         await onLogin({
+//             values: {
+//                 username: username.value,
+//                 password: password.value,
+//                 rememberMe: checked.value
+//             }
+//         });
+//     } catch (error) {
+//         alert('gagal');
+//         // messageError.value = error?.message;
+//         // dialogError.value = true;
+//     } finally {
+//         // setTimeout(() => (loading.value[index] = false), 1000);
+//         loading.value = false;
+//     }
+// };
+
+// State UI
+const username = ref('');
+const password = ref('');
+const rememberMe = ref(false);
+const loading = ref(false);
+const messageError = ref('');
+const dialogError = ref(false);
+// Sinkronkan loading & error ke UI (opsional — bisa juga pakai langsung ref dari composable)
+watch(isAuthLoading, (val) => (loading.value = val));
+watch(authError, (val) => {
+    if (val) {
+        messageError.value = val;
+        dialogError.value = true;
+    } else {
+        messageError.value = '';
+        dialogError.value = false;
     }
+});
+const handleSubmit = async () => {
+    const result = await login({
+        username: username.value,
+        password: password.value,
+        rememberMe: rememberMe.value
+    });
+
+    if (result.success && result.redirectRoute) {
+        await router.push(result.redirectRoute);
+    }
+    // Jika gagal, UI sudah otomatis update via `authError` dan `dialogError`
 };
 </script>
 

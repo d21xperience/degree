@@ -12,11 +12,11 @@ import TopbarWidget from './TopbarWidget.vue';
 
 <style scoped>
 .navigation-bar {
-    /* position: absolute; */
-    /* top: 0;
+    position: absolute;
+    top: 0;
     left: 0;
     right: 0;
-    z-index: 50; */
+    z-index: 50;
     /* background: transparent; */
     /* background-color: blue; */
 }
@@ -28,5 +28,6 @@ import TopbarWidget from './TopbarWidget.vue';
     display: flex;
     align-items: center;
     justify-content: space-between;
+    /* background: transparent; */
 }
 </style>

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 // import { useStore } from 'vuex';
 // const store = useStore();
 
@@ -40,6 +40,10 @@ const cekSekolah = async () => {
 };
 const errorMessage = ref('');
 const handleSubmit = async () => {
+    if (email.value == '' || email.value.len < 0) {
+        console.log(email.value);
+        return;
+    }
     // 🔒 1. Cegah multiple submit
     if (loading.value) return; // <-- tambahkan ini: early return jika sedang loading
 
@@ -48,6 +52,7 @@ const handleSubmit = async () => {
     // 🧹 2. Reset error sebelumnya (opsional, untuk UI feedback)
     errorMessage.value = null;
 
+    disableButton.value = true;
     const dataReg = {
         user: {
             email: email.value.trim(),
@@ -88,11 +93,12 @@ const handleSubmit = async () => {
         }
     } catch (error) {
         // 🔍 4. Tangani error dengan baik
-        if (error.name === 'AbortError') {
+        if (error.message === 'AbortError') {
             errorMessage.value = 'Waktu permintaan habis. Coba lagi.';
-        } else if (error.code === 'ALREADY_EXISTS') {
-            errorMessage.value = 'Email atau sekolah sudah terdaftar.';
-        } else if (error.code === 'INVALID_ARGUMENT') {
+        } else if (error.message === 'email already registered') {
+            errorMessage.value = 'Email sudah terdaftar, gunakan email lain.';
+            disableButton.value = true;
+        } else if (error.message === 'INVALID_ARGUMENT') {
             errorMessage.value = 'Data tidak valid. Periksa kembali.';
         } else {
             errorMessage.value = 'Gagal mendaftar. Coba beberapa saat lagi.';
@@ -101,6 +107,7 @@ const handleSubmit = async () => {
         console.error('[Register] Error:', error);
     } finally {
         loading.value = false; // <-- pastikan selalu reset loading
+        // disableButton.value = false;
     }
 };
 
@@ -109,6 +116,13 @@ const disableButton = ref(false);
 const formatValues = (obj) => {
     return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, String(value).trim()]));
 };
+
+watch(email, (newVal) => {
+    if (!newVal) {
+        errorMessage.value = '';
+        disableButton.value = false;
+    }
+});
 </script>
 
 <template>

@@ -8,7 +8,8 @@ export function useSekolah() {
         try {
             const tes = store.getters['sekolahService/getSekolah'];
             const response = tes;
-            response.uri = response?.sekolah.nama.toLowerCase().replace(/\s+/g, '');
+            // response.uri = response?.sekolah.nama.toLowerCase().replace(/\s+/g, '');
+            response.uri = response?.sekolahSlug;
             return response;
         } catch (error) {
             return null;

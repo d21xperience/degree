@@ -1,6 +1,7 @@
 <script setup>
 import router from '@/router';
 import { ref } from 'vue';
+import LazyImage from '../LazyImage.vue';
 const useLightBackground = ref(true);
 const hoverIndex = ref(-1);
 
@@ -57,7 +58,8 @@ const schools = ref([
             <!-- Logo Grid -->
             <div class="logo-grid">
                 <div v-for="(school, index) in schools" :key="index" class="logo-item" :class="{ verified: school.verified }">
-                    <img :src="school.logo" :alt="school.name" class="logo-image" @mouseover="hoverIndex = index" @mouseleave="hoverIndex = -1" />
+                    <LazyImage :src="school.logo" :alt="school.name" container-class="logo-image" @mouseover="hoverIndex = index" @mouseleave="hoverIndex = -1" />
+                    <!-- <img :src="school.logo" :alt="school.name" class="logo-image" @mouseover="hoverIndex = index" @mouseleave="hoverIndex = -1" /> -->
                     <span v-if="school.verified" class="verified-badge">✔️</span>
                 </div>
             </div>
@@ -121,7 +123,7 @@ const schools = ref([
 }
 
 .logo-image {
-    max-width: 100%;
+    max-width: 30%;
     max-height: 80px;
     filter: grayscale(100%);
     opacity: 0.8;

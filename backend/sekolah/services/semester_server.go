@@ -74,7 +74,7 @@ func (s *SemesterServiceServer) GetSemester(ctx context.Context, req *pb.GetSeme
 	// Validasi request
 	err := utils.ValidateFields(req, requiredFields)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 	conditions := make(map[string]any)
 	orderBy := []string{"tahun_ajaran_id DESC", "semester DESC"}

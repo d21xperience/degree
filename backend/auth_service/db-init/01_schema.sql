@@ -11,7 +11,7 @@ CREATE TABLE sekolah_tenant (
 	kode_kecamatan VARCHAR(50) NULL,
 	kode_kab VARCHAR(50) NULL,
 	kode_prop VARCHAR(50) NULL,
-	alamat_jalan VARCHAR(50) NULL,
+	alamat_jalan VARCHAR(255) NULL,
 	created_at TIMESTAMPTZ NULL,
 	updated_at TIMESTAMPTZ NULL,
 	logo_url VARCHAR(255) NULL DEFAULT NULL,

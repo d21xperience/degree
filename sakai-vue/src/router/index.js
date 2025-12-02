@@ -35,7 +35,6 @@ const router = createRouter({
             name: 'login',
             meta: { title: 'Login' },
             component: () => import('@/views/pages/auth/Login.vue')
-            // beforeEnter: redirectIfAuthenticated
         },
         {
             path: '/auth/register',
@@ -356,7 +355,7 @@ const router = createRouter({
 // 🔐 Global navigation guard
 router.beforeEach(async (to, from, next) => {
     isLoading.value = true;
-
+    console.log('berforeEach....', to);
     // Cek auth sekali saat app pertama kali load
     if (store.state.authService.isCheckingAuth && !store.state.authService.user) {
         await store.dispatch('authService/checkAuth');
@@ -365,7 +364,6 @@ router.beforeEach(async (to, from, next) => {
     const isAuthenticated = store.getters['authService/isAuthenticated'];
     // console.log('nilai isAuthenticated', isAuthenticated);
     if (to.meta.requiresAuth && !isAuthenticated) {
-        // next({ name: 'Login', query: { redirect: to.fullPath } });
         // next({ name: 'login' });
         // ✅ Simpan query asli + tambahkan redirect jika perlu
         next({
@@ -376,6 +374,7 @@ router.beforeEach(async (to, from, next) => {
             }
         });
     } else if (to.meta.guestOnly && isAuthenticated) {
+        console.log('gues only');
         next({ name: 'Dashboard' });
     } else {
         next();

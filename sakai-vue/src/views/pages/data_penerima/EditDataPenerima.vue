@@ -102,7 +102,8 @@ const isLoadingSave = ref(false);
 const cancel = async () => {
     isLoading.value = true;
     const sekolah = await fetchSekolah();
-    const nmSekolah = sekolah.sekolah?.nama.toLowerCase().replace(/\s+/g, '');
+    // const nmSekolah = sekolah.sekolah?.nama.toLowerCase().replace(/\s+/g, '');
+    const nmSekolah = sekolah.sekolahSlug;
     setTimeout(() => {
         isLoading.value = false;
         // router.push({ name: 'infoGuru' });

@@ -19,13 +19,13 @@ import WhyTrustUsWidget from '@/components/landing/WhyTrustUsWidget.vue';
             <!-- <HerosWidget /> -->
             <!-- <FeaturesWidget class="z-50" /> -->
             <HowItWorksWidget class="my-5" />
-            <AboutUsWidget />
             <WhyTrustUsWidget />
             <MemberHaveJoined />
             <TestimonialsWidget />
             <ContactUsWidget />
             <CallToActionWidget />
             <WhatsAppFloat phone="6289602897265" />
+            <AboutUsWidget />
             <FooterWidget />
         </div>
     </div>

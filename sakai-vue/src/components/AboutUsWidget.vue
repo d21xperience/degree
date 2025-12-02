@@ -1,7 +1,15 @@
 <script setup>
 import { ref } from 'vue';
+import LazyImage from './LazyImage.vue';
 
 const fullWidthLayout = ref(false); // Set to true for full-width blue background
+
+// const heroData = computed(() => ({
+//     backgroundImage: {
+//         src: 'https://localhost/static/landingpage/7.jpg',
+//         alt: 'Latar belakang teknologi blockchain dengan visualisasi keamanan data'
+//     }
+// }));
 </script>
 
 <template>
@@ -14,7 +22,10 @@ const fullWidthLayout = ref(false); // Set to true for full-width blue backgroun
 
             <div class="content-wrapper">
                 <div class="image-column">
-                    <img src="https://localhost/static/landingpage/4.jpg" alt="Ilustrasi verifikasi blockchain" class="feature-image" />
+                    <LazyImage src="https://localhost/static/landingpage/4.jpg" alt="Tes" @load="console.log('✅ Load sukses:', $event)" @error="console.error('❌ Error:', $event)" />
+
+                    <!-- <LazyImage alt="Tes" src="https://localhost/static/landingpage/4.jpg" :use-native-lazy="true" :show-spinner="true" image-class="hero-background-image opacity-0" loaded-class="opacity-70 transition-opacity duration-500" /> -->
+                    <!-- <img src="https://localhost/static/landingpage/4.jpg" alt="Ilustrasi verifikasi blockchain" class="feature-image" /> -->
                 </div>
 
                 <div class="text-column">

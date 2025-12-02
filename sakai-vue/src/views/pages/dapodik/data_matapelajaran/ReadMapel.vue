@@ -239,9 +239,18 @@ const addMapel1 = (e) => {
     // kategoriMapelList.value.push()
     // Kirim ke backend
 };
-
+// const props = defineProps({
+//     isParentCompleted: {
+//         type: Boolean,
+//         default: true
+//     }
+// });
+// const tes = ref(true);
 onMounted(async () => {
-    // await fetchK();
+    // if (tes.value) {
+    //     // Jangan fetch data
+    //     return;
+    // }
     initial();
 });
 

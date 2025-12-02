@@ -44,22 +44,7 @@ const model = computed(() => {
                     icon: 'pi pi-fw pi-home',
                     to: `/${sekolahPath}/dashboard`
                 },
-                {
-                    label: 'User',
-                    icon: 'pi pi-fw pi-users',
-                    items: [
-                        {
-                            label: 'Manajemen user',
-                            icon: 'pi pi-fw pi-user',
-                            to: `/${sekolahPath}/manajemen-user`
-                        }
-                        // {
-                        //     label: 'Transkrip Nilai',
-                        //     icon: 'pi pi-fw pi-bookmark',
-                        //     to: `/${sekolahPath}/data-penerima/transkrip`
-                        // }
-                    ]
-                },
+
                 {
                     label: 'Dapodik',
                     icon: 'pi pi-fw pi-building-columns',
@@ -161,6 +146,22 @@ const model = computed(() => {
                     command: () => {
                         router.push({ name: 'daftarTrx' });
                     }
+                },
+                {
+                    label: 'User',
+                    icon: 'pi pi-fw pi-users',
+                    items: [
+                        {
+                            label: 'Manajemen user',
+                            icon: 'pi pi-fw pi-user',
+                            to: `/${sekolahPath}/manajemen-user`
+                        }
+                        // {
+                        //     label: 'Transkrip Nilai',
+                        //     icon: 'pi pi-fw pi-bookmark',
+                        //     to: `/${sekolahPath}/data-penerima/transkrip`
+                        // }
+                    ]
                 }
             ]
         });

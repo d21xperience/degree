@@ -152,8 +152,16 @@ const handleKeydown = (event) => {
         <!-- Hero Section -->
         <section class="hero-section" role="banner" aria-labelledby="hero-title">
             <!-- Background Image with Lazy Loading -->
-            <LazyImage :src="heroData.backgroundImage.src" :alt="heroData.backgroundImage.alt" container-class="hero-overlay" image-class="hero-background-image" :show-spinner="false" @load="onBackgroundLoad" @error="onBackgroundError" />
-
+            <!-- <LazyImage :src="heroData.backgroundImage.src" :alt="heroData.backgroundImage.alt" container-class="hero-overlay" image-class="hero-background-image" :show-spinner="false" @load="onBackgroundLoad" @error="onBackgroundError" /> -->
+            <LazyImage
+                :src="heroData.backgroundImage.src"
+                :alt="heroData.backgroundImage.alt"
+                :use-native-lazy="false"
+                :show-spinner="false"
+                container-class="hero-overlay"
+                image-class="hero-background-image opacity-0"
+                loaded-class="opacity-70 transition-opacity duration-500"
+            />
             <!-- Hero Content -->
             <div class="hero-content">
                 <h1 id="hero-title" class="hero-headline">

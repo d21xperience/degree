@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import api from '../api';
 const state = {
-    tabelTenant: JSON.parse(localStorage.getItem('tabelTenant')) || null,
+    tabelTenant: JSON.parse(localStorage.getItem('tabelTenant')),
     tabelSekolah: JSON.parse(localStorage.getItem('tabelSekolah')) || null,
     tabelTingkatPendidikan: JSON.parse(localStorage.getItem('tabelTingkatPendidikan')) || null,
 
@@ -55,19 +55,19 @@ const mutations = {
     },
     resetState(state) {
         localStorage.clear();
-        // state.tabelTenant = null;
+        state.tabelTenant = null;
 
-        // state.tabelSekolah = null;
+        state.tabelSekolah = null;
 
-        // state.tabelTingkatPendidikan = null;
+        state.tabelTingkatPendidikan = null;
 
-        // state.tabelJurusan = null;
+        state.tabelJurusan = null;
 
-        // state.tabelMapel = null;
+        state.tabelMapel = null;
 
-        // state.selectedTahunAjaran = [];
-        // state.tabelGelarAkademik = [];
-        // state.tabelDashboard = [];
+        state.selectedTahunAjaran = [];
+        state.tabelGelarAkademik = [];
+        state.tabelDashboard = [];
     }
 };
 
@@ -124,13 +124,13 @@ const actions = {
     // =======================================
     async fetchTabeltenant({ commit }, sekolahTenantId) {
         try {
-            const response = await api.get('/ss/sekolah/sekolah-terdaftar', {
+            const { data } = await api.get('/ss/sekolah/sekolah-terdaftar', {
                 params: {
                     sekolah_tenant_id: sekolahTenantId
                 }
             });
-            commit('SET_TABELTENANT', response.data);
-            return response.data;
+            commit('SET_TABELTENANT', data);
+            return data;
         } catch (error) {
             throw new Error(`Gagal mengambil data tabel tenant: ${error}`);
         }
