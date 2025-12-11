@@ -4,10 +4,10 @@ import api from '../api';
 // Semester
 // ================================================
 const state = {
-    selectedTahunAjaran: JSON.parse(localStorage.getItem('selectedTahunAjaran')) || [],
+    selectedTahunAjaran: JSON.parse(localStorage.getItem('selectedTahunAjaran')) || null,
     selectedSemester: JSON.parse(localStorage.getItem('selectedSemester')) || null,
     tabelSemester: JSON.parse(localStorage.getItem('tabelSemester')) || null,
-    tabelTahunAjaran: JSON.parse(localStorage.getItem('tabelTahunAjaran')) || []
+    tabelTahunAjaran: JSON.parse(localStorage.getItem('tabelTahunAjaran')) || null
 };
 const mutations = {
     SET_TABELSEMESTER(state, value) {
@@ -42,25 +42,27 @@ const actions = {
                 }
             });
 
-            // const selectedSemester = data.semester.find((item) => item.periodeAktif === 1)?.semesterId;
-            // const selectedTahunAjaran = [
-            //     ...new Set(
-            //         data.semester
-            //             .filter((item) => item.periodeAktif === 1)
-            //             .map((item) => {
-            //                 item.tahunAjaranId;
-            //             })
-            //     )
-            // ];
-            // commit('SET_SELECTEDSEMESTER', selectedSemester);
-            // commit('SET_SELECTEDTAHUNAJARAN', selectedTahunAjaran);
+            const listTahunAjaran = [...new Set(data.semester.map((item) => item.tahunAjaranId))].map((id) => ({ tahunAjaranId: id, label: String(id) }));
+            // 1. Ambil yang periodeAktif = 1
+            const active = data.semester.filter((item) => item.periodeAktif === 1)[0];
 
-            const listTahunAjaran = [...new Set(data.semester.map((item) => item.tahunAjaranId))].map((id) => ({ tahunAjaranId: id }));
+            // 2. Bentuk array baru
+            // const selectedSemester = active ? { semesterId: active.semesterId, label: String(active.namaSemester) } : null;
+            const selectedSemester = data.semester.find((item) => item.periodeAktif === 1) || null;
+
+            const selectedTahunAjaran = active ? { tahunAjaranId: active.tahunAjaranId, label: String(active.tahunAjaranId) } : null;
 
             commit('SET_TABELSEMESTER', data.semester);
             commit('SET_TABELTAHUNAJARAN', listTahunAjaran);
 
-            return data;
+            commit('SET_SELECTEDSEMESTER', selectedSemester);
+            commit('SET_SELECTEDTAHUNAJARAN', selectedTahunAjaran);
+            return {
+                status: data.status,
+                message: data.message,
+                semester: data.semester,
+                tahunAjaran: listTahunAjaran
+            };
         } catch (error) {
             console.log(error);
             throw new Error(`Gagal mendapatkan semester: ${error}`);
@@ -102,20 +104,26 @@ const actions = {
     // ================================================
     // Tahun Ajaran
     // ================================================
-    async fetchTahunAjaran({ commit }, tahun_ajaran_id) {
-        try {
-            const { data } = await api.get(`/ss/tahun-ajaran`, {
-                params: {
-                    tahun_ajaran_id: tahun_ajaran_id
-                }
-            });
-            commit('SET_TABELTAHUNAJARAN', data.tahunAjaran);
-            const selectedTahunAjaran = data.tahunAjaran.reduce((max, item) => (item.tahunAjaranId > max.tahunAjaranId ? item : max), data.tahunAjaran[0]);
-            commit('SET_SELECTEDTAHUNAJARAN', selectedTahunAjaran);
-            return data;
-        } catch (error) {
-            throw new Error(`Gagal mendapatkan tahun ajaran: ${error}`);
-        }
+    async fetchTahunAjaran({ commit, dispatch }, tahun_ajaran_id) {
+        const { data } = await dispatch.fetchSemester();
+        return {
+            status: data.status,
+            message: data.message,
+            tahunAjaran: data.tahunAjaran
+        };
+        // try {
+        //     const { data } = await api.get(`/ss/tahun-ajaran`, {
+        //         params: {
+        //             tahun_ajaran_id: tahun_ajaran_id
+        //         }
+        //     });
+        //     commit('SET_TABELTAHUNAJARAN', data.tahunAjaran);
+        //     const selectedTahunAjaran = data.tahunAjaran.reduce((max, item) => (item.tahunAjaranId > max.tahunAjaranId ? item : max), data.tahunAjaran[0]);
+        //     commit('SET_SELECTEDTAHUNAJARAN', selectedTahunAjaran);
+        //     return data;
+        // } catch (error) {
+        //     throw new Error(`Gagal mendapatkan tahun ajaran: ${error}`);
+        // }
     },
 
     async fetchSelectedTahunAjaran({ commit }, payload) {

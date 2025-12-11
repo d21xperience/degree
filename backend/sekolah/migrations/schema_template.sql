@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS {{schema_name}}.tabel_sekolah (
 	is_dapodik BOOLEAN NULL DEFAULT FALSE,
 	sekolah_id_dapo UUID NULL DEFAULT NULL,
 	lama_pendidikan SMALLINT NULL DEFAULT NULL,
+	tahun_ajaran_id VARCHAR(5) NULL DEFAULT NULL,
 	PRIMARY KEY (sekolah_id)
 );
 

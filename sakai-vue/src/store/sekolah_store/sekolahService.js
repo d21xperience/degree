@@ -1,17 +1,17 @@
 /* eslint-disable no-unused-vars */
 import api from '../api';
 const state = {
-    tabelTenant: JSON.parse(localStorage.getItem('tabelTenant')),
+    tabelTenant: JSON.parse(localStorage.getItem('tabelTenant')) || null,
     tabelSekolah: JSON.parse(localStorage.getItem('tabelSekolah')) || null,
     tabelTingkatPendidikan: JSON.parse(localStorage.getItem('tabelTingkatPendidikan')) || null,
-
     tabelJurusan: JSON.parse(localStorage.getItem('tabelJurusan')) || null,
     tabelMapel: JSON.parse(localStorage.getItem('tabelMapel')) || null,
-
-    // selectedTahunAjaran: JSON.parse(localStorage.getItem('selectedTahunAjaran')) || [],
     tabelGelarAkademik: JSON.parse(localStorage.getItem('gelarAkademik')) || [],
     tabelDashboard: JSON.parse(localStorage.getItem('tabelDashboard')) || null,
-    tabelJenjang: JSON.parse(localStorage.getItem('tabelJenjang')) || []
+    tabelJenjangPendidikan: JSON.parse(localStorage.getItem('tabelJenjangPendidikan')) || null,
+    tabelBentukPendidikan: JSON.parse(localStorage.getItem('tabelBentukPendidikan')) || null,
+    tabelKategoriSekolah: JSON.parse(localStorage.getItem('tabelKategoriSekolah')) || [],
+    isKategoriSekolahCompleted: JSON.parse(localStorage.getItem('isKategoriSekolahCompleted')) || false
 };
 
 const mutations = {
@@ -49,25 +49,35 @@ const mutations = {
         localStorage.setItem('tabelDashboard', JSON.stringify(value));
     },
 
-    SET_TABELJENJANG(state, value) {
-        state.tabelJenjang = value;
-        localStorage.setItem('tabelJenjang', JSON.stringify(value));
+    SET_TABELJENJANGPENDIDIKAN(state, value) {
+        state.tabelJenjangPendidikan = value;
+        localStorage.setItem('tabelJenjangPendidikan', JSON.stringify(value));
+    },
+    SET_TABELBENTUKPENDIDIKAN(state, value) {
+        state.tabelBentukPendidikan = value;
+        localStorage.setItem('tabelBentukPendidikan', JSON.stringify(value));
+    },
+    SET_TABELKATEGORISEKOLAH(state, value) {
+        state.tabelKategoriSekolah = value;
+        localStorage.setItem('tabelKategoriSekolah', JSON.stringify(value));
+    },
+    SET_ISKATEGORISEKOLAHCOMPLETED(state, value) {
+        state.isKategoriSekolahCompleted = value;
+        localStorage.setItem('isKategoriSekolahCompleted', JSON.stringify(value));
     },
     resetState(state) {
         localStorage.clear();
         state.tabelTenant = null;
-
         state.tabelSekolah = null;
-
         state.tabelTingkatPendidikan = null;
-
         state.tabelJurusan = null;
-
         state.tabelMapel = null;
-
         state.selectedTahunAjaran = [];
         state.tabelGelarAkademik = [];
         state.tabelDashboard = [];
+        state.tabelJenjangPendidikan = null;
+        state.tabelKategoriSekolah = [];
+        state.isKategoriSekolahCompleted = false;
     }
 };
 
@@ -102,20 +112,24 @@ const actions = {
     async fetchSekolah({ commit }, payload) {
         try {
             const response = await api.get(`/ss/${payload.schemaname}/sekolah`);
-            commit('SET_TABELSEKOLAH', response.data);
-            return response.data;
+            if (response.status) {
+                commit('SET_TABELSEKOLAH', response.data);
+                return response.data;
+            }
         } catch (error) {
-            throw new Error(`Gagal menghapus Kategori Mapel: ${error}`);
+            throw new Error(`Gagal mengambil data sekolah: ${error}`);
         }
     },
     async updateSekolah({ commit }, payload) {
         try {
             const response = await api.put(`/ss/${payload.schemaname}/update`, payload);
             if (response.status) {
+                commit('SET_TABELSEKOLAH', payload);
                 return response.data;
             }
         } catch (error) {
-            throw new Error(`Gagal menghapus Kategori Mapel: ${error}`);
+            console.log(error);
+            throw new Error(`Gagal update sekolah: ${error}`);
         }
     },
 
@@ -130,7 +144,7 @@ const actions = {
                 }
             });
             commit('SET_TABELTENANT', data);
-            return data;
+            return { status: true, schemaname: data.schemaname };
         } catch (error) {
             throw new Error(`Gagal mengambil data tabel tenant: ${error}`);
         }
@@ -150,10 +164,12 @@ const actions = {
             throw new Error(`Gagal membuat tabel tenant: ${error}`);
         }
     },
-    async fetchBentukPendidikan() {
+    async fetchBentukPendidikan({ commit }) {
         try {
-            const { data } = await api.get(`/ss/ref/bentuk-pendidikan`);
-            return data;
+            const { data } = await api.get('/ss/ref/bentuk-pendidikan');
+            // console.log('Bentuk Pendidikan ====', data);
+            commit('SET_TABELBENTUKPENDIDIKAN', data?.bentukPendidikan);
+            return data?.bentukPendidikan;
         } catch (error) {
             throw new Error(`Gagal membuat bentuk pendidikan: ${error}`);
         }
@@ -169,7 +185,7 @@ const actions = {
                 }
             });
             if (data.status) {
-                commit('SET_TABELJENJANG', data.jenjang);
+                commit('SET_TABELJENJANGPENDIDIKAN', data.jenjang);
                 return data;
             }
         } catch (error) {
@@ -307,6 +323,7 @@ const actions = {
                     semester_id: payload.semester_id
                 }
             });
+            console.log(payload);
             if (response) {
                 commit('SET_DASHBOARD', { semester_id: payload.semester_id, data: response.data });
                 return response.data;
@@ -317,22 +334,26 @@ const actions = {
     },
 
     async fetchKategoriSekolah({ commit }, payload) {
-        console.log('payload fetchKategoriSekolah', payload);
-        if (!payload.tahunAjaranId) {
-            return;
-        }
         try {
-            const response = await api.get(`/ss/${payload.schemaname}/kategori-sekolah`, {
+            const { data } = await api.get(`/ss/${payload.schemaname}/kategori-sekolah`, {
                 params: {
                     tahun_ajaran_id: payload.tahun_ajaran_id
                 }
             });
-            if (response) {
-                // commit('SET_DASHBOARD', response.data);
-                return response.data;
+            if (data.status) {
+                commit('SET_TABELKATEGORISEKOLAH', {
+                    tahunAjaranId: payload.tahun_ajaran_id,
+                    kategoriSekolah: data.kategoriSekolah
+                });
+                if (data.kategoriSekolah.length == 0) {
+                    commit('SET_ISKATEGORISEKOLAHCOMPLETED', false);
+                } else {
+                    commit('SET_ISKATEGORISEKOLAHCOMPLETED', true);
+                }
+                return data.kategoriSekolah;
             }
         } catch (error) {
-            console.log(error);
+            commit('SET_ISKATEGORISEKOLAHCOMPLETED', false);
             throw new Error(error.message);
         }
     },
@@ -393,7 +414,7 @@ const actions = {
 
     async createProsesKelas({ commit }, payload) {
         try {
-            // console.log({commit}, payload);
+            console.log(payload);
             // return
             const response = await api.post(`/ss/${payload.schemaname}/kategori-sekolah-kelas/proses`, payload);
             if (response.status) {
@@ -401,7 +422,8 @@ const actions = {
                 return response.data;
             }
         } catch (error) {
-            throw new Error(`Gagal menghapus Kategori Mapel: ${error}`);
+            console.log(error);
+            throw new Error(`Gagal membuat Kategori Mapel: ${error}`);
         }
     },
 
@@ -490,9 +512,13 @@ const getters = {
 
     getJurusan: (state) => state.tabelJurusan,
     getTingkatPendidikan: (state) => state.tabelTingkatPendidikan,
+    getBentukPendidikan: (state) => state.tabelBentukPendidikan,
+    getJenjangPendidikan: (state) => state.tabelJenjangPendidikan,
     getMapel: (state) => state.tabelMapel,
     getGelarAkademik: (state) => state.tabelGelarAkademik,
-    getDashboard: (state) => state.tabelDashboard
+    getDashboard: (state) => state.tabelDashboard,
+    getTabelKategoriSekolah: (state) => state.tabelKategoriSekolah,
+    getIsKategoriSekolahCompleted: (state) => state.isKategoriSekolahCompleted
 };
 
 export default {

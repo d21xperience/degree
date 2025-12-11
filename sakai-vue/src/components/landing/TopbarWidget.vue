@@ -1,10 +1,10 @@
 <script setup>
 import router from '@/router';
 import { useAuth } from '@/views/pages/auth/composables/auth';
+import { Button } from 'primevue';
 import { computed } from 'vue';
-import { useI18n } from 'vue-i18n';
+// import { useI18n } from 'vue-i18n';
 import { useStore } from 'vuex';
-import LanguageSwitcher from '../LanguageSwitcher.vue';
 const store = useStore();
 const { user } = useAuth();
 function smoothScroll(id) {
@@ -17,9 +17,9 @@ function smoothScroll(id) {
         });
     }
 }
-const { t } = useI18n();
+// const { t } = useI18n();
 const isAuthenticated = computed(() => store.getters['authService/isAuthenticated']);
-
+// Button
 const toDashboard = async () => {
     if (isAuthenticated.value) {
         console.log('topbarWidget', user);
@@ -77,12 +77,12 @@ const toDashboard = async () => {
             </li>
             <li>
                 <a class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl" @click="smoothScroll('about')">
-                    <span>{{ t('about') }}</span>
+                    <span>{{ 'about' }}</span>
                 </a>
             </li>
             <li>
                 <a class="px-0 py-4 text-primary dark:text-surface-0 font-medium text-xl" @click="smoothScroll('contact')">
-                    <span>{{ t('contact') }}</span>
+                    <span>{{ 'contact' }}</span>
                 </a>
             </li>
             <li>
@@ -106,7 +106,7 @@ const toDashboard = async () => {
                 <Button label="Dashboard" rounded @click="toDashboard" />
             </div>
             <div>
-                <LanguageSwitcher />
+                <!-- <LanguageSwitcher /> -->
             </div>
         </div>
     </div>

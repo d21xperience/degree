@@ -55,6 +55,11 @@ const model = computed(() => {
                             to: `/${sekolahPath}/data-dapodik/info-sekolah`
                         },
                         {
+                            label: 'Data Semester',
+                            icon: 'pi pi-fw pi-bookmark',
+                            to: `/${sekolahPath}/data-dapodik/semester`
+                        },
+                        {
                             label: 'Data Mapel',
                             icon: 'pi pi-fw pi-book',
                             to: `/${sekolahPath}/data-dapodik/info-mapel`
@@ -62,22 +67,22 @@ const model = computed(() => {
                         {
                             label: 'Data Kelas',
                             icon: 'pi pi-fw pi-building-columns',
-                            to: `/${sekolahPath}/data-dapodik/info-kelas`
+                            to: `/${sekolahPath}/data-dapodik/kelas`
                         },
-                        {
-                            label: 'Data Guru',
-                            icon: 'pi pi-fw pi-users',
-                            to: `/${sekolahPath}/data-dapodik/info-guru`
-                        },
+                        // {
+                        //     label: 'Data Guru',
+                        //     icon: 'pi pi-fw pi-users',
+                        //     to: `/${sekolahPath}/data-dapodik/info-guru`
+                        // },
                         {
                             label: 'Data Siswa',
                             icon: 'pi pi-fw pi-users',
-                            to: `/${sekolahPath}/data-dapodik/info-siswa`
+                            to: `/${sekolahPath}/data-dapodik/siswa`
                         },
                         {
                             label: 'Data Nilai',
                             icon: 'pi pi-fw pi-book',
-                            to: `/${sekolahPath}/data-dapodik/info-nilai`
+                            to: `/${sekolahPath}/data-dapodik/nilai`
                         },
                         {
                             label: 'Kenaikan & Kelulusan',

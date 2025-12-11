@@ -1,28 +1,22 @@
 // composable/useDashboard.js
 import { computed } from 'vue';
 import { useStore } from 'vuex';
-import { useSemester } from './useSemester';
-import { useTableTenant } from './useTableTenant';
 
-export function useDashboard({ autoload = false } = {}) {
+export function useDashboard() {
     const store = useStore();
-    const { schemaname } = useTableTenant();
-    const { selectedSemester } = useSemester();
-
-    // ✅ Derived state (opsional, tapi berguna)
     const dashboard = computed(() => {
         return store.getters['sekolahService/getDashboard'] || null;
     });
 
     // 🚀 Action utama
-    const fetchDashboardSekolah = async () => {
+    const fetchDashboardSekolah = async (schemaname = '', semesterId = '') => {
         // 1. Cek cache dulu
         const cached = store.getters['sekolahService/getDashboard'];
         if (cached) return cached;
 
         // 2. Pastikan dependensi tersedia
-        const schema = schemaname.value;
-        const semesterId = selectedSemester.value;
+        const schema = schemaname;
+        // const semesterId = selectedSemester.value;
 
         if (!schema) {
             throw new Error('Schema name belum tersedia');
@@ -34,30 +28,22 @@ export function useDashboard({ autoload = false } = {}) {
             throw new Error('Semester belum dipilih');
         }
 
+        console.log(semesterId);
         // 3. Fetch
         const payload = {
             schemaname: schema,
             semester_id: semesterId
         };
-
+        console.log(payload);
         return await store.dispatch('sekolahService/fetchDashboard', payload);
     };
 
     // 🔁 Init manual
-    const initialize = async () => {
+    const initialize = async (schemaname, semesterId) => {
         if (!store.getters['sekolahService/getDashboard']) {
-            await fetchDashboardSekolah();
+            await fetchDashboardSekolah(schemaname, semesterId);
         }
     };
-
-    // 🔄 Auto-init (opsional & aman)
-    if (autoload) {
-        // Karena dependensi async (semester/tenant), lebih baik **tidak auto-fetch di sini**,
-        // tapi biarkan komponen yang kendalikan setelah dependensi siap.
-        // Contoh: di komponen, panggil `initialize()` setelah `selectedSemester` terisi.
-        // → Jadi `autoload: true` di sini **tidak otomatis fetch**, hanya sediakan kemudahan.
-        // (Kita tetap sediakan opsi, tapi biarkan user yang trigger)
-    }
 
     return {
         dashboard,

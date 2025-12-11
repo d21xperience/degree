@@ -23,30 +23,32 @@ type TemplateColumn struct {
 }
 
 type DataTemplate struct {
-	TemplateType       string
-	Schemaname         string
-	TahunAjaranId      string
-	RombonganBelajarId string
-	SemesterId         string
+	TemplateType        string
+	Schemaname          string
+	TahunAjaranId       string
+	KurikulumId         string
+	SemesterId          string
+	RombonganBelajarId  string
+	TingkatPendidikanId string
 }
 
 // Mengembalikan daftar kolom berdasarkan tipe template
-func GetTemplateColumns(param *DataTemplate) ([]TemplateColumn, bool) {
+func GetTemplateColumns(param *DataTemplate, db *gorm.DB) ([]TemplateColumn, bool, error) {
 	switch param.TemplateType {
-	case "siswa":
-		return GetSiswaColumns(), true
-	case "guru":
-		return GetGuruColumns(), true
-	case "kelas":
-		return GetKelasColumns(), true
-	// case "ijazah":
-	// 	return GetIjazahColumns(), true
-	case "transkrip":
-		return GetTranskripColumns(), true
+	// case "siswa":
+	// 	return GetSiswaColumns(), true
+	// case "guru":
+	// 	return GetGuruColumns(), true
+	// case "kelas":
+	// 	return GetKelasColumns(), true
+	// // case "ijazah":
+	// // 	return GetIjazahColumns(), true
+	// case "transkrip":
+	// 	return GetTranskripColumns(), true
 	case "nilai":
-		return GetNilaiColumns(), true
+		return GetNilaiTemplateColumns(param, db)
 	default:
-		return nil, false
+		return nil, false, nil
 	}
 }
 

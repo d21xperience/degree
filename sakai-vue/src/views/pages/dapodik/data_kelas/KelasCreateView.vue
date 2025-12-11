@@ -33,7 +33,7 @@ const kelas = ref();
 onMounted(async () => {
     if (kelasId) {
         isEdit.value = true;
-        kelas.value = await searchKelas(kelasId);
+        kelas.value = await searchKelas('', kelasId);
         console.log(kelas.value);
         if (kelas.value) {
             Object.assign(rombel.value, kelas.value);

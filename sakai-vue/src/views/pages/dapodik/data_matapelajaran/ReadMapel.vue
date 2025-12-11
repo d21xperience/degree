@@ -1,9 +1,7 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { inject, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 const store = useStore();
-
-import TingkatComponent from '@/components/sekolah_components/TingkatComponent.vue';
 
 import { FilterMatchMode } from '@primevue/core/api';
 const pembelajaran = ref({});
@@ -12,20 +10,19 @@ const guruList = ref();
 
 import DialogMapel from '@/components/sekolah_components/DialogMapel.vue';
 import { useKategoriSekolah } from '@/composables/sekolah_composable/useKategoriSekolah';
-import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
-import { useSemester } from '@/composables/sekolah_composable/useSemester';
-import { useTableTenant } from '@/composables/sekolah_composable/useTableTenant';
 import { useToast } from 'primevue';
-const { schemaname } = useTableTenant();
-const { fetchKategoriSekolah, deleteKategoriMapel, deleteBatchKategoriMapel, fetchKategoriMapel } = useKategoriSekolah();
-const { initSelectedSemester } = useSemester();
-const { fetchTingkat } = useSekolah();
 
+// PROVIDER===============================
+const schemaname = inject('schemanameProvider');
+const tahunAjaranId = inject('tahunAjaranProvider');
+const sekolah = inject('sekolahProvider');
+// ========================================
+// console.log(schemaname);
+const { fetchKategoriSekolah, deleteKategoriMapel, deleteBatchKategoriMapel, fetchKategoriMapel } = useKategoriSekolah(schemaname);
 const kategoriSekolahList = ref([]);
 const kategoriMapelList = ref([]);
 const selectedKategoriSekolah = ref();
-const selectedTingkat = ref([]);
-const initialTingkat = ref();
+const selectedTingkat = ref();
 const initKategoriMapel = async () => {
     try {
         const payload = {
@@ -44,22 +41,24 @@ const initKategoriMapel = async () => {
         toast.add({ severity: 'error', summary: 'Failled', detail: `${error.message}`, life: 3000 });
     }
 };
-
+const selectedTahunAjaran = ref();
 const initial = async () => {
+    console.log(selectedTahunAjaran.value);
     // await fetchKategoriSekolah();
-    kategoriSekolahList.value = await fetchKategoriSekolah(); //kategoriSekolahTabel.value;
+    kategoriSekolahList.value = await fetchKategoriSekolah(tahunAjaranId.value?.label); //kategoriSekolahTabel.value;
     selectedKategoriSekolah.value = kategoriSekolahList.value[0];
-    const results = await fetchTingkat();
-    initialTingkat.value = results[0].kode;
 };
-
-watch(initSelectedSemester, () => {
-    // console.log(newVal);
-    // initKategoriMapel();
+watch(tahunAjaranId, (newVal) => {
+    console.log(newVal);
+    selectedTahunAjaran.value = newVal;
     initial();
+    initKategoriMapel();
+    // initial();
     //    return initSelectedSemester.value?.tahunAjaranId;
 });
-
+onMounted(() => {
+    initial();
+});
 watch(selectedKategoriSekolah, () => {
     initKategoriMapel();
 });
@@ -162,14 +161,14 @@ const searchGuru = (event) => {
 
 const generateUUID = () => crypto.randomUUID();
 
-const saveToDB = (req_Object, endpoint_String) => {
+const saveToDB = async (req_Object, endpoint_String) => {
     console.log(endpoint_String);
     try {
         const payload = {
             schemaname: req_Object?.schemaname,
             pembelajaran: req_Object?.data
         };
-        const results = store.dispatch(endpoint_String, payload);
+        const results = await store.dispatch(endpoint_String, payload);
         if (results) {
             return results;
         } else {
@@ -246,13 +245,6 @@ const addMapel1 = (e) => {
 //     }
 // });
 // const tes = ref(true);
-onMounted(async () => {
-    // if (tes.value) {
-    //     // Jangan fetch data
-    //     return;
-    // }
-    initial();
-});
 
 // const isCompleted = ref(false)
 </script>
@@ -262,12 +254,12 @@ onMounted(async () => {
         <Toolbar>
             <template #start>
                 <div v-show="kategoriMapelList.length > 0">
-                    <Button v-tooltip.bottom="'Tambah Mapel'" icon="pi pi-plus" severity="success" class="mr-2 text-lg" @click="isVisible = !isVisible" />
+                    <Button v-tooltip.bottom="'Tambah Mapel'" icon="pi pi-plus" severity="success" class="mr-2 text-sm" @click="isVisible = !isVisible" />
                     <Button
                         v-tooltip.bottom="'Hapus banyak mapel'"
                         icon="pi pi-trash"
                         severity="danger"
-                        class="mr-2 text-lg"
+                        class="mr-2 text-sm"
                         :disabled="!selectedKategoriMapel || !selectedKategoriMapel.length || selectedKategoriMapel.length == 1"
                         @click="dialogBatchDelete"
                     />
@@ -278,7 +270,7 @@ onMounted(async () => {
             <template #end>
                 <div class="flex">
                     <div>
-                        <TingkatComponent v-model="selectedTingkat" :initial-value="initialTingkat" />
+                        <TingkatComponent v-model="selectedTingkat" :jenjang-pendidikan-id="sekolah?.sekolah.jenjangPendidikanId" />
                     </div>
                     <!-- <IconField>
                             <InputIcon>
@@ -286,7 +278,7 @@ onMounted(async () => {
                             </InputIcon>
                             <InputText v-model="filters['global'].value" placeholder="Search..." class="md:w-48" />
                         </IconField> -->
-                    <Button v-tooltip.bottom="'Refresh'" icon="pi pi-refresh" severity="help" class="ml-2 text-lg" />
+                    <Button v-tooltip.bottom="'Refresh'" icon="pi pi-refresh" severity="help" class="ml-2 text-sm" />
                 </div>
             </template>
         </Toolbar>

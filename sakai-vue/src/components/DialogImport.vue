@@ -1,33 +1,69 @@
 <script setup>
 import FileUpload from 'primevue/fileupload';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 
-const { schemaname } = useTableTenant();
-const { initSelectedSemester } = useSemester();
-// ============toast============
-import { useSemester } from '@/composables/sekolah_composable/useSemester';
-import { useTableTenant } from '@/composables/sekolah_composable/useTableTenant';
-import Toast from 'primevue/toast';
+import store from '@/store';
 import { useToast } from 'primevue/usetoast';
 import DialogLoading from './DialogLoading.vue';
 const toast = useToast();
-
-const isLoading = ref(false);
-
-const baseUrl = `${import.meta.env.VITE_API_SEKOLAH_BASE_URL}/ss`;
-const templateUrl = computed(() => {
-    return `${baseUrl}/download/template?template_type=${props.templateType}&schemaname=${schemaname.value}&semesterId=${selectedTahunAjaran.value?.tahunAjaranId}`;
+const schemaname = computed(() => {
+    return store.getters['sekolahService/getTabeltenant']?.schemaname || null;
 });
-const selectedTahunAjaran = ref();
 // ========================
 // Props dari parent
 const props = defineProps({
     visible: Boolean,
-    templateType: String
+    templateType: {
+        type: String,
+        required: true
+    },
+    selectedSemester: {
+        type: Object,
+        required: true
+    },
+    paramNilai: {
+        type: Object,
+        default: null
+    },
+    message: {
+        type: String,
+        default: ''
+    }
 });
-
 // Emit event ke parent
 const emit = defineEmits(['update:visible', 'save', 'cancel']);
+const isLoading = ref(false);
+const selectedTahunAjaran = computed(() => props.selectedSemester?.tahunAjaranId);
+// let rombelQuery = '';
+const semesterAktif = computed(() => {
+    let tes = '';
+    switch (props.templateType) {
+        case 'siswa':
+            tes = selectedTahunAjaran.value;
+            break;
+        default:
+            tes = props.selectedSemester?.semesterId;
+            break;
+    }
+    return tes;
+});
+
+// watch(props.templateType, (newVal) => {
+//     switch (newVal) {
+//         case 'siswa':
+//             semesterAktif = props.selectedSemester;
+//             break;
+
+//         default:
+//             semesterAktif = props.selectedSemester?.semesterId;
+//             break;
+//     }
+// });
+
+const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/ss`;
+const templateUrl = computed(() => {
+    return `${baseUrl}/download/template?template_type=${props.templateType}&schemaname=${schemaname.value}&semesterId=${semesterAktif.value}`;
+});
 
 // Menggunakan computed agar bisa mengupdate prop.visible
 const isVisible = computed({
@@ -53,9 +89,9 @@ const saveData = async () => {
 
     const file = uploadedFiles.value.files[0];
     // console.log(file);
-    // console.log(file.name.includes(props.templateType) && file.name.includes(`${selectedTahunAjaran.value.tahunAjaranId}`))
+    // console.log(file.name.includes(props.templateType) && file.name.includes(`${props.selectedTahunAjaran}`))
     // Cek file yang akan diupload apakah sudah sesuai dengan ketentuan
-    if (!(file.name.includes(props.templateType) && file.name.includes(`${selectedTahunAjaran.value.tahunAjaranId}`))) {
+    if (!(file.name.includes(props.templateType) && file.name.includes(semesterAktif))) {
         toast.add({ severity: 'warn', summary: 'Gagal', detail: 'Silakan unggah file sesuai dengan template yang telah disediakan!', life: 3000 });
         uploadedFiles.value.files = null;
         return;
@@ -63,7 +99,7 @@ const saveData = async () => {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_type', props.templateType);
-    formData.append('schemaname', JSON.stringify(schemaname.value));
+    formData.append('schemaname', JSON.stringify(schemaname));
     // console.log('Upload URL:', uploadUrl);
     for (let pair of formData.entries()) {
         console.log(pair[0] + ': ', pair[1]);
@@ -100,17 +136,27 @@ const isErr = ref(false);
 const submitted = ref(false);
 const downloadTemplate = async () => {
     submitted.value = true;
-    if (!selectedTahunAjaran.value) {
-        // alert('Pilih tahun pelajaran');
+    if (!semesterAktif.value) {
         isErr.value = true;
         return;
     }
+
     try {
+        // Siapkan data yang akan dikirim
+        let requestData = {};
+        console.log(props.paramNilai);
+        if (props.paramNilai) {
+            requestData = props.paramNilai;
+        }
+        // return;
+        // Ganti GET dengan POST dan kirim data di body
         const response = await fetch(templateUrl.value, {
-            method: 'GET',
+            method: 'POST', // Ubah ke POST
             headers: {
+                'Content-Type': 'application/json',
                 Accept: 'application/octet-stream'
-            }
+            },
+            body: JSON.stringify(requestData) // Kirim data di body
         });
 
         if (!response.ok) {
@@ -119,7 +165,7 @@ const downloadTemplate = async () => {
 
         // Coba ambil nama file dari header Content-Disposition
         const contentDisposition = response.headers.get('Content-Disposition');
-        let fileName = 'downloaded_file.xlsx'; // Default jika tidak ditemukan
+        let fileName = 'template_nilai.xlsx';
         if (contentDisposition) {
             const match = contentDisposition.match(/filename="([^"]+)"/);
             if (match && match[1]) {
@@ -138,31 +184,29 @@ const downloadTemplate = async () => {
         document.body.removeChild(a);
 
         window.URL.revokeObjectURL(url);
+
+        // Reset loading state jika ada
+        submitted.value = false;
     } catch (error) {
         console.log(error);
-        toast.add({ severity: 'error', summary: 'Error', detail: 'Terjadi kesalahan saat mengunduh file', life: 3000 });
+        submitted.value = false;
+        toast.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Terjadi kesalahan saat mengunduh file',
+            life: 3000
+        });
     }
 };
-watch(initSelectedSemester, (newVal) => {
-    // console.log("newVal",newVal)
-    selectedTahunAjaran.value = newVal;
-    console.log('selectedTahun ', selectedTahunAjaran.value);
-});
-onMounted(async () => {
-    // await fetchTahunAjaran();
-    // console.log(initSelectedSemester.value);
-    selectedTahunAjaran.value = initSelectedSemester.value;
-    // console.log(selectedTahunAjaran.value);
-    // console.log(`${selectedTahunAjaran.value?.tahunAjaranId}`)
-});
 </script>
 
 <template>
-    <Toast />
     <Dialog v-model:visible="isVisible" :style="{ width: '450px' }" header="Tambah Data" :modal="true">
         <div>
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700"> Unggah File Excel (Pastikan sesuai dengan Template yang disediakan) </label>
+                <label class="block text-sm font-bold text-gray-700"> Unggah File Excel (Pastikan sesuai dengan Template yang disediakan) </label>
+                <p class="text-sm">Upload masal {{ props.message }}</p>
+                <!-- <p class="text-sm">Upload banyak siswa hanya untuk semester 1. Jika pada semester 2 ada penambahan siswa tambahkan secara manual.</p> -->
                 <!-- <div class="mt-2 flex flex-col gap-6 items-center justify-center">
                     <FileUpload ref="uploadedFiles" mode="basic" name="file" accept=".xlsx" :maxFileSize="2000000"
                         :customUpload="true" @before-upload="onBeforeUpload" @upload="onUpload" severity="secondary" />
@@ -175,7 +219,7 @@ onMounted(async () => {
                 <div class="mt-2 text-sm text-gray-500">
                     Unduh Template Import data
                     <a href="#" class="text-indigo-600 hover:text-indigo-500" @click.prevent="downloadTemplate"
-                        >disini <span class="text-gray-500">untuk tahun ajaran {{ selectedTahunAjaran.namaSemester }}</span></a
+                        >disini <span class="text-gray-500">untuk tahun ajaran {{ selectedTahunAjaran }}</span></a
                     >
                 </div>
                 <!-- <div class="">

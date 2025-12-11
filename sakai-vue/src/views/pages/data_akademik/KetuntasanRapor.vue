@@ -144,7 +144,7 @@ const getStatusLabel = (status) => {
     }
 };
 
-import Select from 'primevue/select';
+// import Select from 'primevue/select';
 
 // select tahun ijazah
 const selectedCity = ref();

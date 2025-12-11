@@ -3,6 +3,11 @@ import store from '@/store';
 import { ref } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import { authGuard } from './guards/authGuard';
+import kelasRoute from './routes/kelas_route';
+import mapelRoute from './routes/mapel_route';
+import nilaiRoute from './routes/nilai_route';
+import semesterRoute from './routes/semester_route';
+import siswaRoute from './routes/siswa_route';
 export const isLoading = ref(false); // state loading global
 
 const router = createRouter({
@@ -86,7 +91,27 @@ const router = createRouter({
                     name: 'manajemenUser',
                     meta: { requiresAuth: true, title: 'Manajemen User' },
                     component: () => import('@/views/pages/data_user/MajemenUser.vue'),
-                    props: true
+                    props: true,
+                    children: [
+                        {
+                            path: '',
+                            name: 'listUser',
+                            component: () => import('@/views/pages/data_user/users/UserListView.vue'),
+                            title: 'Daftar User'
+                        },
+                        {
+                            path: '',
+                            name: 'createUser',
+                            component: () => import('@/views/pages/data_user/users/UserCreateView.vue'),
+                            title: 'Buat User'
+                        },
+                        {
+                            path: ':id/edit',
+                            name: 'editteUser',
+                            component: () => import('@/views/pages/data_user/users/UserEditView.vue'),
+                            title: 'Edit User'
+                        }
+                    ]
                 },
                 {
                     path: 'data-dapodik',
@@ -94,101 +119,30 @@ const router = createRouter({
                     meta: { role: 'admin' },
                     children: [
                         {
-                            path: 'info-siswa',
-                            name: 'infoSiswa',
-                            props: true,
-                            meta: { title: 'Info Siswa', namaRoute: 'Siswa' },
-                            component: () => import('@/views/pages/dapodik/data_siswa/ReadSiswa.vue')
-                        },
-                        {
                             path: 'info-sekolah',
                             name: 'infoSekolah',
                             meta: { title: 'Info Sekolah', namaRoute: 'Sekolah' },
                             component: () => import('@/views/pages/dapodik/DataSekolah.vue')
                         },
+                        ...semesterRoute,
 
                         {
-                            path: 'info-guru',
-                            name: 'infoGuru',
-                            meta: { title: 'Info Guru', namaRoute: 'Guru' },
-                            component: () => import('@/views/pages/dapodik/data_guru/ReadGuru.vue')
-                        },
-                        {
-                            path: 'input-guru',
-                            name: 'inputGuru',
+                            path: '',
+                            component: () => import('@/layout/AppLayoutSemester.vue'),
                             props: true,
-                            meta: { disableSelect: true, title: 'Tambah Guru' },
-                            component: () => import('@/views/pages/dapodik/data_guru/AddGuru.vue')
-                        },
-                        {
-                            path: 'edit-guru',
-                            name: 'editGuru',
-                            props: true,
-                            meta: { disableSelect: true, title: 'Edit Guru', namaRoute: 'Guru' },
-                            component: () => import('@/views/pages/dapodik/data_guru/AddGuru.vue')
-                        },
-
-                        {
-                            path: 'info-kelas',
-                            name: 'infoKelas',
-                            meta: { title: 'Info Kelas', namaRoute: 'Kelas' },
-                            component: () => import('@/views/pages/dapodik/data_kelas/ReadKelas.vue')
-                        },
-
-                        {
-                            path: 'edit-kelas',
-                            name: 'editKelas',
-                            props: true,
-                            meta: { disableSelect: true, title: 'Tambah Kelas', namaRoute: 'Kelas' },
-                            component: () => import('@/views/pages/dapodik/data_kelas/AddKelas.vue')
-                        },
-
-                        {
-                            path: 'input-kelas',
-                            name: 'inputKelas',
-                            props: true,
-                            meta: { disableSelect: true, title: 'Tambah Kelas', namaRoute: 'Kelas' },
-                            component: () => import('@/views/pages/dapodik/data_kelas/AddKelas.vue')
-                        },
-                        {
-                            path: 'input-siswa',
-                            name: 'inputSiswa',
-                            props: true,
-                            meta: { disableSelect: true, title: 'Tambah Siswa', namaRoute: 'Siswa' },
-                            component: () => import('@/views/pages/dapodik/data_siswa/AddSiswa.vue')
-                        },
-                        {
-                            path: 'edit-siswa',
-                            name: 'editSiswa',
-                            props: true,
-                            meta: { disableSelect: true, title: 'Edit Siswa' },
-                            component: () => import('@/views/pages/dapodik/data_siswa/AddSiswa.vue')
-                        },
-                        {
-                            path: 'info-mapel',
-                            name: 'infoMapel',
-                            meta: { title: 'Info Mapel', namaRoute: 'Mata Pelajaran' },
-                            component: () => import('@/views/pages/dapodik/data_matapelajaran/ReadMapel.vue')
-                        },
-                        {
-                            path: 'info-nilai',
-                            name: 'infoNilai',
-                            props: true,
-                            meta: { disableSelect: false, title: 'Nilai', namaRoute: 'Info NIlai' },
-                            component: () => import('@/views/pages/dapodik/data_nilai/DataNilai.vue')
-                        },
-                        {
-                            path: 'input-nilai',
-                            name: 'inputNilai',
-                            props: true,
-                            meta: { disableSelect: true, title: 'Tambah Nilai', namaRoute: 'Siswa' },
-                            component: () => import('@/views/pages/dapodik/data_siswa/AddSiswa.vue')
-                        },
-                        {
-                            path: 'status-kenaikan',
-                            name: 'infoKenaikan',
-                            meta: { title: 'Info Kenaikan', namaRoute: 'Kelas' },
-                            component: () => import('@/views/pages/dapodik/KenaikanDanKelulusan.vue')
+                            children: [
+                                {
+                                    path: 'status-kenaikan',
+                                    name: 'infoKenaikan',
+                                    meta: { title: 'Info Kenaikan', namaRoute: 'Kelas' },
+                                    component: () => import('@/views/pages/dapodik/KenaikanDanKelulusan.vue')
+                                },
+                                // ...guruRoute,
+                                ...siswaRoute,
+                                ...kelasRoute,
+                                ...mapelRoute,
+                                ...nilaiRoute
+                            ]
                         }
                     ]
                 },
@@ -355,7 +309,7 @@ const router = createRouter({
 // 🔐 Global navigation guard
 router.beforeEach(async (to, from, next) => {
     isLoading.value = true;
-    console.log('berforeEach....', to);
+    // console.log('berforeEach....', to);
     // Cek auth sekali saat app pertama kali load
     if (store.state.authService.isCheckingAuth && !store.state.authService.user) {
         await store.dispatch('authService/checkAuth');
@@ -389,12 +343,6 @@ router.afterEach((to) => {
 });
 
 // // 🧨 Tangani 401 dari interceptor → logout & redirect
-// window.addEventListener('unauthorized', () => {
-//     store.dispatch('authService/logout');
-//     router.push({ name: 'login' });
-// });
-
-// src/router/index.js (atau tempat Anda daftarkan event listener)
 
 window.addEventListener('unauthorized', () => {
     const currentRoute = router.currentRoute.value;

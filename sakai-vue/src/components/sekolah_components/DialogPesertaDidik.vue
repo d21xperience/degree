@@ -140,7 +140,7 @@ const fetchSiswa = async () => {
     const payload = {
         page: 1,
         perpage: 700,
-        schemaname: await store.getters['sekolahService/getTabeltenant']?.schemaName
+        schemaname: store.getters['sekolahService/getTabeltenant']?.schemaName
     };
     // console.log(payload)
     const results = await store.dispatch('sekolahService/fetchSiswa', payload);

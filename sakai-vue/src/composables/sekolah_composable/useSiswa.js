@@ -1,19 +1,31 @@
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
-import { useSemester } from './useSemester';
-import { useTableTenant } from './useTableTenant';
+
 export function useSiswa() {
+    const schemaname = computed(() => {
+        return store.getters['sekolahService/getTabeltenant']?.schemaname || null;
+    });
     const store = useStore();
     const siswaAktifList = ref([]);
-    const { schemaname } = useTableTenant();
-    const { initSelectedSemester, initSelectedTahunAjaran } = useSemester();
-    const fetchSiswaAktif = async (semesterId = null) => {
+    // const schemaname = computed(() => {
+    //     return store.getters['sekolahService/getTabeltenant']?.schemaname || null;
+    // });
+    // const initSelectedSemester = computed(store.getters['semesterService/getSelectedSemester']);
+    // const initSelectedTahunAjaran = computed(store.getters['semesterService/getSelectedTahunAjaran']);
+
+    // ACTION
+    const fetchSiswaAktif = async (semesterId = '') => {
+        if (semesterId === '') {
+            console.error(new Error('semester_id harus diisi'));
+            return;
+        }
+
         try {
             const requestData = {
                 schemaname: schemaname.value,
-                semesterId: semesterId || initSelectedSemester.value.semesterId
+                semesterId: semesterId
             };
-            const cachedData = await store.getters['siswaService/getSiswaAktif'];
+            const cachedData = store.getters['siswaService/getSiswaAktif'];
             const shouldFetchNewData = !cachedData || !cachedData?.peserta_didik?.length || cachedData.semester_id !== requestData.semesterId;
 
             let studentData = cachedData;
@@ -34,7 +46,7 @@ export function useSiswa() {
     const deleteSiswaAktif = async (anggotaRombelId) => {
         try {
             const payload = {
-                schemaname: schemaname.value,
+                schemaname: schemaname,
                 anggota_rombel_id: anggotaRombelId
             };
             const response = await store.dispatch('siswaService/createAnggotaKelas', payload);
@@ -47,7 +59,7 @@ export function useSiswa() {
     const deleteBatchSiswaAktif = async (anggotaRombelIds) => {
         try {
             const payload = {
-                schemaname: schemaname.value,
+                schemaname: schemaname,
                 anggota_rombel_id: anggotaRombelIds
             };
             const response = await store.dispatch('siswaService/deleteBatchAnggotaKelas', payload);
@@ -60,7 +72,7 @@ export function useSiswa() {
     // const addSiswaAktif = async (anggotaRombelIds) => {
     //     try {
     //         const payload = {
-    //             schemaname: schemaname.value,
+    //             schemaname: schemaname,
     //             anggota_rombel_id: anggotaRombelIds
     //         };
     //         const response = await store.dispatch('siswaService/deleteBatchAnggotaKelas', payload);
@@ -73,7 +85,7 @@ export function useSiswa() {
     // };
     const searchSiswaAktif = async (pesertaDidikId) => {
         try {
-            const response = await store.getters['siswaService/getSiswaAktif'];
+            const response = store.getters['siswaService/getSiswaAktif'];
             if (response) {
                 const siswa = response.peserta_didik.find((item) => item.pesertaDidikId.includes(pesertaDidikId));
                 return siswa;
@@ -83,11 +95,36 @@ export function useSiswa() {
             throw new Error('Gagal melakukan pencarian siswa aktif:', error);
         }
     };
-    const fetchBanyakSiswaByTingkatId = async (tingkatPendidikanId) => {
+    /**
+     *
+     * @param {String} rombonganBelajarId Wajib
+     * @param {String} semesterId Wajib
+     * @returns {Array}
+     */
+    const getSiswaAktifByKelasId = async (rombonganBelajarId = '', semesterId = '') => {
+        if (rombonganBelajarId == '' || semesterId == '') {
+            throw new Error('Parameter wajib disi');
+        }
+        try {
+            const cachedData = store.getters['siswaService/getSiswaAktif'];
+            if (cachedData) {
+                if (cachedData.semester_id === semesterId) {
+                    return cachedData.peserta_didik.filter((val) => val.rombonganBelajarId === rombonganBelajarId);
+                }
+            } else {
+                const anggotaKelas = await fetchSiswaAktif(semesterId);
+                return anggotaKelas.filter((val) => val.rombonganBelajarId === rombonganBelajarId);
+            }
+        } catch (error) {
+            console.error('Gagal mengambil data kelas:', error);
+        }
+    };
+
+    const fetchBanyakSiswaByTingkatId = async (tingkatPendidikanId, semesterId) => {
         try {
             const payload = {
-                schemaname: schemaname.value,
-                semester_id: `${initSelectedTahunAjaran.value?.tahunAjaranId}2`,
+                schemaname: schemaname,
+                semester_id: semesterId,
                 tingkat_pendidikan_id: tingkatPendidikanId
             };
             const res = await store.dispatch('siswaService/fetchBanyakSiswaByTingkatId', payload);
@@ -98,12 +135,12 @@ export function useSiswa() {
             throw new Error(`Gagal siswa berdasarkan tingkat: ${error.message}`);
         }
     };
-    const fetchBanyakSiswaByRombelId = async (rombelId) => {
+    const fetchBanyakSiswaByRombelId = async (semesterId, rombelId) => {
         // eslint-disable-next-line no-useless-catch
         try {
             const payload = {
-                schemaname: schemaname.value,
-                semester_id: `${initSelectedSemester.value?.semesterId}`,
+                schemaname: schemaname,
+                semester_id: semesterId,
                 rombongan_belajar_id: rombelId
             };
             // return
@@ -120,6 +157,7 @@ export function useSiswa() {
         deleteBatchSiswaAktif,
         searchSiswaAktif,
         fetchBanyakSiswaByTingkatId,
-        fetchBanyakSiswaByRombelId
+        fetchBanyakSiswaByRombelId,
+        getSiswaAktifByKelasId
     };
 }

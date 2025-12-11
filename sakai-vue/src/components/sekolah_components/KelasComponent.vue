@@ -1,28 +1,28 @@
 <script setup>
 import { useKelas } from '@/composables/sekolah_composable/useKelas';
-import { useSemester } from '@/composables/sekolah_composable/useSemester';
-import { useToast } from 'primevue/usetoast';
 
 import { computed, onMounted, ref, watch } from 'vue';
 const kelasOptions = ref([]);
-const props = defineProps(['modelValue']); // props dari parent
+const props = defineProps({
+    modelValue: {
+        type: [Object, String, Number, null],
+        default: null
+    },
+    initSelectedSemester: {
+        type: Object,
+        required: true
+    }
+}); // props dari parent
 const emit = defineEmits(['update:modelValue']); // emit update ke parent
 const loadingKelas = ref(false);
-const { fetchKelas } = useKelas();
-const { initSelectedSemester } = useSemester();
+const { fetchKelas, isFetching, isError } = useKelas();
+// const { initSelectedSemester } = useSemester();
 // const internalValue = ref();
-const toast = useToast();
 
 const initial = async () => {
-    try {
-        const response = await fetchKelas();
-        if (response.status) {
-            kelasOptions.value = response.kelas;
-            toast.add({ severity: 'success', summary: 'Success', detail: `${response.message}`, life: 3000 });
-        }
-    } catch (error) {
-        toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengambil kelas: ${error}`, life: 3000 });
-    }
+    const response = await fetchKelas(props.initSelectedSemester);
+    console.log(response);
+    kelasOptions.value = response;
 };
 // watch(internalValue, (newVal) => {
 //     emit('update:modelValue', newVal);
@@ -33,7 +33,7 @@ const internalValue = computed({
     set: (value) => emit('update:modelValue', value)
 });
 
-watch(initSelectedSemester, async (newVal) => {
+watch(props.initSelectedSemester, async (newVal) => {
     console.log(newVal);
     if (newVal) {
         loadingKelas.value = true;
@@ -43,7 +43,6 @@ watch(initSelectedSemester, async (newVal) => {
             await initial();
         } catch (error) {
             console.error(error);
-            toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengambil kelas: ${error}`, life: 3000 });
         } finally {
             loadingKelas.value = false;
         }
@@ -56,5 +55,15 @@ onMounted(async () => {
 </script>
 
 <template>
-    <Select v-model="internalValue" :options="kelasOptions" option-label="nmKelas" :placeholder="!loadingKelas ? 'Pilih Kelas...' : 'Memuat data..'" fluid checkmark :show-clear="true" :loading="loadingKelas" />
+    <div class="flex min-w-72 items-center space-x-2">
+        <template v-if="isFetching">
+            <span class="text-sm text-gray-500">Memuat...</span>
+        </template>
+        <template v-else-if="isError">
+            <span class="text-sm text-red-500">Gagal memuat</span>
+        </template>
+        <template v-else>
+            <Select v-model="internalValue" :options="kelasOptions" option-label="nmKelas" :placeholder="!loadingKelas ? 'Pilih Kelas...' : 'Memuat data..'" fluid checkmark :show-clear="true" :loading="loadingKelas" />
+        </template>
+    </div>
 </template>

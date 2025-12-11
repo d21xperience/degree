@@ -21,7 +21,7 @@ export async function authGuard(to, from, next) {
 
 export async function redirectIfAuthenticated(to, from, next) {
     // if (store.getters['authService/isAuthenticated']) {
-    //     const nmSekolah = await store.getters['authService/getSekolah']?.namaSekolah;
+    //     const nmSekolah = store.getters['authService/getSekolah']?.namaSekolah;
     //     return next({ name: 'dashboard', params: { sekolah: nmSekolah.toLowerCase().replace(/\s+/g, '') } });
     // }
     // return next();

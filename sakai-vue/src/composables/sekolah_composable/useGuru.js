@@ -1,21 +1,29 @@
 import { ref } from 'vue';
 import { useStore } from 'vuex';
-import { useSemester } from './useSemester';
-import { useTableTenant } from './useTableTenant';
-export function useGuru() {
+
+/**
+ *
+ * @param {String} schemaname Wajib
+ * @param {Object} initSelectedSemester Wajib
+ * @returns
+ */
+export function useGuru(schemaname, initSelectedSemester) {
     const store = useStore();
-    const { schemaname } = useTableTenant();
-    const { initSelectedSemester } = useSemester();
+    // const schemaname = computed(() => {
+    //     return store.getters['sekolahService/getTabeltenant']?.schemaname || null;
+    // });
+    // const initSelectedSemester = computed(() => store.getters['semesterService/getSelectedSemester']);
     const guruList = ref([]);
     const guruTerdaftarList = ref([]);
 
+    // ACTION
     const fetchGuruTerdaftar = async () => {
         try {
             const payload = {
                 tahunAjaranId: initSelectedSemester.value?.tahunAjaranId,
                 schemaname: schemaname.value
             };
-            let res = await store.getters['guruService/getPTKTerdaftar'];
+            let res = store.getters['guruService/getPTKTerdaftar'];
             // console.log('useguruService/fetchGuruTerdaftar', res);
             if (!res || res.length == 0) {
                 // console.log(payload);

@@ -21,13 +21,13 @@ const { currentWallet, loadWalletInfo } = useWalletInfo();
 const showPasswordDialog = ref(false);
 const password = ref('');
 
-const handlePasswordSubmit = (submittedPassword) => {
-    password.value = submittedPassword;
-    // Here you would typically use the password for further actions, e.g., actual deployment
-    console.log('Password submitted:', password.value);
-    // For now, we'll just close the dialog
-    showPasswordDialog.value = false;
-};
+// const handlePasswordSubmit = (submittedPassword) => {
+//     password.value = submittedPassword;
+//     // Here you would typically use the password for further actions, e.g., actual deployment
+//     console.log('Password submitted:', password.value);
+//     // For now, we'll just close the dialog
+//     showPasswordDialog.value = false;
+// };
 
 const contractRequest = reactive({
     name: 'Default Contract',

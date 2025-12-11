@@ -9,7 +9,7 @@ const mutations = {
         state.tabelKelas = value;
         localStorage.setItem('tabelKelas', JSON.stringify(value));
     },
-    RESET_STATE(state) {
+    resetState(state) {
         state.tabelKelas = null;
     }
 };
@@ -21,6 +21,7 @@ const actions = {
 
     async fetchKelas({ commit }, payload) {
         try {
+            console.log('----[kelasService]----', payload);
             const response = await api.get(`/ss/${payload.schemaname}/kelas`, {
                 params: {
                     semester_id: payload.semester_id,
@@ -35,8 +36,7 @@ const actions = {
             commit('SET_TABELKELAS', data);
             return response.data;
         } catch (error) {
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            console.error('Gagal mengambil kelas:', error);
         }
     },
 
@@ -46,9 +46,7 @@ const actions = {
             console.log('sekolahService/createKelas', response);
             return response.data;
         } catch (error) {
-            console.error('Gagal membuat kelas:', error);
             console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
         }
     },
     async editKelas({ commit }, payload) {
@@ -59,7 +57,7 @@ const actions = {
             return response.data;
         } catch (error) {
             // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
-            console.error('Gagal update kelas:', error);
+            console.error('Gagal edit kelas:', error);
             return null;
         }
     },

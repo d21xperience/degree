@@ -182,7 +182,7 @@ const architecture = ref([
 
             <label class="font-bold">Tipe Jaringan</label>
             <!-- <InputText v-model.trim="editingItem.Type" required /> -->
-            <NetworkTypeComponent v-model:modelValue="editingItem.Type" :initial-value="editingItem.Type" />
+            <NetworkTypeComponent v-model:model-value="editingItem.Type" :initial-value="editingItem.Type" />
 
             <label class="font-bold">Nama Jaringan</label>
             <InputText v-model.trim="editingItem.Name" required />

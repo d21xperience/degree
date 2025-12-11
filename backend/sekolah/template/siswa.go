@@ -36,7 +36,7 @@ func GetSiswaColumns() []TemplateColumn {
 			ShowDropDown:     true,
 			ShowErrorMessage: true,
 			ErrorTitle:       utils.StringToPointer("Input Agama Salah!"),
-			Error:            utils.StringToPointer("Pilih agama dari daftar"),
+			Error:            utils.StringToPointer("Pilih agama sesuai daftar input Agama"),
 			Sqref:            "I2:I1048576",
 			PromptTitle:      utils.StringToPointer("Input Agama"),
 			ShowInputMessage: true,

@@ -1,0 +1,6 @@
+{
+    "Console Debug": {
+        "prefix": "con",
+        "body": ["console.log('-[${1:Name}]-',${2:val})"]
+    }
+}

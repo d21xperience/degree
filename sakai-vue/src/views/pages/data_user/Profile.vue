@@ -152,14 +152,14 @@ import { useToast } from 'primevue/usetoast';
 import { reactive, ref } from 'vue';
 
 // Components PrimeVue
-import Avatar from 'primevue/avatar';
-import Button from 'primevue/button';
-import Card from 'primevue/card';
-import Chip from 'primevue/chip';
-import InputText from 'primevue/inputtext';
-import Select from 'primevue/Select';
-import Tag from 'primevue/tag';
-import Textarea from 'primevue/textarea';
+// import Avatar from 'primevue/avatar';
+// import Button from 'primevue/button';
+// import Card from 'primevue/card';
+// import Chip from 'primevue/chip';
+// import InputText from 'primevue/inputtext';
+// import Select from 'primevue/Select';
+// import Tag from 'primevue/tag';
+// import Textarea from 'primevue/textarea';
 
 const toast = useToast();
 const loading = ref(false);

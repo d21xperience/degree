@@ -50,7 +50,11 @@ func StartServer() {
 	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		UploadService.UploadFileHTTP(w, r)
 	})
-	method, pattern = createPattern("GET", "api", "v1", "ss", "download", "template")
+	// method, pattern = createPattern("GET", "api", "v1", "ss", "download", "template")
+	// mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
+	// 	UploadService.DownloadTemplateHTTP(w, r)
+	// })
+	method, pattern = createPattern("POST", "api", "v1", "ss", "download", "template")
 	mux.Handle(method, pattern, func(w http.ResponseWriter, r *http.Request, pathParams map[string]string) {
 		UploadService.DownloadTemplateHTTP(w, r)
 	})

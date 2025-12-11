@@ -61,15 +61,16 @@ func (h *HTTPHandler) HandlerLoginHTTP() func(w http.ResponseWriter, r *http.Req
 		}
 
 		// ✅ Set cookies (HTTP-only, Secure, SameSite)
-		setTokenCookie(w, "access_token", resp.AccessToken, 15*time.Minute)
+		// setTokenCookie(w, "access_token", resp.AccessToken, 30*time.Minute)
+		setTokenCookie(w, "access_token", resp.AccessToken, time.Duration(resp.ExpiresIn))
 		setTokenCookie(w, "refresh_token", resp.RefreshToken, 7*24*time.Hour)
 
 		// ✅ Hanya kirim data user, bukan token (aman)
 		json.NewEncoder(w).Encode(map[string]any{
-			"status":  true,
-			"message": "logged on",
-			"user_id": resp.UserId,
-			"email":   resp.Email,
+			"status":     true,
+			"message":    "logged on",
+			"user_id":    resp.UserId,
+			"expires_in": resp.ExpiresIn,
 			// "email":   resp.Email,
 		})
 	}
@@ -94,7 +95,7 @@ func (h *HTTPHandler) HandlerRefreshHTTP() func(w http.ResponseWriter, r *http.R
 		// ✅ Kirim user info (opsional)
 		json.NewEncoder(w).Encode(map[string]string{
 			"user_id": resp.AccessToken,
-			// "email":   resp.Email,
+			// "expires_in": utils.ToString(resp.ExpireIn),
 		})
 	}
 }

@@ -1,30 +1,22 @@
 import api from '../api';
-// const decodeToken = (token) => {
-//     try {
-//         const payload = JSON.parse(atob(token.split('.')[1]));
-//         return {
-//             id: payload.user_id,
-//             username: payload.username || '',
-//             name: payload.name || '',
-//             roles: payload.roles || '',
-//             asalSekolah: payload.asal_sekolah || '',
-//             sekolah_tenant_id: payload.sekolah_tenant_id || ''
-//             // exp: payload.exp ? new Date(payload.exp * 1000) : null,
-//             // raw: payload // simpan semua jika perlu
-//         };
-//     } catch (e) {
-//         console.error('Gagal decode token:', e);
-//         return null;
-//     }
-// };
 
 const state = {
-    user: null, // { user_id, email, ... }
+    user: null,
     isAuthenticated: false,
-    isCheckingAuth: true // untuk menampilkan loading saat cek session
+    isCheckingAuth: true, // untuk menampilkan loading saat cek session
+    expiresAt: JSON.parse(localStorage.getItem('expiresAt')) || null,
+    expiresIn: JSON.parse(localStorage.getItem('expiresIn')) || null,
+    sIdleWarning: false,
+    idleCountdown: 0
 };
 
 const mutations = {
+    SET_TOKEN_EXPIRY(state, { expiresIn, expiresAt }) {
+        state.expiresIn = expiresIn; // simpan durasi (detik)
+        localStorage.setItem('expiresIn', JSON.stringify(expiresIn));
+        state.expiresAt = expiresAt; // simpan timestamp (ms)
+        localStorage.setItem('expiresAt', JSON.stringify(expiresAt));
+    },
     SET_USER(state, user) {
         state.user = user;
         // localStorage.setItem('user', JSON.stringify(user)); // Simpan user ke localStorage
@@ -40,6 +32,11 @@ const mutations = {
     },
     SET_CHECKING(state, value) {
         state.isCheckingAuth = value;
+    },
+    // 🔴 Mutations untuk idle
+    SET_IDLE_WARNING(state, { isWarning, countdown }) {
+        state.isIdleWarning = isWarning;
+        state.idleCountdown = countdown;
     },
     SET_USER_ROLE(state, value) {
         state.userRole = value;
@@ -64,22 +61,25 @@ const mutations = {
     RESET(state) {
         state.user = null;
         state.sekolah = null;
+        state.expiresIn = null; // simpan durasi (detik)
+        state.expiresAt = null;
         localStorage.clear(); // opsional – pilih kunci spesifik
     }
 };
 
 const actions = {
-    async checkAuth({ commit }) {
+    async checkAuth({ commit, dispatch }) {
         commit('SET_CHECKING', true);
         try {
             const { data } = await api.get('/as/auth/web/me');
             commit('SET_USER', data);
         } catch (err) {
             // Jika 401 atau error jaringan → anggap tidak login
-            commit('CLEAR_USER');
-            commit('RESET');
-            commit('sekolahService/resetState', null, { root: true });
-            commit('semesterService/resetState', null, { root: true });
+            // commit('CLEAR_USER');
+            // commit('RESET');
+            // commit('sekolahService/resetState', null, { root: true });
+            // commit('semesterService/resetState', null, { root: true });
+            await dispatch.reset;
         } finally {
             commit('SET_CHECKING', false);
         }
@@ -89,22 +89,39 @@ const actions = {
     async login({ commit, dispatch }, credentials) {
         try {
             const { data } = await api.post('/as/auth/web/login', credentials);
+            // Ambil expiresIn DARI RESPON LOGIN
+            const expiresIn = data.expires_in || data.expiresIn || 1800; // support snake/kebab
+
+            // Simpan ke state (bisa via mutation khusus, atau langsung)
+            commit('SET_TOKEN_EXPIRY', {
+                expiresIn,
+                expiresAt: Date.now() + expiresIn * 1000
+            });
             await dispatch('checkAuth');
+            await dispatch('configureIdleDetection');
             return data;
         } catch (error) {
             console.log(error);
             throw error;
         }
     },
-    async refreshToken() {
+    async refreshToken({ commit, dispatch }) {
         try {
             const { data } = await api.post('/as/auth/web/refresh');
-            await actions.checkAuth();
+
+            const expiresIn = data.expires_in || data.expiresIn || 1800;
+            commit('SET_TOKEN_EXPIRY', {
+                expiresIn,
+                expiresAt: Date.now() + expiresIn * 1000
+            });
+
+            await dispatch('checkAuth');
+            await dispatch('configureIdleDetection'); // ✅ perbarui idle timeout
+
             return data;
         } catch (err) {
-            console.warn('Refresh token invalid/expired. Logging out...');
-            await actions.logout(); // fallback logout
-            throw err.response?.data || { message: 'Refresh failed' };
+            await dispatch('logout');
+            throw err;
         }
     },
     async me() {
@@ -117,30 +134,73 @@ const actions = {
             throw err.response?.data; //|| { message: 'Unauthorized' };
         }
     },
+    configureIdleDetection({ state }) {
+        console.log('[DEBUG] isAuthenticated:', state.isAuthenticated);
+        console.log('[DEBUG] expiresAt:', state.expiresAt);
+        // if (!state.isAuthenticated || !state.expiresAt) return;
 
-    /*—— BOOTSTRAP di App.vue created() ——*/
-    // async bootstrap({ commit }) {
-    //     try {
-    //         const data = await actions.me();
-    //         if (data.status) {
-    //             commit('SET_USER', data.user);
-    //             commit('SET_USER_ROLE', data.user.role);
-    //             commit('SET_SEKOLAH', data.sekolahTenant);
-    //         }
-    //         return true;
-    //     } catch (_) {
-    //         commit('RESET'); // clear user if not logged in
-    //         return false;
-    //     }
-    // },
-    async logout({ commit }) {
+        // // 🔑 Hitung idle timeout = 90% dari sisa waktu
+        // const now = Date.now();
+        // const timeLeft = state.expiresAt - now;
+        // if (timeLeft <= 0) return;
+
+        // const idleTimeout = Math.min(
+        //     timeLeft * 0.9, // 90% dari sisa waktu
+        //     25 * 60 * 1000 // maks 25 menit
+        // );
+
+        // // Kirim ke idle detection
+        // window.dispatchEvent(
+        //     new CustomEvent('idle-configure', {
+        //         detail: { timeout: idleTimeout }
+        //     })
+        // );
+        if (!state.isAuthenticated || !state.expiresAt) return;
+
+        const timeLeft = state.expiresAt - Date.now();
+        if (timeLeft <= 0) return;
+
+        const timeout = Math.min(timeLeft * 0.9, 25 * 60 * 1000);
+
+        // 🔥 Kirim event ke App.vue
+        window.dispatchEvent(
+            new CustomEvent('idle-configure', {
+                detail: { timeout }
+            })
+        );
+    },
+    // 🔴 Action: mulai idle detection
+    // eslint-disable-next-line no-unused-vars
+    startIdleDetection({ dispatch }) {
+        // Hanya mulai jika sudah login
+        if (!state.isAuthenticated) return;
+
+        // Gunakan event untuk komunikasi (hindari direct import)
+        window.dispatchEvent(new CustomEvent('idle-start'));
+    },
+
+    // 🔴 Action: logout karena idle
+    async logoutDueToIdle({ dispatch }) {
+        await dispatch('logout');
+        // Redirect hanya jika di protected route
+        const router = window.$router;
+        if (router) {
+            const route = router.currentRoute.value;
+            if (route.meta?.requiresAuth) {
+                router.push({ name: 'login', query: { reason: 'idle' } });
+            }
+        }
+    },
+    // eslint-disable-next-line no-unused-vars
+    async logout({ commit, dispatch }) {
         try {
             await api.post('/as/auth/web/logout');
         } finally {
-            commit('CLEAR_USER');
-            commit('RESET');
-            commit('sekolahService/resetState', null, { root: true });
-            commit('semesterService/resetState', null, { root: true });
+            await dispatch('reset');
+            // commit('CLEAR_USER');
+            // commit('RESET');
+            // commit('sekolahService/resetState', null, { root: true });
+            // commit('semesterService/resetState', null, { root: true });
         }
     },
     // eslint-disable-next-line no-unused-vars
@@ -148,6 +208,17 @@ const actions = {
         const response = await api.post('/as/auth:register', payload);
         return response.data;
     },
+
+    async reset({ commit }) {
+        commit('CLEAR_USER');
+        commit('RESET');
+        commit('sekolahService/resetState', null, { root: true });
+        commit('semesterService/resetState', null, { root: true });
+        commit('kurikulumService/resetState', null, { root: true });
+        commit('siswaService/resetState', null, { root: true });
+        commit('kelasService/resetState', null, { root: true });
+    },
+
     // Fitur baru ceknpsn
     // eslint-disable-next-line no-unused-vars
     async ceknpsn({ commit }, npsn) {

@@ -1,38 +1,99 @@
 <script setup>
-import { useSemester } from '@/composables/sekolah_composable/useSemester';
-import { useToast } from 'primevue/usetoast';
-import { computed, onMounted, ref } from 'vue';
-const { listSemester, selectedSemester } = useSemester();
-const semesterOptions = ref([]);
-const props = defineProps(['modelValue', 'isDisabled']); // props dari parent
-const emit = defineEmits(['update:modelValue']); // emit update ke parent
-const toast = useToast();
+import { computed, ref, toRefs, watch } from 'vue';
+import { useStore } from 'vuex';
 
-// const internalValue = ref();
+// Store
+const store = useStore();
 
-// watch(internalValue, (newVal) => {
-//     emit('update:modelValue', newVal);
-// });
-
-const internalValue = computed({
-    get: () => props.modelValue,
-    set: (value) => emit('update:modelValue', value)
+// Props & Emits
+const props = defineProps({
+    modelValue: {
+        type: [String, Number, Object],
+        default: null
+    },
+    isDisabled: {
+        type: Boolean,
+        default: false
+    },
+    tahunAjaranId: {
+        type: [String, Number],
+        default: null
+    }
 });
 
-const initial = async () => {
-    try {
-        semesterOptions.value = listSemester.value;
-        // console.log(semesterOptions.value);
-        internalValue.value = selectedSemester;
-    } catch (error) {
-        toast.add({ severity: 'error', summary: 'Failled', detail: `Gagal mengambil data semester: ${error}`, life: 3000 });
+const emit = defineEmits(['update:modelValue']);
+
+// Destructure props with toRefs for reactivity
+const { modelValue, isDisabled, tahunAjaranId } = toRefs(props);
+
+// Computed
+const semesterList = computed(() => store.getters['semesterService/getSemester']);
+
+// Reactive state
+const semesterOptions = ref([]);
+const internalValue = ref(modelValue.value);
+
+// Watchers
+// Watch for external modelValue changes
+watch(modelValue, (newValue) => {
+    if (newValue !== internalValue.value) {
+        internalValue.value = newValue;
     }
-};
-onMounted(async () => {
-    await initial();
+});
+
+// Watch for internalValue changes to emit to parent
+watch(internalValue, (newValue) => {
+    if (newValue !== modelValue.value) {
+        emit('update:modelValue', newValue);
+    }
+});
+const isLoading = ref(false);
+// Watch for tahunAjaranId changes to filter options
+watch(
+    tahunAjaranId,
+    (newTahunAjaranId) => {
+        if (!newTahunAjaranId) {
+            semesterOptions.value = [];
+            return;
+        }
+        semesterOptions.value = semesterList.value.filter((semester) => semester.tahunAjaranId == newTahunAjaranId);
+    },
+    { immediate: true }
+);
+
+// Optional: Reset internal value when tahunAjaranId changes
+watch(tahunAjaranId, () => {
+    internalValue.value = null;
 });
 </script>
 
 <template>
-    <Select v-model="internalValue" :options="semesterOptions" option-label="namaSemester" placeholder="Semester" fluid checkmark :disabled="props.isDisabled" class="w-full md:w-56" />
+    <div class="w-full">
+        <!-- Loading State -->
+        <div v-if="isLoading" class="text-sm text-gray-500">Memuat...</div>
+
+        <!-- Error State -->
+        <!-- <div v-else-if="error" class="text-sm text-red-500">Gagal memuat data</div> -->
+
+        <!-- Normal State -->
+        <Select
+            v-else
+            v-model="internalValue"
+            :options="semesterOptions"
+            option-label="namaSemester"
+            placeholder="Pilih Semester"
+            :disabled="isDisabled"
+            class="w-full md:w-56"
+            fluid
+            checkmark
+            :class="{ 'opacity-50 cursor-not-allowed': isDisabled }"
+        />
+
+        <!-- Debug info (remove in production) -->
+        <!-- <div v-if="process.env.NODE_ENV === 'development'" class="mt-2 text-xs text-gray-400">Options: {{ semesterOptions.length }}, Selected: {{ internalValue }}</div> -->
+    </div>
 </template>
+
+<style scoped>
+/* Optional: Add any component-specific styles here */
+</style>

@@ -17,6 +17,7 @@ import (
 	"auth_service/utils"
 
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
@@ -64,11 +65,6 @@ func NewAuthServiceServer(jwtManager *jwt.Manager) *AuthServiceServer {
 	}
 }
 
-// type SchoolRegistration struct {
-// 	SchoolName string `json:"school_name"`
-// 	AdminEmail string `json:"admin_email"`
-// }
-
 func (s *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	// Validate credentials
 	username := req.GetUsername()
@@ -99,8 +95,8 @@ func (s *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*p
 	}
 
 	return &pb.LoginResponse{
-		AccessToken: accessToken,
-		// ExpiresAt:    exp,
+		AccessToken:  accessToken,
+		ExpiresIn:    int64(s.jwtManager.AccessTokenExp.Seconds()),
 		RefreshToken: refreshToken,
 		UserId:       user.ID,
 		Email:        user.Email,
@@ -118,9 +114,6 @@ func (s *AuthServiceServer) AuthMe(ctx context.Context, _ *pb.Empty) (*pb.User, 
 	// ✅ Ambil data user dari DB/repo
 	user, err := s.repoUser.FindByID(userID)
 	if err != nil {
-		// if errors.Is(err, domain.ErrUserNotFound) {
-		// 	return nil, status.Error(codes.Unauthenticated, "user not found") // bisa jadi token palsu
-		// }
 		return nil, status.Error(codes.Internal, "failed to fetch user")
 	}
 
@@ -143,6 +136,75 @@ func (s *AuthServiceServer) AuthMe(ctx context.Context, _ *pb.Empty) (*pb.User, 
 			Npsn:        asalSekolah.NPSN,
 			EnkripId:    asalSekolah.EnkripID,
 		},
+	}, nil
+}
+
+// internal/server/auth_service.go
+func (s *AuthServiceServer) RefreshToken(ctx context.Context, _ *pb.RefreshRequest) (*pb.LoginResponse, error) {
+	// ✅ 1. Ambil refresh_token dari context (sudah di-inject oleh WithMetadata)
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "no metadata")
+	}
+
+	refreshTokens := md["x-refresh-token"] // ← sesuaikan dengan key di WithMetadata
+	if len(refreshTokens) == 0 {
+		return nil, status.Error(codes.Unauthenticated, "missing refresh token")
+	}
+
+	refreshTokenStr := refreshTokens[0]
+	if refreshTokenStr == "" {
+		return nil, status.Error(codes.Unauthenticated, "empty refresh token")
+	}
+
+	// ✅ 2. Verifikasi refresh token
+	token, err := s.jwtManager.VerifyRefreshToken(refreshTokenStr)
+	if err != nil {
+		log.Printf("Refresh token verification failed: %v", err)
+		return nil, status.Error(codes.Unauthenticated, "invalid or expired refresh token")
+	}
+
+	// ✅ 3. Ekstrak user_id dari klaim
+	claims, ok := token.Claims.(jwt.Claims)
+	if !ok {
+		return nil, status.Error(codes.Unauthenticated, "invalid token claims")
+	}
+
+	// userID, ok := claims["user_id"].(string)
+	userID := claims.UserID
+	// if !ok || userID == "" {
+	// 	return nil, status.Error(codes.Unauthenticated, "user_id not found in token")
+	// }
+
+	// ✅ 4. (Opsional) Validasi tambahan: cek apakah user masih aktif di DB
+	user, err := s.repoUser.FindByID(userID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, status.Error(codes.Unauthenticated, "user not found")
+		}
+		return nil, status.Error(codes.Internal, "failed to fetch user")
+	}
+	// if !user.IsActive {
+	// 	return nil, status.Error(codes.Unauthenticated, "user account is inactive")
+	// }
+
+	// ✅ 5. ROTASI: generate pasangan token BARU
+	accessToken, newRefreshToken, err := s.jwtManager.GenerateTokens(user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "failed to generate new tokens")
+	}
+
+	// ✅ 6. (Opsional) Revoke refresh token lama
+	// Contoh: simpan di Redis blacklist selama masa berlaku lama
+	// go s.revokeToken(refreshTokenStr, s.jwtManager.RefreshTokenExp)
+
+	// ✅ 7. Kembalikan response
+	return &pb.LoginResponse{
+		AccessToken:  accessToken,
+		RefreshToken: newRefreshToken, // ← token BARU
+		ExpiresIn:    int64(s.jwtManager.AccessTokenExp.Seconds()),
+		UserId:       user.ID,
+		Email:        user.Email,
 	}, nil
 }
 

@@ -13,11 +13,14 @@ import (
 )
 
 type ParamTemplate struct {
-	templateType string
-	schemaname   string
-	filePath     string
-	semesterId   string
-	rombelId     string
+	templateType        string
+	schemaname          string
+	filePath            string
+	semesterId          string
+	tahunAjaranId       string
+	KurikulumId         string
+	RombonganBelajarId  string
+	TingkatPendidikanId string
 }
 
 // Fungsi untuk membaca file Excel dan memproses data berdasarkan jenis
@@ -343,14 +346,19 @@ func GenerateTemplateV2(param ParamTemplate, db *gorm.DB) (*excelize.File, error
 	f.SetSheetName("Sheet1", sheetName)
 
 	dataTemplate := &template.DataTemplate{
-		TemplateType:       param.templateType,
-		Schemaname:         param.schemaname,
-		TahunAjaranId:      param.semesterId,
-		RombonganBelajarId: param.rombelId,
-		SemesterId:         param.semesterId,
+		TemplateType:        param.templateType,
+		Schemaname:          param.schemaname,
+		TahunAjaranId:       param.tahunAjaranId,
+		SemesterId:          param.semesterId,
+		KurikulumId:         param.KurikulumId,
+		RombonganBelajarId:  param.RombonganBelajarId,
+		TingkatPendidikanId: param.TingkatPendidikanId,
 	}
 
-	columns, exists := template.GetTemplateColumns(dataTemplate)
+	columns, exists, err := template.GetTemplateColumns(dataTemplate, db)
+	if err != nil {
+		return nil, fmt.Errorf("gagal mengambil data template: %w", err)
+	}
 	if !exists {
 		return nil, fmt.Errorf("template type %s tidak ditemukan", param.templateType)
 	}

@@ -1,49 +1,14 @@
-<script setup>
-import TahunAjaranComponent from '@/components/sekolah_components/TahunAjaranComponent.vue';
-import { useSemester } from '@/composables/sekolah_composable/useSemester';
-// import LoadingOverlay from '@/components/LoadingOverlay.vue';
-// import { isLoading } from '@/router';
-import { computed, reactive, ref } from 'vue';
-import { useRoute } from 'vue-router';
-const { selectedSemester } = useSemester();
-// const { fetchTabelTenant } = useTableTenant();
-const route = useRoute();
-// =====================================
-const isDisabled = computed(() => route.meta.disableSelect);
-const namaRoute = computed(() => route.meta.namaRoute);
-
-// const tabelTenant = ref(null);
-
-// ==============================
-// onMounted(async () => {
-//     // tabelTenant.value = await fetchTabelTenant();
-// });
-
-const isCompleted = ref(false);
-const listDataPersiapan = reactive([
-    {
-        id: 0,
-        keterangan: 'Semester',
-        link: 'infoSekolah'
-    },
-    {
-        id: 1,
-        keterangan: 'Kompetensi keahlian dilayani',
-        link: 'infoSekolah'
-    }
-]);
-</script>
-
 <template>
     <div>
-        <div v-if="isCompleted || route.name == 'infoSekolah'">
+        <!-- {{ cekTahunajaranId || '' }} -->
+        <div v-if="isCompleted || route.name == 'infoSekolah' || route.name == 'semesterInfo'">
             <div class="flex justify-between items-center mb-2">
                 <div class="text-2xl font-semibold">
                     Data <span v-show="namaRoute">{{ `${namaRoute}` }}</span>
                 </div>
                 <div class="md:flex md:items-center">
                     <!-- <div class="min-w-32">Tahun Pelajaran</div> -->
-                    <TahunAjaranComponent v-model="selectedSemester" :is-disabled="isDisabled" />
+                    <TahunAjaranComponent v-model:model-value="cekTahunajaranId" :is-disabled="isDisabled" />
                 </div>
             </div>
             <div class="card">
@@ -60,12 +25,64 @@ const listDataPersiapan = reactive([
                 <p class="text-gray-700">Silakan lengkapi data di bawah ini terlebih dahulu pada menu <strong>Data Sekolah.</strong></p>
                 <div class="flex">
                     <ol class="list-decimal list-inside">
-                        <li v-for="(value, index) in listDataPersiapan" :key="index" class="mb-2">
-                            <router-link :to="{ name: value.link }" class="font-medium rounded-md hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition">{{ value.keterangan }}</router-link>
-                        </li>
+                        <router-link :to="{ name: 'infoSekolah', query: { lengkapi: 2 } }" class="font-medium rounded-md hover:text-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition"
+                            >Kompetensi keahlian dilayani</router-link
+                        >
                     </ol>
                 </div>
             </div>
         </div>
+
+        <!-- Global Dialog (cukup 1x di App.vue) -->
+        <DialogStatus v-model="dialog.visible" :type="dialog.type" :title="dialog.title" :message="dialog.message" :button-label="dialog.buttonLabel" @confirm="dialog.onConfirm" />
     </div>
 </template>
+
+<script setup>
+import TahunAjaranComponent from '@/components/sekolah_components/TahunAjaranComponent.vue';
+import { useKategoriSekolah } from '@/composables/sekolah_composable/useKategoriSekolah';
+import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
+import { useDialogStatus } from '@/composables/useDialogStatus';
+import store from '@/store';
+import { computed, provide, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+const route = useRoute();
+
+// Mendapatkan url parameter
+// =====================================
+const isDisabled = computed(() => route.meta.disableSelect);
+const namaRoute = computed(() => route.meta.namaRoute);
+// =====================================
+const cekTahunajaranId = ref(null);
+const isCompleted = computed(() => store.getters['sekolahService/getIsKategoriSekolahCompleted']);
+const user = computed(() => store.getters['authService/user']);
+const schemaname = computed(() => {
+    return store.getters['sekolahService/getTabeltenant']?.schemaname || null;
+});
+
+const { currentSekolah } = useSekolah({ schemaname: schemaname.value, autoload: true });
+const { fetchKategoriSekolah } = useKategoriSekolah(schemaname.value);
+
+// Mengirimkan data ke seluruh keluarga
+// const currentSekolah = computed(() => store.getters['sekolahService/getSekolah']);
+provide('sekolahSlugProvider', user.value.sekolahSlug);
+provide('sekolahProvider', currentSekolah);
+provide('schemanameProvider', schemaname.value);
+provide(
+    'tahunAjaranProvider',
+    computed(() => cekTahunajaranId.value)
+);
+// console.log('currentSekolah!!', currentSekolah.value);
+watch(cekTahunajaranId, (newVal) => {
+    if (newVal) {
+        fetchKategoriSekolah(newVal.label);
+    }
+});
+const { dialogState } = useDialogStatus();
+const dialog = computed({
+    get: () => dialogState.value,
+    set: (val) => {
+        dialogState.value.visible = val.visible;
+    }
+});
+</script>

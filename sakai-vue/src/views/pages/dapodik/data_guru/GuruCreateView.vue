@@ -1,7 +1,7 @@
 <script setup>
 import router from '@/router';
 import { debounce } from 'lodash-es';
-import { onMounted, ref, watch } from 'vue';
+import { inject, onMounted, ref, watch } from 'vue';
 
 // ================================
 // composable
@@ -12,9 +12,11 @@ const { fetchGelarAkademik, selectedGelarAkademikDepan, selectedGelarAkademikBel
 import AgamaComponent from '@/components/general/AgamaComponent.vue';
 import JKComponent from '@/components/general/JKComponent.vue';
 import { useGuru } from '@/composables/sekolah_composable/useGuru';
-import { useSemester } from '@/composables/sekolah_composable/useSemester';
+// import { useSemester } from '@/composables/sekolah_composable/useSemester';
 import { useRoute } from 'vue-router';
-const { initSelectedTahunAjaran } = useSemester();
+const { semesterProvider } = inject('services');
+
+const { initSelectedTahunAjaran } = semesterProvider;
 const { searchGuruTerdaftar, updateGuruTerdaftar, addGuruTerdaftar, guruTerdaftarLoading } = useGuru();
 // Model Peserta Didik Pelengkap
 const tabel_ptk_terdaftar = ref({

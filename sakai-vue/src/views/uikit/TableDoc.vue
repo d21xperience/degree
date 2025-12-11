@@ -289,7 +289,7 @@ function calculateCustomerTotal(name) {
 
     <div class="card">
         <div class="font-semibold text-xl mb-4">Row Expansion</div>
-        <DataTable v-model:expandedRows="expandedRows" :value="products" data-key="id" table-style="min-width: 60rem">
+        <DataTable v-model:expanded-rows="expandedRows" :value="products" data-key="id" table-style="min-width: 60rem">
             <template #header>
                 <div class="flex flex-wrap justify-end gap-2">
                     <Button text icon="pi pi-plus" label="Expand All" @click="expandAll" />

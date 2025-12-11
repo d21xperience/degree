@@ -117,7 +117,7 @@ const actions = {
             throw error;
         }
     },
-
+    // eslint-disable-next-line no-unused-vars
     async updateBlockchainNetwork({ commit }, payload) {
         try {
             // console.log(payload)
@@ -129,6 +129,7 @@ const actions = {
         }
     },
 
+    // eslint-disable-next-line no-unused-vars
     async deleteBlockchainNetwork({ commit }, payload) {
         try {
             const networkIds = payload.map((item) => Number(item.Id)).filter((id) => Number.isInteger(id) && id >= 0 && id <= 4294967295); // validasi uint32
@@ -150,6 +151,7 @@ const actions = {
     },
     // ==========================akun=========================
     // ===================================================
+    // eslint-disable-next-line no-unused-vars
     async fetchBCAccount({ commit }, username) {
         try {
             const { data } = await api.get('scs/blockchainaccount/list', {
@@ -189,77 +191,59 @@ const actions = {
             throw new Error('Gagal update BC network', error);
         }
     },
+    // eslint-disable-next-line no-unused-vars
     async importBCAccount({ commit }, payload) {
-        // console.log('Payload yang dikirim:', JSON.stringify(payload, null, 2));
-
-        try {
-            // const response = await api.post(`scs/blockchainaccount/import`, JSON.stringify(payload, null, 2));
-            const { data } = await api.post(`scs/blockchainaccount/import`, payload);
-            console.log(data);
-            // commit("SET_BCNETWORK", response.data);
-            return data; // Mengembalikan data sekolah
-        } catch (error) {
-            throw error;
-        }
+        // const response = await api.post(`scs/blockchainaccount/import`, JSON.stringify(payload, null, 2));
+        const { data } = await api.post(`scs/blockchainaccount/import`, payload);
+        console.log(data);
+        // commit("SET_BCNETWORK", response.data);
+        return data; // Mengembalikan data sekolah
     },
+    // eslint-disable-next-line no-unused-vars
     async updateBCAccount({ commit }, payload) {
         let network_name = payload.network_name || 0;
         let user_id = payload.user_id || 0;
         let password = payload.password || 0;
         let schemaname = payload.schemaname || null;
 
-        try {
-            const response = await api.get(`/blockchainaccount/create`, {
-                params: {
-                    schemaname: schemaname,
-                    password: password,
-                    user_id: user_id,
-                    network_name: network_name
-                }
-            });
-            // commit("SET_BCNETWORK", response.data);
-            return response.data; // Mengembalikan data sekolah
-        } catch (error) {
-            throw error;
-        }
+        const response = await api.get(`/blockchainaccount/create`, {
+            params: {
+                schemaname: schemaname,
+                password: password,
+                user_id: user_id,
+                network_name: network_name
+            }
+        });
+        // commit("SET_BCNETWORK", response.data);
+        return response.data; // Mengembalikan data sekolah
     },
 
     // ================================
-
+    // eslint-disable-next-line no-unused-vars
     async createIjazahBC({ commit }, payload) {
-        try {
-            // console.log(JSON.stringify(payload));
-            // return;
-            const response = await api.post(`/scs/ijazah-bc/create`, JSON.stringify(payload));
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+        // console.log(JSON.stringify(payload));
+        // return;
+        const response = await api.post(`/scs/ijazah-bc/create`, JSON.stringify(payload));
+        return response.data;
     },
+    // eslint-disable-next-line no-unused-vars
     async fetchIjazahBC({ commit }, payload) {
-        try {
-            const response = await api.get(`/scs/ijazah-bc`, {
-                params: {
-                    sekolah_id: payload.sekolah_id,
-                    tahun_ajaran_id: payload.tahun_ajaran_id
-                }
-            });
-            return response.data;
-        } catch (error) {
-            throw error;
-        }
+        const response = await api.get(`/scs/ijazah-bc`, {
+            params: {
+                sekolah_id: payload.sekolah_id,
+                tahun_ajaran_id: payload.tahun_ajaran_id
+            }
+        });
+        return response.data;
     },
+    // eslint-disable-next-line no-unused-vars
     async searchIjazahBC({ commit }, payload) {
-        try {
-            const response = await api.get(`/scs/ijazah-bc/search`, {
-                params: {
-                    nisn: payload.nisn
-                }
-            });
-            return response.data.ijazahBc;
-        } catch (error) {
-            throw error;
-        }
+        const response = await api.get(`/scs/ijazah-bc/search`, {
+            params: {
+                nisn: payload.nisn
+            }
+        });
+        return response.data.ijazahBc;
     },
     // ================================
 
@@ -275,40 +259,34 @@ const actions = {
     //     } catch (error) {
     //         throw error
     //     }
-
+    // eslint-disable-next-line no-unused-vars
     async fetchContract({ commit }, payload) {
-        try {
-            const response = await api.get(`/scs/contract-address`);
-            if (response) {
-                commit('SET_CONTRACT', response.data.contract);
-                return response.data;
-            }
-        } catch (error) {
-            throw error;
+        const response = await api.get(`/scs/contract-address`);
+        if (response) {
+            commit('SET_CONTRACT', response.data.contract);
+            return response.data;
         }
     },
 
     // ============================================
     // BC IJAZAH
     // ============================================
+    // eslint-disable-next-line no-unused-vars
     async fetchSCIjazah({ commit }, payload) {
-        try {
-            // console.log(payload);
-            const response = await api.get(`/scs/ijazah-bc`, {
-                params: {
-                    sekolah_id: payload.sekolah_id,
-                    tahun_ajaran_id: `${payload.tahun_ajaran_id}`
-                }
-            });
-            if (response) {
-                const results = { tahun_ajaran_id: `${payload.tahun_ajaran_id}`, degreeData: response.data.degreeData };
-                commit('SET_SCIjazah', results);
-                return response.data;
+        // console.log(payload);
+        const response = await api.get(`/scs/ijazah-bc`, {
+            params: {
+                sekolah_id: payload.sekolah_id,
+                tahun_ajaran_id: `${payload.tahun_ajaran_id}`
             }
-        } catch (error) {
-            throw error;
+        });
+        if (response) {
+            const results = { tahun_ajaran_id: `${payload.tahun_ajaran_id}`, degreeData: response.data.degreeData };
+            commit('SET_SCIjazah', results);
+            return response.data;
         }
     },
+    // eslint-disable-next-line no-unused-vars
     async fetchBCTransaction({ commit }, payload) {
         try {
             const response = await api.get('/scs/bc-transaction', {
@@ -328,36 +306,28 @@ const actions = {
     // ==================================
     // EVM OR NONEVM
     // ==================================
+    // eslint-disable-next-line no-unused-vars
     async getNetworkChainId({ commit }, payload) {
-        try {
-            const { data } = await api.get('scs/bc-networks/ethereum-network', {
-                params: {
-                    rpc_url: payload
-                }
-            });
-            return data;
-        } catch (error) {
-            throw error;
-        }
+        const { data } = await api.get('scs/bc-networks/ethereum-network', {
+            params: {
+                rpc_url: payload
+            }
+        });
+        return data;
     },
 
     async createWalletInfo({ commit }, payload) {
-        try {
-            commit('SET_WALLETINFO', payload);
-        } catch (error) {}
+        commit('SET_WALLETINFO', payload);
     },
 
+    // eslint-disable-next-line no-unused-vars
     async fetchWalletInfo({ commit }, pubAddress) {
-        try {
-            const { data } = await api.post('/scs/blockchainaccount/wallet', pubAddress);
-            console.log(data);
-            return data;
-        } catch (error) {
-            throw error;
-        }
+        const { data } = await api.post('/scs/blockchainaccount/wallet', pubAddress);
+        console.log(data);
+        return data;
     },
     // ======== SMART CONTRACT =======
-
+    // eslint-disable-next-line no-unused-vars
     async getsolVersion({ commit }) {
         try {
             return await api.get('/scs/contract/deploy/solc-version');
@@ -365,12 +335,12 @@ const actions = {
             console.log(error);
         }
     },
-
+    // eslint-disable-next-line no-unused-vars
     async deployContract({ commit }, payload) {
         const { data } = await api.post('/scs/contract/deploy', payload);
         return data;
     },
-
+    // eslint-disable-next-line no-unused-vars
     async getContract({ commit }, ownerAddress) {
         const { data } = await api.get('/scs/contract', {
             params: {
@@ -379,6 +349,7 @@ const actions = {
         });
         return data;
     },
+    // eslint-disable-next-line no-unused-vars
     async activeContract({ commit }) {
         const { data } = await api.get('/scs/contract/active-contract');
         return data;
@@ -387,6 +358,7 @@ const actions = {
     // ==========================================
     // Blockhain Service
     // ==========================================
+    // eslint-disable-next-line no-unused-vars
     async setBCConfig({ commit }, payload) {
         try {
             const { data } = await api.post('scs/blockchain/config', payload);

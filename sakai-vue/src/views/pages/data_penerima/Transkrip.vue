@@ -78,7 +78,7 @@ onMounted(async () => {
             </div>
         </div>
         <DataTable
-            v-model:expandedRows="expandedRows"
+            v-model:expanded-rows="expandedRows"
             :value="siswa"
             data-key="pesertaDidikId"
             striped-rows

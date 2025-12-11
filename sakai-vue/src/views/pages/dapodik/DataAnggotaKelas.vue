@@ -143,7 +143,7 @@ const getStatusLabel = (status) => {
 };
 
 import EmptyData from '@/components/EmptyData.vue';
-import Select from 'primevue/select';
+// import Select from 'primevue/select';
 
 // select tahun ijazah
 const selectedCity = ref();

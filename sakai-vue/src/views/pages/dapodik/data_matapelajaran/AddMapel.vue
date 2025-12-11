@@ -2,7 +2,7 @@
 import { ref, computed } from 'vue';
 
 import InputText from 'primevue/inputtext';
-import Select from 'primevue/select';
+// import Select from 'primevue/select';
 
 import DatePicker from 'primevue/datepicker';
 

@@ -1,18 +1,18 @@
 <script setup>
-import AnggotaKelas from '@/components/sekolah_components/AnggotaKelas.vue';
 import TingkatComponent from '@/components/sekolah_components/TingkatComponent.vue';
 import { useDns } from '@/composables/sekolah_composable/useDns';
 import { useKelas } from '@/composables/sekolah_composable/useKelas';
-import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
-import { useSemester } from '@/composables/sekolah_composable/useSemester';
 import router from '@/router';
 import { FilterMatchMode } from '@primevue/core/api';
-import { computed, onMounted, ref, watch } from 'vue';
+import { useToast } from 'primevue';
+import { computed, inject, ref, watch } from 'vue';
 
-const { sekolah } = useSekolah();
-const { getKelas } = useKelas();
+const sekolah = inject('sekolahProvider');
+const { fetchKelas } = useKelas();
 const { addDns } = useDns();
-const { selectedSemester } = useSemester();
+const sekolahSlug = inject('sekolahSlugProvider');
+// const slug = computed(() => store.getters['authService/getUser'])?.sekolahSlug;
+// const { selectedSemester } = useSemester();
 const kelasList = ref([]);
 const closeDialog = () => {
     selectedKelas.value = null;
@@ -36,21 +36,16 @@ const deleteKelas = () => {
     // }
 };
 // const selectedSemester = computed(() => store.getters['sekolahService/getSelectedSemester']);
-watch(selectedSemester, async () => {
-    await initial();
-});
-const initial = async () => {
+// watch(selectedSemester, async () => {
+//     await initial();
+// });
+const toast = useToast();
+const initial = async (ObjSemester) => {
     try {
-        const res = await getKelas();
-        if (res.status) {
-            kelasList.value = res.kelas;
-        }
-        // if (kelasList.value.length > 0) {
-        //     tingkatPendidikanOptions.value = await fetchTingkat();
-        // }
+        kelasList.value = await fetchKelas(ObjSemester);
     } catch (error) {
-        console.log(error);
-        throw new Error('Gagal initialisasi kelas: ', error);
+        console.log('Gagal initialisasi kelas: ', error);
+        toast.add({ severity: 'error', summary: 'Gagal initialisasi', detail: `${error}`, life: 20000 });
     }
 };
 
@@ -64,10 +59,10 @@ const filters = ref({
 // const submitted = ref(false);
 
 const editKelas = async () => {
+    console.log(sekolahSlug);
     router.push({
         name: 'editKelas',
-        params: { sekolah: sekolah.value?.uri },
-        query: { kelasId: selectedKelas.value[0]?.rombonganBelajarId.toString() }
+        params: { sekolah: sekolahSlug, id: selectedKelas.value[0]?.rombonganBelajarId.toString() }
     });
 };
 
@@ -120,7 +115,7 @@ const isDialogKelulusan = ref(false);
 //             schemaname: schemaname,
 //             tahun_ajaran_id: `${selectedSemester.value?.tahunAjaranId + 1}`,
 //             anggota_kelas: anggotaKelas,
-//             sekolah_id: await store.getters['sekolahService/getSekolah']?.sekolah_id
+//             sekolah_id: store.getters['sekolahService/getSekolah']?.sekolah_id
 //         };
 //         const res = await store.dispatch('sekolahService/createProsesIjazah', payload);
 //         // console.log(res);
@@ -133,7 +128,7 @@ const isDialogKelulusan = ref(false);
 //     }
 //     isDialogKelulusan.value = false;
 // };
-const dialogImport = ref(false);
+// const dialogImport = ref(false);
 
 const sendToDns = async () => {
     const anggotaKelas = selectedKelas.value[0].anggotaKelas.map((item) => ({
@@ -141,10 +136,10 @@ const sendToDns = async () => {
         rombongan_belajar_id: item.rombonganBelajarId || '',
         program_keahlian: selectedKelas.value[0].namaJurusanSp || '',
         paket_keahlian: selectedKelas.value[0].namaJurusanSp || '',
-        sekolah_id: sekolah.sekolah.sekolah_id || '',
-        npsn: sekolah.sekolah.npsn || '', // jika ada, ambil dari sekolah
-        kabupaten_kota: sekolah.sekolah.kabKota || '',
-        provinsi: sekolah.sekolah.propinsi || '',
+        sekolah_id: sekolah.value.sekolah.sekolah_id || '',
+        npsn: sekolah.value.sekolah.npsn || '', // jika ada, ambil dari sekolah
+        kabupaten_kota: sekolah.value.sekolah.kabKota || '',
+        provinsi: sekolah.value.sekolah.propinsi || '',
         nama: item.pesertaDidik.nmSiswa || '',
         tempat_lahir: item.pesertaDidik.tempatLahir || '',
         tanggal_lahir: item.pesertaDidik.tanggalLahir || '',
@@ -152,11 +147,11 @@ const sendToDns = async () => {
         nis: item.pesertaDidik.nis || '',
         nisn: item.pesertaDidik.nisn || '',
         nama_ortu_wali: item.pesertaDidik.nmAyah || '',
-        sekolah_penyelenggara_ujian_us: sekolah.sekolah.nama || '',
-        sekolah_penyelenggara_ujian_un: sekolah.sekolah.nama || '',
-        asal_sekolah: sekolah.sekolah.nama || '',
+        sekolah_penyelenggara_ujian_us: sekolah.value.sekolah.nama || '',
+        sekolah_penyelenggara_ujian_un: sekolah.value.sekolah.nama || '',
+        asal_sekolah: sekolah.value.sekolah.nama || '',
         nomor_ijazah: '',
-        tempat_ijazah: sekolah.sekolah.kabKota || '',
+        tempat_ijazah: sekolah.value.sekolah.kabKota || '',
         tanggal_ijazah: '',
         tahun_ajaran_id: `${selectedSemester.value.tahunAjaranId}`,
         is_complete: false
@@ -167,13 +162,21 @@ const sendToDns = async () => {
     addDns(anggotaKelas);
 };
 
-onMounted(async () => {
-    await initial();
+// const selectedTahunAjaran = computed(() => store.getters['semesterService/getSelectedTahunAjaran']);
+const selectedSemester = inject('selectedSemesterProvider');
+
+watch(selectedSemester, async (newVal) => {
+    console.log('----[selectedSemester]----', newVal);
+    if (newVal) {
+        await initial(newVal);
+    } else {
+        kelasList.value = [];
+    }
 });
 </script>
 
 <template>
-    <div>
+    <div class="">
         <Toolbar>
             <template #start>
                 <div v-show="kelasList?.length > 0">
@@ -196,17 +199,18 @@ onMounted(async () => {
             </template>
             <template #end>
                 <div class="flex flex-wrap gap-2 items-center justify-between">
-                    <div class="flex">
-                        <TingkatComponent v-model:model-value="filters['tingkatPendidikanId'].value" />
+                    <div class="flex flex-wrap items-center space-x-2">
+                        <label>Tingkat</label>
+                        <TingkatComponent v-model:model-value="filters['tingkatPendidikanId'].value" :jenjang-pendidikan-id="sekolah?.sekolah.jenjangPendidikanId" :is-disabled="!selectedSemester || kelasList.length === 0" />
                     </div>
-                    <div>
+                    <!-- <div>
                         <Button v-tooltip.bottom="'Refresh'" icon="pi pi-refresh" severity="help" class="mr-2 text-lg" @click="initial" />
-                    </div>
+                    </div> -->
                 </div>
             </template>
         </Toolbar>
 
-        <div v-if="kelasList.length === 0" class="flex justify-center h-32 items-center"><h5>Tidak ada data</h5></div>
+        <div v-if="kelasList.length === 0" class="flex justify-center h-32 items-center"><h5>Silahkan pilih semseter</h5></div>
         <DataTable
             v-else
             ref="dt"
@@ -226,8 +230,6 @@ onMounted(async () => {
             current-page-report-template="Showing {first} to {last} of {totalRecords} kelas"
             class="mt-2"
         >
-            <!-- <template #empty> No customers found. </template> -->
-            <!-- <template #loading> Loading customers data. Please wait. </template> -->
             <Column selection-mode="multiple" style="width: 3rem" :exportable="false" />
             <Column field="nmKelas" header="Nama" style="width: 7rem">
                 <template #loading>
@@ -244,7 +246,6 @@ onMounted(async () => {
                 </template>
             </Column>
             <Column field="kurikulum.namaKurikulum" header="Kurikulum" />
-            <!-- Jika SMK/MAK Program Keahlian & Kompetensi Keahlian akan muncul-->
             <div v-if="isKejuruan">
                 <Column field="namaJurusanSp" header="Jurusan" sortable />
             </div>
@@ -256,7 +257,7 @@ onMounted(async () => {
             <Column field="jumlahAnggota" header="Jml." />
         </DataTable>
 
-        <DialogImport v-model:visible="dialogImport" template-type="kelas" />
+        <!-- <DialogImport v-model:visible="dialogImport" template-type="kelas" /> -->
         <DialogConfirmDelete v-model:visible="deleteKelasDialog" message="Apakah kelas tersebut akan dihapus?" @confirm="deleteKelas" @close-dialog="closeDialog" />
         <Dialog v-model:visible="showAnggotaKelas" style="width: 450px; height: max-content" header="Anggota Kelas" close-icon="pi pi-times" maximizable>
             <AnggotaKelas :rombongan-belajar-id="rombonganBelajarId" />

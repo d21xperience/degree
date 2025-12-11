@@ -46,7 +46,7 @@ export function useDns() {
     };
     const getDns = async (tahunAjaranId) => {
         try {
-            let response = await store.getters['dnsService/getDns'];
+            let response = store.getters['dnsService/getDns'];
             // console.log(response)
             if (!response || !Array.isArray(response.dataNominasiSementara) || response.dataNominasiSementara.length === 0 || response.tahun_ajaran_id != tahunAjaranId) {
                 const payload = {

@@ -89,9 +89,9 @@ const saveSelection = async () => {
 // const semester = ref();
 // const fetchSemester = async () => {
 //     try {
-//         let cek = await store.getters['sekolahService/getTahunAjaran'];
+//         let cek = store.getters['sekolahService/getTahunAjaran'];
 //         if (!cek || cek.length === 0) {
-//             semester.value = await store.getters['sekolahService/getSemester'];
+//             semester.value = store.getters['sekolahService/getSemester'];
 //             if (!semester.value) {
 //                 semester.value = await store.dispatch('sekolahService/fetchSemester');
 //             }

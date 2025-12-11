@@ -1,0 +1,25 @@
+{
+    "Set & watch Prop": {
+        "prefix": "snipsetwp",
+        "body": [
+            "const props = defineProps({ ",
+            " schemaname: { ",
+            "  type: String, ",
+            "  required: true ",
+            " },                                    ",
+            " tahunAjaranId: {                      ",
+            " type: String,                     ",
+            " required: true                    ",
+            " } ",
+            "});                                      ",
+            "                                         ",
+            "watch(                                   ",
+            " () => props.tahunAjaranId,            ",
+            " (baru) => {                           ",
+            " fetchKategoriSekolah(baru);       ",
+            " }",
+            ");                                       "
+        ],
+        "description": "Tambahkan props dan watch"
+    }
+}

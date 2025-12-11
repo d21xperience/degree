@@ -1,70 +1,54 @@
 <script setup>
 import { useSekolah } from '@/composables/sekolah_composable/useSekolah';
-import { useSemester } from '@/composables/sekolah_composable/useSemester';
-import { useTableTenant } from '@/composables/sekolah_composable/useTableTenant';
-import { computed, onMounted, ref, watch } from 'vue';
-const { fetchBentukPendidikan, fetchJenjangPendidikan, fetchSekolah, fetchTingkat, updateSekolah } = useSekolah();
-
-const { selectedSemester } = useSemester();
-const fetchRefTable = async () => {
-    bentukPendidikan.value = await fetchBentukPendidikan(); //getBentukPendidikan();
-    // console.log(bentukPendidikan.value);
-    jenjangPendidikan.value = await fetchJenjangPendidikan(); //getJenjangPendidikan();
-    // console.log(jenjangPendidikan.value);
-};
-const { schemaname } = useTableTenant();
-// Evaluasi variabel di bawah ini:
+import { onMounted, ref, watch } from 'vue';
+import BentukPendidikanComponent from './BentukPendidikanComponent.vue';
+import JenjangPendidikanComponent from './JenjangPendidikanComponent.vue';
 
 const sekolah = ref({
     sekolah: {}
 });
 
-const initFirst = async () => {
-    sekolah.value = await fetchSekolah();
-};
-const tingkat = ref();
-onMounted(async () => {
-    initFirst();
-    tingkat.value = await fetchTingkat();
-    // console.log(tingkat.value);
-    // const data = await fetchSekolah();
-    // Object.assign(sekolah, data);
+const props = defineProps({
+    schemaname: {
+        type: String,
+        required: true
+    },
+    storeSekolah: {
+        type: Object,
+        required: true
+    }
 });
-watch(selectedSemester, () => {
-    // console.log('update semester');
-    initFirst();
+
+watch(
+    () => props.storeSekolah,
+    (baru) => {
+        sekolah.value = baru;
+    }
+);
+
+const { isFetching, updateSekolah, isError } = useSekolah({ schemaname: props.schemaname, autoload: false });
+
+onMounted(async () => {
+    if (!props.storeSekolah) {
+        // await initialize();
+        sekolah.value = props.storeSekolah;
+    } else {
+        sekolah.value = props.storeSekolah;
+    }
 });
 const selectedBentukPendidikan = ref();
 const selectedJenjangPendidikan = ref();
-watch(selectedBentukPendidikan, (newVal) => {
-    if (newVal) {
-        sekolah.value.sekolah.bentukPendidikanId = newVal.bentukPendidikanId;
-        sekolah.value.bentukPendidikanStr = newVal.nama;
-    }
-});
-watch(selectedJenjangPendidikan, (newVal) => {
-    if (newVal) {
-        sekolah.value.sekolah.jenjangPendidikanId = newVal.jenjangPendidikanId;
-        sekolah.value.jenjangPendidikanStr = newVal.nama;
-    }
-});
-// Edit
-const isEdit = ref(false);
 
-const bentukPendidikan = ref([]);
-const jenjangPendidikan = ref([]);
-watch(isEdit, async (newVal) => {
-    if (newVal) {
-        await fetchRefTable();
-        selectedBentukPendidikan.value = bentukPendidikan.value.find((item) => item.nama === sekolah.value.bentukPendidikanStr);
-        selectedJenjangPendidikan.value = jenjangPendidikan.value.find((item) => item.nama === sekolah.value.jenjangPendidikanStr);
-    }
-});
-const jenjangPendidikanFiltered = computed(() => {
-    return jenjangPendidikan.value.filter((item) => item.jenjangLembaga === 1);
-});
-const editSekolah = () => {
+const isEdit = ref(false);
+const messageError = ref('');
+const dialogError = ref(false);
+const handleEditSekolah = async () => {
     isEdit.value = !isEdit.value;
+    selectedBentukPendidikan.value = sekolah.value?.bentukPendidikanStr;
+    selectedJenjangPendidikan.value = sekolah.value?.jenjangPendidikanStr;
+
+    // jenjangPendidikanFiltered.value = await fetchJenjangPendidikan();
+    // bentukPendidikanFilter.value = await fetchBe;
 };
 const getWebsiteUrl = (url) => {
     if (!url.startsWith('http://') && !url.startsWith('https://')) {
@@ -72,25 +56,25 @@ const getWebsiteUrl = (url) => {
     }
     return url;
 };
-const loadingUpdate = ref(false);
+
+const isUpdateSekolah = ref(false);
 const updateData = async () => {
-    loadingUpdate.value = true;
-    try {
-        const payload = {
-            schemaname: schemaname.value,
-            sekolah: sekolah.value.sekolah,
-            bentukPendidikanStr: selectedBentukPendidikan.value.nama,
-            jenjangPendidikanStr: selectedJenjangPendidikan.value.nama
-        };
-        await updateSekolah(payload);
-        selectedBentukPendidikan.value = null;
-    } catch (error) {
-        console.log(error);
-    } finally {
-        loadingUpdate.value = false;
-        isEdit.value = false;
-    }
+    isUpdateSekolah.value = true;
 };
+const handleUpdate = async () => {
+    isUpdateSekolah.value = false;
+    await updateSekolah(sekolah.value);
+};
+
+watch(isError, (val) => {
+    if (val) {
+        messageError.value = val;
+        dialogError.value = true;
+    } else {
+        messageError.value = '';
+        dialogError.value = false;
+    }
+});
 </script>
 
 <template>
@@ -98,8 +82,17 @@ const updateData = async () => {
         <div class="mb-4">
             <div class="flex justify-between">
                 <h3 class="text-lg font-semibold mb-2">Identitas</h3>
-                <Button v-tooltip.bottom="'Edit data sekolah'" icon="pi pi-pencil" :style="isEdit ? 'background-color:blue;border:none' : 'background-color:gray;border:none'" size="small" rounded="" @click="editSekolah" />
+                <Button
+                    v-tooltip.bottom="'Edit data sekolah'"
+                    :disabled="isFetching"
+                    icon="pi pi-pencil"
+                    :style="isEdit ? 'background-color:blue;border:none' : 'background-color:gray;border:none'"
+                    size="small"
+                    rounded=""
+                    @click="handleEditSekolah"
+                />
             </div>
+
             <div class="grid grid-cols-2 gap-4">
                 <div>Nama</div>
                 <div>{{ sekolah?.sekolah.nama }}</div>
@@ -107,14 +100,14 @@ const updateData = async () => {
                 <div>
                     <div v-if="!isEdit">{{ sekolah?.jenjangPendidikanStr }}</div>
                     <div v-else>
-                        <Select v-model="selectedJenjangPendidikan" filter :options="jenjangPendidikanFiltered" option-label="nama" placeholder="Pilih jenjang pendidikan" fluid show-clear class="w-full md:w-56" />
+                        <JenjangPendidikanComponent v-model:model-value="selectedJenjangPendidikan" />
                     </div>
                 </div>
                 <div>Bentuk Pendidikan</div>
                 <div>
                     <div v-if="!isEdit">{{ sekolah?.bentukPendidikanStr }}</div>
                     <div v-else>
-                        <Select v-model="selectedBentukPendidikan" :options="bentukPendidikan" filter option-label="nama" placeholder="Pilih bentuk pendidikan" fluid show-clear class="w-full md:w-56" />
+                        <BentukPendidikanComponent v-model:model-value="selectedBentukPendidikan" />
                     </div>
                 </div>
                 <div>NSS</div>
@@ -178,19 +171,32 @@ const updateData = async () => {
             <div class="grid grid-cols-2 gap-4">
                 <div>Nama Kepsek</div>
                 <div>
-                    <div v-if="!isEdit">{{ sekolah.sekolah?.nmKepsek }}</div>
+                    <div v-if="!isEdit">{{ sekolah?.sekolah.nmKepsek }}</div>
                     <div v-else><InputText v-model="sekolah.sekolah.nmKepsek" fluid name="nmKepsek" /></div>
                 </div>
                 <div>NIP Kepsek</div>
                 <div>
-                    <div v-if="!isEdit">{{ sekolah.sekolah?.nipKepsek }}</div>
+                    <div v-if="!isEdit">{{ sekolah?.sekolah.nipKepsek }}</div>
                     <div v-else><InputText v-model="sekolah.sekolah.nipKepsek" fluid name="nipKepsek" /></div>
                 </div>
             </div>
         </div>
-    </div>
-    <div v-show="isEdit" class="flex justify-end">
-        <Button class="bg-blue-800 text-white px-4 py-2 rounded flex items-center" label="Update Data" icon="pi pi-save" :loading="loadingUpdate" @click="updateData" />
+        <div v-show="isEdit" class="flex justify-end">
+            <Button class="bg-blue-800 text-white px-4 py-2 rounded flex items-center" label="Update Data" icon="pi pi-save" :loading="isFetching" @click="updateData" />
+        </div>
+
+        <Dialog v-model:visible="isUpdateSekolah" :modal="true" :style="{ width: '450px' }">
+            Apakah Data sekolah akan disimpan?
+            <template #header><b>Update Data</b></template>
+            <template #footer>
+                <Button label="Ya" severity="danger" class="w-32" @click="handleUpdate" />
+                <Button label="Tidak" class="w-32" @click="isUpdateSekolah = false" />
+            </template>
+        </Dialog>
+        <LoadingOverlay :visible="isFetching" />
+        <Dialog v-model:visible="dialogError" :style="{ width: '450px' }" header="Warning" :modal="true" position="top">
+            <p>{{ messageError }}</p>
+        </Dialog>
     </div>
 </template>
 

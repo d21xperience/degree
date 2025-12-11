@@ -32,7 +32,7 @@ export function useSCService() {
 
     const getSCIjazah = async (payload) => {
         try {
-            let response = await store.getters['scService/getSCIjazah'];
+            let response = store.getters['scService/getSCIjazah'];
             // console.log(response);
             // return
             if (!response || !Array.isArray(response.degreeData) || response.degreeData.length == 0 || response.tahun_ajaran_id != payload.tahun_ajaran_id) {
@@ -50,11 +50,11 @@ export function useSCService() {
             throw new Error(`Gagal mendapatkan ijazah: ${error.message}`);
         }
     };
-    const getContract = () => {
+    const getContract = async () => {
         try {
             let response = store.getters['scService/getContract'];
             if (!response) {
-                response = store.dispatch('scService/fetchContract');
+                response = await store.dispatch('scService/fetchContract');
                 if (response.status) {
                     return response.contract;
                 }
@@ -170,7 +170,7 @@ export function useSCService() {
         await store.dispatch('scService/setBlockchainNetwork', networkPlatform);
     };
     const getBCNetwork = async () => {
-        return await store.getters['scService/getBCNetworkSelected'];
+        return store.getters['scService/getBCNetworkSelected'];
     };
 
     // ================================================

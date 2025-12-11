@@ -1,12 +1,12 @@
 <script setup>
-import LoadingOverlay from '@/components/LoadingOverlay.vue';
+// import LoadingOverlay from '@/components/LoadingOverlay.vue';
+import DialogImport from '@/components/DialogImport.vue';
 import KelasComponent from '@/components/sekolah_components/KelasComponent.vue';
-import { useKelas } from '@/composables/sekolah_composable/useKelas';
 import { useNilai } from '@/composables/sekolah_composable/useNilai';
-import { useSemester } from '@/composables/sekolah_composable/useSemester';
+import { useSiswa } from '@/composables/sekolah_composable/useSiswa';
 import { FilterMatchMode } from '@primevue/core/api';
 import { useToast } from 'primevue/usetoast';
-import { computed, ref, watch } from 'vue';
+import { computed, inject, ref, watch } from 'vue';
 const pembelajaran = ref({});
 const dataNilaiSiswa = ref([]);
 const kelasSelected = ref(null);
@@ -16,9 +16,11 @@ const expandedRows = ref();
 //     dataNilaiSiswa.value = await fetchNilaiSiswa();
 // });
 const { searchNilai } = useNilai();
-const { initSelectedSemester } = useSemester();
-const { fetchAnggotaKelas } = useKelas();
-
+// const { initSelectedSemester } = useSemester();
+const { getSiswaAktifByKelasId } = useSiswa();
+const tahunAjaranId = inject('tahunAjaranProvider');
+const initSelectedSemester = inject('selectedSemesterProvider');
+// const selectedSemester = computed(() => initSelectedSemester.value?.label);
 const isLoading = ref(false);
 const toast = useToast();
 const dt = ref();
@@ -36,11 +38,11 @@ const editNilai = (mapel) => {
     pembelajaran.value.semester_id = kelas.value.semesterId;
 };
 
-const exportCSV = () => {
-    isLoading.value = true;
-    // alert("hello")
-    // dt.value.exportCSV();
-};
+// const exportCSV = () => {
+//     // isLoading.value = true;
+//     // alert("hello")
+//     // dt.value.exportCSV();
+// };
 
 const isDialogImport = ref(false);
 const saveImport = () => {
@@ -96,7 +98,7 @@ const collapseAll = () => {
 };
 
 watch(kelasSelected, (newVal) => {
-    console.log(!newVal);
+    // console.log(!newVal);
     if (!newVal) {
         resetSiswa();
     } else {
@@ -106,7 +108,7 @@ watch(kelasSelected, (newVal) => {
 const loadSiswaAktif = async () => {
     isLoading.value = true;
     try {
-        dataNilaiSiswa.value = await fetchAnggotaKelas(kelasSelected.value?.rombonganBelajarId, initSelectedSemester.value?.semesterId);
+        dataNilaiSiswa.value = await getSiswaAktifByKelasId(kelasSelected.value?.rombonganBelajarId, initSelectedSemester.value?.semesterId);
         // console.log(dataNilaiSiswa.value);
     } catch (error) {
         toast.add({ severity: 'error', summary: 'Failled', detail: 'Gagal mendapatkan nilai siswa', life: 3000 });
@@ -114,6 +116,20 @@ const loadSiswaAktif = async () => {
         isLoading.value = false;
     }
 };
+
+const importNIlai = () => {
+    isDialogImport.value = true;
+};
+
+const paramNilai = computed(() => {
+    let tes = {
+        rombelId: kelasSelected.value?.rombonganBelajarId,
+        kurikulumId: String(kelasSelected.value?.kurikulumId),
+        tahunAjaranId: tahunAjaranId.value.label,
+        tingkatPendidikanId: String(kelasSelected.value?.tingkatPendidikanId)
+    };
+    return tes;
+});
 </script>
 
 <template>
@@ -121,13 +137,13 @@ const loadSiswaAktif = async () => {
         <Toolbar>
             <template #start>
                 <div class="w-56">
-                    <KelasComponent v-model="kelasSelected" class="mr-2" />
+                    <KelasComponent v-if="initSelectedSemester" v-model="kelasSelected" class="mr-2" :init-selected-semester="initSelectedSemester" />
                 </div>
                 <div v-show="!!kelasSelected" class="ml-1 flex space-x-1">
                     <!-- <Button icon="pi pi-plus" severity="success" class="text-lg" @click="openNew" v-tooltip.bottom="'Tambah Siswa'" :loading="isOpenNew" /> -->
                     <!-- <Button icon="pi pi-pencil" severity="warn" @click="editNilai" :disabled="!selectedSiswa || !selectedSiswa.length || selectedSiswa.length > 2" class="" v-tooltip.bottom="'Edit nilai'" :loading="loadingEdit" /> -->
                     <!-- <Button icon="pi pi-trash" severity="danger" class="text-lg" @click="deleteSiswaDialog = true" :disabled="!selectedSiswa || !selectedSiswa.length" v-tooltip.bottom="'Hapus Nilai'" /> -->
-                    <Button v-tooltip.bottom="'Import Nilai'" icon="pi pi-upload" severity="warn" class="text-sm" @click="exportCSV($event)" />
+                    <Button v-tooltip.bottom="'Import Nilai'" icon="pi pi-upload" severity="" class="text-sm" @click="importNIlai" />
                 </div>
             </template>
             <template #end>
@@ -139,86 +155,100 @@ const loadSiswaAktif = async () => {
                         <InputText v-model="filters['global'].value" placeholder="Search..." :disabled="!dataNilaiSiswa || (Array.isArray(dataNilaiSiswa) && !dataNilaiSiswa.length > 0)" />
                     </IconField>
                 </div>
-                <Button v-show="!!kelasSelected" v-tooltip.bottom="'Refresh'" icon="pi pi-refresh" severity="help" class="mr-2 text-lg" @click="loadSiswaAktif" />
+                <Button v-show="!!kelasSelected" v-tooltip.bottom="'Refresh'" icon="pi pi-refresh" severity="help" class="mr-2 text-sm" @click="loadSiswaAktif" />
             </template>
         </Toolbar>
-        <div v-if="!kelasSelected" class="flex justify-center h-32 items-center">
-            <h5>Silahkan pilih kelas terlebih dahulu</h5>
+        <div v-if="!initSelectedSemester" class="flex justify-center h-32 items-center">
+            <h5>Silahkan pilih semester terlebih dahulu</h5>
         </div>
-        <DataTable
-            v-else
-            ref="dt"
-            v-model:expandedRows="expandedRows"
-            striped-rows
-            size="small"
-            :value="dataNilaiSiswa"
-            data-key="pesertaDidikId"
-            :paginator="true"
-            :rows="10"
-            :filters="filters"
-            paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
-            :rows-per-page-options="[10, 20, 50]"
-            current-page-report-template="Showing {first} to {last} of {totalRecords} siswa"
-            @row-expand="onRowExpand"
-            @row-collapse="onRowCollapse"
-        >
-            <template #header>
-                <div class="flex flex-wrap justify-end gap-2">
-                    <Button text icon="pi pi-plus" label="Expand All" @click="expandAll" />
-                    <Button text icon="pi pi-minus" label="Collapse All" @click="collapseAll" />
-                </div>
-            </template>
-            <template #empty>
-                <p class="flex justify-center text-xl">Data Tidak ditemukan.</p>
-            </template>
-            <Column expander style="width: 5rem" />
-            <Column field="nmSiswa" header="Nama" sortable />
-            <Column field="tingkatPendidikanId" header="Tingkat" />
-            <Column field="nmKelas" header="Nama Kelas" />
-            <Column field="" header="Aksi">
-                <template #body="{ data }">
-                    <Button icon="pi pi-trash" outlined rounded class="mr-2" @click="editNilai(data)" />
-                    <!-- <Button icon="pi pi-trash" outlined rounded severity="danger"
-                                    @click="confirmdeleteMapel(data)" /> -->
+        <div v-else>
+            <div v-if="!kelasSelected" class="flex justify-center h-32 items-center">
+                <h5>Silahkan pilih kelas</h5>
+            </div>
+            <DataTable
+                v-else
+                ref="dt"
+                v-model:expanded-rows="expandedRows"
+                striped-rows
+                size="small"
+                :value="dataNilaiSiswa"
+                data-key="pesertaDidikId"
+                :paginator="true"
+                :rows="10"
+                :filters="filters"
+                paginator-template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+                :rows-per-page-options="[10, 20, 50]"
+                current-page-report-template="Showing {first} to {last} of {totalRecords} siswa"
+                @row-expand="onRowExpand"
+                @row-collapse="onRowCollapse"
+            >
+                <template #header>
+                    <div class="flex flex-wrap justify-end gap-2">
+                        <Button text icon="pi pi-plus" label="Expand All" @click="expandAll" />
+                        <Button text icon="pi pi-minus" label="Collapse All" @click="collapseAll" />
+                    </div>
                 </template>
-            </Column>
-            <template #expansion="">
-                <div class="p-4">
-                    <DataTable :value="siswa.nilaiMapel">
-                        <Column field="MataPelajaran" header="Mata Pelajaran" class="text-slate-500" />
-                        <!-- Kolom Semester Dinamis -->
-                        <Column v-for="n in totalSemesters" :key="`Semester${n}`" :field="`Semester${n}`" :header="`${n}`">
-                            <!-- Opsional: Tambahkan warna berdasarkan nilai -->
-                            <template #body="{ data }">
-                                <span
-                                    :class="{
-                                        'text-green-600 font-medium': data[`Semester${n}`] >= 85,
-                                        'text-yellow-600': data[`Semester${n}`] >= 75 && data[`Semester${n}`] < 85,
-                                        'text-red-600': data[`Semester${n}`] < 75
-                                    }"
-                                >
-                                    {{ data[`Semester${n}`] }}
-                                </span>
-                            </template>
-                        </Column>
-                        <template #empty> <p class="text-xl flex justify-center font-bold text-red-500">Nilai tidak ditemukan.</p> </template>
-                        <Column field="" header="Edit">
-                            <template #body="{ data }">
-                                <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editNilai(data)" />
-                                <!-- <Button icon="pi pi-trash" outlined rounded severity="danger"
+                <template #empty>
+                    <p class="flex justify-center text-xl">Data Tidak ditemukan.</p>
+                </template>
+                <Column expander style="width: 5rem" />
+                <Column field="nmSiswa" header="Nama" sortable />
+                <Column field="tingkatPendidikanId" header="Tingkat" />
+                <Column field="nmKelas" header="Nama Kelas" />
+                <Column field="" header="Aksi">
+                    <template #body="{ data }">
+                        <Button icon="pi pi-trash" outlined rounded class="mr-2" @click="editNilai(data)" />
+                        <!-- <Button icon="pi pi-trash" outlined rounded severity="danger"
                                     @click="confirmdeleteMapel(data)" /> -->
-                            </template>
-                        </Column>
-                    </DataTable>
-                </div>
-            </template>
-        </DataTable>
+                    </template>
+                </Column>
+                <template #expansion="">
+                    <div class="p-4">
+                        <DataTable :value="siswa.nilaiMapel">
+                            <Column field="MataPelajaran" header="Mata Pelajaran" class="text-slate-500" />
+                            <!-- Kolom Semester Dinamis -->
+                            <Column v-for="n in totalSemesters" :key="`Semester${n}`" :field="`Semester${n}`" :header="`${n}`">
+                                <!-- Opsional: Tambahkan warna berdasarkan nilai -->
+                                <template #body="{ data }">
+                                    <span
+                                        :class="{
+                                            'text-green-600 font-medium': data[`Semester${n}`] >= 85,
+                                            'text-yellow-600': data[`Semester${n}`] >= 75 && data[`Semester${n}`] < 85,
+                                            'text-red-600': data[`Semester${n}`] < 75
+                                        }"
+                                    >
+                                        {{ data[`Semester${n}`] }}
+                                    </span>
+                                </template>
+                            </Column>
+                            <template #empty> <p class="text-xl flex justify-center font-bold text-red-500">Nilai tidak ditemukan.</p> </template>
+                            <Column field="" header="Edit">
+                                <template #body="{ data }">
+                                    <Button icon="pi pi-pencil" outlined rounded class="mr-2" @click="editNilai(data)" />
+                                    <!-- <Button icon="pi pi-trash" outlined rounded severity="danger"
+                                    @click="confirmdeleteMapel(data)" /> -->
+                                </template>
+                            </Column>
+                        </DataTable>
+                    </div>
+                </template>
+            </DataTable>
+        </div>
 
         <!-- import data -->
         <!-- DIALOG IMPORT -->
-        <DialogImport v-model:visible="isDialogImport" template-type="nilai" @save="saveImport" @cancel="cancelImport" />
+        <DialogImport
+            v-if="initSelectedSemester"
+            v-model:visible="isDialogImport"
+            template-type="nilai"
+            message="untuk nilai siswa sesuai dengan kelas yang dipilih."
+            :selected-semester="initSelectedSemester"
+            :param-nilai="paramNilai"
+            @save="saveImport"
+            @cancel="cancelImport"
+        />
 
         <!-- end of import data -->
-        <LoadingOverlay :visible="isLoading"> Memuat data, harap tunggu... </LoadingOverlay>
+        <!-- <LoadingOverlay :visible="isLoading"> Memuat data, harap tunggu... </LoadingOverlay> -->
     </div>
 </template>

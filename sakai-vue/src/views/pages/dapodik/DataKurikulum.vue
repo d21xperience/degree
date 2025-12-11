@@ -332,11 +332,11 @@ onMounted(async () => {
                     <div class="flex space-x-2">
                         <div class="w-full">
                             kurikulum
-                            <Select v-model:modelValue="kurikulum.kurikulum" :options="kurikulumOptions" option-label="label" option-value="value" fluid :disabled="isTahunAjaranAvailable" />
+                            <Select v-model:model-value="kurikulum.kurikulum" :options="kurikulumOptions" option-label="label" option-value="value" fluid :disabled="isTahunAjaranAvailable" />
                         </div>
                         <div class="w-full">
                             Nama
-                            <InputText v-model:modelValue="kurikulum.namakurikulum" fluid :disabled="isTahunAjaranAvailable" />
+                            <InputText v-model:model-value="kurikulum.namakurikulum" fluid :disabled="isTahunAjaranAvailable" />
                         </div>
                     </div>
                     <div class="flex space-x-2">

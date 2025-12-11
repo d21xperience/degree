@@ -4,10 +4,11 @@ import { debounce } from 'lodash-es';
 import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
 import { useSekolah } from './sekolah_composable/useSekolah';
-import { useTableTenant } from './sekolah_composable/useTableTenant';
 
 export function useFormOptions() {
-    const { schemaname } = useTableTenant();
+    const schemaname = computed(() => {
+        return store.getters['sekolahService/getTabeltenant']?.schemaname || null;
+    });
     const { sekolah } = useSekolah();
     const store = useStore();
     const selectedJenisKelamin = ref();
@@ -42,11 +43,11 @@ export function useFormOptions() {
     const jurusanOptions = ref();
     const ptkLoading = ref(false);
     const ptkOptions = ref([]);
-    const fetchGelarAkademik = () => {
+    const fetchGelarAkademik = async () => {
         try {
             let cek = store.getters['sekolahService/getGelarAkademik'];
             if (!cek || cek.length == 0) {
-                cek = store.dispatch('sekolahService/fetchGelarAkademik');
+                cek = await store.dispatch('sekolahService/fetchGelarAkademik');
             }
             // console.log(cek);
             gelarAkademikOptions.value = cek;
@@ -80,7 +81,7 @@ export function useFormOptions() {
 
     const fetchKurikulum = async () => {
         try {
-            // let response = kurikulumList; //await store.getters['sekolahService/getKurikulum'];
+            // let response = kurikulumList; //store.getters['sekolahService/getKurikulum'];
             if (!kurikulumList.value || kurikulumList.value.length == 0) {
                 const { kurikulum } = await store.dispatch('kurikulumService/fetchKurikulum', { jenjangPendidikanId: sekolah.value?.sekolah.jenjangPendidikanId, jenjangPendidikanStr: sekolah.value?.bentukPendidikanStr });
                 // if (response.value.status) {

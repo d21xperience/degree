@@ -1,47 +1,155 @@
+// src/composables/useSemester.js
 import { computed, getCurrentInstance, onMounted, ref, watch } from 'vue';
 import { useStore } from 'vuex';
 import { useTableTenant } from './useTableTenant';
+
+/**
+ * Composable untuk mengelola data semester & tahun ajaran
+ * Bergantung pada schemaname dari useTableTenant — menunggu hingga siap.
+ *
+ * @param {Object} options
+ * @param {boolean} [options.autoload=true] - Jalankan inisialisasi otomatis saat mounted
+ * @returns {Object} API publik
+ */
 export function useSemester({ autoload = true } = {}) {
-    const { schemaname, fetchTabelTenant } = useTableTenant({ autoload: false });
+    // console.log('[COMPOSABLES] useSemester dipanggil!!');
+    // 🔒 Pastikan dipanggil dalam setup()
     if (import.meta.env.DEV && !getCurrentInstance()) {
         console.error('[useSemester] Error: Composable ini harus dipanggil di dalam setup() atau <script setup>.');
     }
 
     const store = useStore();
+    // 📦 Dependency: schemaname dari tenant
+    const { schemaname, isReady: isSchemaReady, ready: ensureSchema } = useTableTenant();
 
-    // --- 1. Getter-based computed (source of truth dari store)
+    // === 📊 STATE REAKTIF ===
+
+    // 🔹 Getter-based (source of truth dari store)
     const listSemester = computed(() => store.getters['semesterService/getSemester'] || []);
     const listTahunAjaran = computed(() => store.getters['semesterService/getTahunAjaran'] || []);
 
     const storeSelectedSemester = computed(() => store.getters['semesterService/getSelectedSemester']);
     const storeSelectedTahunAjaran = computed(() => store.getters['semesterService/getSelectedTahunAjaran']);
 
-    // --- 2. Local UI state (hanya untuk interaksi sementara sebelum commit)
+    // 🔹 Local UI state (untuk interaksi sementara sebelum commit ke store)
     const selectedSemester = ref(null);
     const selectedTahunAjaran = ref(null);
 
-    // --- 3. Helper: Load dari store, fallback ke backend jika kosong
+    // 🔹 Loading & error state (opsional — bisa dipakai di UI)
+    const isLoading = ref(false);
+    const error = ref(null);
+
+    // === 🔄 SYNC DENGAN STORE ===
+
+    // Sinkronisasi dari store ke local ref (one-way: store → local)
+    watch(storeSelectedSemester, (val) => {
+        if (val !== selectedSemester.value) selectedSemester.value = val;
+    });
+
+    watch(storeSelectedTahunAjaran, (val) => {
+        if (val !== selectedTahunAjaran.value) selectedTahunAjaran.value = val;
+    });
+
+    // Sinkronisasi balik: local → store (one-way, hanya saat berubah)
+    watch(selectedSemester, (newVal) => {
+        if (newVal !== storeSelectedSemester.value) {
+            store.commit('semesterService/SET_SELECTEDSEMESTER', newVal);
+        }
+    });
+
+    watch(selectedTahunAjaran, (newVal) => {
+        if (newVal !== storeSelectedTahunAjaran.value) {
+            store.commit('semesterService/SET_SELECTEDTAHUNAJARAN', newVal);
+        }
+    });
+
+    // === ⚙️ HELPER: Fetch & Inisialisasi ===
+
+    /**
+     * Ambil data semester dari backend (jika belum ada di store)
+     * ✅ Menunggu schemaname siap secara eksplisit
+     */
+    const fetchSemester = async () => {
+        try {
+            isLoading.value = true;
+            error.value = null;
+
+            // ✅ Pastikan schemaname siap — ini kunci utama!
+            const schema = await ensureSchema();
+            if (!schema) {
+                throw new Error('Schema name required but not available');
+            }
+
+            const result = await store.dispatch('semesterService/fetchSemester', schema);
+            if (!result?.status) {
+                throw new Error(result?.message || 'Gagal mengambil data semester');
+            }
+
+            return result.semester;
+        } catch (err) {
+            error.value = err;
+            // console.error('[useSemester] fetchSemester error:', err);
+            throw err;
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
+    /**
+     * Ambil data tahun ajaran dari backend
+     * 🔁 Hindari fetch ulang jika sudah ada
+     */
+    const fetchTahunAjaran = async () => {
+        if (listTahunAjaran.value.length > 0) {
+            return listTahunAjaran.value;
+        }
+
+        try {
+            isLoading.value = true;
+            error.value = null;
+
+            const result = await store.dispatch('semesterService/fetchTahunAjaran');
+            if (!result?.status) {
+                throw new Error(result?.message || 'Gagal mengambil data tahun ajaran');
+            }
+
+            return result.tahunAjaran;
+        } catch (err) {
+            error.value = err;
+            console.error('[useSemester] fetchTahunAjaran error:', err);
+            throw err;
+        } finally {
+            isLoading.value = false;
+        }
+    };
+
+    /**
+     * Inisialisasi state semester/tahun ajaran:
+     * 1. Coba dari store (selected)
+     * 2. Jika tidak ada → fetch dari backend
+     * 3. Fallback ke item pertama jika perlu
+     */
     const initializeFromStoreOrFetch = async () => {
-        // 🔁 Sync `selectedSemester`
+        // 🔁 Sync selected semester
         if (storeSelectedSemester.value != null) {
             selectedSemester.value = storeSelectedSemester.value;
         } else {
-            // fallback: ambil dari backend & set ke store + local
             try {
                 await fetchSemester();
-                // Setelah fetch, coba lagi ambil dari getter
+                // Setelah fetch, cek lagi
                 if (storeSelectedSemester.value != null) {
                     selectedSemester.value = storeSelectedSemester.value;
-                } else {
-                    // fallback ke item pertama (opsional, sesuaikan logika bisnis)
-                    selectedSemester.value = listSemester.value[0]?.semesterId ?? null;
+                } else if (listSemester.value.length > 0) {
+                    // Fallback: semester aktif atau item pertama
+                    const active = listSemester.value.find((s) => s.isActive);
+                    selectedSemester.value = active?.semesterId ?? listSemester.value[0].semesterId;
                 }
             } catch (err) {
-                console.warn('Gagal inisialisasi semester:', err.message);
+                console.warn('[useSemester] Gagal inisialisasi semester:', err.message);
             }
         }
 
-        // 🔁 Sync `selectedTahunAjaran`
+        // 🔁 Sync selected tahun ajaran
         if (storeSelectedTahunAjaran.value != null) {
             selectedTahunAjaran.value = storeSelectedTahunAjaran.value;
         } else {
@@ -49,126 +157,106 @@ export function useSemester({ autoload = true } = {}) {
                 await fetchTahunAjaran();
                 if (storeSelectedTahunAjaran.value != null) {
                     selectedTahunAjaran.value = storeSelectedTahunAjaran.value;
-                } else {
-                    selectedTahunAjaran.value = listTahunAjaran.value[0]?.tahunAjaranId ?? null;
+                } else if (listTahunAjaran.value.length > 0) {
+                    const active = listTahunAjaran.value.find((t) => t.isActive);
+                    selectedTahunAjaran.value = active?.tahunAjaranId ?? listTahunAjaran.value[0].tahunAjaranId;
                 }
             } catch (err) {
-                console.warn('Gagal inisialisasi tahun ajaran:', err.message);
+                console.warn('[useSemester] Gagal inisialisasi tahun ajaran:', err.message);
             }
         }
     };
 
-    // --- 4. Watcher: Sync ke store hanya saat local state berubah (one-way: local → store)
-    watch(selectedSemester, (newValue) => {
-        if (newValue !== storeSelectedSemester.value) {
-            store.commit('semesterService/SET_SELECTEDSEMESTER', newValue);
-        }
-    });
-
-    watch(selectedTahunAjaran, (newValue) => {
-        if (newValue !== storeSelectedTahunAjaran.value) {
-            store.commit('semesterService/SET_SELECTEDTAHUNAJARAN', newValue);
-        }
-    });
-
-    // --- 5. Actions (dibuat lebih reusable & clear responsibilities)
-
-    const fetchSemester = async () => {
-        try {
-            // ✅ Validasi dependensi
-            if (!schemaname.value) {
-                await fetchTabelTenant();
-                // throw new Error('Schema name belum tersedia — pastikan useTableTenant sudah diinisialisasi');
-            }
-            // if (schemaname.value === '') {
-            //     throw new Error('Schema name kosong — kemungkinan data tenant tidak valid');
-            // }
-            // console.log('dipanggil dari useSemester', schemaname.value);
-            const result = await store.dispatch('semesterService/fetchSemester', schemaname.value);
-            if (!result?.status) throw new Error(result?.message || 'Fetch semester failed');
-            return result.semester;
-        } catch (error) {
-            const msg = error instanceof Error ? error.message : String(error);
-            throw new Error(`Gagal mengambil semester: ${msg}`);
-        }
-    };
-
-    const fetchTahunAjaran = async () => {
-        // ✅ Optimasi: hindari fetch ulang jika sudah ada
-        if (listTahunAjaran.value.length > 0) return listTahunAjaran.value;
-
-        try {
-            const result = await store.dispatch('semesterService/fetchTahunAjaran');
-            if (!result?.status) throw new Error(result?.message || 'Fetch tahun ajaran failed');
-            return result.tahunAjaran;
-        } catch (error) {
-            const msg = error instanceof Error ? error.message : String(error);
-            throw new Error(`Gagal mendapatkan tahun ajaran: ${msg}`);
-        }
-    };
+    // === 🧰 MUTATION ACTIONS (CRUD) ===
 
     const deleteSemester = async (semesters) => {
         if (!Array.isArray(semesters)) {
-            throw new TypeError('Parameter must be an array of semester objects');
+            throw new TypeError('Parameter `semesters` harus berupa array');
         }
 
-        const semesterIds = semesters.map((s) => s.semesterId).filter((id) => typeof id === 'number' || typeof id === 'string');
+        const semesterIds = semesters.map((s) => s.semesterId).filter((id) => id != null && (typeof id === 'number' || typeof id === 'string'));
 
         if (semesterIds.length === 0) {
-            throw new Error('No valid semester IDs provided');
+            throw new Error('Tidak ada ID semester yang valid untuk dihapus');
         }
 
         try {
+            isLoading.value = true;
+            error.value = null;
+
             const response = await store.dispatch('semesterService/deleteSemester', semesterIds);
-            if (!response?.status) throw new Error(response?.message || 'Deletion failed');
+            if (!response?.status) {
+                throw new Error(response?.message || 'Gagal menghapus semester');
+            }
+
             return response;
-        } catch (error) {
-            const msg = error instanceof Error ? error.message : String(error);
-            throw new Error(`Gagal menghapus semester: ${msg}`);
+        } catch (err) {
+            error.value = err;
+            console.error('[useSemester] deleteSemester error:', err);
+            throw err;
+        } finally {
+            isLoading.value = false;
         }
     };
 
     const updateSemester = async (semester) => {
         if (!semester || typeof semester !== 'object') {
-            throw new TypeError('Semester must be a non-null object');
+            throw new TypeError('Parameter `semester` harus berupa objek non-null');
         }
 
         try {
+            isLoading.value = true;
+            error.value = null;
+
             const response = await store.dispatch('semesterService/updateSemester', semester);
-            if (!response?.status) throw new Error(response?.message || 'Update failed');
+            if (!response?.status) {
+                throw new Error(response?.message || 'Gagal memperbarui semester');
+            }
+
             return response;
-        } catch (error) {
-            const msg = error instanceof Error ? error.message : String(error);
-            throw new Error(`Gagal update semester: ${msg}`);
+        } catch (err) {
+            error.value = err;
+            console.error('[useSemester] updateSemester error:', err);
+            throw err;
+        } finally {
+            isLoading.value = false;
         }
     };
 
-    // --- 6. Auto-init (opsional, bisa dipanggil manual juga)
+    // === 🚀 AUTO-INIT (opsional) ===
+
     if (autoload) {
         onMounted(() => {
-            initializeFromStoreOrFetch();
+            // Jalankan async tanpa mengganggu render
+            initializeFromStoreOrFetch().catch((err) => {
+                console.warn('[useSemester] Inisialisasi otomatis gagal:', err.message);
+            });
         });
     }
 
-    // 📤 Return API public
+    // === 📤 PUBLIC API ===
+
     return {
-        // State reaktif
+        // 🔹 State
+        schemaname, // exposed for debugging or derived logic
         selectedSemester,
         selectedTahunAjaran,
         listSemester,
         listTahunAjaran,
 
-        // Derived (opsional, tapi bisa di-return jika perlu)
-        // initSelectedSemester: storeSelectedSemester,  // ← hindari duplikasi; cukup gunakan computed ini jika diperlukan
-        // initSelectedTahunAjaran: storeSelectedTahunAjaran,
+        // 🔹 Status
+        isLoading,
+        error,
+        isSchemaReady,
 
-        // Actions
+        // 🔹 Actions
         fetchSemester,
         fetchTahunAjaran,
         deleteSemester,
         updateSemester,
+        initialize: initializeFromStoreOrFetch,
 
-        // Manual init (untuk edge case)
-        initialize: initializeFromStoreOrFetch
+        // 🔹 Helper (opsional)
+        ensureSchema // expose untuk composable lain yang butuh schemaname
     };
 }

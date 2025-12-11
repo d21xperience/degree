@@ -1,12 +1,12 @@
 <script setup>
-import { defineEmits, defineProps } from 'vue';
+import { defineEmits } from 'vue';
 
-const props = defineProps({
-    transaction: {
-        type: Object,
-        required: true
-    }
-});
+// const props = defineProps({
+//     transaction: {
+//         type: Object,
+//         required: true
+//     }
+// });
 
 const emit = defineEmits(['close']);
 

@@ -142,7 +142,7 @@ watch(email, (newVal) => {
                     <div class="my-6">
                         <div class="flex justify-between items-center space-x-8">
                             <div class="w-full">
-                                <SekolahComponent v-model:modelValue="searchTerm" />
+                                <SekolahComponent v-model:model-value="searchTerm" />
                             </div>
                             <div>
                                 <Button label="Cek" class="w-24" :loading="loading" :disabled="!isObject(searchTerm) || loading == true" @click="cekSekolah" />

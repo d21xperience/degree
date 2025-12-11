@@ -9,11 +9,14 @@ const mutations = {
     SET_TABELKURIKULUM(state, value) {
         state.tabelKurikulum = value;
         localStorage.setItem('tabelKurikulum', JSON.stringify(value));
-    }
+    },
     // SET_TABELKURIKULUM(state, value) {
     //     state.tabelKurikulum = value;
     //     localStorage.setItem('tabelKurikulum', JSON.stringify(value));
     // },
+    resetState(state) {
+        state.tabelKurikulum = null;
+    }
 };
 
 const actions = {
@@ -27,11 +30,12 @@ const actions = {
         try {
             const { data } = await api.get('ss/ref/kurikulum', {
                 params: {
-                    jenjang_pendidikan_id: payload.jenjangPendidikanId
+                    jenjang_pendidikan_id: payload
                 }
             });
+            // console.log(data);
             if (data.status) {
-                commit('SET_TABELKURIKULUM', { jenjangPendidikanId: payload.jenjangPendidikanId, kurikulum: data?.kurikulum });
+                commit('SET_TABELKURIKULUM', { jenjangPendidikanId: payload, kurikulum: data?.kurikulum });
                 return data;
             }
         } catch (error) {

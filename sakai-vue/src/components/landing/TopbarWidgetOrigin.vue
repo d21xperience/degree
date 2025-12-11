@@ -18,11 +18,11 @@ function smoothScroll(id) {
 const { t } = useI18n();
 const isAuthenticated = ref(false);
 onMounted(async () => {
-    isAuthenticated.value = await store.getters['authService/isAuthenticated'];
+    isAuthenticated.value = store.getters['authService/isAuthenticated'];
 });
 
 const toDashboard = async () => {
-    const sekolah = await store.getters['authService/getSekolah']?.namaSekolah;
+    const sekolah = store.getters['authService/getSekolah']?.namaSekolah;
     if (isAuthenticated.value) {
         router.push({ name: 'suDashboard' });
     }

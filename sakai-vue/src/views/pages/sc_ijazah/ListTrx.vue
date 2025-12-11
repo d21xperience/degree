@@ -12,7 +12,7 @@ onMounted(async () => {
 // const fetchTransaksi = async () => {
 //     try {
 //         let payload = {
-//             sekolah_id: await store.getters["sekolahService/getSekolah"]?.sekolah_id,
+//             sekolah_id: store.getters["sekolahService/getSekolah"]?.sekolah_id,
 //             tahun_ajaran_id: tahunAjaranId.value
 //         }
 //         const results = await store.dispatch("scService/fetchIjazahBC", payload)

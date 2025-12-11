@@ -1,12 +1,12 @@
-import { computed } from 'vue';
+import { computed, inject } from 'vue';
 import { useStore } from 'vuex';
-import { useSemester } from './sekolah_composable/useSemester';
 import { useTableTenant } from './sekolah_composable/useTableTenant';
 
 export function useAuthService() {
     const store = useStore();
     const { schemaname } = useTableTenant();
-    const { initSelectedSemester } = useSemester();
+    const { semesterProvider } = inject('services');
+    const { initSelectedSemester } = semesterProvider;
     const currentUser = computed(() => store.getters['authService/currentUser']);
     const fetchUser = async () => {
         try {
@@ -14,7 +14,7 @@ export function useAuthService() {
                 tahunAjaranId: initSelectedSemester.value?.tahunAjaranId,
                 schemaname: schemaname.value
             };
-            let res = await store.getters['sekolahService/getPTKTerdaftar'];
+            let res = store.getters['sekolahService/getPTKTerdaftar'];
             if (!res) {
                 res = await store.dispatch('sekolahService/fetchPTKTerdaftar', payload);
             } else {

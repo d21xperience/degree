@@ -4,8 +4,10 @@ import { isLoading } from '@/router';
 </script>
 
 <template>
-    <LoadingOverlay :visible="isLoading"> Memuat data, harap tunggu... </LoadingOverlay>
-    <router-view />
+    <div>
+        <LoadingOverlay :visible="isLoading"> Memuat data, harap tunggu... </LoadingOverlay>
+        <router-view />
+    </div>
 </template>
 
 <style scoped></style>

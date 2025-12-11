@@ -42,7 +42,7 @@ const filterMapel = debounce(async (searchTerm) => {
     }
 }, 250);
 const addMapel = () => {
-    emit('addMapel', internalValue);
+    emit('addMapel', internalValue.value);
 };
 onMounted(async () => {});
 </script>

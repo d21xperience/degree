@@ -6,7 +6,7 @@ const store = useStore();
 // ===========================
 // ========================
 // PRIMEVUE
-import Select from 'primevue/select';
+// import Select from 'primevue/select';
 import Tab from 'primevue/tab';
 import TabList from 'primevue/tablist';
 import Tabs from 'primevue/tabs';
@@ -28,13 +28,13 @@ onMounted(() => {
 });
 const fetchSemester = async () => {
     try {
-        semester.value = await store.getters['sekolahService/getSemester'];
+        semester.value = store.getters['sekolahService/getSemester'];
         if (!semester.value || semester.value.length === 0) {
-            semester.value = store.dispatch('sekolahService/fetchSemester');
+            semester.value = await store.dispatch('sekolahService/fetchSemester');
             // Cek apakah di vuex ada nilai
         }
         // tetapkan semester yang dipilih
-        selectedSemester.value = await store.getters['sekolahService/getSelectedSemester'];
+        selectedSemester.value = store.getters['sekolahService/getSelectedSemester'];
         if (!selectedSemester.value) {
             selectedSemester.value = semester.value.reduce((latest, current) => (current.semesterId > latest.semesterId ? current : latest));
         }

@@ -120,7 +120,7 @@ const isDialogKelulusan = ref(false);
 //             schemaname: schemaname,
 //             tahun_ajaran_id: `${selectedSemester.value?.tahunAjaranId + 1}`,
 //             anggota_kelas: anggotaKelas,
-//             sekolah_id: await store.getters['sekolahService/getSekolah']?.sekolah_id
+//             sekolah_id: store.getters['sekolahService/getSekolah']?.sekolah_id
 //         };
 //         const res = await store.dispatch('sekolahService/createProsesIjazah', payload);
 //         // console.log(res);

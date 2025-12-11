@@ -4,12 +4,15 @@ import (
 	"auth_service/models"
 	"auth_service/utils"
 	"crypto/rsa"
+	"errors"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
+
+const accessTokenExpiry = 30 * time.Minute
 
 type Manager struct {
 	PrivateKey      *rsa.PrivateKey
@@ -35,7 +38,7 @@ func NewManager() *Manager {
 	privateKey, err := loadPrivateKey(utils.GetEnv("JWT_PRIVATE_PATH", "./keys/private.pem"))
 	if err != nil {
 		panic("tidak dapat membaca private key " + err.Error())
-	} 
+	}
 	publicKey, kid, err := ParseKeyFile(utils.GetEnv("JWT_PRIVATE_PATH", "./keys/private.pem"))
 	if err != nil {
 		panic(err)
@@ -44,7 +47,7 @@ func NewManager() *Manager {
 	return &Manager{
 		PrivateKey:      privateKey,
 		PublicKey:       publicKey,
-		AccessTokenExp:  15 * time.Minute,
+		AccessTokenExp:  accessTokenExpiry,
 		RefreshTokenExp: 7 * 24 * time.Hour,
 		Issuer:          "sc-app",
 		Kid:             kid,
@@ -136,4 +139,34 @@ func loadPublicKey(path string) (*rsa.PublicKey, error) {
 	data, _ := os.ReadFile(path)
 	key, _ := jwt.ParseRSAPublicKeyFromPEM(data)
 	return key, nil
+}
+
+// internal/auth/jwt_manager.go
+func (j *Manager) VerifyRefreshToken(tokenStr string) (*jwt.Token, error) {
+	token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
+		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+		}
+		return j.PublicKey, nil // pastikan Anda punya public key untuk refresh token
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, errors.New("invalid refresh token")
+	}
+
+	// ✅ Verifikasi claim khusus: pastikan ini refresh token
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.New("invalid claims")
+	}
+
+	tokenType, _ := claims["type"].(string)
+	if tokenType != "refresh" {
+		return nil, errors.New("not a refresh token")
+	}
+
+	return token, nil
 }

@@ -2,12 +2,15 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import router from './router';
 
+import 'primeicons/primeicons.css';
+import '@/assets/tailwind.css';
 import '@/assets/styles.scss';
+// js
 import Aura from '@primeuix/themes/aura';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
-import i18n from './i18n';
+// import i18n from './i18n';
 import store from './store';
 
 const app = createApp(App);
@@ -25,7 +28,7 @@ app.use(PrimeVue, {
 });
 app.use(ToastService);
 app.use(ConfirmationService);
-app.use(i18n);
+// app.use(i18n);
 store.dispatch('authService/checkAuth').finally(() => {
     app.mount('#app');
 });

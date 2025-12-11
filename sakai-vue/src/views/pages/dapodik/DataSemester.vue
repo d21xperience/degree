@@ -2,12 +2,13 @@
 import { useToast } from 'primevue/usetoast';
 
 import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
-import { useSemester } from '@/composables/sekolah_composable/useSemester';
 import { useUtils } from '@/composables/useUtils';
 import { FilterMatchMode } from '@primevue/core/api';
-import { computed, onMounted, reactive, ref, watch } from 'vue';
+import { computed, inject, onMounted, reactive, ref, watch } from 'vue';
 
-const { deleteSemester, updateSemester, fetchSemester } = useSemester();
+const { semesterProvider } = inject('services');
+
+const { deleteSemester, updateSemester, fetchSemester } = semesterProvider;
 
 const { formatterDateID, extractYearAsUint32 } = useUtils();
 
@@ -328,11 +329,11 @@ onMounted(async () => {
                     <div class="flex space-x-2">
                         <div class="w-full">
                             Semester
-                            <Select v-model:modelValue="semester.semester" :options="semesterOptions" option-label="label" option-value="value" fluid :disabled="isTahunAjaranAvailable" />
+                            <Select v-model:model-value="semester.semester" :options="semesterOptions" option-label="label" option-value="value" fluid :disabled="isTahunAjaranAvailable" />
                         </div>
                         <div class="w-full">
                             Nama
-                            <InputText v-model:modelValue="semester.namaSemester" fluid :disabled="isTahunAjaranAvailable" />
+                            <InputText v-model:model-value="semester.namaSemester" fluid :disabled="isTahunAjaranAvailable" />
                         </div>
                     </div>
                     <div class="flex space-x-2">

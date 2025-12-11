@@ -7,7 +7,7 @@ const store = useStore();
 const route = useRoute();
 // Dialog
 import Dialog from 'primevue/dialog';
-import Select from 'primevue/select';
+// import Select from 'primevue/select';
 
 // const { selectedTahunAjaran, initSelectedTahunAjaran, listTahunAjaran } = useSekolahService();
 const sekolahService = useSekolahService();
@@ -95,9 +95,9 @@ const listTahunAjaran = ref([]);
 // const semester = ref();
 // const fetchSemester = async () => {
 //     try {
-//         let cek = await store.getters['sekolahService/getTahunAjaran'];
+//         let cek = store.getters['sekolahService/getTahunAjaran'];
 //         if (!cek || cek.length === 0) {
-//             semester.value = await store.getters['sekolahService/getSemester'];
+//             semester.value = store.getters['sekolahService/getSemester'];
 //             if (!semester.value) {
 //                 semester.value = await store.dispatch('sekolahService/fetchSemester');
 //             }

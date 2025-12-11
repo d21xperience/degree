@@ -4,7 +4,6 @@ import (
 	"auth_service/jwt"
 	"auth_service/utils"
 	"context"
-	"log"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -47,7 +46,7 @@ func (i *AuthInterceptor) Unary() grpc.UnaryServerInterceptor {
 
 		ctx = context.WithValue(ctx, utils.CtxUserID, claims.UserID)
 		ctx = context.WithValue(ctx, utils.CtxRole, claims.Role)
-		log.Printf("Injected userID=%q", claims.UserID) // ← temporary log
+		// log.Printf("Injected userID=%q", claims.UserID) // ← temporary log
 		return handler(ctx, req)
 
 	}

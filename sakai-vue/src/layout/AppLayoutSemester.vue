@@ -1,22 +1,40 @@
-<script setup>
-import { useSekolahService } from '@/composables/sekolah_composable/useSekolah';
-import { computed } from 'vue';
-const { fetchSemester, initSelectedSemester, selectedSemester, listSemester } = useSekolahService();
-
-const namaRoute = computed(() => route.meta.namaRoute);
-const isDisabled = computed(() => route.meta.disableSelect);
-</script>
 <template>
-    <div class="flex justify-between items-center mb-2">
-        <label class="text-xl md:text-2xl"
-            >Data <span v-show="namaRoute">{{ `${namaRoute} - ` }}</span> Dapodik</label
-        >
-        <div class="md:flex md:items-center">
-            <label class="min-w-32">Tahun Pelajaran</label>
-            <Select v-model="selectedSemester" :options="listSemester" option-label="namaSemester" placeholder="Tahun Pelajaran" class="w-full" :disabled="isDisabled" />
+    <div>
+        <div class="flex justify-end">
+            <div class="flex items-center space-x-2">
+                <div><span class="font-semibold">Semester</span></div>
+                <div>
+                    <SemesterComponent v-model="selectedSemester" :tahun-ajaran-id="tahunAjaranProvider?.label" :is-disabled="isDisabled" />
+                </div>
+            </div>
+        </div>
+        <div class="mt-4">
+            <RouterView />
         </div>
     </div>
-    <div class="card">
-        <RouterView />
-    </div>
 </template>
+<script setup>
+import SemesterComponent from '@/components/sekolah_components/SemesterComponent.vue';
+import store from '@/store';
+import { computed, inject, provide, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+
+const isDisabled = computed(() => route.meta.disableSemester);
+
+const selectedSemester = ref();
+const tahunAjaranProvider = inject('tahunAjaranProvider');
+// const selectedTahunAjaran = ref();
+provide('selectedSemesterProvider', selectedSemester);
+
+// watch(tahunAjaranProvider, (newVal) => {
+//     if (newVal) {
+//         selectedTahunAjaran.value = newVal.label;
+//     }
+// });
+watch(selectedSemester, async (newVal) => {
+    console.log(newVal);
+    store.commit('semesterService/SET_SELECTEDSEMESTER', newVal);
+});
+</script>

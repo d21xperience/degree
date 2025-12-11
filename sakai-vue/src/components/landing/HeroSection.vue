@@ -124,13 +124,13 @@ const handleVerification = async () => {
     }
 };
 
-const onBackgroundLoad = (event) => {
-    emit('background-load', event);
-};
+// const onBackgroundLoad = (event) => {
+//     emit('background-load', event);
+// };
 
-const onBackgroundError = (event) => {
-    console.error('Failed to load hero background:', event);
-};
+// const onBackgroundError = (event) => {
+//     console.error('Failed to load hero background:', event);
+// };
 
 // Keyboard event handlers
 const handleKeydown = (event) => {

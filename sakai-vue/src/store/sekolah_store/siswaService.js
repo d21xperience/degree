@@ -9,7 +9,7 @@ const mutations = {
         state.tabelSiswaAktif = tabelSiswaAktif;
         localStorage.setItem('tabelSiswaAktif', JSON.stringify(tabelSiswaAktif));
     },
-    RESET_STATE(state) {
+    resetState(state) {
         state.tabelSiswaAktif = null;
     }
 };
@@ -26,26 +26,27 @@ const actions = {
             return null;
         }
     },
-    async fetchSiswa({ commit }, payload) {
-        try {
-            const response = await api.get(`/ss/${payload.schemaname}/siswa`, {
-                params: {
-                    page: payload.page,
-                    perpage: payload.perpage
-                    // schemaname: schemaname,
-                }
-            });
-            // console.log(response);
+    // async fetchSiswa({ commit }, payload) {
+    //     try {
+    //         const response = await api.get(`/ss/${payload.schemaname}/siswa`, {
+    //             params: {
+    //                 page: payload.page,
+    //                 perpage: payload.perpage
+    //                 // schemaname: schemaname,
+    //             }
+    //         });
+    //         // console.log(response);
 
-            return response.data;
-        } catch (error) {
-            // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
-            console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
-        }
-    },
+    //         return response.data;
+    //     } catch (error) {
+    //         // commit("SET_ERROR", error.response?.data || "Terjadi kesalahan");
+    //         console.log(error);
+    //         throw new Error('Gagal menghapus Kategori Mapel:', error);
+    //     }
+    // },
     async fetchSiswaAktif({ commit }, payload) {
         try {
+            // console.log(payload);
             const response = await api.get(`/ss/${payload.schemaname}/anggota-kelas`, {
                 params: {
                     semester_id: payload.semesterId,
@@ -60,7 +61,7 @@ const actions = {
             return results;
         } catch (error) {
             console.log(error);
-            throw new Error('Gagal menghapus Kategori Mapel:', error);
+            throw new Error('Gagal mengambil siswa aktif:', error);
         }
     },
 

@@ -1,15 +1,18 @@
-import { fileURLToPath, URL } from 'node:url';
-
 import { PrimeVueResolver } from '@primevue/auto-import-resolver';
 import vue from '@vitejs/plugin-vue';
+import { fileURLToPath, URL } from 'node:url';
 import Components from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
-
 // https://vitejs.dev/config/
 export default defineConfig({
-    // optimizeDeps: {
-    //     noDiscovery: true
-    // },
+    optimizeDeps: {
+        // exclude: ['primevue']
+        include: [
+            'primevue',
+            'chart.js',
+            'lodash-es' // karena PrimeVue pakai lodash-es dalam
+        ]
+    },
     plugins: [
         vue(),
         Components({
@@ -31,9 +34,7 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         assetsDir: 'assets',
-        sourcemap: false, // Nonaktifkan sourcemap untuk production
-        // sourcemap: false, // Nonaktifkan sourcemap untuk production
-        // Optimasi untuk production
+        sourcemap: false,
         minify: 'esbuild',
         rollupOptions: {
             output: {

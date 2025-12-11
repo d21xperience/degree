@@ -14,19 +14,22 @@ const store = useStore();
 // Props dari parent
 const props = defineProps({
     visible: Boolean,
-    pesertaDidik: Array
+    pesertaDidik: {
+        type: Object,
+        default: null
+    }
     // templateType: String,
     // schemaName: String,
 });
 
 // Emit event ke parent
-const emit = defineEmits(['update:visible', 'save', 'cancel']);
+// const emit = defineEmits(['update:visible', 'save', 'cancel']);
 
 // Menggunakan computed agar bisa mengupdate prop.visible
-const isVisible = computed({
-    get: () => props.visible,
-    set: (value) => emit('update:visible', value)
-});
+// const isVisible = computed({
+//     get: () => props.visible,
+//     set: (value) => emit('update:visible', value)
+// });
 
 const jenisKelaminOptions = ref([
     { label: 'Laki-Laki', value: 'L' },

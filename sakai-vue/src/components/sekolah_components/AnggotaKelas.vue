@@ -10,7 +10,7 @@ import { useSiswa } from '@/composables/sekolah_composable/useSiswa';
 import { FilterMatchMode } from '@primevue/core/api';
 import Column from 'primevue/column';
 import DataTable from 'primevue/datatable';
-import Select from 'primevue/select';
+// import Select from 'primevue/select';
 import Toolbar from 'primevue/toolbar';
 import { useToast } from 'primevue/usetoast';
 import { onBeforeRouteLeave } from 'vue-router';

@@ -55,7 +55,7 @@ export function useAuth() {
             };
 
             const response = await store.dispatch('authService/login', payload);
-
+            console.log(response);
             if (response?.status === true) {
                 const user = store.getters['authService/user'];
 

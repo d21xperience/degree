@@ -1,22 +1,40 @@
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useStore } from 'vuex';
-import { useSemester } from './useSemester';
-import { useTableTenant } from './useTableTenant';
 // =================================================
 // KELAS
 // =================================================
 export function useKelas() {
     const store = useStore();
-    const { schemaname } = useTableTenant();
-    const { initSelectedSemester } = useSemester();
-
+    const schemaname = computed(() => store.getters['sekolahService/getTabeltenant']);
+    const isFetching = ref(null);
+    const isError = ref(false);
+    // const selectedSemester = computed(() => store.getters['semesterService/getSelectedSemester']);
+    // console.log('call useKelas', schemaname.value);
     const kelasList = ref([]);
-
-    const fetchKelas = async (kelasId = null, tingkatPendidikanId = null) => {
+    /**
+     *
+     * @param {Object} selectedSemester Wajib
+     * @param {String} kelasId Optional
+     * @param {String} tingkatPendidikanId Optional
+     * @returns
+     */
+    const fetchKelas = async (selectedSemester = null, kelasId = '', tingkatPendidikanId = '') => {
+        isFetching.value = true;
         try {
+            const cached = computed(() => store.getters['kelasService/getKelas']);
+            console.log('----[fetchKelas cached]----', typeof cached.value);
+            if (cached.value) {
+                console.log('----[blok1]----');
+                if (cached.value.semesterId === selectedSemester?.semesterId) {
+                    console.log('----[blok2]----');
+                    return cached.value.kelas;
+                }
+            }
+
+            console.log('----[blok cek]----', schemaname.value);
             const payload = {
-                schemaname: schemaname.value,
-                semester_id: initSelectedSemester.value?.semesterId
+                schemaname: schemaname.value.schemaname,
+                semester_id: selectedSemester?.semesterId
             };
             if (kelasId) {
                 payload.kelas_id = kelasId;
@@ -24,33 +42,44 @@ export function useKelas() {
             if (tingkatPendidikanId) {
                 payload.tingkat_pendidikan_id = tingkatPendidikanId;
             }
+            console.log('----[blok3]----');
             const response = await store.dispatch('kelasService/fetchKelas', payload);
-            return response;
+            return response.kelas;
         } catch (error) {
+            console.log(error);
+            isError.value = true;
             throw new Error(`Gagal mengambil kelas: ${error.message}`);
+        } finally {
+            isFetching.value = false;
         }
     };
-    const getKelas = async () => {
+    // const getKelas = async () => {
+    //     try {
+    //         let response = store.getters['kelasService/getKelas'];
+    //         if (!response || Array.isArray(response.kelas) || response.kelas.length == 0 || selectedSemester?.semesterId != response?.semesterId) {
+    //             response = await fetchKelas();
+    //         }
+    //         kelasList.value = response.kelas;
+    //         return response;
+    //     } catch (error) {
+    //         throw new Error(`Gagal mendapatkan kelas: ${error.message}`);
+    //     }
+    // };
+
+    /**
+     *
+     * @param {Object} selectedSemester Wajib
+     * @param {String} kelasId Optional
+     * @returns
+     */
+    const getById = async (selectedSemester = null, kelasId = null) => {
         try {
             let response = store.getters['kelasService/getKelas'];
-            if (!response || Array.isArray(response.kelas) || response.kelas.length == 0 || initSelectedSemester.value?.semesterId != response?.semesterId) {
-                response = await fetchKelas();
-            }
-            kelasList.value = response.kelas;
-            return response;
-        } catch (error) {
-            throw new Error(`Gagal mendapatkan kelas: ${error.message}`);
-        }
-    };
 
-    const searchKelas = async (kelasId = null) => {
-        try {
-            let response = store.getters['kelasService/getKelas'];
-
-            if (!response || response.kelas.length == 0 || initSelectedSemester.value?.semesterId != response?.semesterId) {
+            if (!response || response.kelas.length == 0 || selectedSemester?.semesterId != response?.semesterId) {
                 const payload = {
-                    schemaname: schemaname.value,
-                    semester_id: initSelectedSemester.value?.semesterId
+                    schemaname: schemaname.value.schemaname,
+                    semester_id: selectedSemester?.semesterId
                 };
                 response = await store.dispatch('kelasService/fetchKelas', payload);
             }
@@ -64,7 +93,7 @@ export function useKelas() {
     const addKelas = async (kelas, anggotaKelas = null) => {
         try {
             const payload = {
-                schemaname: schemaname.value,
+                schemaname: schemaname.value.schemaname,
                 kelas: [kelas._rawValue],
                 anggota_kelas: anggotaKelas
             };
@@ -77,6 +106,8 @@ export function useKelas() {
         }
     };
 
+    const update = () => {};
+
     /**
      *
      * @param {String} rombonganBelajarId
@@ -84,13 +115,20 @@ export function useKelas() {
      * @returns
      */
     const fetchAnggotaKelas = async (rombonganBelajarId = '', semesterId = '') => {
+        console.log(rombonganBelajarId);
+        console.log(semesterId);
+        if (rombonganBelajarId == '' || semesterId == '') {
+            throw new Error('Parameter wajib disi');
+        }
         try {
-            const cachedData = await store.getters['siswaService/getSiswaAktif'];
-            if (cachedData.semester_id === semesterId) {
-                const anggotaKelas = cachedData.peserta_didik.filter((val) => val.rombonganBelajarId === rombonganBelajarId);
-                return anggotaKelas;
-            }
-            return null;
+            const cachedData = store.getters['siswaService/getSiswaAktif'];
+            console.log('cachaedData', cachedData);
+            console.log(semesterId);
+            // if (cachedData.semester_id === semesterId) {
+            //     // const anggotaKelas = cachedData.peserta_didik.filter((val) => val.rombonganBelajarId === rombonganBelajarId);
+            //     // return anggotaKelas;
+            // }
+            // return null;
         } catch (error) {
             console.error('Gagal mengambil data kelas:', error);
         }
@@ -98,9 +136,11 @@ export function useKelas() {
 
     return {
         fetchKelas,
-        getKelas,
+        isError,
+        // getKelas,
         addKelas,
-        searchKelas,
+        getById,
+        update,
         kelasList,
         fetchAnggotaKelas
     };

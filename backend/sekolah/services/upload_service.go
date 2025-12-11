@@ -187,7 +187,7 @@ func (s *UploadServiceServer) UploadFileHTTP(w http.ResponseWriter, r *http.Requ
 		fmt.Println("Upload sukses!")
 	} else {
 		http.Error(w, "Tipe upload tidak dikenali", http.StatusBadRequest)
-	} 
+	}
 	// Berikan respon
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]any{
@@ -195,27 +195,50 @@ func (s *UploadServiceServer) UploadFileHTTP(w http.ResponseWriter, r *http.Requ
 		// "data":    data,
 	})
 }
- 
 
-// ===============versi 2
+// ===============versi 3
 func (h *UploadServiceServer) DownloadTemplateHTTP(w http.ResponseWriter, r *http.Request) {
+
+	// Cek method
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Decode JSON body
+	var req struct {
+		RombonganBelajarId  string `json:"rombelId"`
+		KurikulumId         string `json:"kurikulumId"`
+		TahunAjaranId       string `json:"tahunAjaranId"`
+		TingkatPendidikanId string `json:"tingkatPendidikanId"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
 	templateType := r.URL.Query().Get("template_type")
 	if templateType == "" || r.URL.Query().Get("schemaname") == "" {
 		http.Error(w, "template-type or schemaname is required", http.StatusBadRequest)
 		return
 	}
 
-	if templateType == "nilai" {
-		if r.URL.Query().Get("rombongan_belajar_id") == "" {
-			http.Error(w, "rombongan_belajar_id is required", http.StatusBadRequest)
-			return
-		}
-	}
+	// if templateType == "nilai" {
+	// 	if r.URL.Query().Get("kurikulum_id") == "" {
+	// 		http.Error(w, "kurikulum_id is required", http.StatusBadRequest)
+	// 		return
+	// 	}
+	// }
+
 	param := ParamTemplate{
-		schemaname:   r.FormValue("schemaname"),
-		semesterId:   r.FormValue("semesterId"),
-		rombelId:     r.FormValue("rombongan_belajar_id"),
-		templateType: templateType,
+		schemaname:          r.FormValue("schemaname"),
+		semesterId:          r.FormValue("semesterId"),
+		templateType:        templateType,
+		RombonganBelajarId:  req.RombonganBelajarId,
+		KurikulumId:         req.KurikulumId,
+		tahunAjaranId:       req.TahunAjaranId,
+		TingkatPendidikanId: req.TingkatPendidikanId,
 	}
 
 	// Generate template langsung ke memori (tidak simpan ke file)
@@ -371,6 +394,180 @@ func (s *UploadServiceServer) processUploadSiswa(
 
 	return nil
 }
+
+// func (h *UploadServiceServer) DownloadTemplateHTTP(w http.ResponseWriter, r *http.Request) {
+// 	templateType := r.URL.Query().Get("template_type")
+// 	if templateType == "" || r.URL.Query().Get("schemaname") == "" {
+// 		http.Error(w, "template-type or schemaname is required", http.StatusBadRequest)
+// 		return
+// 	}
+
+// 	if templateType == "nilai" {
+// 		if r.URL.Query().Get("kurikulum_id") == "" {
+// 			http.Error(w, "kurikulum_id is required", http.StatusBadRequest)
+// 			return
+// 		}
+// 	}
+// 	param := ParamTemplate{
+// 		schemaname:   r.FormValue("schemaname"),
+// 		semesterId:   r.FormValue("semesterId"),
+// 		KurikulumId:  r.FormValue("kurikulum_id"),
+// 		templateType: templateType,
+// 	}
+
+// 	// Generate template langsung ke memori (tidak simpan ke file)
+// 	f, err := GenerateTemplateV2(param, config.DB)
+// 	if err != nil {
+// 		http.Error(w, fmt.Sprintf("Gagal membuat template: %v", err), http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	// Tulis file ke buffer memory
+// 	var buf bytes.Buffer
+// 	if err := f.Write(&buf); err != nil {
+// 		http.Error(w, fmt.Sprintf("Gagal menulis template ke buffer: %v", err), http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	// Header respons
+// 	filename := fmt.Sprintf("template_%s_%s_%s.xlsx", templateType, param.schemaname, param.semesterId)
+// 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s\"", filename))
+// 	w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+// 	w.Header().Set("Content-Length", fmt.Sprintf("%d", buf.Len()))
+// 	w.Header().Set("Cache-Control", "no-cache")
+// 	w.Header().Set("Pragma", "no-cache")
+
+// 	// Kirim file langsung dari buffer
+// 	if _, err := io.Copy(w, &buf); err != nil {
+// 		http.Error(w, fmt.Sprintf("Gagal mengirim file: %v", err), http.StatusInternalServerError)
+// 		return
+// 	}
+// }
+
+// func (s *UploadServiceServer) processUploadSiswa(
+// 	ctx context.Context,
+// 	param ParamTemplate,
+// 	uploadFunc func(*ParamTemplate) ([][]string, error),
+// ) error {
+// 	var err error
+// 	// Ambil data dari file
+// 	data, err := uploadFunc(&param)
+// 	if err != nil {
+// 		return fmt.Errorf("gagal memproses file: %v", err)
+// 	}
+// 	// log.Printf("pembacaan di luar loop %s", data[0][4])
+// 	for i, row := range data {
+// 		pesertaDidikId := uuid.New()
+
+// 		if err != nil {
+// 			return err
+// 		}
+
+// 		var tglLahir, tglDiterima *time.Time
+// 		if len(row[7]) != 0 {
+// 			cek, err := utils.StringToTime(data[i][7], "02/01/2006")
+// 			if err != nil {
+// 				log.Printf("gagal parsing tanggal lahir %s", row[7])
+// 			}
+// 			tglLahir = utils.TimeToPointer(cek.Format("2006-01-02"))
+// 		}
+// 		if len(row[11]) != 0 {
+// 			cek, err := utils.StringToTime(data[i][11], "02/01/2006")
+// 			if err != nil {
+// 				log.Printf("gagal parsing tanggal mendaftar %s", row[11])
+// 				return nil
+// 			}
+// 			tglDiterima = utils.TimeToPointer(cek.Format("2006-01-02"))
+// 		}
+
+// 		// Simpan ke tabel peserta didik (siswa)
+// 		err = s.repoSiswa.Save(ctx, &models.PesertaDidik{
+// 			PesertaDidikId:  pesertaDidikId,
+// 			Nis:             safeGet(row, 2),
+// 			Nisn:            safeGet(row, 3),
+// 			NmSiswa:         row[4],
+// 			JenisKelamin:    safeGet(row, 5),
+// 			TempatLahir:     safeGet(row, 6),
+// 			TanggalLahir:    tglLahir,
+// 			Agama:           safeGet(row, 8),
+// 			AlamatSiswa:     safeGet(row, 9),
+// 			TeleponSiswa:    safeGet(row, 10),
+// 			DiterimaTanggal: tglDiterima,
+// 			NmAyah:          safeGet(row, 12),
+// 			NmIbu:           safeGet(row, 13),
+// 			PekerjaanAyah:   safeGet(row, 14),
+// 			PekerjaanIbu:    safeGet(row, 15),
+// 			NmWali:          safeGet(row, 16),
+// 			PekerjaanWali:   safeGet(row, 17),
+// 			Nik:             safeGet(row, 18),
+// 		}, param.schemaname)
+
+// 		if err != nil {
+// 			// Jika duplikat NISN, ambil pesertaDidikId dari database
+// 			if strings.Contains(err.Error(), "failed to save record") {
+// 				log.Printf("Duplikat NISN ditemukan baris %d: %s — mengambil ID dari DB", i+1, row[3])
+
+// 				// Ambil ID dari database berdasarkan NISN
+// 				pd, getErr := s.repoSiswa.FindByID(ctx, row[3], param.schemaname, "nisn")
+// 				if getErr != nil {
+// 					return fmt.Errorf("duplikat NISN, tetapi gagal ambil ID: %v", getErr)
+// 				}
+// 				pesertaDidikId = pd.PesertaDidikId
+// 			} else {
+// 				return fmt.Errorf("gagal menyimpan peserta didik: %v", err)
+// 			}
+// 		} else {
+// 			// Simpan ke tabel pelengkap siswa (opsional)
+// 			err = s.repoSiswaPelengkap.Save(ctx, &models.PesertaDidikPelengkap{
+// 				PelengkapSiswaId: uuid.New(),
+// 				PesertaDidikId:   pesertaDidikId,
+// 				StatusDalamKel:   safeGet(row, 19),
+// 				AnakKe:           safeGet(row, 20),
+// 				SekolahAsal:      safeGet(row, 21),
+// 				DiterimaKelas:    safeGet(row, 22),
+// 				AlamatOrtu:       safeGet(row, 23),
+// 				TeleponOrtu:      safeGet(row, 24),
+// 				AlamatWali:       safeGet(row, 25),
+// 				TeleponWali:      safeGet(row, 26),
+// 			}, param.schemaname)
+
+// 			if err != nil {
+// 				// Jika duplikat NISN, ambil pesertaDidikId dari database
+// 				if strings.Contains(err.Error(), "failed to save record") {
+// 					log.Printf("Duplikat peserta_didik_id ditemukan baris %d: %s — mengambil ID dari DB", i+1, row[3])
+// 				} else {
+// 					return fmt.Errorf("gagal menyimpan peserta didik: %v", err)
+// 				}
+// 			}
+// 		}
+
+// 		// Jika kelas tersedia, simpan ke rombel anggota
+// 		for j := 1; j <= 2; j++ {
+// 			// rombonganBelajarId := utils.StringToUUID(row[27])
+// 			conditions := map[string]any{
+// 				"tabel_kelas.nm_kelas":    row[1],
+// 				"tabel_kelas.semester_id": fmt.Sprintf("%s%d", param.semesterId, j),
+// 			}
+// 			rombonganBelajarId, err1 := s.repoKelas.FindWithPreloadAndJoinsOrigin(ctx, param.schemaname, nil, nil, conditions, nil) //utils.StringToUUID(row[27])
+// 			if err1 != nil {
+// 				return err1
+// 			}
+// 			err = s.repoKelasAnggota.Save(ctx, &models.RombelAnggota{
+// 				AnggotaRombelId:    uuid.New(),
+// 				PesertaDidikId:     pesertaDidikId,
+// 				SemesterId:         fmt.Sprintf("%s%d", param.semesterId, j),
+// 				RombonganBelajarId: utils.UUIDToPointer(rombonganBelajarId[0].RombonganBelajarId),
+// 			}, param.schemaname)
+
+// 			if err != nil {
+// 				return fmt.Errorf("gagal menyimpan anggota rombel: %v", err)
+// 			}
+
+// 		}
+// 	}
+
+// 	return nil
+// }
 
 func (s *UploadServiceServer) processUploadGuru(
 	ctx context.Context,
