@@ -2,10 +2,8 @@ package interceptor
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
 	"fmt"
-	"log"
 	"sekolah/jwks"
 	"strings"
 
@@ -92,11 +90,11 @@ func JWTInterceptor(authJWKSURL string) grpc.UnaryServerInterceptor {
 		if len(parts) < 2 {
 			return nil, status.Error(codes.Unauthenticated, "malformed JWT")
 		}
-		headerBytes, err := base64.RawURLEncoding.DecodeString(parts[0])
-		if err != nil {
-			return nil, status.Errorf(codes.Unauthenticated, "invalid JWT header encoding: %v", err)
-		}
-		log.Printf("🔍 Decoded JWT header JSON: %s", string(headerBytes))
+		// headerBytes, err := base64.RawURLEncoding.DecodeString(parts[0])
+		// if err != nil {
+		// 	return nil, status.Errorf(codes.Unauthenticated, "invalid JWT header encoding: %v", err)
+		// }
+		// log.Printf("🔍 Decoded JWT header JSON: %s", string(headerBytes))
 
 		// Parse JWT header for KID
 		parser := jwt.NewParser()

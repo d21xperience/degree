@@ -13,6 +13,7 @@ export function useKategoriSekolah(schemaname = '') {
 
     const store = useStore();
     const isFetching = ref(false);
+    const isError = ref(null);
     // const schemaname = computed(() => store.getters['sekolahService/getTabeltenant']?.schemaname || null);
     // const selectedTahunAjaran = computed(() => store.getters['semesterService/getSelectedTahunAjaran']);
     // state
@@ -171,36 +172,23 @@ export function useKategoriSekolah(schemaname = '') {
 
     /**
      *
-     * @param {Array} kategoriSekolah Wajib diisi
+     * @param {Object} kategoriSekolah Wajib diisi
      * @returns {Object}
      */
-    const createKategoriSekolah = async (kategoriSekolah = []) => {
+    const createKategoriSekolah = async (kategoriSekolah = {}) => {
         try {
             isFetching.value = true;
             console.log(kategoriSekolah);
-            return;
+            // return;
             const payload = {
                 schemaname: schemaname,
-                kategori_sekolah: {
-                    kurikulum_id: kategoriSekolah.kurikulum_id,
-                    jurusan_id: kategoriSekolah.jurusan_id,
-                    nama_kurikulum: kategoriSekolah.nama_kurikulum,
-                    nama_bidang_keahlian: kategoriSekolah.nama_bidang_keahlian,
-                    nama_program_keahlian: kategoriSekolah.nama_program_keahlian,
-                    nama_jurusan: kategoriSekolah.nama_jurusan,
-                    jenjang_pendidikan_id: kategoriSekolah.jenjang_pendidikan_id,
-                    tingkat_id: kategoriSekolah.tingkat_id,
-                    jumlah: kategoriSekolah.jumlah,
-                    tahun_ajaran_id: `${kategoriSekolah.tahun_ajaran_id}`
-                }
+                kategori_sekolah: kategoriSekolah
             };
-            console.log(payload);
-            alert('berhasil ditambahkan!!!');
-            return;
             const response = await store.dispatch('sekolahService/createKategoriSekolah', payload);
-            return response.kategoriSekolah;
+            return response;
         } catch (error) {
-            throw new Error(`Gagal membuat Kategori Sekolah:'${error.message || error}`);
+            console.log(`Gagal membuat Kategori Sekolah:'${error.message || error}`);
+            isError.value = Error(`Gagal membuat Kategori Sekolah:'${error.message || error}`);
         } finally {
             isFetching.value = false;
         }
@@ -367,6 +355,7 @@ export function useKategoriSekolah(schemaname = '') {
         createKategoriSekolahId,
         isKurikulumIdDuplicate,
         isTingkatIdDuplicate,
-        convertToSekolahTabel
+        convertToSekolahTabel,
+        isError
     };
 }

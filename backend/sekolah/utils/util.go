@@ -363,3 +363,26 @@ func GenerateNomorIjazah(npsn string, tahun int) string {
 	randomNumber := r.Intn(1000000) // random 6 digit
 	return fmt.Sprintf("%s/%d/%06d", npsn, tahun, randomNumber)
 }
+
+// Fungsi generik untuk menghapus duplikat berdasarkan key tertentu
+func RemoveDuplicatesByKey[T any, K comparable](data []T, getKey func(T) K) []T {
+	// Buat map untuk menyimpan data unik berdasarkan key
+	uniqueMap := make(map[K]T)
+
+	// Iterasi melalui semua data
+	for _, item := range data {
+		key := getKey(item)
+		// Simpan item jika key belum ada di map
+		if _, exists := uniqueMap[key]; !exists {
+			uniqueMap[key] = item
+		}
+	}
+
+	// Konversi map ke slice
+	result := make([]T, 0, len(uniqueMap))
+	for _, value := range uniqueMap {
+		result = append(result, value)
+	}
+
+	return result
+}

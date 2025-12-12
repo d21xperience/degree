@@ -6,8 +6,8 @@ const { fetchEducationLevel } = useEducationLevel();
 
 const props = defineProps({
     modelValue: {
-        type: String,
-        default: ''
+        type: Number,
+        default: 0
     },
     jenjangPendidikanId: {
         type: Number,
@@ -42,6 +42,6 @@ watch(
 
 <template>
     <div class="w-52">
-        <Select v-model="internalValue" :options="tingkatPendidikanOptions" option-label="nama" option-value="kode" placeholder="Pilih tingkat..." fluid checkmark :disabled="props.isDisabled" :show-clear="true" />
+        <Select v-model="internalValue" :options="tingkatPendidikanOptions" option-label="nama" option-value="tingkatPendidikanId" placeholder="Pilih tingkat..." fluid checkmark :disabled="props.isDisabled" :show-clear="true" />
     </div>
 </template>

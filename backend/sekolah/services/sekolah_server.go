@@ -15,6 +15,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/xuri/excelize/v2"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"gorm.io/gorm"
 )
 
@@ -309,23 +311,35 @@ func (s *SekolahService) CreateKategoriSekolah(ctx context.Context, req *pb.Crea
 	// Validasi request
 	err = utils.ValidateFields(req, requiredFields)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Unimplemented, fmt.Sprintf("missing: %s", err))
 	}
 	Schemaname := req.GetSchemaname()
 	pbKategoriSekolah := req.KategoriSekolah
-	kategoriSekolahModel := &models.KategoriSekolah{
-		NamaKurikulum:       &pbKategoriSekolah.NamaKurikulum,
-		NamaJurusan:         &pbKategoriSekolah.NamaJurusan,
-		TahunAjaranId:       pbKategoriSekolah.TahunAjaranId,
-		JurusanId:           &pbKategoriSekolah.JurusanId,
-		KurikulumId:         pbKategoriSekolah.KurikulumId,
-		JenjangPendidikanId: &pbKategoriSekolah.JenjangPendidikanId,
-		NamaBidangKeahlian:  &pbKategoriSekolah.NamaBidangKeahlian,
-		NamaProgramKeahlian: &pbKategoriSekolah.NamaProgramKeahlian,
-		TingkatId:           pbKategoriSekolah.TingkatId,
-		Jumlah:              &pbKategoriSekolah.Jumlah,
+
+	kategoriKelas := utils.ConvertPBToModels(pbKategoriSekolah.KategoriKelas, func(item *pb.KategoriKelas) *models.KategoriKelas {
+		return &models.KategoriKelas{
+			TingkatId: item.TingkatId,
+			Jumlah:    item.Jumlah,
+		}
+	})
+	var kategoriSekolahModel []*models.KategoriSekolah
+	for _, v := range kategoriKelas {
+		kategoriSekolah := &models.KategoriSekolah{
+			NamaKurikulum:       &pbKategoriSekolah.NamaKurikulum,
+			NamaJurusan:         &pbKategoriSekolah.NamaJurusan,
+			TahunAjaranId:       pbKategoriSekolah.TahunAjaranId,
+			JurusanId:           &pbKategoriSekolah.JurusanId,
+			KurikulumId:         pbKategoriSekolah.KurikulumId,
+			JenjangPendidikanId: &pbKategoriSekolah.JenjangPendidikanId,
+			NamaBidangKeahlian:  &pbKategoriSekolah.NamaBidangKeahlian,
+			NamaProgramKeahlian: &pbKategoriSekolah.NamaProgramKeahlian,
+			TingkatId:           v.TingkatId,
+			Jumlah:              &v.Jumlah,
+			IsAdded:             true,
+		}
+		kategoriSekolahModel = append(kategoriSekolahModel, kategoriSekolah)
 	}
-	err = s.repoKategoriSekolah.Save(ctx, kategoriSekolahModel, Schemaname)
+	err = s.repoKategoriSekolah.SaveMany(ctx, Schemaname, kategoriSekolahModel, 100)
 	if err != nil {
 		return &pb.CreateKategoriSekolahResponse{
 			Message: "Gagal menambahkan kategori sekolah",
@@ -362,10 +376,48 @@ func (s *SekolahService) GetKategoriSekolah(ctx context.Context, req *pb.GetKate
 			KategoriSekolah: nil,
 		}, nil
 	}
+	if len(modelKategoriSekolah) == 0 {
+		return nil, status.Error(codes.NotFound, "Data tidak ditemukan")
+	}
 
-	pbKategoriSekolah := utils.ConvertModelsToPB(modelKategoriSekolah, func(item models.KategoriSekolah) *pb.KategoriSekolah {
+	// Group data berdasarkan KurikulumId
+	grouped := make(map[int32][]models.KategoriSekolah)
+
+	for _, item := range modelKategoriSekolah {
+		kurikulumID := item.KurikulumId
+		grouped[kurikulumID] = append(grouped[kurikulumID], item)
+	}
+	seen := make(map[int32]bool)
+	results := []*models.KategoriSekolah{}
+
+	for _, item := range modelKategoriSekolah {
+		if !seen[item.KurikulumId] {
+			seen[item.KurikulumId] = true
+			results = append(results, &item)
+		}
+	}
+	totalKelas := 0
+
+	var modelKategoriKelas []*models.KategoriKelas
+	pbKategoriSekolah := utils.ConvertPBToModels(results, func(item *models.KategoriSekolah) *pb.KategoriSekolah {
+		modelKategoriKelas = nil
+		// outerLoop: // Label untuk loop terluar
+		for index, items := range grouped {
+			if index == item.KurikulumId {
+				for _, v := range items {
+					kategoriKelas := models.KategoriKelas{
+						KategoriSekolahId: v.KategorisekolahId,
+						TingkatId:         v.TingkatId,
+						Jumlah:            utils.SafeInt32(v.Jumlah),
+					}
+					modelKategoriKelas = append(modelKategoriKelas, &kategoriKelas)
+				}
+			}
+			// break outerLoop
+		}
+
 		return &pb.KategoriSekolah{
-			KategoriSekolahId:   item.KategorisekolahId,
+			// KategoriSekolahId:   item.KategorisekolahId,
 			NamaKurikulum:       utils.SafeString(item.NamaKurikulum),
 			NamaJurusan:         utils.SafeString(item.NamaJurusan),
 			TahunAjaranId:       item.TahunAjaranId,
@@ -376,8 +428,20 @@ func (s *SekolahService) GetKategoriSekolah(ctx context.Context, req *pb.GetKate
 			JenjangPendidikanId: utils.SafeInt32(item.JenjangPendidikanId),
 			TingkatId:           item.TingkatId,
 			Jumlah:              utils.SafeInt32(item.Jumlah),
+			IsAdded:             item.IsAdded,
+			KategoriKelas: utils.ConvertModelsToPB(modelKategoriKelas, func(item *models.KategoriKelas) *pb.KategoriKelas {
+				totalKelas += int(item.Jumlah)
+				return &pb.KategoriKelas{
+					TingkatId:         item.TingkatId,
+					Jumlah:            item.Jumlah,
+					KategoriSekolahId: item.KategoriSekolahId,
+				}
+			}),
+			TotalKelas: int32(totalKelas),
 		}
+
 	})
+
 	return &pb.GetKategoriSekolahResponse{
 		Message:         "Berhasil mendapatkan kategori sekolah ",
 		Status:          true,

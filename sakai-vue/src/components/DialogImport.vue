@@ -48,18 +48,6 @@ const semesterAktif = computed(() => {
     return tes;
 });
 
-// watch(props.templateType, (newVal) => {
-//     switch (newVal) {
-//         case 'siswa':
-//             semesterAktif = props.selectedSemester;
-//             break;
-
-//         default:
-//             semesterAktif = props.selectedSemester?.semesterId;
-//             break;
-//     }
-// });
-
 const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/ss`;
 const templateUrl = computed(() => {
     return `${baseUrl}/download/template?template_type=${props.templateType}&schemaname=${schemaname.value}&semesterId=${semesterAktif.value}`;

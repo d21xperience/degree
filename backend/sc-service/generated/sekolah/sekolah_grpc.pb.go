@@ -534,8 +534,11 @@ type SekolahServiceClient interface {
 	// KATEGORI SEKOLAH
 	// ====================================
 	CreateKategoriSekolah(ctx context.Context, in *CreateKategoriSekolahRequest, opts ...grpc.CallOption) (*CreateKategoriSekolahResponse, error)
+	// Fungsi untuk update kategori sekolah
 	UpdateKategoriSekolah(ctx context.Context, in *UpdateKategoriSekolahRequest, opts ...grpc.CallOption) (*UpdateKategoriSekolahResponse, error)
+	// Fungsi untuk mendapatkan kategori sekolah
 	GetKategoriSekolah(ctx context.Context, in *GetKategoriSekolahRequest, opts ...grpc.CallOption) (*GetKategoriSekolahResponse, error)
+	// Fungsi untuk menghapus kategori sekolah
 	DeleteKategoriSekolah(ctx context.Context, in *DeleteKategoriSekolahRequest, opts ...grpc.CallOption) (*DeleteKategoriSekolahResponse, error)
 	// ====================================
 	// PROSES KATEGORI SEKOLAH & KELAS --FUNGSI UNTUK MEMBUAT KELAS BERDASARAKAN KATEGORI KELAS DAN SEKOLAH
@@ -545,9 +548,13 @@ type SekolahServiceClient interface {
 	// KATEGORI SEKOLAH MAPEL
 	// ====================================
 	CreateKategoriMapel(ctx context.Context, in *CreateKategoriMapelRequest, opts ...grpc.CallOption) (*CreateKategoriMapelResponse, error)
+	// Fungsi untuk update kategori mapel
 	UpdateKategoriMapel(ctx context.Context, in *UpdateKategoriMapelRequest, opts ...grpc.CallOption) (*UpdateKategoriMapelResponse, error)
+	// Fungsi untuk mendapatkan kategori mapel
 	GetKategoriMapel(ctx context.Context, in *GetKategoriMapelRequest, opts ...grpc.CallOption) (*GetKategoriMapelResponse, error)
+	// Fungsi untuk menghapus kategori mapel
 	DeleteKategoriMapel(ctx context.Context, in *DeleteKategoriMapelRequest, opts ...grpc.CallOption) (*DeleteKategoriMapelResponse, error)
+	// Fungsi untuk menghapus banyak kategori mapel
 	BatchDeleteKategoriMapel(ctx context.Context, in *BatchDeleteKategoriMapelRequest, opts ...grpc.CallOption) (*BatchDeleteKategoriMapelResponse, error)
 }
 
@@ -734,8 +741,11 @@ type SekolahServiceServer interface {
 	// KATEGORI SEKOLAH
 	// ====================================
 	CreateKategoriSekolah(context.Context, *CreateKategoriSekolahRequest) (*CreateKategoriSekolahResponse, error)
+	// Fungsi untuk update kategori sekolah
 	UpdateKategoriSekolah(context.Context, *UpdateKategoriSekolahRequest) (*UpdateKategoriSekolahResponse, error)
+	// Fungsi untuk mendapatkan kategori sekolah
 	GetKategoriSekolah(context.Context, *GetKategoriSekolahRequest) (*GetKategoriSekolahResponse, error)
+	// Fungsi untuk menghapus kategori sekolah
 	DeleteKategoriSekolah(context.Context, *DeleteKategoriSekolahRequest) (*DeleteKategoriSekolahResponse, error)
 	// ====================================
 	// PROSES KATEGORI SEKOLAH & KELAS --FUNGSI UNTUK MEMBUAT KELAS BERDASARAKAN KATEGORI KELAS DAN SEKOLAH
@@ -745,9 +755,13 @@ type SekolahServiceServer interface {
 	// KATEGORI SEKOLAH MAPEL
 	// ====================================
 	CreateKategoriMapel(context.Context, *CreateKategoriMapelRequest) (*CreateKategoriMapelResponse, error)
+	// Fungsi untuk update kategori mapel
 	UpdateKategoriMapel(context.Context, *UpdateKategoriMapelRequest) (*UpdateKategoriMapelResponse, error)
+	// Fungsi untuk mendapatkan kategori mapel
 	GetKategoriMapel(context.Context, *GetKategoriMapelRequest) (*GetKategoriMapelResponse, error)
+	// Fungsi untuk menghapus kategori mapel
 	DeleteKategoriMapel(context.Context, *DeleteKategoriMapelRequest) (*DeleteKategoriMapelResponse, error)
+	// Fungsi untuk menghapus banyak kategori mapel
 	BatchDeleteKategoriMapel(context.Context, *BatchDeleteKategoriMapelRequest) (*BatchDeleteKategoriMapelResponse, error)
 	mustEmbedUnimplementedSekolahServiceServer()
 }

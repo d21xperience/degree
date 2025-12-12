@@ -4,7 +4,7 @@ import DialogConfirmDelete from '@/components/DialogConfirmDelete.vue';
 import { useKategoriSekolah } from '@/composables/sekolah_composable/useKategoriSekolah';
 import { useKurikulum } from '@/composables/sekolah_composable/useKurikulum';
 import { useToast } from 'primevue';
-import { reactive, ref, watch, watchEffect } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import TingkatComponent from './TingkatComponent.vue';
 
 const props = defineProps({
@@ -23,16 +23,11 @@ const props = defineProps({
     }
 });
 const toas = useToast();
-const { createKategoriSekolah, deleteKategoriSekolahKurikulum, createProsesKategoriSekolahDanKelas, updateKategoriSekolah, storeKategoriSekolahTabel, createKategoriSekolahId, isKurikulumIdDuplicate, isTingkatIdDuplicate, convertToSekolahTabel } =
-    useKategoriSekolah(props.schemaname);
+const { createKategoriSekolah, createProsesKategoriSekolahDanKelas, createKategoriSekolahId, isKurikulumIdDuplicate, isTingkatIdDuplicate, fetchKategoriSekolah } = useKategoriSekolah(props.schemaname);
 
 const { kurikulumList } = useKurikulum();
 const kategoriSekolahTabel = ref([]);
 const expandedRows = ref({});
-watchEffect(() => {
-    // Salin dari computed ke local mutable state hanya sekali atau saat data utama berubah
-    // kategoriSekolahTabel.value = storeKategoriSekolahTabel.value?.map((x) => ({ ...x }));
-});
 
 // UI State
 const isEditKategoriSekolah = ref(false);
@@ -101,11 +96,29 @@ watch(
     }
 );
 
+// watch(props.tahunAjaranId, async (newVal) => {
+//
+// });
+
+const internalValue = computed({
+    get: () => props.tahunAjaranId
+    // set: (value) => emit('update:modelValue', value)
+});
+
+watch(internalValue, async (newVal) => {
+    if (newVal) {
+        // kategoriSekolahTabel.value = await fetchKategoriSekolah(newVal);
+        // console.log(tes);
+    }
+});
+onMounted(async () => {
+    kategoriSekolahTabel.value = await fetchKategoriSekolah(internalValue.value);
+});
 const onRowExpand = (event) => {
-    toas.add({ severity: 'info', summary: 'Product Expanded', detail: event.data.name, life: 3000 });
+    // toas.add({ severity: 'info', summary: 'Product Expanded', detail: event.data.name, life: 3000 });
 };
 const onRowCollapse = (event) => {
-    toas.add({ severity: 'success', summary: 'Product Collapsed', detail: event.data.name, life: 3000 });
+    // toas.add({ severity: 'success', summary: 'Product Collapsed', detail: event.data.name, life: 3000 });
 };
 
 // Kategori Sekolah CRUD Operations
@@ -117,6 +130,9 @@ const openAddDialog = () => {
     Object.assign(formState, {
         selectedKurikulum: ''
     });
+    resetFormState();
+};
+const resetFormState = () => {
     Object.assign(currentKategori, {
         bidang_keahlian: null,
         program_keahlian: null,
@@ -126,6 +142,7 @@ const openAddDialog = () => {
         tingkat_id: ''
     });
 };
+
 const addKategoriSekolah = async () => {
     if (!formState.selectedKurikulum) {
         alert('Kurikulum harus dipilih!');
@@ -146,7 +163,8 @@ const addKategoriSekolah = async () => {
             jenjang_pendidikan_id: formState.selectedKurikulum.jenjangPendidikanId,
             tahun_ajaran_id: props.tahunAjaranId,
             jumlah: 0,
-            kategorikelas: []
+            kategorikelas: [],
+            is_added: false
         };
         if (isKurikulumIdDuplicate(kategoriSekolahTabel.value, newKategori.kurikulum_id)) {
             console.error(`❌ Gagal menambahkan data: kurikulum_id ${newKategori.kurikulum_id} sudah ada!`);
@@ -198,7 +216,7 @@ const dialogAddKelas = (e) => {
     formState.selectedTingkat = null;
     formState.isEditMode = false;
     currentKategori.jumlah = 0;
-    currentKategori.tingkat_id = '';
+    currentKategori.tingkat_id = 0;
     isDialogVisible.addKategoriKelas = true;
 };
 
@@ -217,7 +235,7 @@ const addKelas = async () => {
         if (isTingkatIdDuplicate(formState.selectedKategoriKelas.kategorikelas, newKelas.tingkat_id)) {
             console.error(`❌ Gagal menambahkan data: tingkat_id ${newKelas.tingkat_id} sudah ada!`);
             errorDialog.value = true;
-            errorMessage.value = `Kelas  ${newKelas.tingkat_id} sudah ditambahkan, silahkan isi untuk tingkat lainnya `;
+            errorMessage.value = `Kelas  ${newKelas.tingkat_id} sudah ada pada kurkikulum ${currentKategoriSekolah.value.nama_kurikulum}! Silahkan tambahkan kelas yang lain `;
             return;
         }
         formState.selectedKategoriKelas.kategorikelas.push(newKelas);
@@ -309,13 +327,30 @@ const hapusKelasByTingkatId = (dataArray, tingkatIdYangAkanDihapus) => {
     return dataBaru;
 };
 
+const newKategoriKelas = ref();
 const dialogProsesKurikulum = (e) => {
-    messageDelete.value = `Anda akan memproses kurikulum? <br>Pastikan kurikulum dan jumlah kelas sudah sesuai dengan Satuan Pendidikan yang akan diproses!`;
+    newKategoriKelas.value = { ...e };
+    console.log(newKategoriKelas.value);
+    messageDelete.value = `Anda akan memproses kurikulum. <br>Pastikan kurikulum dan jumlah kelas sudah sesuai dengan Satuan Pendidikan yang akan diproses. Lanjutkan!`;
     isDialogVisible.prosesKurikulum = true;
 };
 const addProsesKurikulum = async () => {
-    await createKategoriSekolah(kategoriSekolahTabel.value);
+    // Cek apakah kelas sudah diisi?
+    console.log(newKategoriKelas.value);
+    const jmlKelas = newKategoriKelas.value?.kategorikelas.length;
+    // console.log(jmlKelas);
+    if (!jmlKelas) {
+        alert(`Data tidak bisa disimpan karena kelas masih kosong`);
+        return;
+    }
+    const res = await createKategoriSekolah(newKategoriKelas.value);
+    // Setelah berhasil membuat kategori kelas, lanjut pembuatan kurikulum
     // createProsesKategoriSekolahDanKelas();
+    if (res.status) {
+        await createProsesKategoriSekolahDanKelas();
+        toas.add({ severity: 'success', summary: 'Berhaisl', detail: 'Sukes Kompetensi ', life: 2000 });
+    }
+    return;
 };
 
 const isComplete = ref(true);
@@ -331,7 +366,7 @@ const resetKelas = () => {
         <div>
             <div class="flex justify-between mb-4">
                 <div>
-                    <Button v-show="isEditKategoriSekolah" v-tooltip.bottom="`Tambah kompetensi`" label="Tambah" icon="pi pi-plus" size="small" class="rounded-full" @click="openAddDialog" />
+                    <Button v-show="isEditKategoriSekolah" v-tooltip.bottom="`Tambah kompetensi keahlian`" label="Tambah" icon="pi pi-plus" size="small" class="rounded-full" @click="openAddDialog" />
                 </div>
                 <div>
                     <Button v-tooltip.bottom="'Edit kategori'" icon="pi pi-pencil" severity="secondary" :loading="isLoadingEditKategoriSekolah" @click="isEditKategoriSekolah = !isEditKategoriSekolah" />
@@ -353,9 +388,9 @@ const resetKelas = () => {
                     <Column header="Aksi" :hidden="!isEditKategoriSekolah">
                         <template #body="slotProps">
                             <div class="flex justify-center space-x-2">
-                                <Button v-tooltip.bottom="'Hapus kompetensi'" icon="pi pi-trash" class="!text-sm" severity="danger" size="small" rounded @click="handleDeleteKategoriSekolah(slotProps.data)" />
                                 <Button v-tooltip.bottom="'Tambah kelas'" icon="pi pi-plus" class="!text-sm" severity="warn" size="small" rounded @click="dialogAddKelas(slotProps.data)" />
-                                <Button v-tooltip.bottom="'Simpan'" icon="pi pi-save" class="!text-sm" severity="success" size="small" rounded @click="dialogProsesKurikulum(slotProps.data)" />
+                                <Button v-tooltip.bottom="'Hapus kompetensi'" icon="pi pi-trash" class="!text-sm" severity="danger" size="small" rounded @click="handleDeleteKategoriSekolah(slotProps.data)" />
+                                <Button v-show="!slotProps.data.is_added" v-tooltip.bottom="'Simpan'" icon="pi pi-save" class="!text-sm" severity="success" size="small" rounded @click="dialogProsesKurikulum(slotProps.data)" />
                             </div>
                         </template>
                     </Column>
@@ -371,8 +406,8 @@ const resetKelas = () => {
                             <Column header="Aksi" :hidden="!isEditKategoriSekolah">
                                 <!-- eslint-disable-next-line vue/no-template-shadow -->
                                 <template #body="slotProps">
-                                    <Button v-tooltip.bottom="'Hapus kelas'" icon="pi pi-trash" class="mr-2 !text-sm" severity="danger" size="small" rounded @click="handleDeleteKategoriKelas(slotProps.data)" />
                                     <Button v-tooltip.bottom="'Edit kelas'" icon="pi pi-pencil" class="mr-2 !text-sm" severity="warn" size="small" rounded @click="dialogEditKelas(slotProps.data)" />
+                                    <Button v-tooltip.bottom="'Hapus kelas'" icon="pi pi-trash" class="mr-2 !text-sm" severity="danger" size="small" rounded @click="handleDeleteKategoriKelas(slotProps.data)" />
                                 </template>
                             </Column>
                         </DataTable>

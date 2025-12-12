@@ -63,6 +63,13 @@ type KategoriSekolah struct {
 	TingkatId           int32   `gorm:"column:tingkat_id"`
 	Jumlah              *int32  `gorm:"jumlah"`
 	TahunAjaranId       int32   `gorm:"column:tahun_ajaran_id"`
+	IsAdded             bool    `gorm:"column:is_added"`
+}
+
+type KategoriKelas struct {
+	KategoriSekolahId int32
+	TingkatId         int32
+	Jumlah            int32
 }
 type KategoriMapel struct {
 	Id                int32          `gorm:"column:id;primaryKey;autoIncrement"`

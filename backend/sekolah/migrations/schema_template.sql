@@ -270,7 +270,8 @@ CREATE TABLE  IF NOT EXISTS {{schema_name}}.tabel_kategori_sekolah (
 	jenjang_pendidikan_id NUMERIC(2,0) NULL DEFAULT NULL,
 	tingkat_id INTEGER NULL DEFAULT NULL,
 	jumlah INTEGER NULL DEFAULT NULL,
-	tahun_ajaran_id NUMERIC(4,0) NOT NULL
+	tahun_ajaran_id NUMERIC(4,0) NOT NULL,
+	is_added BOOLEAN NULL DEFAULT FALSE,
 );
 
 CREATE TABLE {{schema_name}}.tabel_kategori_mapel (
